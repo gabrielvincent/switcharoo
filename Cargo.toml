@@ -15,7 +15,7 @@ documentation.workspace = true
 members = ["exec-lib", "core-lib", "windows-lib", "launcher-lib"]
 
 [workspace.package]
-version = "0.1.0"
+version = "0.1.1"
 license = "MIT"
 authors = ["h3rmt"]
 keywords = ["hyprland"]

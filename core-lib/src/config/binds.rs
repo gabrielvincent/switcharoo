@@ -182,28 +182,28 @@ fn generate_overview(
     }
 
     keyword_list.push((
-        "bind",
+        "binde",
         format!(
             ", right, exec, {}",
             generate_switch_press(ron_options, Direction::Right, true)?
         ),
     ));
     keyword_list.push((
-        "bind",
+        "binde",
         format!(
             ", left, exec, {}",
             generate_switch_press(ron_options, Direction::Left, true)?
         ),
     ));
     keyword_list.push((
-        "bind",
+        "binde",
         format!(
             ", down, exec, {}",
             generate_switch_press(ron_options, Direction::Down, true)?
         ),
     ));
     keyword_list.push((
-        "bind",
+        "binde",
         format!(
             ", up, exec, {}",
             generate_switch_press(ron_options, Direction::Up, true)?
@@ -211,7 +211,7 @@ fn generate_overview(
     ));
 
     keyword_list.push((
-        "bind",
+        "binde",
         format!(
             ", {}, exec, {}",
             overview.navigate.forward,
@@ -220,7 +220,7 @@ fn generate_overview(
     ));
     match &overview.navigate.reverse {
         Reverse::Key(key) => keyword_list.push((
-            "bind",
+            "binde",
             format!(
                 ", {}, exec, {}",
                 key,
@@ -228,7 +228,7 @@ fn generate_overview(
             ),
         )),
         Reverse::Mod(modk) => keyword_list.push((
-            "bind",
+            "binde",
             format!(
                 "{}, {}, exec, {}",
                 modk,
@@ -380,7 +380,7 @@ fn generate_switch(
         ),
     ));
     keyword_list.push((
-        "bind",
+        "binde",
         format!(
             "{}, left, exec, {}",
             switch.open.modifier,
@@ -388,7 +388,7 @@ fn generate_switch(
         ),
     ));
     keyword_list.push((
-        "bind",
+        "binde",
         format!(
             "{}, down, exec, {}",
             switch.open.modifier,
@@ -396,7 +396,7 @@ fn generate_switch(
         ),
     ));
     keyword_list.push((
-        "bind",
+        "binde",
         format!(
             "{}, up, exec, {}",
             switch.open.modifier,
@@ -405,7 +405,7 @@ fn generate_switch(
     ));
 
     keyword_list.push((
-        "bind",
+        "binde",
         format!(
             "{}, {}, exec, {}",
             switch.open.modifier,
@@ -415,7 +415,7 @@ fn generate_switch(
     ));
     match &switch.navigate.reverse {
         Reverse::Key(key) => keyword_list.push((
-            "bind",
+            "binde",
             format!(
                 "{}, {}, exec, {}",
                 switch.open.modifier,
@@ -424,7 +424,7 @@ fn generate_switch(
             ),
         )),
         Reverse::Mod(modk) => keyword_list.push((
-            "bind",
+            "binde",
             format!(
                 "{} {}, {}, exec, {}",
                 switch.open.modifier,
