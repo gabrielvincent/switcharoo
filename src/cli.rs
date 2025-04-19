@@ -32,7 +32,7 @@ pub struct GlobalOpts {
     pub css_file: Option<std::path::PathBuf>,
 
     /// Path to css [default: $XDG_DATA_HOME/hyprshell]
-    #[arg(long, global = true)]
+    #[arg(long, short = 'd', global = true)]
     pub data_dir: Option<std::path::PathBuf>,
 }
 
