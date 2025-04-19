@@ -1,0 +1,52 @@
+[package]
+name = "hyprshell"
+rust-version = "1.80"
+edition = "2021"
+readme = "README.md"
+
+version.workspace = true
+license.workspace = true
+authors.workspace = true
+keywords.workspace = true
+repository.workspace = true
+documentation.workspace = true
+
+[workspace]
+members = ["exec-lib", "core-lib", "windows-lib", "launcher-lib"]
+
+[workspace.package]
+version = "0.1.0"
+license = "MIT"
+authors = ["h3rmt"]
+keywords = ["hyprland"]
+repository = "https://github.com/h3rmt/hyprshell/"
+documentation = "https://docs.rs/crate/hyprshell"
+
+[dependencies]
+anyhow = { version = "1.0.95" }
+clap = { version = "4.5.23", features = ["derive"] }
+tracing = { version = "0.1.41" }
+tracing-subscriber = { version = "0.3.19", features = ["fmt", "env-filter", "ansi"], default-features = false }
+
+rand = { version = "0.9.0" }
+async-channel = { version = "2.3.1", default-features = true }
+gtk = { version = "0.9.6", package = "gtk4", default-features = false, features = ["v4_6"] }
+
+exec-lib = { path = "exec-lib", package = "hyprshell-exec-lib" }
+core-lib = { path = "core-lib", package = "hyprshell-core-lib" }
+windows-lib = { path = "windows-lib", package = "hyprshell-windows-lib" }
+launcher-lib = { path = "launcher-lib", optional = true, package = "hyprshell-launcher-lib" }
+
+[features]
+default = ["json_config", "toml_config", "generate_config_command", "launcher"]
+generate_config_command = ["core-lib/generate_config"]
+json_config = ["core-lib/json_config"]
+toml_config = ["core-lib/toml_config"]
+debug_command = []
+launcher = ["dep:launcher-lib"]
+bar = []
+
+[profile.release]
+strip = "debuginfo"
+lto = true
+opt-level = "s"

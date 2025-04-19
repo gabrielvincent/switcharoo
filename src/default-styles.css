@@ -1,0 +1,26 @@
+/* style reset */
+* {
+    all: unset;
+}
+
+label {
+    padding-top: 2px;
+}
+
+/* fix size for icons in launcher */
+.large-icons {
+    -gtk-icon-size: 32px;
+}
+
+flowboxchild {
+    padding: 2px;
+}
+
+.monochrome {
+    filter: grayscale(100%);
+}
+
+/* window text color */
+.window {
+    color: var(--text-color, rgba(245, 245, 245, 1));
+}

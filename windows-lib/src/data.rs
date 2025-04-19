@@ -1,0 +1,118 @@
+use core_lib::{
+    Active, ClientData, ClientId, FindByFirst, HyprlandData, MonitorData, MonitorId, WorkspaceData,
+    WorkspaceId,
+};
+use exec_lib::collect::collect_hypr_data;
+use tracing::{span, trace, warn, Level};
+use crate::sort::{sort_clients_by_position, sort_clients_by_recent};
+
+#[derive(Debug, Clone, Default)]
+pub struct SortConfig {
+    pub sort_recent: bool,
+    pub filter_current_workspace: bool,
+    pub filter_current_monitor: bool,
+    pub filter_same_class: bool,
+}
+
+pub fn collect_data(config: &SortConfig) -> anyhow::Result<(HyprlandData, Active)> {
+    let _span = span!(Level::TRACE, "collect_data").entered();
+
+    let (
+        mut client_data,
+        mut workspace_data,
+        mut monitor_data,
+        active_client,
+        active_ws,
+        active_monitor,
+    ) = collect_hypr_data()?;
+    client_data = update_client_position(client_data, &workspace_data, &monitor_data);
+    if config.sort_recent {
+        sort_clients_by_recent(&mut client_data);
+    } else {
+        client_data = sort_clients_by_position(client_data);
+    }
+
+    trace!("active_client: {active_client:?}; active_ws: {active_ws:?}; active_monitor: {active_monitor:?}");
+
+    // iterate over all clients and set active to false if the client is not on the active workspace or monitor
+    for (_, client) in client_data.iter_mut() {
+        client.enabled = (!config.filter_same_class
+            || active_client
+                .as_ref()
+                .is_none_or(|active| client.class == *active.0))
+            && (!config.filter_current_workspace || client.workspace == active_ws)
+            && (!config.filter_current_monitor || client.monitor == active_monitor);
+    }
+
+    // iterate over all workspaces and set active to false if no client is on the workspace is active
+    for (wid, workspace) in workspace_data.iter_mut() {
+        workspace.enabled = client_data
+            .iter()
+            .any(|(_, c)| c.enabled && c.workspace == *wid);
+    }
+
+    // iterate over all monitors and set active to false if no client is on the monitor is active
+    for (id, monitor) in monitor_data.iter_mut() {
+        monitor.enabled = client_data
+            .iter()
+            .any(|(_, c)| c.enabled && c.monitor == *id);
+    }
+
+    trace!("client_data: {:?}", client_data);
+    trace!("workspace_data: {:?}", workspace_data);
+    trace!("monitor_data: {:?}", monitor_data);
+
+    Ok((
+        HyprlandData {
+            clients: client_data,
+            workspaces: workspace_data,
+            monitors: monitor_data,
+        },
+        Active {
+            client: active_client.map(|c| c.1),
+            workspace: active_ws,
+            monitor: active_monitor,
+        },
+    ))
+}
+
+/// updates clients with workspace and monitor data
+/// * 'clients' - Vector of clients to update
+/// * 'workspace_data' - HashMap of workspace data
+/// * 'monitor_data' - HashMap of monitor data, None if ignore_monitors
+///
+/// removes offset by monitor, adds offset by workspace (client on monitor 1 and workspace 2 will be moved left by monitor 1 offset and right by workspace 2 offset (workspace width * 2))
+pub fn update_client_position(
+    clients: Vec<(ClientId, ClientData)>,
+    workspace_data: &Vec<(WorkspaceId, WorkspaceData)>,
+    monitor_data: &Vec<(MonitorId, MonitorData)>,
+) -> Vec<(ClientId, ClientData)> {
+    clients
+        .into_iter()
+        .filter_map(|(a, mut c)| {
+            let ws = workspace_data
+                .find_by_first(&c.workspace)
+                .map(|ws| (ws.x, ws.y))
+                .or_else(|| {
+                    warn!("Workspace {:?} not found for client: {:?}", c.workspace, c);
+                    None
+                });
+
+            let md = monitor_data
+                .find_by_first(&c.monitor)
+                .map(|md| (md.x, md.y))
+                .or_else(|| {
+                    warn!("Monitor {:?} not found: {:?}", c.monitor, c);
+                    None
+                });
+
+            if let (Some((ws_x, ws_y)), Some((md_x, md_y))) = (ws, md) {
+                c.x += (ws_x - md_x) as i16; // move x cord by workspace offset
+                c.y += (ws_y - md_y) as i16; // move y cord by workspace offset
+                Some((a, c))
+            } else {
+                None
+            }
+        })
+        .collect()
+}

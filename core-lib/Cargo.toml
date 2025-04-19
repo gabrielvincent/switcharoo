@@ -1,0 +1,25 @@
+[package]
+name = "hyprshell-core-lib"
+rust-version = "1.80"
+edition = "2021"
+
+version.workspace = true
+license.workspace = true
+authors.workspace = true
+
+[dependencies]
+notify = { version = "8.0.0", features = [] }
+inquire = { version = "0.7.5", optional = true, default-features = false, features = ["termion"] }
+serde = { version = "1.0.217", features = ["derive"] }
+smart-default = { version = "0.7.1" }
+ron = { version = "0.10.1" }
+semver = { version = "1.0.26" }
+toml = { version = "0.8.20", optional = true }
+serde_json = { version = "1.0.135", optional = true }
+tracing = { version = "0.1.41" }
+anyhow = { version = "1.0.95" }
+
+[features]
+json_config = ["dep:serde_json"]
+toml_config = ["dep:toml"]
+generate_config = ["dep:inquire"]

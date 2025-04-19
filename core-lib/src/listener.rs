@@ -1,0 +1,88 @@
+use crate::Warn;
+use notify::event::{DataChange, ModifyKind};
+use notify::{Config, Event, EventKind, INotifyWatcher, RecursiveMode, Watcher};
+use std::path::PathBuf;
+use tracing::{debug, info, trace, warn};
+
+pub fn hyprshell_config_listener<F>(file_path: PathBuf, callback: F) -> INotifyWatcher
+where
+    F: Fn(&'static str) + 'static + Clone + Send,
+{
+    let mut watcher = INotifyWatcher::new(
+        move |res: notify::Result<Event>| match res {
+            Ok(event) if event.kind == EventKind::Modify(ModifyKind::Data(DataChange::Any)) => {
+                trace!("Event: {:?}", event);
+                callback("hyprshell config change");
+            }
+            Err(err) => {
+                warn!("Watch error: {:?}", err)
+            }
+            Ok(_) => {}
+        },
+        Config::default(),
+    )
+    .expect("Failed to create watcher");
+
+    info!("Starting hyprshell config reload listener");
+    watcher
+        .watch(file_path.as_ref(), RecursiveMode::NonRecursive)
+        .expect("Failed to start hyprshell config reload listener");
+
+    watcher
+}
+
+pub fn hyprshell_css_listener<F>(file_path: PathBuf, callback: F) -> INotifyWatcher
+where
+    F: Fn(&'static str) + 'static + Clone + Send,
+{
+    let mut watcher = INotifyWatcher::new(
+        move |res: notify::Result<Event>| match res {
+            Ok(event) if event.kind == EventKind::Modify(ModifyKind::Data(DataChange::Any)) => {
+                trace!("Event: {:?}", event);
+                callback("hyprshell css change");
+            }
+            Err(err) => {
+                warn!("Watch error: {:?}", err)
+            }
+            Ok(_) => {}
+        },
+        Config::default(),
+    )
+    .expect("Failed to create watcher");
+
+    info!("Starting hyprshell css reload listener");
+    watcher
+        .watch(file_path.as_ref(), RecursiveMode::NonRecursive)
+        .expect("Failed to start hyprshell css reload listener");
+
+    watcher
+}
+
+pub fn hyprshell_config_block(file_path: PathBuf) {
+    if !file_path.exists() {
+        debug!("unable to watch for file changes as the file doesnt exist, exiting");
+        std::process::exit(1);
+    }
+
+    let (tx, rx) = std::sync::mpsc::channel();
+    let mut watcher = INotifyWatcher::new(
+        move |res: notify::Result<Event>| match res {
+            Ok(event) if event.kind == EventKind::Modify(ModifyKind::Data(DataChange::Any)) => {
+                trace!("Event: {:?}", event);
+                tx.send(()).warn("Failed to send reload signal");
+            }
+            Err(err) => {
+                warn!("Watch error: {:?}", err)
+            }
+            Ok(_) => {}
+        },
+        Config::default(),
+    )
+    .expect("Failed to create watcher");
+    debug!("Starting hyprshell config reload listener");
+
+    watcher
+        .watch(file_path.as_ref(), RecursiveMode::NonRecursive)
+        .expect("Failed to start hyprshell config reload listener");
+    rx.recv().warn("Failed to receive reload signal");
+}

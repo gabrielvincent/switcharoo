@@ -1,0 +1,19 @@
+[package]
+name = "hyprshell-windows-lib"
+rust-version = "1.80"
+edition = "2021"
+
+version.workspace = true
+license.workspace = true
+authors.workspace = true
+
+[dependencies]
+tracing = { version = "0.1.41" }
+anyhow = { version = "1.0.95" }
+regex = { version = "1.11.1" }
+
+gtk4-layer-shell = { version = "0.5.0" }
+gtk = { version = "0.9.6", package = "gtk4", default-features = false, features = ["v4_6"] }
+
+core-lib = { path = "../core-lib", package = "hyprshell-core-lib" }
+exec-lib = { path = "../exec-lib", package = "hyprshell-exec-lib" }
