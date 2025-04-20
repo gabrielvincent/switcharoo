@@ -6,17 +6,17 @@ use std::fs::OpenOptions;
 use std::path::{Path, PathBuf};
 use tracing::warn;
 
-pub fn cache_run(desktop_file: &Path, cache_path: &Path) -> anyhow::Result<()> {
-    let cache_path = get_current_week(cache_path);
-    let mut cache_data = if cache_path.exists() {
+pub fn save_run(desktop_file: &Path, data_dir: &Path) -> anyhow::Result<()> {
+    let data_dir = get_current_week(data_dir);
+    let mut cache_data = if data_dir.exists() {
         let file = OpenOptions::new()
             .read(true)
-            .open(&cache_path)
+            .open(&data_dir)
             .context("Failed to open cache file")?;
         from_reader(file).unwrap_or_else(|_| serde_json::json!({}))
     } else {
         // create the file and folder
-        std::fs::create_dir_all(cache_path.parent().unwrap())
+        std::fs::create_dir_all(data_dir.parent().unwrap())
             .context("Failed to create cache directory")?;
         serde_json::json!({})
     };
@@ -30,23 +30,23 @@ pub fn cache_run(desktop_file: &Path, cache_path: &Path) -> anyhow::Result<()> {
         .write(true)
         .create(true)
         .truncate(true)
-        .open(&cache_path)
+        .open(&data_dir)
         .context("Failed to open cache file for writing")?;
     serde_json::to_writer_pretty(file, &cache_data).context("Failed to write to cache file")?;
     Ok(())
 }
 
-fn get_current_week(cache_path: &Path) -> PathBuf {
-    let mut path = PathBuf::from(cache_path);
+fn get_current_week(data_dir: &Path) -> PathBuf {
+    let mut path = PathBuf::from(data_dir);
     path.push("runs");
     path.push(get_name_from_timestamp(0));
     path
 }
 
-fn get_all_weeks(run_cache_weeks: u8, cache_path: &Path) -> Vec<Box<Path>> {
+fn get_all_weeks(run_cache_weeks: u8, data_dir: &Path) -> Vec<Box<Path>> {
     let mut weeks = Vec::new();
     for week in 0..run_cache_weeks {
-        let mut path = PathBuf::from(cache_path);
+        let mut path = PathBuf::from(data_dir);
         path.push("runs");
         path.push(get_name_from_timestamp(week));
         weeks.push(path.into_boxed_path());
@@ -64,10 +64,10 @@ fn get_name_from_timestamp(week: u8) -> Box<Path> {
     )))
 }
 
-pub fn get_cached_runs(run_cache_weeks: u8, cache_path: &Path) -> HashMap<Box<Path>, i64> {
+pub fn get_cached_runs(run_cache_weeks: u8, data_dir: &Path) -> HashMap<Box<Path>, i64> {
     let mut runs = HashMap::new();
 
-    for week in get_all_weeks(run_cache_weeks, cache_path) {
+    for week in get_all_weeks(run_cache_weeks, data_dir) {
         let cache_data = if week.exists() {
             match OpenOptions::new().read(true).open(&week) {
                 Ok(file) => from_reader(file).unwrap_or_else(|_| serde_json::json!({})),

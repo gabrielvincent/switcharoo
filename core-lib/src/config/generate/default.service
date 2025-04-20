@@ -1,0 +1,15 @@
+[Unit]
+Description=Starts hyprshell daemon
+PartOf=graphical-session.target
+After=graphical-session.target
+StartLimitIntervalSec=600
+StartLimitBurst=5
+
+[Service]
+Type=simple
+ExecStart={path} run {params}
+Restart=always
+WorkingDirectory={wd}
+
+[Install]
+WantedBy=graphical-session.target

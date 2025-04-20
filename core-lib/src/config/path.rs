@@ -19,7 +19,7 @@ pub fn get_default_data_dir() -> PathBuf {
     path
 }
 
-fn get_data_dir() -> PathBuf {
+pub fn get_data_dir() -> PathBuf {
     env::var_os("XDG_DATA_HOME")
         .map(PathBuf::from)
         .or_else(|| {

@@ -1,5 +1,5 @@
 use crate::config::generate::autocomplete::StringAutoCompleter;
-use crate::config::generate::write::ConfigData;
+use crate::config::generate::config::ConfigData;
 use crate::config::structs::{KeyMaybeMod, Mod};
 use crate::util::TERMINALS;
 use anyhow::bail;

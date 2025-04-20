@@ -23,7 +23,7 @@ use tracing::{debug, span, trace, warn, Level};
 pub fn create_launcher_window(
     app: &Application,
     global: &mut LauncherGlobal,
-    cache_path: &Path,
+    data_dir: &Path,
 ) -> anyhow::Result<()> {
     let _span = span!(Level::TRACE, "create_launcher_window").entered();
 
@@ -41,7 +41,7 @@ pub fn create_launcher_window(
     let max = global.max_items as usize;
     let show_execs = global.show_execs;
     let run_cache_weeks = global.run_cache_weeks;
-    let cache_path = PathBuf::from(cache_path);
+    let data_dir = PathBuf::from(data_dir);
     let entry = Entry::builder().css_classes(vec!["launcher-input"]).build();
     entry.connect_changed(clone!(
         #[weak]
@@ -54,7 +54,7 @@ pub fn create_launcher_window(
                 max,
                 run_cache_weeks,
                 show_execs,
-                cache_path.clone(),
+                &data_dir,
             );
         }
     ));
@@ -100,7 +100,7 @@ fn update(
     launcher_max_items: usize,
     run_cache_weeks: u8,
     show_launcher_execs: bool,
-    cache_path: PathBuf,
+    data_dir: &Path,
 ) {
     while let Some(child) = list.first_child() {
         list.remove(&child);
@@ -109,7 +109,7 @@ fn update(
         return;
     }
 
-    let matches = get_matches(text, launcher_max_items, run_cache_weeks, &cache_path);
+    let matches = get_matches(text, launcher_max_items, run_cache_weeks, data_dir);
 
     for (index, (_, entry)) in matches.into_iter().take(launcher_max_items).enumerate() {
         let hbox = gtk::Box::builder()
@@ -254,7 +254,7 @@ pub fn get_matches(
     text: &str,
     launcher_max_items: usize,
     run_cache_weeks: u8,
-    cache_path: &Path,
+    data_dir: &Path,
 ) -> Vec<(Match, DesktopEntry)> {
     let entries = get_all_desktop_files();
     let mut matches = HashMap::new();
@@ -284,7 +284,7 @@ pub fn get_matches(
             }
         }
     }
-    let runs = get_cached_runs(run_cache_weeks, cache_path);
+    let runs = get_cached_runs(run_cache_weeks, data_dir);
 
     // sort each of the sections by times run in the past
     let mut matches: Vec<_> = matches.into_values().collect();

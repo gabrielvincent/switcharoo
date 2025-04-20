@@ -10,7 +10,7 @@ pub fn write_css(css_path: PathBuf, override_file: bool) -> anyhow::Result<()> {
 
     if css_path.exists() && !override_file {
         bail!(
-            "CSS file already exists, delete it before generating a new one or use -f to override"
+            "CSS file at {css_path:?} already exists, delete it before generating a new one or use -f to override"
         );
     }
     if let Some(parent) = css_path.parent() {

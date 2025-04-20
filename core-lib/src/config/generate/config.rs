@@ -78,7 +78,7 @@ pub fn write_config(config_path: &Path, config: Config, override_file: bool) -> 
     let _span = span!(Level::TRACE, "write_config").entered();
 
     if config_path.exists() && !override_file {
-        bail!("Config file already exists, delete it before generating a new one or use -f to override");
+        bail!("Config file at {config_path:?} already exists, delete it before generating a new one or use -f to override");
     }
     if let Some(parent) = config_path.parent() {
         create_dir_all(parent)

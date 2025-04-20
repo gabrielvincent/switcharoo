@@ -1,4 +1,4 @@
-use crate::cache::cache_run;
+use crate::cache::save_run;
 use crate::create::get_matches;
 use crate::global::LauncherGlobalData;
 use crate::run::run_program;
@@ -11,7 +11,7 @@ use std::path::Path;
 use std::time::Duration;
 use tracing::{span, trace, Level};
 
-pub async fn close_launcher(offset: Option<u8>, global: &LauncherGlobal, cache_path: &Path) {
+pub async fn close_launcher(offset: Option<u8>, global: &LauncherGlobal, data_dir: &Path) {
     let _span = span!(Level::TRACE, "close_launcher").entered();
 
     if let Some(data) = &global.data {
@@ -23,7 +23,7 @@ pub async fn close_launcher(offset: Option<u8>, global: &LauncherGlobal, cache_p
                     &data1.entry.text(),
                     global.max_items as usize,
                     global.run_cache_weeks,
-                    cache_path,
+                    data_dir,
                 );
                 drop(data1);
                 matches
@@ -36,7 +36,7 @@ pub async fn close_launcher(offset: Option<u8>, global: &LauncherGlobal, cache_p
                     _match.terminal,
                     &global.default_terminal,
                 );
-                cache_run(&_match.path, cache_path).warn("Failed to cache run");
+                save_run(&_match.path, data_dir).warn("Failed to cache run");
                 glib::timeout_future(Duration::from_millis(global.animate_launch_time_ms)).await;
             }
         }

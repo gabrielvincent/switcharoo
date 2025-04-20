@@ -1,0 +1,62 @@
+use crate::config::get_data_dir;
+use anyhow::{bail, Context};
+use std::env;
+use std::fs::create_dir_all;
+use std::path::PathBuf;
+use tracing::{info, span, trace, Level};
+
+const UNIT: &str = include_str!("default.service");
+pub fn write_systemd_unit(
+    override_file: bool,
+    config_path: Option<&PathBuf>,
+    css_path: Option<&PathBuf>,
+    data_dir: Option<&PathBuf>,
+) -> anyhow::Result<()> {
+    let _span = span!(Level::TRACE, "write_systemd_unit").entered();
+    let path = get_path();
+
+    if path.exists() && !override_file {
+        bail!(
+            "Systemd unit file at {path:?} already exists, delete it before generating a new one or use -f to override"
+        );
+    }
+    if let Some(parent) = path.parent() {
+        create_dir_all(parent)
+            .with_context(|| format!("Failed to create config dir at ({parent:?})"))?;
+    }
+
+    let mut params = String::new();
+    if let Some(config_path) = config_path {
+        params.push_str(&format!("--config-file {config_path:?} "));
+    }
+    if let Some(css_path) = css_path {
+        params.push_str(&format!("--css-file {css_path:?} "));
+    }
+    if let Some(data_dir) = data_dir {
+        params.push_str(&format!("--data-dir {data_dir:?} "));
+    }
+
+    let wd = if params.is_empty() {
+        "~".to_string()
+    } else {
+        env::current_dir()?.to_string_lossy().to_string()
+    };
+
+    let unit_text = UNIT
+        .replace("{path}", &env::current_exe()?.to_string_lossy())
+        .replace("{params}", &params)
+        .replace("{wd}", &wd);
+
+    trace!("writing {unit_text} to {path:?}");
+    std::fs::write(&path, unit_text)
+        .with_context(|| format!("Failed to write Systemd unit file at ({path:?})"))?;
+
+    info!("Systemd unit file generated successfully, use `systemctl --user enable --now hyprshell` to start it");
+    Ok(())
+}
+
+fn get_path() -> PathBuf {
+    let mut data_dir = get_data_dir();
+    data_dir.push("systemd/user/hyprshell.service");
+    data_dir
+}

@@ -22,7 +22,7 @@ pub struct Globals {
     #[cfg(feature = "launcher")]
     pub launcher: Option<launcher_lib::LauncherGlobal>,
     #[cfg(any(feature = "launcher", feature = "bar"))]
-    pub cache_path: Box<Path>,
+    pub data_dir: Box<Path>,
 }
 
 pub async fn socket_handler(global: Globals) {
@@ -133,7 +133,7 @@ async fn handle_transfer(transfer: TransferType, global: &Globals) -> anyhow::Re
             }
             #[cfg(feature = "launcher")]
             if let Some(l_global) = &global.launcher {
-                launcher_lib::close_launcher(None, l_global, &global.cache_path).await;
+                launcher_lib::close_launcher(None, l_global, &global.data_dir).await;
             }
         }
         TransferType::Return(config) => {
@@ -161,7 +161,7 @@ async fn handle_transfer(transfer: TransferType, global: &Globals) -> anyhow::Re
                         launcher_lib::close_launcher(
                             Some(config.offset),
                             l_global,
-                            &global.cache_path,
+                            &global.data_dir,
                         )
                         .await;
                     } else {
@@ -169,7 +169,7 @@ async fn handle_transfer(transfer: TransferType, global: &Globals) -> anyhow::Re
                         if let Some(global) = &global.window {
                             close_overview(false, global).await;
                         }
-                        launcher_lib::close_launcher(None, l_global, &global.cache_path).await;
+                        launcher_lib::close_launcher(None, l_global, &global.data_dir).await;
                     };
                 } else if let Some(global) = &global.window {
                     close_overview(false, global).await;

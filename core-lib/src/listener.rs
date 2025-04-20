@@ -1,10 +1,10 @@
 use crate::Warn;
 use notify::event::{DataChange, ModifyKind};
 use notify::{Config, Event, EventKind, INotifyWatcher, RecursiveMode, Watcher};
-use std::path::PathBuf;
+use std::path::Path;
 use tracing::{debug, info, trace, warn};
 
-pub fn hyprshell_config_listener<F>(file_path: PathBuf, callback: F) -> INotifyWatcher
+pub fn hyprshell_config_listener<F>(file_path: &Path, callback: F) -> INotifyWatcher
 where
     F: Fn(&'static str) + 'static + Clone + Send,
 {
@@ -25,13 +25,13 @@ where
 
     info!("Starting hyprshell config reload listener");
     watcher
-        .watch(file_path.as_ref(), RecursiveMode::NonRecursive)
+        .watch(file_path, RecursiveMode::NonRecursive)
         .expect("Failed to start hyprshell config reload listener");
 
     watcher
 }
 
-pub fn hyprshell_css_listener<F>(file_path: PathBuf, callback: F) -> INotifyWatcher
+pub fn hyprshell_css_listener<F>(file_path: &Path, callback: F) -> INotifyWatcher
 where
     F: Fn(&'static str) + 'static + Clone + Send,
 {
@@ -58,7 +58,7 @@ where
     watcher
 }
 
-pub fn hyprshell_config_block(file_path: PathBuf) {
+pub fn hyprshell_config_block(file_path: &Path) {
     if !file_path.exists() {
         debug!("unable to watch for file changes as the file doesnt exist, exiting");
         std::process::exit(1);

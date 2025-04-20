@@ -3,7 +3,12 @@ use std::fmt::Debug;
 use clap::{Args, Parser, Subcommand};
 
 #[derive(Parser, Debug, Clone)]
-#[command(author, version, about, long_about = "hyprshell is a Rust-based GUI designed to enhance window management in hyprland")]
+#[command(
+    author,
+    version,
+    about,
+    long_about = "hyprshell is a Rust-based GUI designed to enhance window management in hyprland"
+)]
 pub struct App {
     #[clap(flatten)]
     pub global_opts: GlobalOpts,
@@ -61,6 +66,10 @@ pub enum ConfigCommand {
         /// Turn off all output
         #[arg(short = 'f', long)]
         force: bool,
+
+        /// dont generate systemd unit file
+        #[arg(long)]
+        no_systemd: bool,
     },
     /// Check the config file for errors and explain how to use the program based on the config
     Check {},

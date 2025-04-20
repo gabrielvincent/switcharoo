@@ -56,7 +56,7 @@ pub fn generate_info(config: Config) -> String {
                 switch.open.modifier,
             ));
         } else {
-            builder.push_str("<Overview disabled>\n");
+            builder.push_str("<Recent Apps disabled>\n");
         };
     }
 

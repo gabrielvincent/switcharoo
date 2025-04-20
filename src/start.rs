@@ -17,13 +17,13 @@ use gtk::{
 };
 use std::io::Write;
 use std::os::unix::net::UnixStream;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use tracing::{debug, error, info, span, trace, warn, Level};
 use windows_lib::{create_windows_window, WindowsGlobal};
 
 const APPLICATION_ID: &str = "com.github.h3rmt.hyprshell";
 
-pub fn start(config_path: PathBuf, css_path: PathBuf, cache_path: PathBuf) -> anyhow::Result<()> {
+pub fn start(config_path: PathBuf, css_path: PathBuf, data_dir: PathBuf) -> anyhow::Result<()> {
     let _span = span!(Level::TRACE, "start").entered();
     loop {
         let application = Application::builder()
@@ -36,19 +36,13 @@ pub fn start(config_path: PathBuf, css_path: PathBuf, cache_path: PathBuf) -> an
 
         let config_path = config_path.clone();
         let css_path = css_path.clone();
-        let cache_path = cache_path.clone();
-        application.connect_activate(move |app| {
-            activate(
-                app,
-                config_path.clone(),
-                css_path.clone(),
-                cache_path.clone(),
-            )
-        });
+        let data_dir = data_dir.clone();
+        application
+            .connect_activate(move |app| activate(app, &config_path, &css_path, &data_dir));
         application.run_with_args::<String>(&[]);
     }
 }
-fn activate(app: &Application, config_path: PathBuf, css_path: PathBuf, cache_path: PathBuf) {
+fn activate(app: &Application, config_path: &Path, css_path: &Path, data_dir: &Path) {
     let _span = span!(Level::TRACE, "activate").entered();
     // reloading the config is needed to delete the old submaps
     reload_config();
@@ -95,7 +89,7 @@ fn activate(app: &Application, config_path: PathBuf, css_path: PathBuf, cache_pa
 
     #[cfg(feature = "launcher")]
     if let Some(launcher_data) = &mut launcher_data {
-        launcher_lib::create_launcher_window(app, launcher_data, &cache_path)
+        launcher_lib::create_launcher_window(app, launcher_data, &data_dir)
             .unwrap_or_else(|e| toast(&format!("Failed to create launcher window: {e}")));
     } else {
         debug!("Launcher is disabled");
@@ -108,9 +102,11 @@ fn activate(app: &Application, config_path: PathBuf, css_path: PathBuf, cache_pa
         #[cfg(feature = "launcher")]
         launcher: launcher_data,
         #[cfg(any(feature = "launcher", feature = "bar"))]
-        cache_path: cache_path.into_boxed_path(),
+        data_dir: Box::from(data_dir),
     };
 
+    let config_path = PathBuf::from(config_path);
+    let css_path = PathBuf::from(css_path);
     glib::spawn_future_local(async move {
         restart_listener(config_path, css_path).await;
     });
@@ -130,7 +126,7 @@ async fn restart_listener(config_path: PathBuf, css_path: PathBuf) {
         async move {
             let (tx2, rx2) = async_channel::bounded(1);
             // must be kept in scope to keep the watcher alive
-            let _watcher = hyprshell_config_listener(config_path, move |mess| {
+            let _watcher = hyprshell_config_listener(&config_path, move |mess| {
                 let _ = tx.send_blocking(mess);
                 let _ = tx2.send_blocking(mess);
             });
@@ -144,7 +140,7 @@ async fn restart_listener(config_path: PathBuf, css_path: PathBuf) {
         async move {
             let (tx2, rx2) = async_channel::bounded(1);
             // must be kept in scope to keep the watcher alive
-            let _watcher = hyprshell_css_listener(css_path, move |mess| {
+            let _watcher = hyprshell_css_listener(&css_path, move |mess| {
                 let _ = tx.send_blocking(mess);
                 let _ = tx2.send_blocking(mess);
             });
@@ -173,7 +169,7 @@ async fn restart_listener(config_path: PathBuf, css_path: PathBuf) {
     send_restart();
 }
 
-fn apply_css(custom_css: &PathBuf) {
+fn apply_css(custom_css: &Path) {
     let provider_app = CssProvider::new();
     provider_app.load_from_data(include_str!("default-styles.css"));
     style_context_add_provider_for_display(
