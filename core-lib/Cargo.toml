@@ -22,6 +22,7 @@ smart-default = { version = "0.7.1" }
 ron = { version = "0.10.1" }
 semver = { version = "1.0.26" }
 toml = { version = "0.8.20", optional = true }
+which = "7.0.3"
 
 [features]
 json_config = ["dep:serde_json"]
