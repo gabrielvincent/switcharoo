@@ -1,0 +1,33 @@
+name: publish
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  publish:
+    permissions:
+      pull-requests: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+      - name: Install gtk4-layer-shell
+        working-directory: /tmp
+        run: |
+          sudo apt-get update
+          sudo apt -y install git libglib2.0-dev libgraphene-1.0-dev meson ninja-build libwayland-dev libgtk-4-dev gobject-introspection libadwaita-1-dev libgirepository1.0-dev python3 valac
+          git clone https://github.com/wmww/gtk4-layer-shell
+          cd gtk4-layer-shell
+          meson setup build
+          ninja -C build
+          sudo ninja -C build install
+          sudo ldconfig
+      - name: Install cargo-workspaces
+        run: cargo install cargo-workspaces
+      - name: Publish to crates.io
+        run: cargo ws publish --token ${{ secrets.CRATES_TOKEN }} custom ${{ github.ref_name }}

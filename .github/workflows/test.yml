@@ -1,9 +1,7 @@
-name: Rust
+name: test
 
 on:
   push:
-#    branches-ignore:
-#      - 'release-please-**'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -32,6 +30,8 @@ jobs:
         uses: Swatinem/rust-cache@v2
         with:
           prefix-key: rust-build
+      - name: Check publish
+        run: cargo publish --dry-run
       - name: Build
         run: ./test.sh
 
