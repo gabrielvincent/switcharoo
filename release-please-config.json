@@ -5,33 +5,48 @@
   "draft-pull-request": true,
   "bootstrap-sha": "0d834ab64cb607d2bc10ca7b13d2642728592f50",
   "plugins": [
-    "cargo-workspace"
+    {
+      "type": "linked-versions",
+      "groupName": "my group",
+      "components": [
+        ".",
+        "core-lib",
+        "exec-lib",
+        "windows-lib",
+        "launcher-lib"
+      ]
+    }
   ],
   "packages": {
     ".": {
-      "release-type": "rust"
+      "release-type": "simple",
+      "extra-files": [
+        {
+          "type": "toml",
+          "path": "Cargo.toml",
+          "jsonpath": "$.workspace.package.version"
+        },
+        {
+          "type": "toml",
+          "path": "Cargo.toml",
+          "jsonpath": "$.workspace.dependencies.core-lib.version"
+        },
+        {
+          "type": "toml",
+          "path": "Cargo.toml",
+          "jsonpath": "$.workspace.dependencies.exec-lib.version"
+        },
+        {
+          "type": "toml",
+          "path": "Cargo.toml",
+          "jsonpath": "$.workspace.dependencies.windows-lib.version"
+        },
+        {
+          "type": "toml",
+          "path": "Cargo.toml",
+          "jsonpath": "$.workspace.dependencies.launcher-lib.version"
+        }
+      ]
     }
-  },
-  "extra-files": [
-    {
-      "type": "toml",
-      "path": "Cargo.toml",
-      "jsonpath": "workspace.dependencies.core-lib.version"
-    },
-    {
-      "type": "toml",
-      "path": "Cargo.toml",
-      "jsonpath": "workspace.dependencies.exec-lib.version"
-    },
-    {
-      "type": "toml",
-      "path": "Cargo.toml",
-      "jsonpath": "workspace.dependencies.windows-lib.version"
-    },
-    {
-      "type": "toml",
-      "path": "Cargo.toml",
-      "jsonpath": "workspace.dependencies.launcher-lib.version"
-    }
-  ]
+  }
 }
