@@ -101,7 +101,7 @@ pub(crate) fn find_next_workspace(
             }
             Direction::Up => si.saturating_sub(workspaces_per_row),
             Direction::Down => {
-                if si >= workspaces.len() - workspaces_per_row {
+                if si as i64 >= workspaces.len() as i64 - workspaces_per_row as i64 {
                     workspaces.len() - 1
                 } else {
                     si + workspaces_per_row

@@ -12,7 +12,7 @@ use crate::next::find_next;
 use crate::WindowsGlobal;
 
 fn scale(value: i16, size_factor: f64) -> i32 {
-    (value as f64 / 25.0 * size_factor) as i32
+    (value as f64 / 31.0 * size_factor) as i32
 }
 pub async fn open_switch(config: OpenSwitch, global: &WindowsGlobal) -> anyhow::Result<()> {
     let _span = span!(Level::TRACE, "open_switch").entered();

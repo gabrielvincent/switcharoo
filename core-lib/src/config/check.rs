@@ -43,7 +43,7 @@ pub fn generate_info(config: Config) -> String {
     if let Some(windows) = &config.windows {
         if let Some(switch) = &windows.switch {
             builder.push_str(&format!(
-                "Press \x1b[1m\x1b[34m{} + {}\x1b[0m and hold \x1b[1m\x1b[34m{}\x1b[0m to view recently used applications. Use \x1b[1m\x1b[34m{}\x1b[0m and \x1b[1m\x1b[34m{}\x1b[0m to select a different window,\n\
+                "Press \x1b[1m\x1b[34m{} + {}\x1b[0m and hold \x1b[1m\x1b[34m{}\x1b[0m to view recently used applications. Press/hold \x1b[1m\x1b[34m{}\x1b[0m and \x1b[1m\x1b[34m{}\x1b[0m to select a different window,\n\
                 release \x1b[1m\x1b[34m{}\x1b[0m to close the window. You can also use the \x1b[34marrow keys\x1b[0m to navigate the clients.\n",
                 switch.navigate.forward,
                 switch.open.modifier,

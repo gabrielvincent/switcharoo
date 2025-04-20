@@ -46,7 +46,7 @@ pub fn prompt_config() -> anyhow::Result<ConfigData> {
 
     let open_switch = {
         let open_switch = Text::new("Modifier to open the switch (<mod> + tab)")
-            .with_autocomplete(StringAutoCompleter::from(vec!["Ctrl", "Alt", "Super"]))
+            .with_autocomplete(StringAutoCompleter::from(vec!["Alt", "Ctrl", "Super"]))
             .with_help_message("Shows clients in a list sorted by recently accessed. Please use something different from the Overview modifier. Leave blank to disable]\n[↑↓ to move, tab to autocomplete, enter to submit")
             .prompt()?;
         if open_switch.trim().is_empty() {
