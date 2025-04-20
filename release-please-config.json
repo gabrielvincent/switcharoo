@@ -1,11 +1,37 @@
 {
   "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
-  "include-v-in-tag": true,
-  "include-component-in-tag": true,
   "always-update": true,
+  "include-component-in-tag": true,
+  "draft-pull-request": true,
+  "bootstrap-sha": "0d834ab64cb607d2bc10ca7b13d2642728592f50",
+  "plugins": [
+    "cargo-workspace"
+  ],
   "packages": {
     ".": {
       "release-type": "rust"
     }
-  }
+  },
+  "extra-files": [
+    {
+      "type": "toml",
+      "path": "Cargo.toml",
+      "jsonpath": "workspace.dependencies.core-lib.version"
+    },
+    {
+      "type": "toml",
+      "path": "Cargo.toml",
+      "jsonpath": "workspace.dependencies.exec-lib.version"
+    },
+    {
+      "type": "toml",
+      "path": "Cargo.toml",
+      "jsonpath": "workspace.dependencies.windows-lib.version"
+    },
+    {
+      "type": "toml",
+      "path": "Cargo.toml",
+      "jsonpath": "workspace.dependencies.launcher-lib.version"
+    }
+  ]
 }

@@ -70,7 +70,7 @@ fn generate_socat(echo: &str, path: PathBuf, socat_path: &str) -> String {
     format!(
         r#"echo '{}' | {} - UNIX-CONNECT:{}"#,
         echo,
-        socat_path
+        socat_path,
         path.as_path().to_string_lossy()
     )
 }

@@ -24,7 +24,7 @@ The application also includes a launcher for running applications directly from 
 
 ### From Source
 
-gtk4 and [gtk4-layer-shell](https://github.com/wmww/gtk4-layer-shell) must be installed
+gtk4, [gtk4-layer-shell](https://github.com/wmww/gtk4-layer-shell)[1.1.1] and socat must be installed
 
 ```bash
 cargo install hyprshell
@@ -38,7 +38,7 @@ paru -S hyprshell
 yay -S hyprshell
 ```
 
-### Nixos
+### Nixos (TODO Add)
 
 - add ``hyprshell.url = "github:h3rmt/hyprshell/release";`` to flake inputs
 - add `specialArgs = { inherit inputs; };` to `nixpkgs.lib.nixosSystem`

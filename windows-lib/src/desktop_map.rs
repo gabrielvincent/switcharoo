@@ -107,30 +107,30 @@ pub fn add_path_for_icon_by_pid_exec(class: &str, path: Box<Path>) {
     );
 }
 
-pub fn get_icon_name_by_name(name: &str) -> Option<(Box<Path>, Source)> {
+pub fn get_icon_name_by_name(name: &str) -> Option<(Box<Path>, Box<Path>, Source)> {
     let map = get_icon_path_map().lock().expect("Failed to lock icon map");
     // prio: name by pid-exec, desktop file name, startup wm class, exec name
     map.get(&(Box::from(name.to_ascii_lowercase()), Source::ByPidExec))
-        .map(|s| (s.0.clone(), Source::ByPidExec))
+        .map(|s| (s.0.clone(), s.1.clone(), Source::ByPidExec))
         .or_else(|| {
             map.get(&(
                 Box::from(name.to_ascii_lowercase()),
                 Source::DesktopFileName,
             ))
-            .map(|s| (s.0.clone(), Source::DesktopFileName))
+            .map(|s| (s.0.clone(), s.1.clone(), Source::DesktopFileName))
         })
         .or_else(|| {
             map.get(&(
                 Box::from(name.to_ascii_lowercase()),
                 Source::DesktopFileStartupWmClass,
             ))
-            .map(|s| (s.0.clone(), Source::DesktopFileStartupWmClass))
+            .map(|s| (s.0.clone(), s.1.clone(), Source::DesktopFileStartupWmClass))
         })
         .or_else(|| {
             map.get(&(
                 Box::from(name.to_ascii_lowercase()),
                 Source::DesktopFileExecName,
             ))
-            .map(|s| (s.0.clone(), Source::DesktopFileExecName))
+            .map(|s| (s.0.clone(), s.1.clone(), Source::DesktopFileExecName))
         })
 }

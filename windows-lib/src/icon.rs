@@ -5,7 +5,7 @@ use std::fs;
 use std::path::Path;
 use tracing::{span, trace, warn, Level};
 
-pub(super) fn set_icon(class: &str, pid: i32, image: &Image) {
+pub fn set_icon(class: &str, pid: i32, image: &Image) {
     let class = class.to_string();
     let image = image.clone();
     let _span = span!(Level::TRACE, "icon", class = class).entered();
@@ -46,14 +46,16 @@ fn load_icon_from_cache(name: &str, pic: &Image) -> Option<Box<Path>> {
         Some(Box::from(Path::new(name)))
     } else {
         // check if icon is in desktop file cache and apply it
-        if let Some((path, source)) = get_icon_name_by_name(name) {
-            trace!("Found icon for {name} in cache from source: {source:?} at {path:?}");
-            if path.is_absolute() {
-                pic.set_from_file(Some(Path::new(&*path)));
+        if let Some((icon_path, path, source)) = get_icon_name_by_name(name) {
+            trace!(
+                "Found icon for {name}/{icon_path:?} in cache from source: {source:?} at {path:?}"
+            );
+            if icon_path.is_absolute() {
+                pic.set_from_file(Some(Path::new(&*icon_path)));
             } else {
-                pic.set_icon_name(path.file_name().and_then(|name| name.to_str()));
+                pic.set_icon_name(icon_path.file_name().and_then(|name| name.to_str()));
             }
-            Some(path)
+            Some(icon_path)
         } else {
             trace!("Icon for {name} not found in theme or cache, using `application-x-executable`");
             pic.set_icon_name(Some("application-x-executable"));
