@@ -1,11 +1,13 @@
 [package]
 name = "hyprshell-core-lib"
-rust-version = "1.80"
-edition = "2021"
-
+edition.workspace = true
+description.workspace = true
 version.workspace = true
 license.workspace = true
 authors.workspace = true
+keywords.workspace = true
+repository.workspace = true
+rust-version.workspace = true
 
 [dependencies]
 notify = { version = "8.0.0", features = [] }

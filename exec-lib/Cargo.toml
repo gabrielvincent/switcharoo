@@ -1,14 +1,16 @@
 [package]
 name = "hyprshell-exec-lib"
-rust-version = "1.80"
-edition = "2021"
-
+edition.workspace = true
+description.workspace = true
 version.workspace = true
 license.workspace = true
 authors.workspace = true
+keywords.workspace = true
+repository.workspace = true
+rust-version.workspace = true
 
 [dependencies]
 hyprland = { version = "0.4.0-beta.2", features = ["async-lite", "dispatch", "keyword", "data", "listener", "ctl"], default-features = false }
 tracing = { version = "0.1.41" }
 anyhow = { version = "1.0.95" }
-core-lib = { path = "../core-lib", package = "hyprshell-core-lib" }
+core-lib = { path = "../core-lib", package = "hyprshell-core-lib", version = "0.1.1" }

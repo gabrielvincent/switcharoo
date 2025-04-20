@@ -3,7 +3,7 @@ use std::fmt::Debug;
 use clap::{Args, Parser, Subcommand};
 
 #[derive(Parser, Debug, Clone)]
-#[command(author, version, about, long_about = "hyprshell is a Rust-based GUI application designed to enhance window management in hyprland")]
+#[command(author, version, about, long_about = "hyprshell is a Rust-based GUI designed to enhance window management in hyprland")]
 pub struct App {
     #[clap(flatten)]
     pub global_opts: GlobalOpts,
