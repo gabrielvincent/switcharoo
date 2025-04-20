@@ -1,9 +1,9 @@
+use crate::desktop_map::{add_path_for_icon_by_pid_exec, get_icon_name_by_name};
 use core_lib::theme_icon_cache;
 use gtk::Image;
 use std::fs;
 use std::path::Path;
 use tracing::{span, trace, warn, Level};
-use crate::desktop_map::{add_path_for_icon_by_pid_exec, get_icon_name_by_name};
 
 pub(super) fn set_icon(class: &str, pid: i32, image: &Image) {
     let class = class.to_string();
@@ -22,7 +22,7 @@ pub(super) fn set_icon(class: &str, pid: i32, image: &Image) {
             .next()
             .unwrap_or_default()
             .split('/')
-            .last()
+            .next_back()
             .unwrap_or_default();
         if cmd.is_empty() {
             warn!("Failed to read cmdline for PID {}", pid);
@@ -51,7 +51,7 @@ fn load_icon_from_cache(name: &str, pic: &Image) -> Option<Box<Path>> {
             if path.is_absolute() {
                 pic.set_from_file(Some(Path::new(&*path)));
             } else {
-                pic.set_icon_name(path.file_name().map(|name| name.to_str()).flatten());
+                pic.set_icon_name(path.file_name().and_then(|name| name.to_str()));
             }
             Some(path)
         } else {

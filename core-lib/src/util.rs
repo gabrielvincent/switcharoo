@@ -153,7 +153,7 @@ fn find_application_dirs() -> Vec<PathBuf> {
             ]
         });
 
-    env::var_os("XDG_DATA_HOME")
+    if let Some(data_home) = env::var_os("XDG_DATA_HOME")
         .map(PathBuf::from)
         .map_or_else(
             || {
@@ -165,8 +165,7 @@ fn find_application_dirs() -> Vec<PathBuf> {
                     })
             },
             Some,
-        )
-        .map(|data_home| dirs.push(data_home));
+        ) { dirs.push(data_home) }
 
     let dirs = dirs
         .into_iter()

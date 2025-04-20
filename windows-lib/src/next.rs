@@ -26,7 +26,7 @@ pub fn find_next(
                     .filter(|(_, c)| c.workspace == active.workspace)
                     .map(|(id, c)| (*id, c.clone()))
                     .collect::<Vec<_>>();
-                if clients.len() == 0 {
+                if clients.is_empty() {
                     clients = hypr_data
                         .clients
                         .iter()
@@ -34,7 +34,7 @@ pub fn find_next(
                         .map(|(id, c)| (*id, c.clone()))
                         .collect::<Vec<_>>();
                 }
-                if clients.len() == 0 {
+                if clients.is_empty() {
                     clients = hypr_data
                         .clients
                         .iter()

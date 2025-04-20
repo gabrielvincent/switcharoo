@@ -44,7 +44,7 @@ fn fill_desktop_file_map(map: &mut IconPathMap, files: &Vec<DirEntry>) -> anyhow
                     .map(|l| l.trim_start_matches("Exec="))
                     .map(extract_exec_name)
                     .and_then(|l| l.split(' ').next())
-                    .and_then(|l| l.split('/').last())
+                    .and_then(|l| l.split('/').next_back())
                     .map(|n| n.replace('"', ""));
                 let startup_wm_class = lines
                     .iter()

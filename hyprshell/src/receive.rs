@@ -12,7 +12,9 @@ use std::fs::remove_file;
 use std::path::Path;
 use std::time::Instant;
 use tracing::{debug, error, info, span, trace, Level};
-use windows_lib::{close_overview, open_overview, open_switch, stop_overview, update_overview, WindowsGlobal};
+use windows_lib::{
+    close_overview, open_overview, open_switch, stop_overview, update_overview, WindowsGlobal,
+};
 
 pub struct Globals {
     pub window: Option<WindowsGlobal>,
@@ -87,8 +89,8 @@ async fn handle_client(stream: InputStream, size: isize, global: &Globals) -> an
 }
 
 async fn handle_client_transfer(buffer: &str, global: &Globals) -> anyhow::Result<()> {
-    let transfer: TransferType =
-        from_ron_string(buffer).with_context(|| format!("Failed to deserialize buffer: {buffer:?}"))?;
+    let transfer: TransferType = from_ron_string(buffer)
+        .with_context(|| format!("Failed to deserialize buffer: {buffer:?}"))?;
     debug!("Received command: {transfer:?}");
 
     handle_transfer(transfer, global)
@@ -130,7 +132,7 @@ async fn handle_transfer(transfer: TransferType, global: &Globals) -> anyhow::Re
             }
             #[cfg(feature = "launcher")]
             if let Some(l_global) = &global.launcher {
-                launcher_lib::close_launcher(None, l_global, &*global.cache_path).await;
+                launcher_lib::close_launcher(None, l_global, &global.cache_path).await;
             }
         }
         TransferType::Return(config) => {
@@ -155,7 +157,7 @@ async fn handle_transfer(transfer: TransferType, global: &Globals) -> anyhow::Re
                         launcher_lib::close_launcher(
                             Some(config.offset),
                             l_global,
-                            &*global.cache_path,
+                            &global.cache_path,
                         )
                         .await;
                     } else {
@@ -163,12 +165,10 @@ async fn handle_transfer(transfer: TransferType, global: &Globals) -> anyhow::Re
                         if let Some(global) = &global.window {
                             close_overview(false, global).await;
                         }
-                        launcher_lib::close_launcher(None, l_global, &*global.cache_path).await;
+                        launcher_lib::close_launcher(None, l_global, &global.cache_path).await;
                     };
-                } else {
-                    if let Some(global) = &global.window {
-                        close_overview(false, global).await;
-                    }
+                } else if let Some(global) = &global.window {
+                    close_overview(false, global).await;
                 }
             }
         }

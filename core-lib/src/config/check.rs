@@ -38,7 +38,7 @@ pub fn generate_info(config: Config) -> String {
         builder.push_str("<Launcher disabled>\n");
     }
 
-    builder.push_str("\n");
+    builder.push('\n');
 
     if let Some(windows) = &config.windows {
         if let Some(switch) = &windows.switch {

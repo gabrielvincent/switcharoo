@@ -86,7 +86,7 @@ pub fn write_config(config_path: &Path, config: Config, override_file: bool) -> 
     }
     match config_path.extension().and_then(OsStr::to_str) {
         None | Some("ron") => {
-            let file = File::create(&config_path)
+            let file = File::create(config_path)
                 .with_context(|| format!("Failed to create config at ({config_path:?})"))?;
             Options::default()
                 .with_default_extension(Extensions::IMPLICIT_SOME)
@@ -97,14 +97,14 @@ pub fn write_config(config_path: &Path, config: Config, override_file: bool) -> 
         }
         #[cfg(feature = "json_config")]
         Some("json") => {
-            let file = File::create(&config_path)
+            let file = File::create(config_path)
                 .with_context(|| format!("Failed to create config at ({config_path:?})"))?;
             serde_json::to_writer_pretty(file, &config).context("Failed to write json config")?
         }
         #[cfg(feature = "toml_config")]
         Some("toml") => {
             let str = toml::to_string_pretty(&config).context("Failed to write toml config")?;
-            write(&config_path, str)
+            write(config_path, str)
                 .with_context(|| format!("Failed to create config at ({config_path:?})"))?;
         }
         Some(ext) => bail!("Invalid config file extension: {}", ext),

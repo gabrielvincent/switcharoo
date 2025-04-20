@@ -132,7 +132,7 @@ fn update(
                     warn!("invalid icon name: {icon_path:?}");
                 }
             } else {
-                icon.set_icon_name(icon_path.file_name().map(|name| name.to_str()).flatten());
+                icon.set_icon_name(icon_path.file_name().and_then(|name| name.to_str()));
             }
         }
         hbox.append(&icon);
@@ -196,7 +196,7 @@ fn get_exec_label(exec: &str) -> String {
                 exec_trim
                     .split(' ')
                     .find(|s| s.contains("--command="))
-                    .and_then(|s| s.split('=').last().and_then(|s| s.split('/').last()))
+                    .and_then(|s| s.split('=').next_back().and_then(|s| s.split('/').next_back()))
                     .unwrap_or_default()
             )
         } else {
@@ -205,7 +205,7 @@ fn get_exec_label(exec: &str) -> String {
                 "[PWA] ({})",
                 exec.split(' ')
                     .next()
-                    .and_then(|s| s.split('/').last())
+                    .and_then(|s| s.split('/').next_back())
                     .unwrap_or_default()
             )
         }
@@ -216,11 +216,11 @@ fn get_exec_label(exec: &str) -> String {
             exec_trim
                 .split(' ')
                 .find(|s| s.contains("--command="))
-                .and_then(|s| s.split('=').last().and_then(|s| s.split('/').last()))
+                .and_then(|s| s.split('=').next_back().and_then(|s| s.split('/').next_back()))
                 .unwrap_or_default()
         )
     } else {
-        format!("({})", exec_trim.to_string()) // show full exec instead of only last part of /path/to/exec
+        format!("({})", exec_trim) // show full exec instead of only last part of /path/to/exec
     }
 }
 

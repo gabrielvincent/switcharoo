@@ -17,14 +17,17 @@ pub async fn close_launcher(offset: Option<u8>, global: &LauncherGlobal, cache_p
     if let Some(data) = &global.data {
         if let Some(offset) = offset {
             trace!("Closing launcher with offset: {}", offset);
-            let data1 = data.borrow();
-            let matches = get_matches(
-                &data1.entry.text(),
-                global.max_items as usize,
-                global.run_cache_weeks,
-                cache_path,
-            );
-            drop(data1);
+            let matches = {
+                let data1 = data.borrow();
+                let matches = get_matches(
+                    &data1.entry.text(),
+                    global.max_items as usize,
+                    global.run_cache_weeks,
+                    cache_path,
+                );
+                drop(data1);
+                matches
+            };
             if let Some((_, _match)) = matches.get(offset as usize) {
                 show_launch(data, offset);
                 run_program(

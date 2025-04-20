@@ -6,7 +6,7 @@ use std::fs::OpenOptions;
 use std::path::{Path, PathBuf};
 use tracing::warn;
 
-pub fn cache_run(desktop_file: &Box<Path>, cache_path: &Path) -> anyhow::Result<()> {
+pub fn cache_run(desktop_file: &Path, cache_path: &Path) -> anyhow::Result<()> {
     let cache_path = get_current_week(cache_path);
     let mut cache_data = if cache_path.exists() {
         let file = OpenOptions::new()
