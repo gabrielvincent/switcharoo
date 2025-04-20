@@ -1,8 +1,11 @@
-use std::io::Write;
-use std::os::unix::net::UnixStream;
+use crate::receive::{socket_handler, Globals};
 use core_lib::config::binds::create_binds_and_submaps;
 use core_lib::theme_icon_cache::init_icon_map;
-use core_lib::{collect_desktop_files, config, get_daemon_socket_path_buff, hyprshell_config_block, hyprshell_config_listener, hyprshell_css_listener};
+use core_lib::transfer::{to_ron_string, TransferType};
+use core_lib::{
+    collect_desktop_files, config, get_daemon_socket_path_buff, hyprshell_config_block,
+    hyprshell_config_listener, hyprshell_css_listener,
+};
 use exec_lib::listener::{hyprland_config_listener, monitor_listener};
 use exec_lib::{apply_keybinds, reload_config, toast};
 use gtk::gdk::Display;
@@ -12,11 +15,11 @@ use gtk::{
     glib, style_context_add_provider_for_display, Application, CssProvider, IconTheme, Settings,
     STYLE_PROVIDER_PRIORITY_APPLICATION, STYLE_PROVIDER_PRIORITY_USER,
 };
+use std::io::Write;
+use std::os::unix::net::UnixStream;
 use std::path::PathBuf;
 use tracing::{debug, error, info, span, trace, warn, Level};
-use core_lib::transfer::{to_ron_string, TransferType};
 use windows_lib::{create_windows_window, WindowsGlobal};
-use crate::receive::{socket_handler, Globals};
 
 const APPLICATION_ID: &str = "com.github.h3rmt.hyprshell";
 

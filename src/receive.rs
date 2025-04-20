@@ -5,6 +5,7 @@ use exec_lib::toast;
 use gtk::gio::{Cancellable, InputStream, SocketListener, UnixSocketAddress};
 use gtk::prelude::{
     EntryExt, IOStreamExt, InputStreamExtManual, SocketConnectionExt, SocketExt, SocketListenerExt,
+    WidgetExt,
 };
 use gtk::{gio, glib};
 use rand::Rng;
@@ -146,7 +147,10 @@ async fn handle_transfer(transfer: TransferType, global: &Globals) -> anyhow::Re
                     let launch = l_global
                         .data
                         .as_ref()
-                        .map(|d| d.borrow().entry.text_length() > 0)
+                        .map(|d| {
+                            let b = d.borrow();
+                            b.entry.text_length() > 0 && b.results.first_child().is_some()
+                        })
                         .unwrap_or(false);
 
                     if launch {
