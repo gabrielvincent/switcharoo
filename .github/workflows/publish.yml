@@ -32,4 +32,5 @@ jobs:
       - name: Publish to crates.io
         run: |
           git checkout ${{ github.ref }} -b hyprshell
-          cargo ws publish --token ${{ secrets.CRATES_TOKEN }} custom ${{ github.ref_name }} -m "chore: release %v" --no-git-tag --allow-branch hyprshell -y
+          git tag -d ${{ github.ref_name }}
+          cargo ws publish --token ${{ secrets.CRATES_TOKEN }} custom ${{ github.ref_name }} -m "chore: release %v" --allow-branch hyprshell -y --tag-prefix=""
