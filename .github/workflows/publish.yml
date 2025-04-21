@@ -31,6 +31,7 @@ jobs:
         run: cargo install cargo-workspaces
       - name: Publish to crates.io
         run: |
+          git fetch --tags origin hyprshell
           git checkout ${{ github.ref }} -b hyprshell
           git push --delete origin ${{ github.ref_name }}
           echo "removing old tag"
