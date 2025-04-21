@@ -32,7 +32,7 @@ jobs:
       - name: Publish to crates.io
         run: |
           git checkout ${{ github.ref }} -b hyprshell
-          git tag -d ${{ github.ref_name }}
-          git push --follow-tags origin hyprshell
+          git push --delete origin ${{ github.ref_name }}
           echo "removing old tag"
-          cargo ws publish --token ${{ secrets.CRATES_TOKEN }} custom ${{ github.ref_name }} -m "chore: release %v" --allow-branch hyprshell -y --tag-prefix=""
+          git fetch --tags
+          cargo ws publish --token ${{ secrets.CRATES_TOKEN }} custom ${{ github.ref_name }} -m "chore: release %v" --allow-branch hyprshell -y
