@@ -3,22 +3,16 @@ use core_lib::transfer::{from_ron_string, TransferType};
 use core_lib::{get_daemon_socket_path_buff, Warn};
 use exec_lib::toast;
 use gtk::gio::{Cancellable, InputStream, SocketListener, UnixSocketAddress};
-use gtk::prelude::{
-    EntryExt, IOStreamExt, InputStreamExtManual, SocketConnectionExt, SocketExt, SocketListenerExt,
-    WidgetExt,
-};
+use gtk::prelude::*;
 use gtk::{gio, glib};
 use rand::Rng;
 use std::fs::remove_file;
 use std::path::Path;
 use std::time::Instant;
 use tracing::{debug, error, info, span, trace, Level};
-use windows_lib::{
-    close_overview, open_overview, open_switch, stop_overview, update_overview, WindowsGlobal,
-};
 
 pub struct Globals {
-    pub window: Option<WindowsGlobal>,
+    pub window: Option<windows_lib::WindowsGlobal>,
     #[cfg(feature = "launcher")]
     pub launcher: Option<launcher_lib::LauncherGlobal>,
     #[cfg(any(feature = "launcher", feature = "bar"))]
@@ -55,7 +49,6 @@ pub async fn socket_handler(global: Globals) {
                     conn.socket().available_bytes(),
                     &global,
                 )
-                .await
                 .context("Failed to handle client")
                 .unwrap_or_else(|e| {
                     toast(&format!("Failed to handle connection {:?}", e));
@@ -68,7 +61,7 @@ pub async fn socket_handler(global: Globals) {
     }
 }
 
-async fn handle_client(stream: InputStream, size: isize, global: &Globals) -> anyhow::Result<()> {
+fn handle_client(stream: InputStream, size: isize, global: &Globals) -> anyhow::Result<()> {
     let now = Instant::now();
     let rand_id = rand::rng().random_range(100..=255);
     let _span = span!(Level::TRACE, "handle_client", id = rand_id).entered();
@@ -84,38 +77,36 @@ async fn handle_client(stream: InputStream, size: isize, global: &Globals) -> an
         return Ok(());
     }
     let str = String::from_utf8_lossy(&buffer);
-    handle_client_transfer(&str, global).await?;
+    handle_client_transfer(&str, global)?;
     trace!("Handled client in {:?}", now.elapsed());
     Ok(())
 }
 
-async fn handle_client_transfer(buffer: &str, global: &Globals) -> anyhow::Result<()> {
+fn handle_client_transfer(buffer: &str, global: &Globals) -> anyhow::Result<()> {
     let transfer: TransferType = from_ron_string(buffer)
         .with_context(|| format!("Failed to deserialize buffer: {buffer:?}"))?;
     debug!("Received command: {transfer:?}");
 
-    handle_transfer(transfer, global)
-        .await
-        .warn("Failed to handle transfer");
+    handle_transfer(transfer, global).warn("Failed to handle transfer");
     Ok(())
 }
 
-async fn handle_transfer(transfer: TransferType, global: &Globals) -> anyhow::Result<()> {
+fn handle_transfer(transfer: TransferType, global: &Globals) -> anyhow::Result<()> {
     match transfer {
         TransferType::OpenOverview(config) => {
             if let Some(global) = &global.window {
-                open_overview(config, global).await?;
+                windows_lib::open_overview(config, global)?;
             } else {
                 return Err(anyhow::anyhow!("No window global data available"));
             };
             #[cfg(feature = "launcher")]
             if let Some(global) = &global.launcher {
-                launcher_lib::open_launcher(global).await?;
+                launcher_lib::open_launcher(global)?;
             }
         }
         TransferType::OpenSwitch(config) => {
             if let Some(global) = &global.window {
-                open_switch(config, global).await?;
+                windows_lib::open_switch(config, global)?;
             } else {
                 return Err(anyhow::anyhow!("No window global data available"));
             }
@@ -123,7 +114,7 @@ async fn handle_transfer(transfer: TransferType, global: &Globals) -> anyhow::Re
         TransferType::Switch(config) => {
             #[cfg(not(feature = "launcher"))]
             if let Some(global) = &global.window {
-                update_overview(config, global).await?;
+                windows_lib::update_overview(config, global)?;
             } else {
                 return Err(anyhow::anyhow!("No window global data available"));
             }
@@ -141,14 +132,14 @@ async fn handle_transfer(transfer: TransferType, global: &Globals) -> anyhow::Re
                 // don't switch selected window if launcher is active
                 if !launcher_active {
                     if let Some(global) = &global.window {
-                        update_overview(config, global).await?;
+                        windows_lib::update_overview(config, global)?;
                     } else {
                         return Err(anyhow::anyhow!("No window global data available"));
                     }
                 }
             } else {
                 if let Some(global) = &global.window {
-                    update_overview(config, global).await?;
+                    windows_lib::update_overview(config, global)?;
                 } else {
                     return Err(anyhow::anyhow!("No window global data available"));
                 }
@@ -156,17 +147,17 @@ async fn handle_transfer(transfer: TransferType, global: &Globals) -> anyhow::Re
         }
         TransferType::Close => {
             if let Some(global) = &global.window {
-                close_overview(true, global).await;
+                windows_lib::close_overview(true, global);
             }
             #[cfg(feature = "launcher")]
             if let Some(l_global) = &global.launcher {
-                launcher_lib::close_launcher(None, l_global, &global.data_dir).await;
+                launcher_lib::close_launcher(None, l_global, &global.data_dir);
             }
         }
         TransferType::Return(config) => {
             #[cfg(not(feature = "launcher"))]
             if let Some(global) = &global.window {
-                close_overview(false, global).await;
+                windows_lib::close_overview(false, global);
             }
             #[cfg(feature = "launcher")]
             {
@@ -183,33 +174,32 @@ async fn handle_transfer(transfer: TransferType, global: &Globals) -> anyhow::Re
                     if launch {
                         // kill overview, launch program
                         if let Some(global) = &global.window {
-                            close_overview(true, global).await;
+                            windows_lib::close_overview(true, global);
                         }
                         launcher_lib::close_launcher(
                             Some(config.offset),
                             l_global,
                             &global.data_dir,
-                        )
-                        .await;
+                        );
                     } else {
                         // close overview, kill launcher
                         if let Some(global) = &global.window {
-                            close_overview(false, global).await;
+                            windows_lib::close_overview(false, global);
                         }
-                        launcher_lib::close_launcher(None, l_global, &global.data_dir).await;
+                        launcher_lib::close_launcher(None, l_global, &global.data_dir);
                     };
                 } else if let Some(global) = &global.window {
-                    close_overview(false, global).await;
+                    windows_lib::close_overview(false, global);
                 }
             }
         }
         TransferType::Restart => {
             if let Some(global) = &global.window {
-                stop_overview(global).await;
+                windows_lib::stop_overview(global);
             }
             #[cfg(feature = "launcher")]
             if let Some(global) = &global.launcher {
-                launcher_lib::stop_launcher(global).await;
+                launcher_lib::stop_launcher(global);
             }
         }
     }

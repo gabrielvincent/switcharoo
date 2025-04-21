@@ -2,7 +2,7 @@ use anyhow::Context;
 use core_lib::transfer::OpenOverview;
 use core_lib::{ClientData, ClientId, FindByFirst};
 use exec_lib::activate_submap;
-use gtk::prelude::{ApplicationWindowExt, FixedExt, FrameExt, WidgetExt};
+use gtk::prelude::*;
 use gtk::{pango, Fixed, Frame, Image, Label, Overflow, Overlay};
 use std::borrow::Cow;
 use std::cmp::min;
@@ -14,7 +14,7 @@ use crate::WindowsGlobal;
 fn scale(value: i16, size_factor: f64) -> i32 {
     (value as f64 / 30.0 * size_factor) as i32
 }
-pub async fn open_overview(config: OpenOverview, global: &WindowsGlobal) -> anyhow::Result<()> {
+pub fn open_overview(config: OpenOverview, global: &WindowsGlobal) -> anyhow::Result<()> {
     let _span = span!(Level::TRACE, "open_overview").entered();
     let (clients_data, active) = collect_data(&SortConfig {
         filter_current_monitor: config.filter_current_monitor,
@@ -26,7 +26,7 @@ pub async fn open_overview(config: OpenOverview, global: &WindowsGlobal) -> anyh
 
     activate_submap(&config.submap_name)?;
 
-    let regex = regex::Regex::new(r"<[^>]*>").expect("Invalid regex");
+    let regex = regex::Regex::new(r"<[^>]*>").context("Invalid regex")?;
 
     let mut data = global.data.borrow_mut();
     for (window, monitor_data) in data.monitor_list.iter_mut() {
@@ -170,7 +170,7 @@ pub async fn open_overview(config: OpenOverview, global: &WindowsGlobal) -> anyh
                         .height_request(scale(client.height, global.size_factor))
                         .build();
 
-                    // add border around initial active client
+                    // add initial border around initial active client
                     if active.client == Some(*address) {
                         client_overlay.add_css_class("active");
                     }

@@ -1,8 +1,8 @@
 use core_lib::{Warn, TERMINALS};
-use std::io;
 use std::os::unix::prelude::CommandExt;
 use std::path::Path;
 use std::process::{Command, Stdio};
+use std::{env, io, thread};
 use tracing::debug;
 
 pub fn run_program(
@@ -36,6 +36,8 @@ pub fn run_program(
 fn run_command(command: &mut Command, run: &str, path: &Option<Box<Path>>) -> io::Result<()> {
     command.arg::<&str>(run.as_ref());
     command.process_group(0);
+    // try to set DISPLAY env doesnt work (for lstopo)
+    // command.envs(env::vars());
 
     if let Some(path) = path {
         command.current_dir(path.as_ref());
@@ -46,5 +48,15 @@ fn run_command(command: &mut Command, run: &str, path: &Option<Box<Path>>) -> io
         .stderr(Stdio::piped())
         .spawn()?;
 
+    if env::var_os("HYPRSHELL_SHOW_OUTPUT").is_some() {
+        thread::spawn(move || {
+            let output = _out.wait_with_output();
+            if let Ok(output) = output {
+                if !output.stdout.is_empty() || !output.stderr.is_empty() {
+                    debug!("Output: {:?}", output);
+                }
+            }
+        });
+    }
     Ok(())
 }

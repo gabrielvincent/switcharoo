@@ -1,11 +1,11 @@
 use core_lib::{FindByFirst, Warn};
 use exec_lib::switch::{switch_client, switch_workspace};
 use exec_lib::{activate_submap, to_client_address};
-use gtk::prelude::{ApplicationWindowExt, WidgetExt};
+use gtk::prelude::*;
 use tracing::{debug, span, trace, Level};
 use crate::WindowsGlobal;
 
-pub async fn close_overview(kill: bool, global: &WindowsGlobal) {
+pub fn close_overview(kill: bool, global: &WindowsGlobal) {
     let _span = span!(Level::TRACE, "close_overview").entered();
 
     activate_submap("reset").warn("Failed to reset submap");
@@ -37,7 +37,6 @@ pub async fn close_overview(kill: bool, global: &WindowsGlobal) {
                     );
                 }
                 switch_client(&to_client_address(cid))
-                    .await
                     .warn(&format!("Failed to execute with id {cid:?}"));
             }
             (_, wid) => {
@@ -52,7 +51,7 @@ pub async fn close_overview(kill: bool, global: &WindowsGlobal) {
                             .unwrap_or_else(|| "<Unknown>".to_string())
                     );
                 }
-                switch_workspace(wid).await.warn(&format!(
+                switch_workspace(wid).warn(&format!(
                     "Failed to execute switch workspace with id {wid:?}"
                 ));
             }

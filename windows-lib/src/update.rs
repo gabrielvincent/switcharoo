@@ -1,10 +1,10 @@
 use core_lib::transfer::SwitchConfig;
-use gtk::prelude::WidgetExt;
+use gtk::prelude::*;
 use tracing::{span, Level};
 use crate::next::find_next;
 use crate::WindowsGlobal;
 
-pub async fn update_overview(config: SwitchConfig, global: &WindowsGlobal) -> anyhow::Result<()> {
+pub fn update_overview(config: SwitchConfig, global: &WindowsGlobal) -> anyhow::Result<()> {
     let _span = span!(Level::TRACE, "update_overview").entered();
 
     let mut data = global.data.borrow_mut();

@@ -14,10 +14,10 @@ build_with_features() {
 
   if [[ -z "$feature_combination" ]]; then
     echo "[$iteration] Building without any features..."
-    cargo build --no-default-features
+    cargo build --no-default-features --quiet
   else
     echo "[$iteration] Building with features: $feature_combination"
-    cargo build --no-default-features --features "$feature_combination"
+    cargo build --no-default-features --features "$feature_combination" --quiet
   fi
 }
 

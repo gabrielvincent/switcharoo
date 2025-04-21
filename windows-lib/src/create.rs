@@ -2,9 +2,7 @@ use anyhow::Context;
 use core_lib::OVERVIEW_NAMESPACE;
 use exec_lib::get_monitors;
 use gtk::gdk::{Display, Monitor};
-use gtk::prelude::{
-    ApplicationWindowExt, DisplayExt, GtkWindowExt, ListModelExtManual, MonitorExt, WidgetExt,
-};
+use gtk::prelude::*;
 use gtk::{Application, ApplicationWindow, FlowBox, Orientation, Overlay, SelectionMode};
 use gtk4_layer_shell::{KeyboardMode, Layer, LayerShell};
 use tracing::{debug, span, Level};

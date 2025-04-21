@@ -1,8 +1,8 @@
-use gtk::prelude::{ApplicationWindowExt, GtkWindowExt};
+use gtk::prelude::*;
 use tracing::{span, trace, Level};
 use crate::LauncherGlobal;
 
-pub async fn stop_launcher(global: &LauncherGlobal) {
+pub fn stop_launcher(global: &LauncherGlobal) {
     let _span = span!(Level::TRACE, "stop_launcher").entered();
 
     if let Some(data) = &global.data {

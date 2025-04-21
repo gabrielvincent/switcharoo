@@ -1,14 +1,15 @@
-use crate::cache::get_cached_runs;
+use crate::data::get_cached_runs;
 use crate::desktop_map::{get_all_desktop_files, DesktopEntry};
 use crate::global::LauncherGlobalData;
 use crate::LauncherGlobal;
 use core_lib::theme_icon_cache::theme_has_icon_name;
-use core_lib::LAUNCHER_NAMESPACE;
+use core_lib::transfer::{ReturnConfig, TransferType};
+use core_lib::{send_to_socket, Warn, LAUNCHER_NAMESPACE};
 use gtk::gdk::Key;
 use gtk::glib::{clone, Propagation};
 use gtk::pango::EllipsizeMode;
-use gtk::prelude::{ApplicationWindowExt, BoxExt, EditableExt, GtkWindowExt, WidgetExt};
-use gtk::{glib, IconSize, Image, ListBoxRow};
+use gtk::prelude::*;
+use gtk::{glib, EventSequenceState, GestureClick, IconSize, Image, ListBoxRow};
 use gtk::{
     Align, Application, ApplicationWindow, Entry, EventControllerKey, Label, ListBox, Orientation,
     SelectionMode,
@@ -119,7 +120,10 @@ fn update(
             .vexpand(true)
             .build();
 
-        let icon = Image::builder().css_classes(vec!["launcher-icon"]).icon_size(IconSize::Large).build();
+        let icon = Image::builder()
+            .css_classes(vec!["launcher-icon"])
+            .icon_size(IconSize::Large)
+            .build();
         if let Some(icon_path) = entry.icon {
             if icon_path.is_absolute() {
                 if let Some(icon_name) = icon_path.file_stem() {
@@ -178,11 +182,21 @@ fn update(
             .vexpand(true)
             .child(&hbox)
             .build();
-        // TODO
-        // list.add_controller(click_entry(&share, raw_index));
+        list2.add_controller(click_entry(index as u8));
 
         list.append(&list2);
     }
+}
+
+fn click_entry(offset: u8) -> GestureClick {
+    let gesture = GestureClick::new();
+    gesture.connect_pressed(move |gesture, _, _, _| {
+        gesture.set_state(EventSequenceState::Claimed);
+        debug!("Exiting on click of launcher entry");
+        send_to_socket(&TransferType::Return(ReturnConfig { offset }))
+            .warn("unable send return to socket");
+    });
+    gesture
 }
 
 fn get_exec_label(exec: &str) -> String {
@@ -196,7 +210,10 @@ fn get_exec_label(exec: &str) -> String {
                 exec_trim
                     .split(' ')
                     .find(|s| s.contains("--command="))
-                    .and_then(|s| s.split('=').next_back().and_then(|s| s.split('/').next_back()))
+                    .and_then(|s| s
+                        .split('=')
+                        .next_back()
+                        .and_then(|s| s.split('/').next_back()))
                     .unwrap_or_default()
             )
         } else {
@@ -216,7 +233,10 @@ fn get_exec_label(exec: &str) -> String {
             exec_trim
                 .split(' ')
                 .find(|s| s.contains("--command="))
-                .and_then(|s| s.split('=').next_back().and_then(|s| s.split('/').next_back()))
+                .and_then(|s| s
+                    .split('=')
+                    .next_back()
+                    .and_then(|s| s.split('/').next_back()))
                 .unwrap_or_default()
         )
     } else {
@@ -272,11 +292,19 @@ pub fn get_matches(
             .name
             .to_ascii_lowercase()
             .contains(&text.to_ascii_lowercase())
+            || entry
+                .exec
+                .to_ascii_lowercase()
+                .contains(&text.to_ascii_lowercase())
         {
             if entry
                 .name
                 .to_ascii_lowercase()
                 .starts_with(&text.to_ascii_lowercase())
+                || entry
+                    .exec
+                    .to_ascii_lowercase()
+                    .starts_with(&text.to_ascii_lowercase())
             {
                 matches.insert(entry.path.clone(), (Match::Exact, entry.clone()));
             } else {

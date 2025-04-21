@@ -1,17 +1,18 @@
-use crate::cache::save_run;
+use crate::data::save_run;
 use crate::create::get_matches;
 use crate::global::LauncherGlobalData;
 use crate::run::run_program;
 use crate::LauncherGlobal;
 use core_lib::Warn;
 use gtk::glib;
-use gtk::prelude::{ApplicationWindowExt, EditableExt, WidgetExt};
+use gtk::glib::clone;
+use gtk::prelude::*;
 use std::cell::RefCell;
 use std::path::Path;
 use std::time::Duration;
 use tracing::{span, trace, Level};
 
-pub async fn close_launcher(offset: Option<u8>, global: &LauncherGlobal, data_dir: &Path) {
+pub fn close_launcher(offset: Option<u8>, global: &LauncherGlobal, data_dir: &Path) {
     let _span = span!(Level::TRACE, "close_launcher").entered();
 
     if let Some(data) = &global.data {
@@ -37,16 +38,32 @@ pub async fn close_launcher(offset: Option<u8>, global: &LauncherGlobal, data_di
                     &global.default_terminal,
                 );
                 save_run(&_match.path, data_dir).warn("Failed to cache run");
-                glib::timeout_future(Duration::from_millis(global.animate_launch_time_ms)).await;
+
+                let time = global.animate_launch_time_ms;
+                let data1 = data.borrow();
+                let results = data1.results.clone();
+                let entry = data1.entry.clone();
+                let window = data1.window.clone();
+                drop(data1);
+                glib::spawn_future_local(clone!(async move {
+                    glib::timeout_future(Duration::from_millis(time)).await;
+                    while let Some(child) = results.first_child() {
+                        results.remove(&child);
+                    }
+                    entry.set_text("");
+                    trace!("Hiding window {:?}", window.id());
+                    window.set_visible(false);
+                }));
             }
+        } else {
+            let data1 = data.borrow();
+            while let Some(child) = data1.results.first_child() {
+                data1.results.remove(&child);
+            }
+            data1.entry.set_text("");
+            trace!("Hiding window {:?}", data1.window.id());
+            data1.window.set_visible(false);
         }
-        let data1 = data.borrow();
-        while let Some(child) = data1.results.first_child() {
-            data1.results.remove(&child);
-        }
-        data1.entry.set_text("");
-        trace!("Hiding window {:?}", data1.window.id());
-        data1.window.set_visible(false);
     }
 }
 

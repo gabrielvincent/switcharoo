@@ -1,24 +1,22 @@
 use crate::receive::{socket_handler, Globals};
 use core_lib::config::binds::create_binds_and_submaps;
 use core_lib::theme_icon_cache::init_icon_map;
-use core_lib::transfer::{to_ron_string, TransferType};
+use core_lib::transfer::TransferType;
 use core_lib::{
-    collect_desktop_files, config, get_daemon_socket_path_buff, hyprshell_config_block,
-    hyprshell_config_listener, hyprshell_css_listener,
+    collect_desktop_files, config, hyprshell_config_block,
+    hyprshell_config_listener, hyprshell_css_listener, send_to_socket, Warn,
 };
 use exec_lib::listener::{hyprland_config_listener, monitor_listener};
 use exec_lib::{apply_keybinds, reload_config, toast};
 use gtk::gdk::Display;
 use gtk::glib::clone;
-use gtk::prelude::{ApplicationExt, ApplicationExtManual};
+use gtk::prelude::*;
 use gtk::{
     glib, style_context_add_provider_for_display, Application, CssProvider, IconTheme, Settings,
     STYLE_PROVIDER_PRIORITY_APPLICATION, STYLE_PROVIDER_PRIORITY_USER,
 };
-use std::io::Write;
-use std::os::unix::net::UnixStream;
 use std::path::{Path, PathBuf};
-use tracing::{debug, error, info, span, trace, warn, Level};
+use tracing::{debug, info, span, trace, warn, Level};
 use windows_lib::{create_windows_window, WindowsGlobal};
 
 const APPLICATION_ID: &str = "com.github.h3rmt.hyprshell";
@@ -37,8 +35,7 @@ pub fn start(config_path: PathBuf, css_path: PathBuf, data_dir: PathBuf) -> anyh
         let config_path = config_path.clone();
         let css_path = css_path.clone();
         let data_dir = data_dir.clone();
-        application
-            .connect_activate(move |app| activate(app, &config_path, &css_path, &data_dir));
+        application.connect_activate(move |app| activate(app, &config_path, &css_path, &data_dir));
         application.run_with_args::<String>(&[]);
     }
 }
@@ -166,7 +163,7 @@ async fn restart_listener(config_path: PathBuf, css_path: PathBuf) {
     });
     let cause = rx.recv().await.unwrap_or_default();
     info!("Restarting gui ({cause})");
-    send_restart();
+    send_to_socket(&TransferType::Restart).warn("unable to send restart");
 }
 
 fn apply_css(custom_css: &Path) {
@@ -277,26 +274,4 @@ fn fill_icon_map() {
     });
 
     init_icon_map(gtk_icons, search_path);
-}
-
-pub fn send_restart() {
-    let path = get_daemon_socket_path_buff();
-    let mut socket = match UnixStream::connect(path) {
-        Ok(socket) => socket,
-        Err(err) => {
-            error!("Failed to connect to socket: {:?}", err);
-            return;
-        }
-    };
-    let message = TransferType::Restart;
-    match to_ron_string(&message) {
-        Ok(message) => {
-            if let Err(err) = socket.write_all(message.as_bytes()) {
-                error!("Failed to send message: {:?}", err);
-            }
-        }
-        Err(err) => {
-            error!("Failed to serialize message: {:?}", err);
-        }
-    }
 }

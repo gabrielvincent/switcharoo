@@ -2,7 +2,7 @@ use anyhow::Context;
 use core_lib::transfer::OpenSwitch;
 use core_lib::{ClientData, ClientId, FindByFirst};
 use exec_lib::activate_submap;
-use gtk::prelude::{ApplicationWindowExt, FrameExt, WidgetExt};
+use gtk::prelude::*;
 use gtk::{pango, Frame, Image, Label, Overflow, Overlay};
 use std::cmp::min;
 use tracing::{span, trace, Level};
@@ -14,7 +14,7 @@ use crate::WindowsGlobal;
 fn scale(value: i16, size_factor: f64) -> i32 {
     (value as f64 / 31.0 * size_factor) as i32
 }
-pub async fn open_switch(config: OpenSwitch, global: &WindowsGlobal) -> anyhow::Result<()> {
+pub fn open_switch(config: OpenSwitch, global: &WindowsGlobal) -> anyhow::Result<()> {
     let _span = span!(Level::TRACE, "open_switch").entered();
     let (clients_data, active) = collect_data(&SortConfig {
         filter_current_monitor: config.filter_current_monitor,

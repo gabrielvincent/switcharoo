@@ -7,9 +7,9 @@ use hyprland::prelude::*;
 use hyprland::shared::{Address, WorkspaceId};
 use tracing::{trace, warn};
 
-pub async fn switch_workspace(workspace_id: WorkspaceId) -> anyhow::Result<()> {
+pub fn switch_workspace(workspace_id: WorkspaceId) -> anyhow::Result<()> {
     // check if already on workspace (if so, don't switch because it throws an error `Previous workspace doesn't exist`)
-    let current_workspace = Workspace::get_active_async().await;
+    let current_workspace = Workspace::get_active();
     if let Ok(workspace) = current_workspace {
         if workspace_id == workspace.id {
             trace!("Already on workspace {}", workspace_id);
@@ -23,7 +23,6 @@ pub async fn switch_workspace(workspace_id: WorkspaceId) -> anyhow::Result<()> {
         );
     } else {
         switch_normal_workspace(workspace_id)
-            .await
             .with_context(|| {
                 format!(
                     "Failed to execute switch workspace with id {}",
@@ -34,21 +33,19 @@ pub async fn switch_workspace(workspace_id: WorkspaceId) -> anyhow::Result<()> {
     Ok(())
 }
 
-pub async fn switch_client(address: &Address) -> anyhow::Result<()> {
+pub fn switch_client(address: &Address) -> anyhow::Result<()> {
     trace!("execute switch to next_client: {}", address);
-    Dispatch::call_async(DispatchType::FocusWindow(WindowIdentifier::Address(
+    Dispatch::call(DispatchType::FocusWindow(WindowIdentifier::Address(
         address.clone(),
-    )))
-    .await?;
-    Dispatch::call_async(DispatchType::BringActiveToTop).await?;
+    )))?;
+    Dispatch::call(DispatchType::BringActiveToTop)?;
     Ok(())
 }
 
-async fn switch_normal_workspace(workspace_id: WorkspaceId) -> anyhow::Result<()> {
+fn switch_normal_workspace(workspace_id: WorkspaceId) -> anyhow::Result<()> {
     trace!("execute switch to workspace {workspace_id}");
-    Dispatch::call_async(DispatchType::Workspace(WorkspaceIdentifierWithSpecial::Id(
+    Dispatch::call(DispatchType::Workspace(WorkspaceIdentifierWithSpecial::Id(
         workspace_id,
-    )))
-    .await?;
+    )))?;
     Ok(())
 }

@@ -4,35 +4,36 @@ use serde_json::from_reader;
 use std::collections::HashMap;
 use std::fs::OpenOptions;
 use std::path::{Path, PathBuf};
-use tracing::warn;
+use tracing::{trace, warn};
 
 pub fn save_run(desktop_file: &Path, data_dir: &Path) -> anyhow::Result<()> {
-    let data_dir = get_current_week(data_dir);
-    let mut cache_data = if data_dir.exists() {
+    let file = get_current_week(data_dir);
+    let mut data = if data_dir.exists() {
         let file = OpenOptions::new()
             .read(true)
-            .open(&data_dir)
+            .open(&file)
             .context("Failed to open cache file")?;
         from_reader(file).unwrap_or_else(|_| serde_json::json!({}))
     } else {
         // create the file and folder
-        std::fs::create_dir_all(data_dir.parent().unwrap())
+        std::fs::create_dir_all(file.parent().unwrap())
             .context("Failed to create cache directory")?;
         serde_json::json!({})
     };
 
-    cache_data[&*desktop_file.to_string_lossy()] = serde_json::json!(cache_data
+    data[&*desktop_file.to_string_lossy()] = serde_json::json!(data
         .get(&*desktop_file.to_string_lossy())
         .map(|v| v.as_i64().unwrap_or(0) + 1)
         .unwrap_or(1));
 
+    trace!("Cache saved to {file:?} (added {:?})", desktop_file);
     let file = OpenOptions::new()
         .write(true)
         .create(true)
         .truncate(true)
-        .open(&data_dir)
+        .open(&file)
         .context("Failed to open cache file for writing")?;
-    serde_json::to_writer_pretty(file, &cache_data).context("Failed to write to cache file")?;
+    serde_json::to_writer_pretty(file, &data).context("Failed to write to cache file")?;
     Ok(())
 }
 
