@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+export RUSTFLAGS=-Awarnings
+
 # Define the features as an array
 declare -a features=("generate_config_command" "json_config" "toml_config" "debug_command" "launcher" "bar")
+#declare -a features=("generate_config_command" "launcher" "bar")
 
 # Get the total number of features
 num_features=${#features[@]}
@@ -32,3 +35,5 @@ for ((i = 0; i < (1 << num_features); i++)); do
   done
   build_with_features "$(IFS=,; printf '%s' "${combination[*]}")" "$i"
 done
+
+echo "all features tested"
