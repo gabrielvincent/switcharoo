@@ -121,10 +121,37 @@ async fn handle_transfer(transfer: TransferType, global: &Globals) -> anyhow::Re
             }
         }
         TransferType::Switch(config) => {
+            #[cfg(not(feature = "launcher"))]
             if let Some(global) = &global.window {
                 update_overview(config, global).await?;
             } else {
                 return Err(anyhow::anyhow!("No window global data available"));
+            }
+            #[cfg(feature = "launcher")]
+            if let Some(l_global) = &global.launcher {
+                let launcher_active = l_global
+                    .data
+                    .as_ref()
+                    .map(|d| {
+                        let b = d.borrow();
+                        b.entry.text_length() > 0 && b.results.first_child().is_some()
+                    })
+                    .unwrap_or(false);
+
+                // don't switch selected window if launcher is active
+                if !launcher_active {
+                    if let Some(global) = &global.window {
+                        update_overview(config, global).await?;
+                    } else {
+                        return Err(anyhow::anyhow!("No window global data available"));
+                    }
+                }
+            } else {
+                if let Some(global) = &global.window {
+                    update_overview(config, global).await?;
+                } else {
+                    return Err(anyhow::anyhow!("No window global data available"));
+                }
             }
         }
         TransferType::Close => {

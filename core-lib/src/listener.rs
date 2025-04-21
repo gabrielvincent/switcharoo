@@ -4,10 +4,15 @@ use notify::{Config, Event, EventKind, INotifyWatcher, RecursiveMode, Watcher};
 use std::path::Path;
 use tracing::{debug, info, trace, warn};
 
-pub fn hyprshell_config_listener<F>(file_path: &Path, callback: F) -> INotifyWatcher
+pub fn hyprshell_config_listener<F>(file_path: &Path, callback: F) -> Option<INotifyWatcher>
 where
     F: Fn(&'static str) + 'static + Clone + Send,
 {
+    if !file_path.exists() {
+        debug!("unable to watch for file changes as the file doesnt exist");
+        return None;
+    }
+
     let mut watcher = INotifyWatcher::new(
         move |res: notify::Result<Event>| match res {
             Ok(event) if event.kind == EventKind::Modify(ModifyKind::Data(DataChange::Any)) => {
@@ -28,13 +33,18 @@ where
         .watch(file_path, RecursiveMode::NonRecursive)
         .expect("Failed to start hyprshell config reload listener");
 
-    watcher
+    Some(watcher)
 }
 
-pub fn hyprshell_css_listener<F>(file_path: &Path, callback: F) -> INotifyWatcher
+pub fn hyprshell_css_listener<F>(file_path: &Path, callback: F) -> Option<INotifyWatcher>
 where
     F: Fn(&'static str) + 'static + Clone + Send,
 {
+    if !file_path.exists() {
+        debug!("unable to watch for file changes as the file doesnt exist");
+        return None;
+    }
+
     let mut watcher = INotifyWatcher::new(
         move |res: notify::Result<Event>| match res {
             Ok(event) if event.kind == EventKind::Modify(ModifyKind::Data(DataChange::Any)) => {
@@ -55,7 +65,7 @@ where
         .watch(file_path.as_ref(), RecursiveMode::NonRecursive)
         .expect("Failed to start hyprshell css reload listener");
 
-    watcher
+    Some(watcher)
 }
 
 pub fn hyprshell_config_block(file_path: &Path) {
