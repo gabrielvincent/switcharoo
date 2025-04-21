@@ -8,7 +8,7 @@ on:
 jobs:
   publish:
     permissions:
-      pull-requests: write
+      contents: write
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -30,4 +30,6 @@ jobs:
       - name: Install cargo-workspaces
         run: cargo install cargo-workspaces
       - name: Publish to crates.io
-        run: cargo ws publish --token ${{ secrets.CRATES_TOKEN }} custom ${{ github.ref_name }}
+        run: |
+          git checkout ${{ github.ref }} -b hyprshell
+          cargo ws publish --token ${{ secrets.CRATES_TOKEN }} custom ${{ github.ref_name }} -m "chore: release %v" --no-git-tag --allow-branch hyprshell -y
