@@ -36,4 +36,4 @@ jobs:
           git push --delete origin ${{ github.ref_name }}
           echo "removing old tag"
           git fetch --tags
-          cargo ws publish custom ${{ github.ref_name }} --message "chore: release %v" --allow-branch hyprshell --yes --no-individual-tags --tag-prefix hyprswitch --force --token ${{ secrets.CRATES_TOKEN }}
+          cargo ws publish custom ${{ github.ref_name }} --amend --no-git-tag --allow-branch hyprshell --yes --token ${{ secrets.CRATES_TOKEN }}
