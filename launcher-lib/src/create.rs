@@ -3,7 +3,7 @@ use crate::desktop_map::{get_all_desktop_files, DesktopEntry};
 use crate::global::LauncherGlobalData;
 use crate::LauncherGlobal;
 use core_lib::theme_icon_cache::theme_has_icon_name;
-use core_lib::transfer::{ReturnConfig, TransferType};
+use core_lib::transfer::{Override, ReturnConfig, TransferType};
 use core_lib::{send_to_socket, Warn, LAUNCHER_NAMESPACE};
 use gtk::gdk::Key;
 use gtk::glib::{clone, Propagation};
@@ -193,8 +193,10 @@ fn click_entry(offset: u8) -> GestureClick {
     gesture.connect_pressed(move |gesture, _, _, _| {
         gesture.set_state(EventSequenceState::Claimed);
         debug!("Exiting on click of launcher entry");
-        send_to_socket(&TransferType::Return(ReturnConfig { offset }))
-            .warn("unable send return to socket");
+        send_to_socket(&TransferType::Return(ReturnConfig {
+            r#override: Some(Override::Offset(offset)),
+        }))
+        .warn("unable send return to socket");
     });
     gesture
 }

@@ -1,15 +1,15 @@
-use anyhow::Context;
-use core_lib::transfer::OpenSwitch;
-use core_lib::{ClientData, ClientId, FindByFirst};
-use exec_lib::activate_submap;
-use gtk::prelude::*;
-use gtk::{pango, Frame, Image, Label, Overflow, Overlay};
-use std::cmp::min;
-use tracing::{span, trace, Level};
 use crate::data::{collect_data, SortConfig};
 use crate::icon::set_icon;
 use crate::next::find_next;
 use crate::WindowsGlobal;
+use anyhow::Context;
+use core_lib::transfer::{OpenSwitch, Override, ReturnConfig, TransferType};
+use core_lib::{send_to_socket, ClientData, ClientId, FindByFirst, Warn};
+use exec_lib::activate_submap;
+use gtk::prelude::*;
+use gtk::{pango, EventSequenceState, Frame, GestureClick, Image, Label, Overflow, Overlay};
+use std::cmp::min;
+use tracing::{debug, span, trace, Level};
 
 fn scale(value: i16, size_factor: f64) -> i32 {
     (value as f64 / 31.0 * size_factor) as i32
@@ -128,8 +128,7 @@ pub fn open_switch(config: OpenSwitch, global: &WindowsGlobal) -> anyhow::Result
                     client_overlay.add_css_class("active");
                 }
 
-                // TODO
-                // client_overlay.add_controller(click_client(&share, *address));
+                client_overlay.add_controller(click_client(*address));
                 client_overlay
             };
             monitor_data.workspaces_flow.insert(&client_overlay, -1);
@@ -146,4 +145,17 @@ pub fn open_switch(config: OpenSwitch, global: &WindowsGlobal) -> anyhow::Result
     data.hypr_data = clients_data;
     drop(data);
     Ok(())
+}
+
+fn click_client(client_id: ClientId) -> GestureClick {
+    let gesture = GestureClick::new();
+    gesture.connect_pressed(move |gesture, _, _, _| {
+        gesture.set_state(EventSequenceState::Claimed);
+        debug!("Exiting on click of client box");
+        send_to_socket(&TransferType::Return(ReturnConfig {
+            r#override: Some(Override::ClientId(client_id)),
+        }))
+        .warn("unable send return to socket");
+    });
+    gesture
 }

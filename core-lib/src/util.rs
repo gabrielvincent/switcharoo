@@ -102,8 +102,7 @@ pub fn daemon_running() -> bool {
 pub fn check_version(version: anyhow::Result<String>) -> anyhow::Result<()> {
     if let Ok(version) = version {
         let parsed_version =
-            semver::Version::parse(&version).context("Unable to parse hyprland Version")?;
-
+            Version::parse(&version).context("Unable to parse hyprland Version")?;
         if parsed_version.lt(&MIN_VERSION) {
             Err(anyhow::anyhow!(
                 "hyprland version {} is too old or unknown, please update to at least {}",
@@ -153,19 +152,19 @@ fn find_application_dirs() -> Vec<PathBuf> {
             ]
         });
 
-    if let Some(data_home) = env::var_os("XDG_DATA_HOME")
-        .map(PathBuf::from)
-        .map_or_else(
-            || {
-                env::var_os("HOME")
-                    .map(|p| PathBuf::from(p).join(".local/share"))
-                    .or_else(|| {
-                        warn!("No XDG_DATA_HOME and HOME environment variable found");
-                        None
-                    })
-            },
-            Some,
-        ) { dirs.push(data_home) }
+    if let Some(data_home) = env::var_os("XDG_DATA_HOME").map(PathBuf::from).map_or_else(
+        || {
+            env::var_os("HOME")
+                .map(|p| PathBuf::from(p).join(".local/share"))
+                .or_else(|| {
+                    warn!("No XDG_DATA_HOME and HOME environment variable found");
+                    None
+                })
+        },
+        Some,
+    ) {
+        dirs.push(data_home)
+    }
 
     let dirs = dirs
         .into_iter()

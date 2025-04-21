@@ -1,3 +1,4 @@
+use crate::{ClientId, WorkspaceId};
 use anyhow::Context;
 use ron::extensions::Extensions;
 use serde::{Deserialize, Serialize};
@@ -40,7 +41,14 @@ pub struct SwitchConfig {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ReturnConfig {
-    pub offset: u8,
+    pub r#override: Option<Override>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
+pub enum Override {
+    Offset(u8),
+    ClientId(ClientId),
+    WorkspaceID(WorkspaceId),
 }
 
 #[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]

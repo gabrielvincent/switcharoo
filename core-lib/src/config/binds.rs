@@ -1,7 +1,7 @@
 use crate::config::structs::{Config, FilterBy, Overview, Reverse, Switch, ToKey};
 use crate::config::Launcher;
 use crate::transfer::{
-    Direction, OpenOverview, OpenSwitch, ReturnConfig, SwitchConfig, TransferType,
+    Direction, OpenOverview, OpenSwitch, Override, ReturnConfig, SwitchConfig, TransferType,
 };
 use crate::util::{get_daemon_socket_path_buff, LAUNCHER_NAMESPACE, OVERVIEW_NAMESPACE};
 use anyhow::Context;
@@ -101,10 +101,12 @@ fn generate_restart(ron_options: &ron::Options, socat_path: &str) -> anyhow::Res
 
 fn generate_return(
     ron_options: &ron::Options,
-    offset: u8,
+    offset: Option<u8>,
     socat_path: &str,
 ) -> anyhow::Result<String> {
-    let config = TransferType::Return(ReturnConfig { offset });
+    let config = TransferType::Return(ReturnConfig {
+        r#override: offset.map(Override::Offset),
+    });
     let config_str = ron_options
         .to_string(&config)
         .context("Failed to serialize config")?;
@@ -218,7 +220,7 @@ fn generate_overview(
         "bind",
         format!(
             ", return, exec, {}",
-            generate_return(ron_options, 0, socat_path)?
+            generate_return(ron_options, None, socat_path)?
         ),
     ));
 
@@ -230,7 +232,7 @@ fn generate_overview(
                 format!(
                     "ctrl, {}, exec, {}",
                     i,
-                    generate_return(ron_options, i, socat_path)?
+                    generate_return(ron_options, Some(i), socat_path)?
                 ),
             ));
         }
@@ -424,7 +426,7 @@ fn generate_switch(
             "{}, {}, exec, {}",
             switch.open.modifier,
             switch.open.modifier.to_key(),
-            generate_return(ron_options, 0, socat_path)?
+            generate_return(ron_options, None, socat_path)?
         ),
     ));
     // second keybinding to close of mod + reverse mod is released
@@ -436,7 +438,7 @@ fn generate_switch(
                 switch.open.modifier,
                 modk,
                 switch.open.modifier.to_key(),
-                generate_return(ron_options, 0, socat_path)?,
+                generate_return(ron_options, None, socat_path)?,
             ),
         ));
     }

@@ -49,7 +49,6 @@ fn activate(app: &Application, config_path: &Path, css_path: &Path, data_dir: &P
 
     let desktop_files = collect_desktop_files();
     windows_lib::reload_desktop_map(&desktop_files);
-    #[cfg(feature = "launcher")]
     launcher_lib::reload_desktop_map(&desktop_files);
 
     let config = match config::load_config(&config_path) {
@@ -71,7 +70,6 @@ fn activate(app: &Application, config_path: &Path, css_path: &Path, data_dir: &P
     };
 
     let windows_data: Option<WindowsGlobal> = config.windows.as_ref().map(WindowsGlobal::new);
-    #[cfg(feature = "launcher")]
     let mut launcher_data: Option<launcher_lib::LauncherGlobal> = config
         .launcher
         .as_ref()
@@ -84,21 +82,16 @@ fn activate(app: &Application, config_path: &Path, css_path: &Path, data_dir: &P
         debug!("Overview is disabled");
     }
 
-    #[cfg(feature = "launcher")]
     if let Some(launcher_data) = &mut launcher_data {
         launcher_lib::create_launcher_window(app, launcher_data, &data_dir)
             .unwrap_or_else(|e| toast(&format!("Failed to create launcher window: {e}")));
     } else {
         debug!("Launcher is disabled");
     }
-    #[cfg(not(feature = "launcher"))]
-    debug!("Launcher is disabled");
 
     let globals = Globals {
         window: windows_data,
-        #[cfg(feature = "launcher")]
         launcher: launcher_data,
-        #[cfg(any(feature = "launcher", feature = "bar"))]
         data_dir: Box::from(data_dir),
     };
 
@@ -176,8 +169,6 @@ fn apply_css(custom_css: &Path) {
     );
 
     windows_lib::get_css();
-
-    #[cfg(feature = "launcher")]
     launcher_lib::get_css();
 
     if !custom_css.exists() {

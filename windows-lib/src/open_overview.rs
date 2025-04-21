@@ -1,15 +1,15 @@
-use anyhow::Context;
-use core_lib::transfer::OpenOverview;
-use core_lib::{ClientData, ClientId, FindByFirst};
-use exec_lib::activate_submap;
-use gtk::prelude::*;
-use gtk::{pango, Fixed, Frame, Image, Label, Overflow, Overlay};
-use std::borrow::Cow;
-use std::cmp::min;
-use tracing::{span, trace, Level};
 use crate::data::{collect_data, SortConfig};
 use crate::icon::set_icon;
 use crate::WindowsGlobal;
+use anyhow::Context;
+use core_lib::transfer::{OpenOverview, Override, ReturnConfig, TransferType};
+use core_lib::{send_to_socket, ClientData, ClientId, FindByFirst, Warn, WorkspaceId};
+use exec_lib::activate_submap;
+use gtk::prelude::*;
+use gtk::{pango, EventSequenceState, Fixed, Frame, GestureClick, Image, Label, Overflow, Overlay};
+use std::borrow::Cow;
+use std::cmp::min;
+use tracing::{debug, span, trace, Level};
 
 fn scale(value: i16, size_factor: f64) -> i32 {
     (value as f64 / 30.0 * size_factor) as i32
@@ -84,7 +84,7 @@ pub fn open_overview(config: OpenOverview, global: &WindowsGlobal) -> anyhow::Re
                     .css_classes(vec!["workspace"])
                     .child(&workspace_frame)
                     .build();
-                // workspace_overlay.add_controller(click_workspace(&share, *wid));
+                workspace_overlay.add_controller(click_workspace(*wid));
                 monitor_data.workspaces_flow.insert(&workspace_overlay, -1);
                 workspace_overlay
             };
@@ -175,8 +175,7 @@ pub fn open_overview(config: OpenOverview, global: &WindowsGlobal) -> anyhow::Re
                         client_overlay.add_css_class("active");
                     }
 
-                    // TODO
-                    // client_overlay.add_controller(click_client(&share, *address));
+                    client_overlay.add_controller(click_client(*address));
                     client_overlay
                 };
                 trace!(
@@ -205,4 +204,30 @@ pub fn open_overview(config: OpenOverview, global: &WindowsGlobal) -> anyhow::Re
 
     drop(data);
     Ok(())
+}
+
+fn click_client(client_id: ClientId) -> GestureClick {
+    let gesture = GestureClick::new();
+    gesture.connect_pressed(move |gesture, _, _, _| {
+        gesture.set_state(EventSequenceState::Claimed);
+        debug!("Exiting on click of client box");
+        send_to_socket(&TransferType::Return(ReturnConfig {
+            r#override: Some(Override::ClientId(client_id)),
+        }))
+        .warn("unable send return to socket");
+    });
+    gesture
+}
+
+fn click_workspace(workspace_id: WorkspaceId) -> GestureClick {
+    let gesture = GestureClick::new();
+    gesture.connect_pressed(move |gesture, _, _, _| {
+        gesture.set_state(EventSequenceState::Claimed);
+        debug!("Exiting on click of workspace box");
+        send_to_socket(&TransferType::Return(ReturnConfig {
+            r#override: Some(Override::WorkspaceID(workspace_id)),
+        }))
+        .warn("unable send return to socket");
+    });
+    gesture
 }

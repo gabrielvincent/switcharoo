@@ -1,5 +1,5 @@
-use crate::data::save_run;
 use crate::create::get_matches;
+use crate::data::save_run;
 use crate::global::LauncherGlobalData;
 use crate::run::run_program;
 use crate::LauncherGlobal;

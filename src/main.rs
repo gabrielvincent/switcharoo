@@ -119,10 +119,9 @@ pub mod malloc {
 }
 
 fn check_features() {
-    debug!("FEATURES: JSON config: {}, TOML support: {}, Launcher support: {}, Bar: {}, Config command: {}, Debug command: {}",
+    debug!("FEATURES: JSON config: {}, TOML support: {}, Bar: {}, Config command: {}, Debug command: {}",
         cfg!(feature = "json_config"),
         cfg!(feature = "toml_config"),
-        cfg!(feature = "launcher"),
         cfg!(feature = "bar"),
         cfg!(feature = "generate_config_command"),
         cfg!(feature = "debug_command"),

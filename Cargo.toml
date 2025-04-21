@@ -28,15 +28,14 @@ async-channel = { version = "2.3.1", default-features = true }
 core-lib.workspace = true
 exec-lib.workspace = true
 windows-lib.workspace = true
-launcher-lib = { workspace = true, optional = true }
+launcher-lib.workspace = true
 
 [features]
-default = ["json_config", "toml_config", "generate_config_command", "launcher"]
+default = ["json_config", "toml_config", "generate_config_command"]
 generate_config_command = ["core-lib/generate_config"]
 json_config = ["core-lib/json_config"]
 toml_config = ["core-lib/toml_config"]
 debug_command = []
-launcher = ["dep:launcher-lib"]
 bar = []
 
 [workspace]

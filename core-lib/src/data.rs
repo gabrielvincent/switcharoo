@@ -74,3 +74,8 @@ impl FindByFirst<MonitorId, MonitorData> for Vec<(MonitorId, MonitorData)> {
         self.iter().find(|(mid, _)| *mid == *id).map(|(_, md)| md)
     }
 }
+
+pub enum IdOverride {
+    ClientId(ClientId),
+    WorkspaceID(WorkspaceId),
+}
