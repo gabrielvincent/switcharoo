@@ -2,7 +2,7 @@
 name = "hyprshell"
 readme = "README.md"
 documentation = "https://docs.rs/hyprshell"
-version = "0.3.0"
+version = "0.3.1"
 edition.workspace = true
 description.workspace = true
 license.workspace = true
@@ -44,7 +44,7 @@ resolver = "2"
 
 
 [workspace.package]
-version = "0.3.0"
+version = "0.3.1"
 description = "hyprshell is a Rust-based GUI designed to enhance window management in hyprland"
 license = "MIT"
 authors = ["h3rmt"]
