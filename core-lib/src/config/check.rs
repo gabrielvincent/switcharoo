@@ -1,17 +1,24 @@
 use crate::config::structs::ToKey;
 use crate::config::{load_config, Config, Reverse};
+use crate::daemon_running;
 use std::path::Path;
 
 pub fn check_config(config_path: &Path) -> anyhow::Result<()> {
     let config = load_config(config_path)
-        .inspect_err(|_| eprintln!("\x1b[31mConfig is invalid\x1b[0m\n"))?;
+        .inspect_err(|err| eprintln!("\x1b[1m\x1b[31mConfig is invalid:\x1b[0m {err:?}\n"))?;
     let info = generate_info(config);
     println!("{info}");
+
+    if daemon_running() {
+        println!("Daemon \x1b[32mrunning\x1b[0m")
+    } else {
+        println!("Daemon \x1b[31mnot running\x1b[0m, start it with `hyprshell run` or `systemctl --user enable --now hyprshell`");
+    }
     Ok(())
 }
 
 pub fn generate_info(config: Config) -> String {
-    let mut builder = String::from("\x1b[32mConfig is valid\x1b[0m\n\n");
+    let mut builder = String::from("\x1b[1m\x1b[32mConfig is valid\x1b[0m\n\n");
 
     if let Some(windows) = &config.windows {
         if let Some(overview) = &windows.overview {

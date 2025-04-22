@@ -25,7 +25,15 @@ pub fn create_binds_and_submaps<'a>(config: &Config) -> anyhow::Result<Vec<(&'a 
         keyword_list.push(("layerrule", format!("noanim, {LAUNCHER_NAMESPACE}")));
         keyword_list.push(("layerrule", format!("noanim, {OVERVIEW_NAMESPACE}")));
         keyword_list.push(("layerrule", format!("dimaround, {OVERVIEW_NAMESPACE}")));
+        keyword_list.push(("layerrule", format!("ignorezero, {OVERVIEW_NAMESPACE}")));
+        keyword_list.push(("layerrule", format!("ignorezero, {LAUNCHER_NAMESPACE}")));
     }
+
+    #[cfg(debug_assertions)]
+    keyword_list.push((
+        "bind",
+        "ctrl, k, exec, pkill hyprshell; hyprctl dispatch submap reset".to_string(),
+    ));
 
     if let Some(windows) = &config.windows {
         if let Some(overview) = &windows.overview {
@@ -295,7 +303,6 @@ fn generate_overview(
         )),
     }
 
-    // if poisoned lock
     keyword_list.push((
         "bind",
         "ctrl, k, exec, pkill hyprshell; hyprctl dispatch submap reset".to_string(),
@@ -507,7 +514,6 @@ fn generate_switch(
         )),
     }
 
-    // if poisoned lock
     keyword_list.push((
         "bind",
         "ctrl, k, exec, pkill hyprshell; hyprctl dispatch submap reset".to_string(),

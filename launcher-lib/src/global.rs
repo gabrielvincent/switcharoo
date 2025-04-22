@@ -10,6 +10,7 @@ pub struct LauncherGlobal {
     pub max_items: u8,
     pub width: u32,
     pub run_cache_weeks: u8,
+    pub show_shell: bool,
     pub data: Option<RefCell<LauncherGlobalData>>,
 }
 
@@ -22,6 +23,7 @@ impl LauncherGlobal {
             max_items: config.max_items,
             width: config.width,
             run_cache_weeks: config.run_cache_weeks,
+            show_shell: config.shell_commands,
             data: None,
         }
     }

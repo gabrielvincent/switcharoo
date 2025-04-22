@@ -13,7 +13,7 @@ pub struct DesktopEntry {
     pub exec: Box<str>,
     pub exec_path: Option<Box<Path>>,
     pub terminal: bool,
-    pub path: Box<Path>,
+    pub source: Box<Path>,
 }
 
 fn get_desktop_file_map() -> &'static Mutex<Vec<DesktopEntry>> {
@@ -96,7 +96,7 @@ fn fill_desktop_file_map(map: &mut Vec<DesktopEntry>, files: &Vec<DirEntry>) -> 
                             exec: exec.trim().into(),
                             exec_path: exec_path.map(|p| Box::from(Path::new(p))),
                             terminal,
-                            path: entry.path().into_boxed_path(),
+                            source: entry.path().into_boxed_path(),
                         });
                     }
                 }

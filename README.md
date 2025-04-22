@@ -1,4 +1,4 @@
-# hyprshell
+# Hyprshell
 
 [![crates.io](https://img.shields.io/crates/v/hyprshell.svg)](https://crates.io/crates/hyprshell) [![Docs](https://docs.rs/built/badge.svg)](https://docs.rs/hyprshell)
 
@@ -6,7 +6,7 @@
 
 ## Overview
 
-hyprshell is a Rust-based GUI designed to enhance window management in [Hyprland](https://github.com/hyprwm/Hyprland).
+Hyprshell (previously hyprswitch) is a Rust-based GUI designed to enhance window management in [Hyprland](https://github.com/hyprwm/Hyprland).
 It provides a powerful and customizable interface for switching between windows using keyboard shortcuts and GUI.
 The application also includes a launcher for running applications directly from the GUI.
 
@@ -68,7 +68,7 @@ To validate your configuration file, run:
 hyprshell config check
 ```
 
-This checks for any syntax errors or issues in your configuration file andshows a `explanation` of how to use hyprshell.
+This checks for any syntax errors or issues in your configuration file and shows a `explanation` of how to use hyprshell.
 
 ### Initialization
 

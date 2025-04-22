@@ -38,8 +38,6 @@ fn main() -> anyhow::Result<()> {
         .unwrap_or_else(|e| warn!("Unable to initialize logging: {e}"));
 
     check_features();
-    check_version(get_version())
-        .unwrap_or_else(|e| warn!("Unable to check hyprland version, continuing anyway: {e}"));
 
     let opts = cli.global_opts.clone();
     let config_path = cli
@@ -54,6 +52,8 @@ fn main() -> anyhow::Result<()> {
             if daemon_running() {
                 bail!("Daemon already running");
             }
+            check_version(get_version())
+                .unwrap_or_else(|e| warn!("Unable to check hyprland version, continuing anyway: {e}"));
             start::start(config_path, css_path, data_dir)?;
         }
         #[cfg(feature = "generate_config_command")]
@@ -64,7 +64,6 @@ fn main() -> anyhow::Result<()> {
                 core_lib::config::generate::write_config(&config_path, config, force)
                     .warn("create");
                 core_lib::config::generate::write_css(css_path, force).warn("create");
-                core_lib::config::check::check_config(&config_path).warn("check");
                 if !no_systemd {
                     core_lib::config::generate::write_systemd_unit(
                         force,
@@ -74,6 +73,7 @@ fn main() -> anyhow::Result<()> {
                     )
                     .warn("create");
                 }
+                core_lib::config::check::check_config(&config_path).warn("check");
             }
             cli::ConfigCommand::Check {} => {
                 core_lib::config::check::check_config(&config_path).warn("check");

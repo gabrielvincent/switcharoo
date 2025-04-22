@@ -1,6 +1,6 @@
 use crate::LauncherGlobal;
 use gtk::prelude::*;
-use gtk4_layer_shell::LayerShell;
+use gtk4_layer_shell::{KeyboardMode, LayerShell};
 use tracing::{span, trace, Level};
 
 pub fn open_launcher(global: &LauncherGlobal) -> anyhow::Result<()> {
@@ -13,6 +13,7 @@ pub fn open_launcher(global: &LauncherGlobal) -> anyhow::Result<()> {
         data.entry.set_text("");
 
         trace!("Showing window {:?}", data.window.id());
+        data.window.set_keyboard_mode(KeyboardMode::Exclusive);
         data.window.set_visible(true);
         data.window.set_monitor(None);
         data.window.grab_focus();

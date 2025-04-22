@@ -41,6 +41,8 @@ pub struct Launcher {
     pub max_items: u8,
     #[default = 3]
     pub run_cache_weeks: u8,
+    #[default = true]
+    pub shell_commands: bool,
 }
 
 #[derive(SmartDefault, Debug, Clone, Deserialize, Serialize)]

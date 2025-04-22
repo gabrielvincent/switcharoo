@@ -17,7 +17,6 @@
 
 .monitor {
     padding: 2px;
-    font-size: 20px;
 }
 
 .workspace {
@@ -39,23 +38,25 @@
 
 .launcher {
     padding: 2px;
-    font-size: 20px;
 }
 
 .launcher-input {
+    font-size: 1.5rem;
     margin: 6px;
     padding: 4px 12px;
 }
 
-.launcher-exec {
-    font-size: 12px;
-}
-
 .launcher-results {
+    font-size: 1.5rem;
     margin: 0 2px 2px 2px;
 }
 
 .launcher-item {
     padding-left: 6px;
     padding-right: 6px;
+}
+
+.launcher-exec {
+    font-size: 1rem;
+    font-family: monospace;
 }

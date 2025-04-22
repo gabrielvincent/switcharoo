@@ -3,7 +3,7 @@ use std::os::unix::prelude::CommandExt;
 use std::path::Path;
 use std::process::{Command, Stdio};
 use std::{env, io, thread};
-use tracing::debug;
+use tracing::{debug, trace};
 
 pub fn run_program(
     run: &str,
@@ -11,52 +11,58 @@ pub fn run_program(
     terminal: bool,
     default_terminal: &Option<String>,
 ) {
+    debug!("Running: {run}");
     if terminal {
         if let Some(term) = default_terminal {
-            let mut process = Command::new(term);
-            process.arg("-e");
-            run_command(&mut process, run, path).warn("Failed to run command");
+            let command = format!("{term} -e {run}");
+            run_command(&command, path).warn("Failed to run command");
         } else {
             debug!("No default terminal found, trying to find one. (configure default_terminal in config to set a default terminal)");
             for term in TERMINALS {
-                let mut process = Command::new(term);
-                process.arg("-e");
-                if run_command(&mut process, run, path).is_ok() {
+                let command = format!("{term} -e {run}");
+                if run_command(&command, path).is_ok() {
                     break;
                 }
             }
         }
     } else {
-        let mut process = Command::new("sh");
-        process.arg("-c");
-        run_command(&mut process, run, path).warn("Failed to run command");
+        run_command(run, path).warn("Failed to run command");
     }
 }
 
-fn run_command(command: &mut Command, run: &str, path: &Option<Box<Path>>) -> io::Result<()> {
-    command.arg::<&str>(run.as_ref());
-    command.process_group(0);
-    // try to set DISPLAY env doesnt work (for lstopo)
-    // command.envs(env::vars());
-
-    if let Some(path) = path {
-        command.current_dir(path.as_ref());
+fn get_command(command: &str) -> Command {
+    // if run as systemd unit all programs exit when not run outside of the units cgroup
+    if env::var("INVOCATION_ID").is_ok() {
+        let mut cmd = Command::new("systemd-run");
+        cmd.args(&["--user", "--scope", "sh", "-c", command]);
+        cmd
+    } else {
+        let mut cmd = Command::new("sh");
+        cmd.args(&["-c", command]);
+        cmd
     }
-    debug!("Running command: {:?}", command);
-    let _out = command
-        .stdout(Stdio::piped())
-        .stderr(Stdio::piped())
-        .spawn()?;
+}
 
-    if env::var_os("HYPRSHELL_SHOW_OUTPUT").is_some() {
-        thread::spawn(move || {
-            let output = _out.wait_with_output();
+fn run_command(run: &str, path: &Option<Box<Path>>) -> io::Result<()> {
+    trace!("Original command: {:?}", run);
+    let mut cmd = get_command(run);
+    cmd.process_group(0);
+    if let Some(path) = path {
+        cmd.current_dir(path.as_ref());
+    }
+
+    debug!("Running command: {:?}", cmd);
+    let _out = cmd.stdout(Stdio::piped()).stderr(Stdio::piped()).spawn()?;
+
+    thread::spawn(move || {
+        let output = _out.wait_with_output();
+        if env::var_os("HYPRSHELL_SHOW_OUTPUT").is_some() {
             if let Ok(output) = output {
                 if !output.stdout.is_empty() || !output.stderr.is_empty() {
                     debug!("Output: {:?}", output);
                 }
             }
-        });
-    }
+        }
+    });
     Ok(())
 }

@@ -7,6 +7,7 @@ mod global;
 mod open;
 mod stop;
 mod run;
+mod r#match;
 
 pub use close::close_launcher;
 pub use create::create_launcher_window;

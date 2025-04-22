@@ -149,7 +149,7 @@ fn handle_transfer(transfer: TransferType, global: &Globals) -> anyhow::Result<(
                     .and_then(|l| {
                         l.data.as_ref().map(|d| {
                             let b = d.borrow();
-                            b.entry.text_length() > 0 && b.results.first_child().is_some()
+                            b.entry.text_length() > 0
                         })
                     })
                     .unwrap_or(false);

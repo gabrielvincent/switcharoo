@@ -43,7 +43,12 @@ pub fn write_systemd_unit(
     };
 
     let unit_text = UNIT
-        .replace("{path}", &env::current_exe()?.to_string_lossy())
+        .replace(
+            "{path}",
+            &env::current_exe()?
+                .to_string_lossy()
+                .replace("(deleted)", ""),
+        )
         .replace("{params}", &params)
         .replace("{wd}", &wd);
 
@@ -51,7 +56,7 @@ pub fn write_systemd_unit(
     std::fs::write(&path, unit_text)
         .with_context(|| format!("Failed to write Systemd unit file at ({path:?})"))?;
 
-    info!("Systemd unit file generated successfully, use `systemctl --user enable --now hyprshell` to start it");
+    info!("Systemd unit file generated successfully");
     Ok(())
 }
 

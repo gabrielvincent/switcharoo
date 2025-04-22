@@ -9,6 +9,8 @@ for lib in "${libs[@]}"; do
     cargo fix --lib -p "$lib" --allow-dirty
 done
 
+echo "Fixing main binary"
 cargo fix -p hyprshell --all --allow-dirty
 
+echo "Building main binary"
 cargo build --release

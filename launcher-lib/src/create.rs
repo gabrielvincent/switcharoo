@@ -1,6 +1,5 @@
-use crate::data::get_cached_runs;
-use crate::desktop_map::{get_all_desktop_files, DesktopEntry};
 use crate::global::LauncherGlobalData;
+use crate::r#match::get_matches;
 use crate::LauncherGlobal;
 use core_lib::theme_icon_cache::theme_has_icon_name;
 use core_lib::transfer::{Override, ReturnConfig, TransferType};
@@ -14,10 +13,8 @@ use gtk::{
     Align, Application, ApplicationWindow, Entry, EventControllerKey, Label, ListBox, Orientation,
     SelectionMode,
 };
-use gtk4_layer_shell::{Edge, KeyboardMode, Layer, LayerShell};
+use gtk4_layer_shell::{Edge, Layer, LayerShell};
 use std::cell::RefCell;
-use std::cmp::Ordering;
-use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use tracing::{debug, span, trace, warn, Level};
 
@@ -42,6 +39,7 @@ pub fn create_launcher_window(
     let max = global.max_items as usize;
     let show_execs = global.show_execs;
     let run_cache_weeks = global.run_cache_weeks;
+    let show_shell = global.show_shell;
     let data_dir = PathBuf::from(data_dir);
     let entry = Entry::builder().css_classes(vec!["launcher-input"]).build();
     entry.connect_changed(clone!(
@@ -55,6 +53,7 @@ pub fn create_launcher_window(
                 max,
                 run_cache_weeks,
                 show_execs,
+                show_shell,
                 &data_dir,
             );
         }
@@ -79,7 +78,6 @@ pub fn create_launcher_window(
     window.init_layer_shell();
     window.set_namespace(Some(LAUNCHER_NAMESPACE));
     window.set_layer(Layer::Overlay);
-    window.set_keyboard_mode(KeyboardMode::Exclusive);
     window.set_anchor(Edge::Top, true);
     window.set_margin(Edge::Top, 20);
     window.present();
@@ -101,6 +99,7 @@ fn update(
     launcher_max_items: usize,
     run_cache_weeks: u8,
     show_launcher_execs: bool,
+    show_shell: bool,
     data_dir: &Path,
 ) {
     while let Some(child) = list.first_child() {
@@ -110,82 +109,107 @@ fn update(
         return;
     }
 
-    let matches = get_matches(text, launcher_max_items, run_cache_weeks, data_dir);
-
+    let matches = get_matches(
+        text,
+        launcher_max_items,
+        run_cache_weeks,
+        show_shell,
+        data_dir,
+    );
     for (index, (_, entry)) in matches.into_iter().take(launcher_max_items).enumerate() {
-        let hbox = gtk::Box::builder()
-            .orientation(Orientation::Horizontal)
-            .spacing(8)
-            .hexpand(true)
-            .vexpand(true)
-            .build();
+        let row = create_entry(
+            index,
+            entry.icon,
+            &entry.name,
+            if show_launcher_execs {
+                Some(get_exec_label(&entry.exec))
+            } else {
+                None
+            },
+        );
+        row.add_controller(click_entry(index as u8));
+        list.append(&row);
+    }
+}
 
-        let icon = Image::builder()
-            .css_classes(vec!["launcher-icon"])
-            .icon_size(IconSize::Large)
-            .build();
-        if let Some(icon_path) = entry.icon {
-            if icon_path.is_absolute() {
-                if let Some(icon_name) = icon_path.file_stem() {
-                    if !theme_has_icon_name(&icon_name.to_string_lossy()) {
-                        icon.set_from_file(Some(Path::new(&*icon_path)));
-                    } else {
-                        icon.set_icon_name(Some(&icon_name.to_string_lossy()));
-                    }
+fn create_entry(
+    index: usize,
+    icon_path: Option<Box<Path>>,
+    name: &str,
+    exec: Option<String>,
+) -> ListBoxRow {
+    let hbox = gtk::Box::builder()
+        .orientation(Orientation::Horizontal)
+        .spacing(8)
+        .hexpand(true)
+        .vexpand(true)
+        .build();
+
+    let icon = Image::builder()
+        .css_classes(vec!["launcher-icon"])
+        .icon_size(IconSize::Large)
+        .build();
+    if let Some(icon_path) = icon_path {
+        if icon_path.is_absolute() {
+            if let Some(icon_name) = icon_path.file_stem() {
+                if !theme_has_icon_name(&icon_name.to_string_lossy()) {
+                    icon.set_from_file(Some(Path::new(&*icon_path)));
                 } else {
-                    warn!("invalid icon name: {icon_path:?}");
+                    icon.set_icon_name(Some(&icon_name.to_string_lossy()));
                 }
             } else {
-                icon.set_icon_name(icon_path.file_name().and_then(|name| name.to_str()));
+                warn!("invalid icon name: {icon_path:?}");
             }
+        } else {
+            // use filename as some files are named org.gnome.file
+            trace!("using name: {:?}", icon_path.file_name().and_then(|name| name.to_str()));
+            icon.set_icon_name(icon_path.file_name().and_then(|name| name.to_str()));
         }
-        hbox.append(&icon);
+    }
+    hbox.append(&icon);
 
-        let title = Label::builder()
+    let title = Label::builder()
+        .halign(Align::Start)
+        .valign(Align::Center)
+        .label(name)
+        .build();
+    hbox.append(&title);
+
+    if let Some(exec) = exec {
+        let exec = Label::builder()
             .halign(Align::Start)
             .valign(Align::Center)
-            .label(entry.name)
-            .build();
-        hbox.append(&title);
-
-        if show_launcher_execs {
-            let exec = Label::builder()
-                .halign(Align::Start)
-                .valign(Align::Center)
-                .hexpand(true)
-                .css_classes(vec!["launcher-exec"])
-                .ellipsize(EllipsizeMode::End)
-                .label(get_exec_label(&entry.exec))
-                .build();
-            hbox.append(&exec);
-        } else {
-            title.set_hexpand(true);
-        }
-
-        if let Some(label) = match index {
-            0 => Some("Return".to_string()),
-            i if i <= 9 => Some(format!("Ctrl+{}", i)),
-            _ => None,
-        } {
-            let index_label = Label::builder()
-                .halign(Align::End)
-                .valign(Align::Center)
-                .label(label)
-                .build();
-            hbox.append(&index_label);
-        }
-
-        let list2 = ListBoxRow::builder()
-            .css_classes(vec!["launcher-item"])
-            .height_request(45)
             .hexpand(true)
-            .vexpand(true)
-            .child(&hbox)
+            .css_classes(vec!["launcher-exec"])
+            .ellipsize(EllipsizeMode::End)
+            .label(exec)
             .build();
-        list2.add_controller(click_entry(index as u8));
-
-        list.append(&list2);
+        hbox.append(&exec);
+    } else {
+        title.set_hexpand(true);
     }
+
+    if let Some(label) = match index {
+        0 => Some("Return".to_string()),
+        i if i <= 9 => Some(format!("Ctrl+{}", i)),
+        _ => None,
+    } {
+        let index_label = Label::builder()
+            .halign(Align::End)
+            .valign(Align::Center)
+            .label(label)
+            .build();
+        hbox.append(&index_label);
+    }
+
+    let row = ListBoxRow::builder()
+        .css_classes(vec!["launcher-item"])
+        .height_request(45)
+        .hexpand(true)
+        .vexpand(true)
+        .child(&hbox)
+        .build();
+    row
 }
 
 fn click_entry(offset: u8) -> GestureClick {
@@ -208,7 +232,7 @@ fn get_exec_label(exec: &str) -> String {
         // "flatpak 'run'" = pwa from browser inside flatpak
         if exec.contains("flatpak run") || exec.contains("flatpak 'run'") {
             format!(
-                "[flatpak + PWA] ({})",
+                "[Flatpak + PWA] {}",
                 exec_trim
                     .split(' ')
                     .find(|s| s.contains("--command="))
@@ -221,7 +245,7 @@ fn get_exec_label(exec: &str) -> String {
         } else {
             // normal PWA
             format!(
-                "[PWA] ({})",
+                "[PWA] {}",
                 exec.split(' ')
                     .next()
                     .and_then(|s| s.split('/').next_back())
@@ -231,7 +255,7 @@ fn get_exec_label(exec: &str) -> String {
         // flatpak detection
     } else if exec.contains("flatpak run") || exec.contains("flatpak 'run'") {
         format!(
-            "[flatpak] ({})",
+            "[Flatpak] {}",
             exec_trim
                 .split(' ')
                 .find(|s| s.contains("--command="))
@@ -242,93 +266,6 @@ fn get_exec_label(exec: &str) -> String {
                 .unwrap_or_default()
         )
     } else {
-        format!("({})", exec_trim) // show full exec instead of only last part of /path/to/exec
+        format!("{}", exec_trim) // show full exec instead of only last part of /path/to/exec
     }
-}
-
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
-pub enum Match {
-    Keyword = 1,
-    Name = 10,
-    Exact = 15,
-}
-fn compare_matches(
-    runs: HashMap<Box<Path>, i64>,
-) -> impl Fn(&(Match, DesktopEntry), &(Match, DesktopEntry)) -> Ordering {
-    move |a: &(Match, DesktopEntry), b: &(Match, DesktopEntry)| {
-        // sort in reverse order
-        match (
-            b.0 as i64 + runs.get(&b.1.path).unwrap_or(&0),
-            a.0 as i64 + runs.get(&a.1.path).unwrap_or(&0),
-        ) {
-            (a1, b1) if a1 > b1 => Ordering::Greater,
-            (a1, b1) if a1 < b1 => Ordering::Less,
-            (a1, b1) if a1 == b1 => {
-                // sort by name
-                a.1.name.cmp(&b.1.name)
-            }
-            _ => unreachable!(),
-        }
-    }
-}
-
-pub fn get_matches(
-    text: &str,
-    launcher_max_items: usize,
-    run_cache_weeks: u8,
-    data_dir: &Path,
-) -> Vec<(Match, DesktopEntry)> {
-    let entries = get_all_desktop_files();
-    let mut matches = HashMap::new();
-    for entry in entries.iter() {
-        if entry.keywords.iter().any(|k| {
-            k.to_ascii_lowercase()
-                .starts_with(&text.to_ascii_lowercase())
-        }) {
-            matches.insert(entry.path.clone(), (Match::Keyword, entry.clone()));
-        }
-    }
-    // do name last to let them appear first
-    for entry in entries.iter() {
-        if entry
-            .name
-            .to_ascii_lowercase()
-            .contains(&text.to_ascii_lowercase())
-            || entry
-                .exec
-                .to_ascii_lowercase()
-                .contains(&text.to_ascii_lowercase())
-        {
-            if entry
-                .name
-                .to_ascii_lowercase()
-                .starts_with(&text.to_ascii_lowercase())
-                || entry
-                    .exec
-                    .to_ascii_lowercase()
-                    .starts_with(&text.to_ascii_lowercase())
-            {
-                matches.insert(entry.path.clone(), (Match::Exact, entry.clone()));
-            } else {
-                matches.insert(entry.path.clone(), (Match::Name, entry.clone()));
-            }
-        }
-    }
-    let runs = get_cached_runs(run_cache_weeks, data_dir);
-
-    // sort each of the sections by times run in the past
-    let mut matches: Vec<_> = matches.into_values().collect();
-    matches.sort_by(compare_matches(runs));
-    let matches = matches
-        .into_iter()
-        .take(launcher_max_items)
-        .collect::<Vec<_>>();
-    trace!(
-        "Matches: {:?}",
-        matches
-            .iter()
-            .map(|(v, e)| format!("{:?}: {}", v, e.name))
-            .collect::<Vec<_>>()
-    );
-    matches
 }
