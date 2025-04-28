@@ -20,6 +20,7 @@ pub struct SortableLaunchOption {
 #[derive(Debug)]
 pub struct StaticLaunchOption {
     pub text: Box<str>,
+    pub details: Box<str>,
     pub icon: Option<Box<Path>>,
     pub key: char,
     pub data: Identifier,
@@ -40,21 +41,23 @@ pub struct Identifier {
 }
 
 pub fn get_sortable_launch_options(
-    plugins: &Vec<Plugins>,
+    plugins: &[Plugins],
     text: &str,
     data_dir: &Path,
 ) -> Vec<SortableLaunchOption> {
     let mut matches = Vec::new();
 
     for plugins in plugins {
+        #[allow(clippy::single_match)]
         match plugins {
             Plugins::Applications(config) => {
-                matches.append(&mut applications::get_sortable_options(
+                applications::get_sortable_options(
+                    &mut matches,
                     text,
                     config.run_cache_weeks,
                     config.show_execs,
                     data_dir,
-                ));
+                );
             }
             _ => {}
         }
@@ -67,7 +70,7 @@ pub fn get_sortable_launch_options(
 }
 
 pub fn get_static_launch_options(
-    plugins: &Vec<Plugins>,
+    plugins: &[Plugins],
     default_terminal: &Option<Box<str>>,
 ) -> Vec<StaticLaunchOption> {
     let mut matches = Vec::new();
@@ -75,10 +78,10 @@ pub fn get_static_launch_options(
     for plugins in plugins {
         match plugins {
             Plugins::Shell() => {
-                matches.append(&mut shell::get_static_options());
+                shell::get_static_options(&mut matches);
             }
             Plugins::Terminal() => {
-                matches.append(&mut terminal::get_static_options(default_terminal));
+                terminal::get_static_options(&mut matches, default_terminal);
             }
             _ => {}
         }
@@ -87,12 +90,7 @@ pub fn get_static_launch_options(
     matches
 }
 
-pub fn launch(
-    iden: &Identifier,
-    text: &str,
-    default_terminal: &Option<Box<str>>,
-    data_dir: &Box<Path>,
-) {
+pub fn launch(iden: &Identifier, text: &str, default_terminal: &Option<Box<str>>, data_dir: &Path) {
     match iden.plugin {
         PluginNames::Applications => {
             applications::launch_option(&iden.identifier, default_terminal, data_dir)

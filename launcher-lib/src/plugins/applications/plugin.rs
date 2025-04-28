@@ -41,12 +41,12 @@ impl SortableLaunchOption {
 }
 
 pub fn get_sortable_options(
+    matches: &mut Vec<SortableLaunchOption>,
     text: &str,
     run_cache_weeks: u8,
     show_execs: bool,
     data_dir: &Path,
-) -> Vec<SortableLaunchOption> {
-    let mut matches = Vec::new();
+) {
     let entries = get_all_desktop_files();
     let runs = get_cached_runs(run_cache_weeks, data_dir);
 
@@ -85,12 +85,11 @@ pub fn get_sortable_options(
             ));
         }
     }
-    matches
 }
 pub fn launch_option(
     iden: &Option<Box<str>>,
     default_terminal: &Option<Box<str>>,
-    data_dir: &Box<Path>,
+    data_dir: &Path,
 ) {
     let entries = get_all_desktop_files();
     let entry = entries
@@ -99,13 +98,13 @@ pub fn launch_option(
     if let Some(entry) = entry {
         let exec = entry.exec.clone();
         run_program(
-            &*exec,
+            &exec,
             entry.exec_path.clone(),
             entry.terminal,
             default_terminal,
         );
         trace!("Saving run: {:?}", entry.source);
-        save_run(&entry.source, &data_dir).warn("Failed to cache run");
+        save_run(&entry.source, data_dir).warn("Failed to cache run");
     } else {
         warn!("Failed to find entry for {:?}", iden);
     }

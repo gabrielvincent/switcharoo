@@ -84,8 +84,8 @@ pub fn collect_data(config: &SortConfig) -> anyhow::Result<(HyprlandData, Active
 /// removes offset by monitor, adds offset by workspace (client on monitor 1 and workspace 2 will be moved left by monitor 1 offset and right by workspace 2 offset (workspace width * 2))
 pub fn update_client_position(
     clients: Vec<(ClientId, ClientData)>,
-    workspace_data: &Vec<(WorkspaceId, WorkspaceData)>,
-    monitor_data: &Vec<(MonitorId, MonitorData)>,
+    workspace_data: &[(WorkspaceId, WorkspaceData)],
+    monitor_data: &[(MonitorId, MonitorData)],
 ) -> Vec<(ClientId, ClientData)> {
     clients
         .into_iter()

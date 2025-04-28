@@ -1,14 +1,13 @@
-use crate::plugins::{get_sortable_launch_options, get_static_launch_options, StaticLaunchOption};
+use crate::plugins::{get_sortable_launch_options, get_static_launch_options};
 use crate::LauncherGlobal;
 use core_lib::theme_icon_cache::theme_has_icon_name;
 use core_lib::transfer::{CloseConfig, TransferType};
 use core_lib::{send_to_socket, Warn};
 use gtk::pango::EllipsizeMode;
-use gtk::prelude::{BoxExt, GestureExt, WidgetExt};
-use gtk::{
-    glib, Align, EventSequenceState, GestureClick, IconSize, Image, Label, ListBoxRow, Orientation,
-};
+use gtk::prelude::{BoxExt, ButtonExt, WidgetExt};
+use gtk::{glib, Align, Button, IconSize, Image, Label, ListBoxRow, Orientation};
 use std::path::Path;
+use std::str::FromStr;
 use tracing::{debug, span, trace, warn, Level};
 
 pub fn update_launcher(global: &LauncherGlobal, text: String) {
@@ -36,7 +35,7 @@ pub fn update_launcher(global: &LauncherGlobal, text: String) {
                 break;
             }
             items -= 1;
-            let row = create_entry(
+            let (row, button) = create_entry(
                 match index {
                     0 => "Return".to_string(),
                     i if i <= 9 => format!("Ctrl+{}", i),
@@ -47,9 +46,10 @@ pub fn update_launcher(global: &LauncherGlobal, text: String) {
                 opt.details,
                 opt.details_long,
             );
-            row.add_controller(click_entry(
-                char::from_u32(index as u32).expect("Failed to convert u32 to char"),
-            ));
+            click_entry(
+                &button,
+                char::from_str(&index.to_string()).expect("Failed to convert u32 to char"),
+            );
             data1.results.append(&row);
             data1.sorted_matches.push(opt.data);
         }
@@ -57,22 +57,28 @@ pub fn update_launcher(global: &LauncherGlobal, text: String) {
         let static_launch_options =
             get_static_launch_options(&global.plugins, &global.default_terminal);
         for opt in static_launch_options.into_iter() {
-            let r#box = create_static_plugin_box(opt.icon, &opt.text);
-            data1.plugin_box.append(&r#box);
+            let button = create_static_plugin_box(opt.icon, &opt.text, &opt.details, opt.key);
+            click_entry(&button, opt.key);
+            data1.plugin_box.append(&button);
             data1.static_matches.insert(opt.key, opt.data);
         }
     }
 }
 
-fn create_static_plugin_box(icon: Option<Box<Path>>, text: &str) -> gtk::Box {
+fn create_static_plugin_box(
+    icon: Option<Box<Path>>,
+    text: &str,
+    details: &str,
+    key: char,
+) -> Button {
     let hbox = gtk::Box::builder()
         .orientation(Orientation::Horizontal)
         .css_classes(["launcher-plugin"])
-        .spacing(4)
+        .spacing(6)
         .build();
 
     if let Some(icon) = icon {
-        trace!("icon: {:?}", icon);
+        // trace!("icon: {:?}", icon);
         let icon = Image::builder()
             .css_classes(["launcher-icon"])
             .icon_size(IconSize::Large)
@@ -81,13 +87,33 @@ fn create_static_plugin_box(icon: Option<Box<Path>>, text: &str) -> gtk::Box {
         hbox.append(&icon);
     }
 
-    let title = Label::builder()
-        .halign(Align::Start)
-        .valign(Align::Center)
-        .label(text)
+    let vbox = gtk::Box::builder()
+        .orientation(Orientation::Vertical)
+        .spacing(2)
         .build();
-    hbox.append(&title);
-    hbox
+
+    let title = Label::builder()
+        .halign(Align::Center)
+        .valign(Align::Start)
+        .label(text)
+        .css_classes(["underline"])
+        .tooltip_text(details)
+        .build();
+    vbox.append(&title);
+
+    let exec = Label::builder()
+        .halign(Align::Center)
+        .valign(Align::End)
+        .ellipsize(EllipsizeMode::End)
+        .css_classes(["launcher-plugin-key"])
+        .label(format!("Ctrl + {key}"))
+        .build();
+    vbox.append(&exec);
+
+    hbox.append(&vbox);
+
+    let button = Button::builder().child(&hbox).build();
+    button
 }
 
 fn create_entry(
@@ -96,7 +122,7 @@ fn create_entry(
     name: &str,
     details: Box<str>,
     details_long: Option<Box<str>>,
-) -> ListBoxRow {
+) -> (ListBoxRow, Button) {
     let hbox = gtk::Box::builder()
         .orientation(Orientation::Horizontal)
         .spacing(8)
@@ -154,26 +180,28 @@ fn create_entry(
     let index_label = Label::builder()
         .halign(Align::End)
         .valign(Align::Center)
+        .css_classes(["launcher-key"])
         .label(key)
         .build();
     hbox.append(&index_label);
 
-    ListBoxRow::builder()
+    let button = Button::builder().child(&hbox).build();
+
+    let row = ListBoxRow::builder()
         .css_classes(["launcher-item"])
         .height_request(45)
         .hexpand(true)
         .vexpand(true)
-        .child(&hbox)
-        .build()
+        .child(&button)
+        .build();
+
+    (row, button)
 }
 
-fn click_entry(char: char) -> GestureClick {
-    let gesture = GestureClick::new();
-    gesture.connect_pressed(move |gesture, _, _, _| {
-        gesture.set_state(EventSequenceState::Claimed);
+fn click_entry(button: &Button, char: char) {
+    button.connect_clicked(move |_| {
         debug!("Exiting on click of launcher entry");
         send_to_socket(&TransferType::Close(CloseConfig::Launcher(char)))
             .warn("unable send return to socket");
     });
-    gesture
 }

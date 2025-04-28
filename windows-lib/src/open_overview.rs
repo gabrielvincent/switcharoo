@@ -81,7 +81,7 @@ pub fn open_overview(global: &WindowsGlobal, config: OpenOverview) -> anyhow::Re
 
             let workspace_overlay = {
                 let workspace_overlay = Overlay::builder()
-                    .css_classes(vec!["workspace"])
+                    .css_classes(["workspace"])
                     .child(&workspace_frame)
                     .build();
                 workspace_overlay.add_controller(click_workspace(*wid));
@@ -148,7 +148,7 @@ pub fn open_overview(global: &WindowsGlobal, config: OpenOverview) -> anyhow::Re
                         }
                     } {
                         let image = Image::builder()
-                            .css_classes(vec!["client-image"])
+                            .css_classes(["client-image"])
                             .pixel_size(
                                 (scale(client.height, global.size_factor).clamp(50, 200) as f64
                                     / 1.5) as i32
@@ -163,7 +163,7 @@ pub fn open_overview(global: &WindowsGlobal, config: OpenOverview) -> anyhow::Re
                     }
 
                     let client_overlay = Overlay::builder()
-                        .css_classes(vec!["client"])
+                        .css_classes(["client"])
                         .overflow(Overflow::Hidden)
                         .child(&client_frame)
                         .width_request(scale(client.width, global.size_factor))

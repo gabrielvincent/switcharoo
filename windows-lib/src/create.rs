@@ -36,11 +36,11 @@ pub fn create_windows_window(app: &Application, global: &WindowsGlobal) -> anyho
 
             let workspaces_flow_overlay = Overlay::builder()
                 .child(&workspaces_flow)
-                .css_classes(vec!["monitor"])
+                .css_classes(["monitor"])
                 .build();
 
             let window = ApplicationWindow::builder()
-                .css_classes(vec!["window"])
+                .css_classes(["window"])
                 .application(app)
                 .child(&workspaces_flow_overlay)
                 .default_height(10)

@@ -101,7 +101,7 @@ pub fn open_switch(global: &WindowsGlobal, config: OpenSwitch) -> anyhow::Result
                     }
                 } {
                     let image = Image::builder()
-                        .css_classes(vec!["client-image"])
+                        .css_classes(["client-image"])
                         .pixel_size(
                             (scale(monitor.height as i16, global.size_factor).clamp(50, 200) as f64
                                 / 1.5) as i32
@@ -116,7 +116,7 @@ pub fn open_switch(global: &WindowsGlobal, config: OpenSwitch) -> anyhow::Result
                 }
 
                 let client_overlay = Overlay::builder()
-                    .css_classes(vec!["client"])
+                    .css_classes(["client"])
                     .overflow(Overflow::Hidden)
                     .child(&client_frame)
                     .width_request(scale(monitor.width as i16, global.size_factor))

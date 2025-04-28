@@ -14,7 +14,7 @@ pub fn close_launcher(global: &LauncherGlobal, char: Option<char>) {
 
             let data1 = data.borrow();
             if let Some(r#match) = match char {
-                '0'..'9' => data1
+                '0'..='9' => data1
                     .sorted_matches
                     .get(char.to_digit(10).expect("unable to convert char") as usize),
                 char => data1.static_matches.get(&char),
@@ -23,7 +23,7 @@ pub fn close_launcher(global: &LauncherGlobal, char: Option<char>) {
                 // show_launch(data, offset);
                 plugins::launch(
                     r#match,
-                    &data1.entry.text().to_string(),
+                    &data1.entry.text(),
                     &global.default_terminal,
                     &global.data_dir,
                 );
@@ -42,6 +42,7 @@ pub fn close_launcher(global: &LauncherGlobal, char: Option<char>) {
 }
 
 /// no longer used, but would look cool when launching apps
+#[allow(dead_code)]
 fn show_launch(data: &RefCell<LauncherGlobalData>, offset: u8) {
     let _span = span!(Level::TRACE, "show_launch").entered();
 

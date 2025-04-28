@@ -1,7 +1,7 @@
-mod applications;
+mod plugin;
 mod cache;
 mod map;
 
-pub use applications::get_sortable_options;
-pub use applications::launch_option;
+pub use plugin::get_sortable_options;
+pub use plugin::launch_option;
 pub use map::reload_desktop_map;

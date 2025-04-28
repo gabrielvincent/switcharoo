@@ -52,7 +52,7 @@ fn activate(app: &Application, config_path: &Path, css_path: &Path, data_dir: &P
     windows_lib::reload_desktop_map(&desktop_files);
     launcher_lib::reload_desktop_map(&desktop_files);
 
-    let config = match config::load_config(&config_path) {
+    let config = match config::load_config(config_path) {
         Err(err) => {
             toast(&format!("Failed to load config: {:?}", err));
             hyprshell_config_block(config_path);
@@ -61,7 +61,7 @@ fn activate(app: &Application, config_path: &Path, css_path: &Path, data_dir: &P
         Ok(config) => config,
     };
 
-    apply_css(&css_path);
+    apply_css(css_path);
     match create_binds_and_submaps(&config) {
         Ok(keybinds) => apply_keybinds(keybinds),
         Err(err) => {
@@ -82,7 +82,7 @@ fn activate(app: &Application, config_path: &Path, css_path: &Path, data_dir: &P
     }
 
     if let Some(launcher_data) = &mut launcher_data {
-        create_launcher_window(app, launcher_data, &data_dir)
+        create_launcher_window(app, launcher_data)
             .unwrap_or_else(|e| toast(&format!("Failed to create launcher window: {e}")));
     } else {
         debug!("Launcher is disabled");
@@ -159,7 +159,7 @@ async fn restart_listener(config_path: PathBuf, css_path: PathBuf) {
 
 fn apply_css(custom_css: &Path) {
     let provider_app = CssProvider::new();
-    provider_app.load_from_data(include_str!("default-styles.css"));
+    provider_app.load_from_bytes(&glib::Bytes::from_static(include_bytes!("default-styles.css")));
     style_context_add_provider_for_display(
         &Display::default().expect("Could not connect to a display."),
         &provider_app,

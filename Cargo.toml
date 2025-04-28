@@ -58,7 +58,7 @@ anyhow = { version = "1.0.95" }
 tracing = { version = "0.1.41" }
 serde_json = { version = "1.0.135" }
 
-gtk = { version = "0.9.6", package = "gtk4", default-features = false, features = ["v4_6"] }
+gtk = { version = "0.9.6", package = "gtk4", default-features = false, features = ["v4_12"] }
 gtk4-layer-shell = { version = "0.5.0" }
 
 core-lib = { path = "core-lib", package = "hyprshell-core-lib", version = "0.3.0" }

@@ -2,8 +2,10 @@ use crate::plugins::{Identifier, PluginNames, StaticLaunchOption};
 use exec_lib::run::run_program;
 use std::path::PathBuf;
 
-pub fn get_static_options(default_terminal: &Option<Box<str>>) -> Vec<StaticLaunchOption> {
-    let mut matches = Vec::new();
+pub fn get_static_options(
+    matches: &mut Vec<StaticLaunchOption>,
+    default_terminal: &Option<Box<str>>,
+) {
     matches.push(StaticLaunchOption {
         data: Identifier {
             plugin: PluginNames::Terminal,
@@ -11,11 +13,13 @@ pub fn get_static_options(default_terminal: &Option<Box<str>>) -> Vec<StaticLaun
         },
         key: 't',
         text: Box::from("Terminal"),
+        details: Box::from("Run a command in a terminal"),
         icon: Some(
             PathBuf::from(
                 default_terminal
                     .as_deref()
                     .map(|term| match term {
+                        // random fix for alacritty icon
                         "alacritty" => "Alacritty",
                         other => other,
                     })
@@ -24,7 +28,6 @@ pub fn get_static_options(default_terminal: &Option<Box<str>>) -> Vec<StaticLaun
             .into_boxed_path(),
         ),
     });
-    matches
 }
 
 pub fn launch_option(text: &str, default_terminal: &Option<Box<str>>) {

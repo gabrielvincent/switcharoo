@@ -2,8 +2,7 @@ use crate::plugins::{Identifier, PluginNames, StaticLaunchOption};
 use exec_lib::run::run_program;
 use std::path::PathBuf;
 
-pub fn get_static_options() -> Vec<StaticLaunchOption> {
-    let mut matches = Vec::new();
+pub fn get_static_options(matches: &mut Vec<StaticLaunchOption>) {
     matches.push(StaticLaunchOption {
         data: Identifier {
             plugin: PluginNames::Shell,
@@ -11,9 +10,9 @@ pub fn get_static_options() -> Vec<StaticLaunchOption> {
         },
         key: 'r',
         text: Box::from("Shell"),
+        details: Box::from("Run a command in a shell"),
         icon: Some(PathBuf::from("bash").into_boxed_path()),
     });
-    matches
 }
 
 pub fn launch_option(text: &str, default_terminal: &Option<Box<str>>) {

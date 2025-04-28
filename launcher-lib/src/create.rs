@@ -3,30 +3,28 @@ use crate::LauncherGlobal;
 use core_lib::transfer::TransferType;
 use core_lib::{send_to_socket, Warn, LAUNCHER_NAMESPACE};
 use gtk::gdk::Key;
-use gtk::glib::{clone, Propagation};
+use gtk::glib::Propagation;
 use gtk::prelude::*;
-use gtk::{glib, Orientation};
+use gtk::Orientation;
 use gtk::{Application, ApplicationWindow, Entry, EventControllerKey, ListBox, SelectionMode};
 use gtk4_layer_shell::{Edge, Layer, LayerShell};
 use std::cell::RefCell;
 use std::collections::HashMap;
-use std::path::Path;
-use tracing::{debug, span, trace, Level};
+use tracing::{debug, span, Level};
 
 pub fn create_launcher_window(
     app: &Application,
     global: &mut LauncherGlobal,
-    data_dir: &Path,
 ) -> anyhow::Result<()> {
     let _span = span!(Level::TRACE, "create_launcher_window").entered();
 
     let main_vbox = ListBox::builder()
-        .css_classes(vec!["launcher"])
+        .css_classes(["launcher"])
         .width_request(global.width as i32)
         .selection_mode(SelectionMode::None)
         .build();
 
-    let entry = Entry::builder().css_classes(vec!["launcher-input"]).build();
+    let entry = Entry::builder().css_classes(["launcher-input"]).build();
     entry.connect_changed(|e| {
         send_to_socket(&TransferType::Type(e.text().to_string()))
             .warn("unable send return to socket");
@@ -42,7 +40,7 @@ pub fn create_launcher_window(
 
     let results = ListBox::builder()
         .selection_mode(SelectionMode::None)
-        .css_classes(vec!["launcher-results"])
+        .css_classes(["launcher-results"])
         .build();
     main_vbox.append(&results);
 
@@ -56,7 +54,7 @@ pub fn create_launcher_window(
     main_vbox.append(&plugin_box);
 
     let window = ApplicationWindow::builder()
-        .css_classes(vec!["window"])
+        .css_classes(["window"])
         .application(app)
         .child(&main_vbox)
         .default_height(10)

@@ -28,7 +28,7 @@ pub(super) fn get_all_desktop_files<'a>() -> MutexGuard<'a, Vec<DesktopEntry>> {
     map
 }
 
-pub fn reload_desktop_map(files: &Vec<DirEntry>) {
+pub fn reload_desktop_map(files: &[DirEntry]) {
     let mut map = get_desktop_file_map()
         .lock()
         .expect("Failed to lock desktop file map");
@@ -38,7 +38,7 @@ pub fn reload_desktop_map(files: &Vec<DirEntry>) {
 
 fn fill_desktop_file_map(
     map: &mut Vec<DesktopEntry>,
-    files: &Vec<DirEntry>,
+    files: &[DirEntry],
 ) -> anyhow::Result<()> {
     let _span = span!(Level::TRACE, "fill_desktop_file_map").entered();
 

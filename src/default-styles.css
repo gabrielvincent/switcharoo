@@ -22,6 +22,7 @@ flowboxchild {
 
 .underline {
     text-decoration: underline;
+    /*text-decoration: underline dashed;*/
 }
 
 tooltip {

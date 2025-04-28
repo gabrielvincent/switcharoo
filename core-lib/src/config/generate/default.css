@@ -42,13 +42,13 @@
 }
 
 .launcher-input {
-    font-size: 1.5rem;
+    font-size: 1.5em;
     margin: 6px;
     padding: 4px 12px;
 }
 
 .launcher-results {
-    font-size: 1.5rem;
+    font-size: 1.5em;
     margin: 0 2px 2px 2px;
 }
 
@@ -58,10 +58,24 @@
 }
 
 .launcher-exec {
-    font-size: 0.8rem;
+    font-size: 0.6em;
     font-family: monospace;
 }
 
-.launcher-plugin {
+.launcher-key {
+    font-size: 0.8em;
+    font-family: monospace;
+}
+
+.launcher-plugins {
     padding: 4px;
+}
+
+.launcher-plugin {
+    padding: 6px;
+}
+
+.launcher-plugin-key {
+    font-size: 0.8em;
+    font-family: monospace;
 }
