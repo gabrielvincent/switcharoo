@@ -52,9 +52,7 @@ pub enum Plugins {
 #[derive(SmartDefault, Debug, Clone, Deserialize, Serialize)]
 #[serde(default, deny_unknown_fields)]
 pub struct ApplicationsPluginOptions {
-    #[default = 400]
-    pub animate_launch_time_ms: u64,
-    #[default = 3]
+    #[default = 4]
     pub run_cache_weeks: u8,
     #[default = true]
     pub show_execs: bool,

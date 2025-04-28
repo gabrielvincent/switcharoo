@@ -1,7 +1,8 @@
+extern crate alloc;
+
 mod close;
 mod create;
 mod css;
-mod data;
 mod desktop_map;
 mod global;
 mod keybinds;

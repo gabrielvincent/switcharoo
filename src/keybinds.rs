@@ -4,10 +4,7 @@ use core_lib::config::{Config, FilterBy, Overview, Reverse, Switch, ToKey};
 use core_lib::transfer::{
     CloseConfig, Direction, OpenOverview, OpenSwitch, SwitchConfig, TransferType,
 };
-use core_lib::{
-    generate_socat, to_ron_string, LAUNCHER_NAMESPACE,
-    OVERVIEW_NAMESPACE,
-};
+use core_lib::{generate_socat, LAUNCHER_NAMESPACE, OVERVIEW_NAMESPACE};
 use launcher_lib::generate_keybinds;
 use tracing::{span, Level};
 
@@ -55,13 +52,13 @@ pub fn create_binds_and_submaps<'a>(config: &Config) -> anyhow::Result<Vec<(&'a 
 
 fn generate_exit() -> anyhow::Result<String> {
     let config = TransferType::Exit;
-    let config_str = to_ron_string(&config).context("Failed to serialize config")?;
+    let config_str = serde_json::to_string(&config).context("Failed to serialize config")?;
     Ok(generate_socat(&config_str))
 }
 
 fn generate_return(config: CloseConfig) -> anyhow::Result<String> {
     let config = TransferType::Close(config);
-    let config_str = to_ron_string(&config).context("Failed to serialize config")?;
+    let config_str = serde_json::to_string(&config).context("Failed to serialize config")?;
     Ok(generate_socat(&config_str))
 }
 
@@ -70,7 +67,7 @@ fn generate_switch_press(direction: Direction, workspace: bool) -> anyhow::Resul
         direction,
         workspace,
     });
-    let config_str = to_ron_string(&config).context("Failed to serialize config")?;
+    let config_str = serde_json::to_string(&config).context("Failed to serialize config")?;
     Ok(generate_socat(&config_str))
 }
 
@@ -99,7 +96,7 @@ fn generate_overview_open(
         submap_name: submap_name.to_string(),
         workspaces_per_row,
     });
-    let config_str = to_ron_string(&config).context("Failed to serialize config")?;
+    let config_str = serde_json::to_string(&config).context("Failed to serialize config")?;
     Ok(generate_socat(&config_str))
 }
 
@@ -232,7 +229,7 @@ fn generate_switch_open(
         workspaces_per_row,
         direction,
     });
-    let config_str = to_ron_string(&config).context("Failed to serialize config")?;
+    let config_str = serde_json::to_string(&config).context("Failed to serialize config")?;
     Ok(generate_socat(&config_str))
 }
 

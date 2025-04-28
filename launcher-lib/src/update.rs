@@ -15,10 +15,15 @@ pub fn update_launcher(global: &LauncherGlobal, text: String) {
     let _span = span!(Level::TRACE, "update_launcher").entered();
 
     if let Some(data) = &global.data {
-        let data1 = data.borrow();
+        let mut data1 = data.borrow_mut();
         while let Some(child) = data1.results.first_child() {
             data1.results.remove(&child);
         }
+        while let Some(child) = data1.plugin_box.first_child() {
+            data1.plugin_box.remove(&child);
+        }
+        data1.sorted_matches.clear();
+        data1.static_matches.clear();
         if text.is_empty() {
             return;
         }
@@ -27,7 +32,7 @@ pub fn update_launcher(global: &LauncherGlobal, text: String) {
             get_sortable_launch_options(&global.plugins, &text, &global.data_dir);
         let mut items = global.max_items;
         for (index, opt) in sortable_launch_options.into_iter().enumerate() {
-            if items <= 0 {
+            if items == 0 {
                 break;
             }
             items -= 1;
@@ -46,43 +51,43 @@ pub fn update_launcher(global: &LauncherGlobal, text: String) {
                 char::from_u32(index as u32).expect("Failed to convert u32 to char"),
             ));
             data1.results.append(&row);
+            data1.sorted_matches.push(opt.data);
         }
 
-        let (static_row, static_box) = create_static_plugin_row();
-        data1.results.append(&static_row);
-
-        let static_launch_options = get_static_launch_options(&global.plugins);
+        let static_launch_options =
+            get_static_launch_options(&global.plugins, &global.default_terminal);
         for opt in static_launch_options.into_iter() {
-            let r#box = create_static_plugin_box(opt);
-            static_box.append(&r#box);
+            let r#box = create_static_plugin_box(opt.icon, &opt.text);
+            data1.plugin_box.append(&r#box);
+            data1.static_matches.insert(opt.key, opt.data);
         }
     }
 }
 
-fn create_static_plugin_box(opt: StaticLaunchOption) -> gtk::Box {
+fn create_static_plugin_box(icon: Option<Box<Path>>, text: &str) -> gtk::Box {
     let hbox = gtk::Box::builder()
         .orientation(Orientation::Horizontal)
+        .css_classes(["launcher-plugin"])
+        .spacing(4)
         .build();
+
+    if let Some(icon) = icon {
+        trace!("icon: {:?}", icon);
+        let icon = Image::builder()
+            .css_classes(["launcher-icon"])
+            .icon_size(IconSize::Large)
+            .icon_name(icon.to_string_lossy())
+            .build();
+        hbox.append(&icon);
+    }
+
+    let title = Label::builder()
+        .halign(Align::Start)
+        .valign(Align::Center)
+        .label(text)
+        .build();
+    hbox.append(&title);
     hbox
-}
-
-fn create_static_plugin_row() -> (ListBoxRow, gtk::Box) {
-    let hbox = gtk::Box::builder()
-        .orientation(Orientation::Horizontal)
-        .spacing(8)
-        .hexpand(true)
-        .vexpand(true)
-        .build();
-
-    // TODO
-    let row = ListBoxRow::builder()
-        .css_classes(vec!["launcher-item"])
-        .height_request(45)
-        .hexpand(true)
-        .vexpand(true)
-        .child(&hbox)
-        .build();
-    (row, hbox)
 }
 
 fn create_entry(
@@ -100,16 +105,16 @@ fn create_entry(
         .build();
 
     let icon = Image::builder()
-        .css_classes(vec!["launcher-icon"])
+        .css_classes(["launcher-icon"])
         .icon_size(IconSize::Large)
         .build();
     if let Some(icon_path) = icon_path {
         if icon_path.is_absolute() {
             if let Some(icon_name) = icon_path.file_stem() {
-                if !theme_has_icon_name(&icon_name.to_string_lossy()) {
-                    icon.set_from_file(Some(Path::new(&*icon_path)));
-                } else {
+                if theme_has_icon_name(&icon_name.to_string_lossy()) {
                     icon.set_icon_name(Some(&icon_name.to_string_lossy()));
+                } else {
+                    icon.set_from_file(Some(Path::new(&*icon_path)));
                 }
             } else {
                 warn!("invalid icon name: {icon_path:?}");
@@ -132,12 +137,11 @@ fn create_entry(
         .build();
     hbox.append(&title);
 
-    // if let Some(exec) = exec {
     let exec = Label::builder()
         .halign(Align::Start)
         .valign(Align::Center)
         .hexpand(true)
-        .css_classes(vec!["launcher-exec"])
+        .css_classes(["launcher-exec"])
         .ellipsize(EllipsizeMode::End)
         .label(details)
         .build();
@@ -154,14 +158,13 @@ fn create_entry(
         .build();
     hbox.append(&index_label);
 
-    let row = ListBoxRow::builder()
-        .css_classes(vec!["launcher-item"])
+    ListBoxRow::builder()
+        .css_classes(["launcher-item"])
         .height_request(45)
         .hexpand(true)
         .vexpand(true)
         .child(&hbox)
-        .build();
-    row
+        .build()
 }
 
 fn click_entry(char: char) -> GestureClick {

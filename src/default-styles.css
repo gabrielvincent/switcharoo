@@ -24,6 +24,13 @@ flowboxchild {
     text-decoration: underline;
 }
 
+tooltip {
+    padding: 5px;
+    background-color: var(--bg-color-hover, rgba(40, 40, 50, 1));
+    border-radius: var(--border-radius, 12px);
+    border: 2px dashed var(--border-color, rgba(90, 90, 120, 0.4));
+}
+
 /* window text color */
 .window {
     color: var(--text-color, rgba(245, 245, 245, 1));

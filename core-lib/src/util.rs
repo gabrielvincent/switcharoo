@@ -43,38 +43,18 @@ impl<A, E: fmt::Debug + fmt::Display> Warn<A> for Result<A, E> {
     }
 }
 
-// TODO check if everyone supports `-e` flag to run commands (needed for run.rs in launcher)
 // from https://github.com/i3/i3/blob/next/i3-sensible-terminal
-pub const TERMINALS: [&str; 29] = [
+// shorted to only the most common ones that I know support -e option
+pub const TERMINALS: [&str; 9] = [
     "alacritty",
     "kitty",
-    "x-terminal-emulator",
-    "mate-terminal",
-    "gnome-terminal",
-    "terminator",
-    "xfce4-terminal",
-    "urxvt",
-    "rxvt",
-    "termit",
-    "Eterm",
-    "aterm",
-    "uxterm",
-    "xterm",
-    "roxterm",
-    "termite",
-    "lxterminal",
-    "terminology",
-    "st",
+    "wezterm",
+    "foot",
     "qterminal",
     "lilyterm",
     "tilix",
     "terminix",
     "konsole",
-    "guake",
-    "tilda",
-    "hyper",
-    "wezterm",
-    "rio",
 ];
 
 pub fn get_daemon_socket_path_buff() -> PathBuf {

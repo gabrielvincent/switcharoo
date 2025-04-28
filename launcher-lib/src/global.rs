@@ -1,7 +1,8 @@
-use crate::plugins::MatchData;
+use crate::plugins::Identifier;
 use core_lib::config::{Launcher, Plugins};
 use gtk::{ApplicationWindow, Entry, ListBox};
 use std::cell::RefCell;
+use std::collections::HashMap;
 use std::path::Path;
 
 #[derive(Debug)]
@@ -33,5 +34,7 @@ pub struct LauncherGlobalData {
     pub window: ApplicationWindow,
     pub entry: Entry,
     pub results: ListBox,
-    pub matches: Vec<MatchData>,
+    pub plugin_box: gtk::Box,
+    pub sorted_matches: Vec<Identifier>,
+    pub static_matches: HashMap<char, Identifier>,
 }

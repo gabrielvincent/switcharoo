@@ -1,17 +1,11 @@
+use core_lib::config::Plugins;
 use std::path::Path;
 
 mod applications;
 mod shell;
 mod terminal;
 
-pub use applications::maps::reload_desktop_map;
-use core_lib::config::Plugins;
-
-#[derive(Debug)]
-pub enum MatchData {
-    Sortable(Identifier),
-    Static(Identifier),
-}
+pub use applications::reload_desktop_map;
 
 #[derive(Debug)]
 pub struct SortableLaunchOption {
@@ -25,21 +19,23 @@ pub struct SortableLaunchOption {
 
 #[derive(Debug)]
 pub struct StaticLaunchOption {
-    pub display: StaticLaunchOptionDisplay,
+    pub text: Box<str>,
+    pub icon: Option<Box<Path>>,
     pub key: char,
     pub data: Identifier,
 }
 
 #[derive(Debug)]
-pub enum StaticLaunchOptionDisplay {
-    Icon(Box<Path>),
-    Text(Box<str>),
+pub enum PluginNames {
+    Applications,
+    Shell,
+    Terminal,
 }
 
 #[derive(Debug)]
 pub struct Identifier {
     /// identify the plugin that created this option.
-    pub plugin: &'static str,
+    pub plugin: PluginNames,
     pub identifier: Option<Box<str>>,
 }
 
@@ -64,10 +60,16 @@ pub fn get_sortable_launch_options(
         }
     }
 
-    matches.sort_by(|a, b| a.score.cmp(&b.score));
+    // sort in reverse
+    matches.sort_by(|a, b| b.score.cmp(&a.score));
+    // trace!("matches: {:?}", matches);
     matches
 }
-pub fn get_static_launch_options(plugins: &Vec<Plugins>) -> Vec<StaticLaunchOption> {
+
+pub fn get_static_launch_options(
+    plugins: &Vec<Plugins>,
+    default_terminal: &Option<Box<str>>,
+) -> Vec<StaticLaunchOption> {
     let mut matches = Vec::new();
 
     for plugins in plugins {
@@ -76,7 +78,7 @@ pub fn get_static_launch_options(plugins: &Vec<Plugins>) -> Vec<StaticLaunchOpti
                 matches.append(&mut shell::get_static_options());
             }
             Plugins::Terminal() => {
-                matches.append(&mut terminal::get_static_options());
+                matches.append(&mut terminal::get_static_options(default_terminal));
             }
             _ => {}
         }
@@ -85,9 +87,20 @@ pub fn get_static_launch_options(plugins: &Vec<Plugins>) -> Vec<StaticLaunchOpti
     matches
 }
 
-pub fn launch_static_options(key: &str, default_terminal: Option<String>) {}
-
-pub fn launch_sortable_options(text: &str, offset: u8) {}
+pub fn launch(
+    iden: &Identifier,
+    text: &str,
+    default_terminal: &Option<Box<str>>,
+    data_dir: &Box<Path>,
+) {
+    match iden.plugin {
+        PluginNames::Applications => {
+            applications::launch_option(&iden.identifier, default_terminal, data_dir)
+        }
+        PluginNames::Shell => shell::launch_option(text, default_terminal),
+        PluginNames::Terminal => terminal::launch_option(text, default_terminal),
+    }
+}
 
 pub fn get_static_options_chars(plugins: &Vec<Plugins>) -> Vec<char> {
     let mut chars = Vec::new();

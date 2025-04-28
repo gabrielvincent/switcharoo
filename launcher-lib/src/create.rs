@@ -5,13 +5,11 @@ use core_lib::{send_to_socket, Warn, LAUNCHER_NAMESPACE};
 use gtk::gdk::Key;
 use gtk::glib::{clone, Propagation};
 use gtk::prelude::*;
-use gtk::glib;
-use gtk::{
-    Application, ApplicationWindow, Entry, EventControllerKey, ListBox,
-    SelectionMode,
-};
+use gtk::{glib, Orientation};
+use gtk::{Application, ApplicationWindow, Entry, EventControllerKey, ListBox, SelectionMode};
 use gtk4_layer_shell::{Edge, Layer, LayerShell};
 use std::cell::RefCell;
+use std::collections::HashMap;
 use std::path::Path;
 use tracing::{debug, span, trace, Level};
 
@@ -28,21 +26,11 @@ pub fn create_launcher_window(
         .selection_mode(SelectionMode::None)
         .build();
 
-    let results = ListBox::builder()
-        .selection_mode(SelectionMode::None)
-        .css_classes(vec!["launcher-results"])
-        .build();
-
     let entry = Entry::builder().css_classes(vec!["launcher-input"]).build();
-    entry.connect_changed(clone!(
-        #[weak]
-        results,
-        move |e| {
-            trace!("Entry changed: {}", e.text());
-            send_to_socket(&TransferType::Type(e.text().to_string()))
-                .warn("unable send return to socket");
-        }
-    ));
+    entry.connect_changed(|e| {
+        send_to_socket(&TransferType::Type(e.text().to_string()))
+            .warn("unable send return to socket");
+    });
     let controller = EventControllerKey::new();
     controller.connect_key_pressed(move |_, k, _, m| match (k, m) {
         (Key::Tab, _) => Propagation::Stop,
@@ -51,7 +39,20 @@ pub fn create_launcher_window(
     });
     entry.add_controller(controller);
     main_vbox.append(&entry);
+
+    let results = ListBox::builder()
+        .selection_mode(SelectionMode::None)
+        .css_classes(vec!["launcher-results"])
+        .build();
     main_vbox.append(&results);
+
+    let plugin_box = gtk::Box::builder()
+        .orientation(Orientation::Horizontal)
+        .spacing(4)
+        .hexpand(false)
+        .vexpand(false)
+        .build();
+    main_vbox.append(&plugin_box);
 
     let window = ApplicationWindow::builder()
         .css_classes(vec!["window"])
@@ -73,7 +74,9 @@ pub fn create_launcher_window(
         window,
         entry,
         results,
-        matches: vec![],
+        plugin_box,
+        sorted_matches: vec![],
+        static_matches: HashMap::new(),
     }));
 
     Ok(())

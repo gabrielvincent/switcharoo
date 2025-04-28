@@ -1,8 +1,9 @@
 use crate::global::LauncherGlobalData;
-use crate::LauncherGlobal;
+use crate::{plugins, LauncherGlobal};
 use gtk::prelude::*;
+use gtk4_layer_shell::{KeyboardMode, LayerShell};
 use std::cell::RefCell;
-use tracing::{span, trace, Level};
+use tracing::{span, trace, warn, Level};
 
 pub fn close_launcher(global: &LauncherGlobal, char: Option<char>) {
     let _span = span!(Level::TRACE, "close_launcher").entered();
@@ -11,74 +12,36 @@ pub fn close_launcher(global: &LauncherGlobal, char: Option<char>) {
         if let Some(char) = char {
             trace!("Closing launcher with char: {}", char);
 
-            #[cfg(not)]
-            {
-                let matches = {
-                    let data1 = data.borrow();
-                    let matches = get_indexed_matches(
-                        &data1.entry.text(),
-                        global.max_items as usize,
-                        global.run_cache_weeks,
-                        global.show_shell,
-                        data_dir,
-                    );
-                    drop(data1);
-                    matches
-                };
-                if let Some((_, _match)) = matches.get((offset as usize).min(matches.len() - 1)) {
-                    let data1 = data.borrow();
-                    // hyprland autofocuses windows if they are created, however, if any window
-                    // exists with keyboard mode exclusive, it will not focus the new window
-                    data1.window.set_keyboard_mode(KeyboardMode::None);
-                    let results = data1.results.clone();
-                    let entry = data1.entry.clone();
-                    let window = data1.window.clone();
-                    drop(data1);
-
-                    show_launch(data, offset);
-                    run_program(
-                        &_match.exec,
-                        &_match.exec_path,
-                        _match.terminal,
-                        &global.default_terminal,
-                    );
-                    if let Some(source) = &_match.source {
-                        trace!("Saving run: {:?}", source);
-                        save_run(source, data_dir).warn("Failed to cache run");
-                    }
-
-                    let time = global.animate_launch_time_ms;
-                    glib::spawn_future_local(clone!(async move {
-                        glib::timeout_future(Duration::from_millis(time)).await;
-                        while let Some(child) = results.first_child() {
-                            results.remove(&child);
-                        }
-                        entry.set_text("");
-                        trace!("Hiding window {:?}", window.id());
-                        window.set_visible(false);
-                    }));
-                } else {
-                    let data1 = data.borrow();
-                    while let Some(child) = data1.results.first_child() {
-                        data1.results.remove(&child);
-                    }
-                    data1.entry.set_text("");
-                    trace!("Hiding window {:?}", data1.window.id());
-                    data1.window.set_visible(false);
-                }
-            }
-        } else {
             let data1 = data.borrow();
-            while let Some(child) = data1.results.first_child() {
-                data1.results.remove(&child);
+            if let Some(r#match) = match char {
+                '0'..'9' => data1
+                    .sorted_matches
+                    .get(char.to_digit(10).expect("unable to convert char") as usize),
+                char => data1.static_matches.get(&char),
+            } {
+                data1.window.set_keyboard_mode(KeyboardMode::None);
+                // show_launch(data, offset);
+                plugins::launch(
+                    r#match,
+                    &data1.entry.text().to_string(),
+                    &global.default_terminal,
+                    &global.data_dir,
+                );
+            } else {
+                warn!("No match found for char: {}", char);
             }
-            data1.entry.set_text("");
-            trace!("Hiding window {:?}", data1.window.id());
-            data1.window.set_visible(false);
         }
+        let data1 = data.borrow();
+        while let Some(child) = data1.results.first_child() {
+            data1.results.remove(&child);
+        }
+        data1.entry.set_text("");
+        trace!("Hiding window {:?}", data1.window.id());
+        data1.window.set_visible(false);
     }
 }
 
+/// no longer used, but would look cool when launching apps
 fn show_launch(data: &RefCell<LauncherGlobalData>, offset: u8) {
     let _span = span!(Level::TRACE, "show_launch").entered();
 

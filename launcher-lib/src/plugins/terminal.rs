@@ -1,22 +1,33 @@
-use crate::plugins::{Identifier, StaticLaunchOption, StaticLaunchOptionDisplay};
+use crate::plugins::{Identifier, PluginNames, StaticLaunchOption};
 use exec_lib::run::run_program;
+use std::path::PathBuf;
 
-const PLUGIN_NAME: &str = "shell";
-
-pub fn get_static_options() -> Vec<StaticLaunchOption> {
+pub fn get_static_options(default_terminal: &Option<Box<str>>) -> Vec<StaticLaunchOption> {
     let mut matches = Vec::new();
     matches.push(StaticLaunchOption {
         data: Identifier {
-            plugin: PLUGIN_NAME,
+            plugin: PluginNames::Terminal,
             identifier: None,
         },
         key: 't',
-        display: StaticLaunchOptionDisplay::Text("Terminal".into()),
+        text: Box::from("Terminal"),
+        icon: Some(
+            PathBuf::from(
+                default_terminal
+                    .as_deref()
+                    .map(|term| match term {
+                        "alacritty" => "Alacritty",
+                        other => other,
+                    })
+                    .unwrap_or("system-run"),
+            )
+            .into_boxed_path(),
+        ),
     });
     matches
 }
 
-pub fn launch_static_options(text: &str, default_terminal: Option<String>) {
+pub fn launch_option(text: &str, default_terminal: &Option<Box<str>>) {
     run_program(
         &format!("$SHELL -c \"{text}\""),
         None,

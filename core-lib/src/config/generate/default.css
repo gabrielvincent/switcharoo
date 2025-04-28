@@ -8,6 +8,7 @@
     --border-radius: 12px;
     --border-size: 3px;
     --border-style: solid;
+    --border-style-secondary: dashed;
 
     --text-color: rgba(245, 245, 245, 1);
     --launcher-animation-speed: 0.4s;
@@ -59,4 +60,8 @@
 .launcher-exec {
     font-size: 0.8rem;
     font-family: monospace;
+}
+
+.launcher-plugin {
+    padding: 4px;
 }

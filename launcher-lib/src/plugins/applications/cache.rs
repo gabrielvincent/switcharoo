@@ -4,7 +4,7 @@ use serde_json::from_reader;
 use std::collections::HashMap;
 use std::fs::OpenOptions;
 use std::path::{Path, PathBuf};
-use tracing::{trace, warn};
+use tracing::{debug, trace, warn};
 
 pub fn save_run(desktop_file: &Path, data_dir: &Path) -> anyhow::Result<()> {
     let file = get_current_week(data_dir);
@@ -71,8 +71,16 @@ pub fn get_cached_runs(run_cache_weeks: u8, data_dir: &Path) -> HashMap<Box<Path
     for week in get_all_weeks(run_cache_weeks, data_dir) {
         let cache_data = if week.exists() {
             match OpenOptions::new().read(true).open(&week) {
-                Ok(file) => from_reader(file).unwrap_or_else(|_| serde_json::json!({})),
-                Err(_) => serde_json::json!({}),
+                Ok(file) => from_reader(file).unwrap_or_else(|err| {
+                    warn!("Failed to open cache file: {:?}", week);
+                    debug!("Error: {:?}", err);
+                    serde_json::json!({})
+                }),
+                Err(err) => {
+                    warn!("Failed to open cache file: {:?}", week);
+                    debug!("Error: {:?}", err);
+                    serde_json::json!({})
+                }
             }
         } else {
             serde_json::json!({})

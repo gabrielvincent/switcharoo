@@ -3,13 +3,13 @@ use std::os::unix::prelude::CommandExt;
 use std::path::Path;
 use std::process::{Command, Stdio};
 use std::{env, io, thread};
-use tracing::{debug, info, trace};
+use tracing::{debug, error, info, trace};
 
 pub fn run_program(
     run: &str,
     path: Option<Box<Path>>,
     terminal: bool,
-    default_terminal: Option<String>,
+    default_terminal: &Option<Box<str>>,
 ) {
     debug!("Running: {run}");
     if terminal {
@@ -21,9 +21,10 @@ pub fn run_program(
             for term in TERMINALS {
                 let command = format!("{term} -e {run}");
                 if run_command(&command, &path).is_ok() {
-                    break;
+                    return;
                 }
             }
+            error!("Failed to find a terminal to run the command");
         }
     } else {
         run_command(run, &path).warn("Failed to run command");
@@ -34,11 +35,11 @@ fn get_command(command: &str) -> Command {
     // if run as systemd unit all programs exit when not run outside the units cgroup
     if env::var("INVOCATION_ID").is_ok() {
         let mut cmd = Command::new("systemd-run");
-        cmd.args(&["--user", "--scope", "--collect", "sh", "-c", command]);
+        cmd.args(["--user", "--scope", "--collect", "sh", "-c", command]);
         cmd
     } else {
         let mut cmd = Command::new("sh");
-        cmd.args(&["-c", command]);
+        cmd.args(["-c", command]);
         cmd
     }
 }

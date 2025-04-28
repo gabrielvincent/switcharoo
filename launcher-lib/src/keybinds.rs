@@ -1,11 +1,11 @@
 use crate::plugins::get_static_options_chars;
 use core_lib::config::Launcher;
+use core_lib::generate_socat;
 use core_lib::transfer::{CloseConfig, TransferType};
-use core_lib::{generate_socat, to_ron_string};
 
 fn generate_launcher_return(config: CloseConfig) -> String {
     let config = TransferType::Close(config);
-    let config_str = to_ron_string(&config).expect("Failed to serialize config");
+    let config_str = serde_json::to_string(&config).expect("Failed to serialize config");
     generate_socat(&config_str)
 }
 
