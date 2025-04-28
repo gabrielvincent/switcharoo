@@ -9,6 +9,8 @@ use tracing::{debug, warn};
 mod cli;
 mod receive;
 mod start;
+mod recive_handle;
+mod gen_keybinds;
 
 fn main() -> anyhow::Result<()> {
     malloc::limit_mmap_threshold();
@@ -119,8 +121,7 @@ pub mod malloc {
 }
 
 fn check_features() {
-    debug!("FEATURES: JSON config: {}, TOML support: {}, Bar: {}, Config command: {}, Debug command: {}",
-        cfg!(feature = "json_config"),
+    debug!("FEATURES: TOML support: {}, Bar: {}, Config command: {}, Debug command: {}",
         cfg!(feature = "toml_config"),
         cfg!(feature = "bar"),
         cfg!(feature = "generate_config_command"),

@@ -14,9 +14,10 @@ use tracing::{info, span, Level};
 #[derive(Debug)]
 pub struct ConfigData {
     pub enable_launcher: bool,
-    pub default_terminal: Option<String>,
+    pub default_terminal: Option<Box<str>>,
     pub overview: Option<(Mod, KeyMaybeMod)>,
     pub switch: Option<Mod>,
+    pub launcher_plugins: Vec<Box<str>>,
     pub grave_reverse: bool,
 }
 
@@ -95,7 +96,6 @@ pub fn write_config(config_path: &Path, config: Config, override_file: bool) -> 
                 .to_io_writer_pretty(file, &config, PrettyConfig::default())
                 .context("Failed to write ron config")?;
         }
-        #[cfg(feature = "json_config")]
         Some("json") => {
             let file = File::create(config_path)
                 .with_context(|| format!("Failed to create config at ({config_path:?})"))?;
@@ -107,7 +107,7 @@ pub fn write_config(config_path: &Path, config: Config, override_file: bool) -> 
             write(config_path, str)
                 .with_context(|| format!("Failed to create config at ({config_path:?})"))?;
         }
-        Some(ext) => bail!("Invalid config file extension: {}", ext),
+        Some(ext) => bail!("Invalid config file extension: {} (check `FEATURES: ` debug log to see enabled extensions)", ext),
     };
 
     info!("Config file generated successfully");

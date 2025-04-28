@@ -1,10 +1,10 @@
+use crate::gen_keybinds::create_binds_and_submaps;
 use crate::receive::{socket_handler, Globals};
-use core_lib::config::binds::create_binds_and_submaps;
 use core_lib::theme_icon_cache::init_icon_map;
 use core_lib::transfer::TransferType;
 use core_lib::{
-    collect_desktop_files, config, hyprshell_config_block,
-    hyprshell_config_listener, hyprshell_css_listener, send_to_socket, Warn,
+    collect_desktop_files, config, hyprshell_config_block, hyprshell_config_listener,
+    hyprshell_css_listener, send_to_socket, Warn,
 };
 use exec_lib::listener::{hyprland_config_listener, monitor_listener};
 use exec_lib::{apply_keybinds, reload_config, toast};
@@ -15,6 +15,7 @@ use gtk::{
     glib, style_context_add_provider_for_display, Application, CssProvider, IconTheme, Settings,
     STYLE_PROVIDER_PRIORITY_APPLICATION, STYLE_PROVIDER_PRIORITY_USER,
 };
+use launcher_lib::{create_launcher_window, LauncherGlobal};
 use std::path::{Path, PathBuf};
 use tracing::{debug, info, span, trace, warn, Level};
 use windows_lib::{create_windows_window, WindowsGlobal};
@@ -69,11 +70,9 @@ fn activate(app: &Application, config_path: &Path, css_path: &Path, data_dir: &P
         }
     };
 
-    let windows_data: Option<WindowsGlobal> = config.windows.as_ref().map(WindowsGlobal::new);
-    let mut launcher_data: Option<launcher_lib::LauncherGlobal> = config
-        .launcher
-        .as_ref()
-        .map(launcher_lib::LauncherGlobal::new);
+    let windows_data: Option<WindowsGlobal> = config.windows.map(WindowsGlobal::new);
+    let mut launcher_data: Option<LauncherGlobal> =
+        config.launcher.map(LauncherGlobal::new(data_dir));
 
     if let Some(windows_data) = &windows_data {
         create_windows_window(app, windows_data)
@@ -83,7 +82,7 @@ fn activate(app: &Application, config_path: &Path, css_path: &Path, data_dir: &P
     }
 
     if let Some(launcher_data) = &mut launcher_data {
-        launcher_lib::create_launcher_window(app, launcher_data, &data_dir)
+        create_launcher_window(app, launcher_data, &data_dir)
             .unwrap_or_else(|e| toast(&format!("Failed to create launcher window: {e}")));
     } else {
         debug!("Launcher is disabled");
@@ -92,7 +91,6 @@ fn activate(app: &Application, config_path: &Path, css_path: &Path, data_dir: &P
     let globals = Globals {
         window: windows_data,
         launcher: launcher_data,
-        data_dir: Box::from(data_dir),
     };
 
     let config_path = PathBuf::from(config_path);

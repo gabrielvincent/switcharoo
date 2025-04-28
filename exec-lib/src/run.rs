@@ -3,38 +3,38 @@ use std::os::unix::prelude::CommandExt;
 use std::path::Path;
 use std::process::{Command, Stdio};
 use std::{env, io, thread};
-use tracing::{debug, trace};
+use tracing::{debug, info, trace};
 
 pub fn run_program(
     run: &str,
-    path: &Option<Box<Path>>,
+    path: Option<Box<Path>>,
     terminal: bool,
-    default_terminal: &Option<String>,
+    default_terminal: Option<String>,
 ) {
     debug!("Running: {run}");
     if terminal {
         if let Some(term) = default_terminal {
             let command = format!("{term} -e {run}");
-            run_command(&command, path).warn("Failed to run command");
+            run_command(&command, &path).warn("Failed to run command");
         } else {
-            debug!("No default terminal found, trying to find one. (configure default_terminal in config to set a default terminal)");
+            info!("No default terminal found, trying to find one. (configure default_terminal in config to set a default terminal)");
             for term in TERMINALS {
                 let command = format!("{term} -e {run}");
-                if run_command(&command, path).is_ok() {
+                if run_command(&command, &path).is_ok() {
                     break;
                 }
             }
         }
     } else {
-        run_command(run, path).warn("Failed to run command");
+        run_command(run, &path).warn("Failed to run command");
     }
 }
 
 fn get_command(command: &str) -> Command {
-    // if run as systemd unit all programs exit when not run outside of the units cgroup
+    // if run as systemd unit all programs exit when not run outside the units cgroup
     if env::var("INVOCATION_ID").is_ok() {
         let mut cmd = Command::new("systemd-run");
-        cmd.args(&["--user", "--scope", "sh", "-c", command]);
+        cmd.args(&["--user", "--scope", "--collect", "sh", "-c", command]);
         cmd
     } else {
         let mut cmd = Command::new("sh");

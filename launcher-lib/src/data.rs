@@ -8,7 +8,7 @@ use tracing::{trace, warn};
 
 pub fn save_run(desktop_file: &Path, data_dir: &Path) -> anyhow::Result<()> {
     let file = get_current_week(data_dir);
-    let mut data = if data_dir.exists() {
+    let mut data = if file.exists() {
         let file = OpenOptions::new()
             .read(true)
             .open(&file)
@@ -65,7 +65,7 @@ fn get_name_from_timestamp(week: u8) -> Box<Path> {
     )))
 }
 
-pub fn get_cached_runs(run_cache_weeks: u8, data_dir: &Path) -> HashMap<Box<Path>, i64> {
+pub fn get_cached_runs(run_cache_weeks: u8, data_dir: &Path) -> HashMap<Box<Path>, u64> {
     let mut runs = HashMap::new();
 
     for week in get_all_weeks(run_cache_weeks, data_dir) {
@@ -81,7 +81,7 @@ pub fn get_cached_runs(run_cache_weeks: u8, data_dir: &Path) -> HashMap<Box<Path
             for (path, runs_count) in obj {
                 runs.insert(
                     PathBuf::from(path).into_boxed_path(),
-                    runs_count.as_i64().unwrap_or(0),
+                    runs_count.as_u64().unwrap_or(0),
                 );
             }
         } else {

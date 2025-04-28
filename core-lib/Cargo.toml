@@ -13,7 +13,7 @@ rust-version.workspace = true
 [dependencies]
 anyhow.workspace = true
 tracing.workspace = true
-serde_json = { workspace = true, optional = true }
+serde_json.workspace = true
 
 notify = { version = "8.0.0", features = [] }
 inquire = { version = "0.7.5", optional = true, default-features = false, features = ["termion"] }
@@ -22,9 +22,8 @@ smart-default = { version = "0.7.1" }
 ron = { version = "0.10.1" }
 semver = { version = "1.0.26" }
 toml = { version = "0.8.20", optional = true }
-which = "7.0.3"
+which = { version = "7.0.3", default-features = false }
 
 [features]
-json_config = ["dep:serde_json"]
 toml_config = ["dep:toml"]
 generate_config = ["dep:inquire"]

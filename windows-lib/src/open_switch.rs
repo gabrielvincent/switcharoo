@@ -3,7 +3,7 @@ use crate::icon::set_icon;
 use crate::next::find_next;
 use crate::WindowsGlobal;
 use anyhow::Context;
-use core_lib::transfer::{OpenSwitch, Override, ReturnConfig, TransferType};
+use core_lib::transfer::{CloseConfig, OpenSwitch, TransferType, WindowsOverride};
 use core_lib::{send_to_socket, ClientData, ClientId, FindByFirst, Warn};
 use exec_lib::activate_submap;
 use gtk::prelude::*;
@@ -14,7 +14,7 @@ use tracing::{debug, span, trace, Level};
 fn scale(value: i16, size_factor: f64) -> i32 {
     (value as f64 / 31.0 * size_factor) as i32
 }
-pub fn open_switch(config: OpenSwitch, global: &WindowsGlobal) -> anyhow::Result<()> {
+pub fn open_switch(global: &WindowsGlobal, config: OpenSwitch) -> anyhow::Result<()> {
     let _span = span!(Level::TRACE, "open_switch").entered();
     let (clients_data, active) = collect_data(&SortConfig {
         filter_current_monitor: config.filter_current_monitor,
@@ -27,9 +27,9 @@ pub fn open_switch(config: OpenSwitch, global: &WindowsGlobal) -> anyhow::Result
         &config.direction,
         false,
         &clients_data,
-        &active,
+        active,
         global.workspaces_per_row as usize,
-    )?;
+    );
 
     activate_submap(&config.submap_name)?;
 
@@ -152,9 +152,9 @@ fn click_client(client_id: ClientId) -> GestureClick {
     gesture.connect_pressed(move |gesture, _, _, _| {
         gesture.set_state(EventSequenceState::Claimed);
         debug!("Exiting on click of client box");
-        send_to_socket(&TransferType::Return(ReturnConfig {
-            r#override: Some(Override::ClientId(client_id)),
-        }))
+        send_to_socket(&TransferType::Close(CloseConfig::Windows(
+            WindowsOverride::ClientId(client_id),
+        )))
         .warn("unable send return to socket");
     });
     gesture

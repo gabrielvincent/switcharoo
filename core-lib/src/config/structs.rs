@@ -29,20 +29,35 @@ pub struct Windows {
 #[derive(SmartDefault, Debug, Clone, Deserialize, Serialize)]
 #[serde(default, deny_unknown_fields)]
 pub struct Launcher {
-    #[default = true]
-    pub show_execs: bool,
     #[default(None)]
-    pub default_terminal: Option<String>,
-    #[default = 400]
-    pub animate_launch_time_ms: u64,
+    pub default_terminal: Option<Box<str>>,
     #[default = 650]
     pub width: u32,
     #[default = 6]
     pub max_items: u8,
+    #[default(vec![
+        Plugins::Applications(ApplicationsPluginOptions::default()),
+        Plugins::Terminal(),
+        Plugins::Shell(),
+    ])]
+    pub plugins: Vec<Plugins>,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub enum Plugins {
+    Applications(ApplicationsPluginOptions),
+    Terminal(),
+    Shell(),
+}
+#[derive(SmartDefault, Debug, Clone, Deserialize, Serialize)]
+#[serde(default, deny_unknown_fields)]
+pub struct ApplicationsPluginOptions {
+    #[default = 400]
+    pub animate_launch_time_ms: u64,
     #[default = 3]
     pub run_cache_weeks: u8,
     #[default = true]
-    pub shell_commands: bool,
+    pub show_execs: bool,
 }
 
 #[derive(SmartDefault, Debug, Clone, Deserialize, Serialize)]

@@ -7,9 +7,9 @@ pub fn find_next(
     direction: &Direction,
     workspace: bool,
     hypr_data: &HyprlandData,
-    active: &Active,
+    active: Active,
     workspaces_per_row: usize,
-) -> anyhow::Result<Active> {
+) -> Active {
     let _span =
         span!(Level::TRACE, "find_next", direction = ?direction, workspace, active = ?active)
             .entered();
@@ -49,29 +49,30 @@ pub fn find_next(
             };
 
             debug!("Next client: {:?}", dat.as_ref().map(|(id, _)| *id));
-            Ok(Active {
+            Active {
                 client: dat.as_ref().map(|(id, _)| *id),
                 workspace: dat
                     .as_ref()
                     .map(|(_, dat)| dat.workspace)
                     .unwrap_or(active.workspace),
                 monitor: dat.map(|(_, dat)| dat.monitor).unwrap_or(active.monitor),
-            })
+            }
         }
-        (true, dir) => {
-            let dat: (WorkspaceId, WorkspaceData) = find_next_workspace(
-                dir,
-                &hypr_data.workspaces,
-                active.workspace,
-                workspaces_per_row,
-            )?;
-            debug!("Next workspace: {:?}", dat.0);
-            Ok(Active {
+        (true, dir) => find_next_workspace(
+            dir,
+            &hypr_data.workspaces,
+            active.workspace,
+            workspaces_per_row,
+        )
+        .map(|(workspace_id, workspace_data)| {
+            debug!("Next workspace: {:?}", workspace_id);
+            Active {
                 client: None,
-                workspace: dat.0,
-                monitor: dat.1.monitor,
-            })
-        }
+                workspace: workspace_id,
+                monitor: workspace_data.monitor,
+            }
+        })
+        .unwrap_or(active),
     }
 }
 

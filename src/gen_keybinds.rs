@@ -1,24 +1,20 @@
-use crate::config::structs::{Config, FilterBy, Overview, Reverse, Switch, ToKey};
-use crate::config::Launcher;
-use crate::transfer::{
-    Direction, OpenOverview, OpenSwitch, Override, ReturnConfig, SwitchConfig, TransferType,
-};
-use crate::util::{get_daemon_socket_path_buff, LAUNCHER_NAMESPACE, OVERVIEW_NAMESPACE};
 use anyhow::Context;
-use ron::extensions::Extensions;
+use core_lib::config::Launcher;
+use core_lib::config::{Config, FilterBy, Overview, Reverse, Switch, ToKey};
+use core_lib::transfer::{
+    CloseConfig, Direction, OpenOverview, OpenSwitch, SwitchConfig, TransferType,
+};
+use core_lib::{
+    generate_socat, get_daemon_socket_path_buff, to_ron_string, LAUNCHER_NAMESPACE,
+    OVERVIEW_NAMESPACE,
+};
+use launcher_lib::generate_keybinds;
 use std::env;
 use std::path::PathBuf;
 use tracing::{span, Level};
 
 pub fn create_binds_and_submaps<'a>(config: &Config) -> anyhow::Result<Vec<(&'a str, String)>> {
     let _span = span!(Level::DEBUG, "create_binds_and_submaps").entered();
-    let ron_options = ron::Options::default()
-        .with_default_extension(Extensions::IMPLICIT_SOME)
-        .with_default_extension(Extensions::UNWRAP_VARIANT_NEWTYPES)
-        .with_default_extension(Extensions::EXPLICIT_STRUCT_NAMES);
-
-    let socat_path = get_socat_path()?;
-
     let mut keyword_list = Vec::<(&str, String)>::new();
 
     if config.layerrules {
@@ -41,116 +37,49 @@ pub fn create_binds_and_submaps<'a>(config: &Config) -> anyhow::Result<Vec<(&'a 
             let submap_name = "hyprshell-overview";
             generate_overview(
                 &mut keyword_list,
-                &ron_options,
                 overview,
                 submap_name,
                 workspaces_per_row,
                 &config.launcher,
-                &socat_path,
             )
             .context("Failed to generate overview")?;
         }
         if let Some(switch) = &windows.switch {
             let workspaces_per_row = windows.workspaces_per_row;
             let submap_name = "hyprshell-switch";
-            generate_switch(
-                &mut keyword_list,
-                &ron_options,
-                switch,
-                submap_name,
-                workspaces_per_row,
-                &socat_path,
-            )
-            .context("Failed to generate overview")?;
+            generate_switch(&mut keyword_list, switch, submap_name, workspaces_per_row)
+                .context("Failed to generate overview")?;
         }
     }
 
     Ok(keyword_list)
 }
 
-fn get_socat_path() -> anyhow::Result<String> {
-    env::var("HYPRSHELL_SOCAT_PATH")
-        .or_else(|_| which::which("socat").map(|path| path.to_string_lossy().to_string()))
-        .context("`socat` command not found. Please ensure it is installed and available in PATH.")
+fn generate_exit() -> anyhow::Result<String> {
+    let config = TransferType::Exit;
+    let config_str = to_ron_string(&config).context("Failed to serialize config")?;
+    Ok(generate_socat(&config_str))
 }
 
-fn generate_socat(echo: &str, path: PathBuf, socat_path: &str) -> String {
-    format!(
-        r#"echo '{}' | {} - UNIX-CONNECT:{}"#,
-        echo,
-        socat_path,
-        path.as_path().to_string_lossy()
-    )
+fn generate_return(config: CloseConfig) -> anyhow::Result<String> {
+    let config = TransferType::Close(config);
+    let config_str = to_ron_string(&config).context("Failed to serialize config")?;
+    Ok(generate_socat(&config_str))
 }
 
-fn generate_close(ron_options: &ron::Options, socat_path: &str) -> anyhow::Result<String> {
-    let config = TransferType::Close;
-    let config_str = ron_options
-        .to_string(&config)
-        .context("Failed to serialize config")?;
-    Ok(generate_socat(
-        &config_str,
-        get_daemon_socket_path_buff(),
-        socat_path,
-    ))
-}
-
-fn generate_restart(ron_options: &ron::Options, socat_path: &str) -> anyhow::Result<String> {
-    let config = TransferType::Restart;
-    let config_str = ron_options
-        .to_string(&config)
-        .context("Failed to serialize config")?;
-    Ok(generate_socat(
-        &config_str,
-        get_daemon_socket_path_buff(),
-        socat_path,
-    ))
-}
-
-fn generate_return(
-    ron_options: &ron::Options,
-    offset: Option<u8>,
-    socat_path: &str,
-) -> anyhow::Result<String> {
-    let config = TransferType::Return(ReturnConfig {
-        r#override: offset.map(Override::Offset),
-    });
-    let config_str = ron_options
-        .to_string(&config)
-        .context("Failed to serialize config")?;
-    Ok(generate_socat(
-        &config_str,
-        get_daemon_socket_path_buff(),
-        socat_path,
-    ))
-}
-
-fn generate_switch_press(
-    ron_options: &ron::Options,
-    direction: Direction,
-    workspace: bool,
-    socat_path: &str,
-) -> anyhow::Result<String> {
+fn generate_switch_press(direction: Direction, workspace: bool) -> anyhow::Result<String> {
     let config = TransferType::Switch(SwitchConfig {
         direction,
         workspace,
     });
-    let config_str = ron_options
-        .to_string(&config)
-        .context("Failed to serialize config")?;
-    Ok(generate_socat(
-        &config_str,
-        get_daemon_socket_path_buff(),
-        socat_path,
-    ))
+    let config_str = to_ron_string(&config).context("Failed to serialize config")?;
+    Ok(generate_socat(&config_str))
 }
 
 fn generate_overview_open(
-    ron_options: &ron::Options,
     submap_name: &str,
     overview: &Overview,
     workspaces_per_row: u8,
-    socat_path: &str,
 ) -> anyhow::Result<String> {
     let config = TransferType::OpenOverview(OpenOverview {
         hide_filtered: overview.other.hide_filtered,
@@ -172,24 +101,16 @@ fn generate_overview_open(
         submap_name: submap_name.to_string(),
         workspaces_per_row,
     });
-    let config_str = ron_options
-        .to_string(&config)
-        .context("Failed to serialize config")?;
-    Ok(generate_socat(
-        &config_str,
-        get_daemon_socket_path_buff(),
-        socat_path,
-    ))
+    let config_str = to_ron_string(&config).context("Failed to serialize config")?;
+    Ok(generate_socat(&config_str))
 }
 
 fn generate_overview(
     keyword_list: &mut Vec<(&str, String)>,
-    ron_options: &ron::Options,
     overview: &Overview,
     submap_name: &str,
     workspaces_per_row: u8,
     launcher: &Option<Launcher>,
-    socat_path: &str,
 ) -> anyhow::Result<()> {
     keyword_list.push((
         "bind",
@@ -197,81 +118,56 @@ fn generate_overview(
             "{}, {}, exec, {}",
             overview.open.modifier,
             overview.open.key.to_key(),
-            generate_overview_open(
-                ron_options,
-                submap_name,
-                overview,
-                workspaces_per_row,
-                socat_path
-            )?,
+            generate_overview_open(submap_name, overview, workspaces_per_row)?,
         ),
     ));
 
     keyword_list.push(("submap", submap_name.to_string()));
-    keyword_list.push((
-        "bind",
-        format!(
-            ", escape, exec, {}",
-            generate_close(ron_options, socat_path)?
-        ),
-    ));
+    keyword_list.push(("bind", format!(", escape, exec, {}", generate_exit()?)));
     keyword_list.push((
         "bind",
         format!(
             "{}, {}, exec, {}",
             overview.open.modifier,
             overview.open.key.to_key(),
-            generate_close(ron_options, socat_path)?
+            generate_exit()?
         ),
     ));
     keyword_list.push((
         "bind",
-        format!(
-            ", return, exec, {}",
-            generate_return(ron_options, None, socat_path)?
-        ),
+        format!(", return, exec, {}", generate_return(CloseConfig::None)?),
     ));
 
-    if let Some(_launcher) = launcher {
-        // add index keys launcher run
-        for i in 1..=9 {
-            keyword_list.push((
-                "bind",
-                format!(
-                    "ctrl, {}, exec, {}",
-                    i,
-                    generate_return(ron_options, Some(i), socat_path)?
-                ),
-            ));
-        }
+    if let Some(launcher) = launcher {
+        generate_keybinds(keyword_list, launcher);
     }
 
     keyword_list.push((
         "binde",
         format!(
             ", right, exec, {}",
-            generate_switch_press(ron_options, Direction::Right, true, socat_path)?
+            generate_switch_press(Direction::Right, true)?
         ),
     ));
     keyword_list.push((
         "binde",
         format!(
             ", left, exec, {}",
-            generate_switch_press(ron_options, Direction::Left, true, socat_path)?
+            generate_switch_press(Direction::Left, true)?
         ),
     ));
     keyword_list.push((
         "binde",
         format!(
             ", down, exec, {}",
-            generate_switch_press(ron_options, Direction::Down, true, socat_path)?
+            generate_switch_press(Direction::Down, true)?
         ),
     ));
     keyword_list.push((
         "binde",
         format!(
             ", up, exec, {}",
-            generate_switch_press(ron_options, Direction::Up, true, socat_path)?
+            generate_switch_press(Direction::Up, true)?
         ),
     ));
 
@@ -280,7 +176,7 @@ fn generate_overview(
         format!(
             ", {}, exec, {}",
             overview.navigate.forward,
-            generate_switch_press(ron_options, Direction::Right, false, socat_path)?
+            generate_switch_press(Direction::Right, false)?
         ),
     ));
     match &overview.navigate.reverse {
@@ -289,7 +185,7 @@ fn generate_overview(
             format!(
                 ", {}, exec, {}",
                 key,
-                generate_switch_press(ron_options, Direction::Left, false, socat_path)?
+                generate_switch_press(Direction::Left, false)?
             ),
         )),
         Reverse::Mod(modk) => keyword_list.push((
@@ -298,7 +194,7 @@ fn generate_overview(
                 "{}, {}, exec, {}",
                 modk,
                 overview.navigate.forward,
-                generate_switch_press(ron_options, Direction::Left, false, socat_path)?
+                generate_switch_press(Direction::Left, false)?
             ),
         )),
     }
@@ -307,26 +203,15 @@ fn generate_overview(
         "bind",
         "ctrl, k, exec, pkill hyprshell; hyprctl dispatch submap reset".to_string(),
     ));
-
-    // restart demon (like config reload or monitor change)
-    keyword_list.push((
-        "bind",
-        format!(
-            "ctrl, r, exec, {}",
-            generate_restart(ron_options, socat_path)?
-        ),
-    ));
     keyword_list.push(("submap", "reset".to_string()));
     Ok(())
 }
 
 fn generate_switch_open(
-    ron_options: &ron::Options,
     submap_name: &str,
     switch: &Switch,
     workspaces_per_row: u8,
     direction: Direction,
-    socat_path: &str,
 ) -> anyhow::Result<String> {
     let config = TransferType::OpenSwitch(OpenSwitch {
         hide_filtered: switch.other.hide_filtered,
@@ -349,23 +234,15 @@ fn generate_switch_open(
         workspaces_per_row,
         direction,
     });
-    let config_str = ron_options
-        .to_string(&config)
-        .context("Failed to serialize config")?;
-    Ok(generate_socat(
-        &config_str,
-        get_daemon_socket_path_buff(),
-        socat_path,
-    ))
+    let config_str = to_ron_string(&config).context("Failed to serialize config")?;
+    Ok(generate_socat(&config_str))
 }
 
 fn generate_switch(
     keyword_list: &mut Vec<(&str, String)>,
-    ron_options: &ron::Options,
     switch: &Switch,
     submap_name: &str,
     workspaces_per_row: u8,
-    socat_path: &str,
 ) -> anyhow::Result<()> {
     keyword_list.push((
         "bind",
@@ -373,14 +250,7 @@ fn generate_switch(
             "{}, {}, exec, {}",
             switch.open.modifier,
             switch.navigate.forward,
-            generate_switch_open(
-                ron_options,
-                submap_name,
-                switch,
-                workspaces_per_row,
-                Direction::Right,
-                socat_path
-            )?,
+            generate_switch_open(submap_name, switch, workspaces_per_row, Direction::Right,)?,
         ),
     ));
     match &switch.navigate.reverse {
@@ -390,14 +260,7 @@ fn generate_switch(
                 "{}, {}, exec, {}",
                 switch.open.modifier,
                 key,
-                generate_switch_open(
-                    ron_options,
-                    submap_name,
-                    switch,
-                    workspaces_per_row,
-                    Direction::Left,
-                    socat_path
-                )?,
+                generate_switch_open(submap_name, switch, workspaces_per_row, Direction::Left,)?,
             ),
         )),
         Reverse::Mod(modk) => keyword_list.push((
@@ -407,33 +270,20 @@ fn generate_switch(
                 switch.open.modifier,
                 modk,
                 switch.navigate.forward,
-                generate_switch_open(
-                    ron_options,
-                    submap_name,
-                    switch,
-                    workspaces_per_row,
-                    Direction::Left,
-                    socat_path
-                )?,
+                generate_switch_open(submap_name, switch, workspaces_per_row, Direction::Left,)?,
             ),
         )),
     }
 
     keyword_list.push(("submap", submap_name.to_string()));
-    keyword_list.push((
-        "bind",
-        format!(
-            ", escape, exec, {}",
-            generate_close(ron_options, socat_path)?
-        ),
-    ));
+    keyword_list.push(("bind", format!(", escape, exec, {}", generate_exit()?)));
     keyword_list.push((
         "bindrt",
         format!(
             "{}, {}, exec, {}",
             switch.open.modifier,
             switch.open.modifier.to_key(),
-            generate_return(ron_options, None, socat_path)?
+            generate_return(CloseConfig::None)?
         ),
     ));
     // second keybinding to close of mod + reverse mod is released
@@ -445,7 +295,7 @@ fn generate_switch(
                 switch.open.modifier,
                 modk,
                 switch.open.modifier.to_key(),
-                generate_return(ron_options, None, socat_path)?,
+                generate_return(CloseConfig::None)?,
             ),
         ));
     }
@@ -455,7 +305,7 @@ fn generate_switch(
         format!(
             "{}, right, exec, {}",
             switch.open.modifier,
-            generate_switch_press(ron_options, Direction::Right, false, socat_path)?
+            generate_switch_press(Direction::Right, false)?
         ),
     ));
     keyword_list.push((
@@ -463,7 +313,7 @@ fn generate_switch(
         format!(
             "{}, left, exec, {}",
             switch.open.modifier,
-            generate_switch_press(ron_options, Direction::Left, false, socat_path)?
+            generate_switch_press(Direction::Left, false)?
         ),
     ));
     keyword_list.push((
@@ -471,7 +321,7 @@ fn generate_switch(
         format!(
             "{}, down, exec, {}",
             switch.open.modifier,
-            generate_switch_press(ron_options, Direction::Down, false, socat_path)?
+            generate_switch_press(Direction::Down, false)?
         ),
     ));
     keyword_list.push((
@@ -479,7 +329,7 @@ fn generate_switch(
         format!(
             "{}, up, exec, {}",
             switch.open.modifier,
-            generate_switch_press(ron_options, Direction::Up, false, socat_path)?
+            generate_switch_press(Direction::Up, false)?
         ),
     ));
 
@@ -489,7 +339,7 @@ fn generate_switch(
             "{}, {}, exec, {}",
             switch.open.modifier,
             switch.navigate.forward,
-            generate_switch_press(ron_options, Direction::Right, false, socat_path)?
+            generate_switch_press(Direction::Right, false)?
         ),
     ));
     match &switch.navigate.reverse {
@@ -499,7 +349,7 @@ fn generate_switch(
                 "{}, {}, exec, {}",
                 switch.open.modifier,
                 key,
-                generate_switch_press(ron_options, Direction::Left, false, socat_path)?
+                generate_switch_press(Direction::Left, false)?
             ),
         )),
         Reverse::Mod(modk) => keyword_list.push((
@@ -509,7 +359,7 @@ fn generate_switch(
                 switch.open.modifier,
                 modk,
                 switch.navigate.forward,
-                generate_switch_press(ron_options, Direction::Left, false, socat_path)?
+                generate_switch_press(Direction::Left, false)?
             ),
         )),
     }
@@ -519,14 +369,6 @@ fn generate_switch(
         "ctrl, k, exec, pkill hyprshell; hyprctl dispatch submap reset".to_string(),
     ));
 
-    // restart demon (like config reload or monitor change)
-    keyword_list.push((
-        "bind",
-        format!(
-            "ctrl, r, exec, {}",
-            generate_restart(ron_options, socat_path)?
-        ),
-    ));
     keyword_list.push(("submap", "reset".to_string()));
     Ok(())
 }

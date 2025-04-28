@@ -1,8 +1,11 @@
+use crate::transfer::TransferType;
 use anyhow::Context;
+use ron::extensions::Extensions;
 use semver::Version;
 use std::fs::DirEntry;
 use std::os::unix::net::UnixStream;
 use std::path::PathBuf;
+use std::sync::OnceLock;
 use std::{env, fmt};
 use tracing::{debug, trace, warn};
 
@@ -27,18 +30,20 @@ impl<A> Warn<A> for Option<A> {
     }
 }
 
-impl<A, E: fmt::Display> Warn<A> for Result<A, E> {
+impl<A, E: fmt::Debug + fmt::Display> Warn<A> for Result<A, E> {
     fn warn(self, msg: &str) -> Option<A> {
         match self {
             Ok(o) => Some(o),
             Err(e) => {
                 warn!("{}: {}", msg, e);
+                debug!("{e:?}");
                 None
             }
         }
     }
 }
 
+// TODO check if everyone supports `-e` flag to run commands (needed for run.rs in launcher)
 // from https://github.com/i3/i3/blob/next/i3-sensible-terminal
 pub const TERMINALS: [&str; 29] = [
     "alacritty",
@@ -172,4 +177,44 @@ fn find_application_dirs() -> Vec<PathBuf> {
         .collect();
     trace!("searching for icons in dirs: {:?}", dirs);
     dirs
+}
+
+static RON_OPTIONS: OnceLock<ron::Options> = OnceLock::new();
+
+fn get_ron_options() -> ron::Options {
+    ron::Options::default()
+        .with_default_extension(Extensions::IMPLICIT_SOME)
+        .with_default_extension(Extensions::UNWRAP_VARIANT_NEWTYPES)
+        .with_default_extension(Extensions::EXPLICIT_STRUCT_NAMES)
+}
+
+pub fn to_ron_string(transfer: &TransferType) -> anyhow::Result<String> {
+    RON_OPTIONS
+        .get_or_init(get_ron_options)
+        .to_string(transfer)
+        .context("Failed to serialize ron transfer data")
+}
+
+pub fn from_ron_string(transfer: &str) -> anyhow::Result<TransferType> {
+    RON_OPTIONS
+        .get_or_init(get_ron_options)
+        .from_str(transfer)
+        .context("Failed to deserialize ron transfer data")
+}
+
+static SOCAT_PATH: OnceLock<String> = OnceLock::new();
+
+fn get_socat_path() -> String {
+    env::var("HYPRSHELL_SOCAT_PATH")
+        .or_else(|_| which::which("socat").map(|path| path.to_string_lossy().to_string()))
+        .expect("`socat` command not found. Please ensure it is installed and available in PATH.")
+}
+
+pub fn generate_socat(echo: &str) -> String {
+    format!(
+        r#"echo '{}' | {} - UNIX-CONNECT:{}"#,
+        echo,
+        SOCAT_PATH.get_or_init(get_socat_path),
+        get_daemon_socket_path_buff().to_string_lossy()
+    )
 }

@@ -920,6 +920,7 @@ dependencies = [
  "hyprshell-launcher-lib",
  "hyprshell-windows-lib",
  "rand 0.9.1",
+ "serde_json",
  "tracing",
  "tracing-subscriber",
 ]
@@ -960,6 +961,7 @@ dependencies = [
  "gtk4",
  "gtk4-layer-shell",
  "hyprshell-core-lib",
+ "hyprshell-exec-lib",
  "serde_json",
  "tracing",
 ]

@@ -1,18 +1,21 @@
-mod data;
 mod close;
 mod create;
 mod css;
+mod data;
 mod desktop_map;
 mod global;
+mod keybinds;
 mod open;
+mod plugins;
 mod stop;
-mod run;
-mod r#match;
+mod update;
 
 pub use close::close_launcher;
 pub use create::create_launcher_window;
 pub use css::get_css;
-pub use desktop_map::reload_desktop_map;
 pub use global::LauncherGlobal;
+pub use keybinds::generate_keybinds;
 pub use open::open_launcher;
+pub use plugins::reload_desktop_map;
 pub use stop::stop_launcher;
+pub use update::update_launcher;

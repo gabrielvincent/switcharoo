@@ -16,5 +16,6 @@ tracing.workspace = true
 gtk.workspace = true
 gtk4-layer-shell.workspace = true
 core-lib.workspace = true
+exec-lib.workspace = true
 serde_json.workspace = true
 chrono = "0.4.40"

@@ -1,6 +1,7 @@
+use crate::recive_handle::{close, exit, open_overview, open_switch, r#type, restart, switch};
 use anyhow::Context;
-use core_lib::transfer::{from_ron_string, Override, TransferType};
-use core_lib::{get_daemon_socket_path_buff, IdOverride, Warn};
+use core_lib::transfer::TransferType;
+use core_lib::{from_ron_string, get_daemon_socket_path_buff};
 use exec_lib::toast;
 use gtk::gio::{Cancellable, InputStream, SocketListener, UnixSocketAddress};
 use gtk::prelude::*;
@@ -14,7 +15,6 @@ use tracing::{debug, error, info, span, trace, Level};
 pub struct Globals {
     pub window: Option<windows_lib::WindowsGlobal>,
     pub launcher: Option<launcher_lib::LauncherGlobal>,
-    pub data_dir: Box<Path>,
 }
 
 pub async fn socket_handler(global: Globals) {
@@ -74,145 +74,25 @@ fn handle_client(stream: InputStream, size: isize, global: &Globals) -> anyhow::
         trace!("Received empty buffer");
         return Ok(());
     }
-    let str = String::from_utf8_lossy(&buffer);
-    handle_client_transfer(&str, global)?;
+
+    handle_client_transfer(&buffer, global)?;
+
     trace!("Handled client in {:?}", now.elapsed());
     Ok(())
 }
 
-fn handle_client_transfer(buffer: &str, global: &Globals) -> anyhow::Result<()> {
-    let transfer: TransferType = from_ron_string(buffer)
+fn handle_client_transfer(buffer: &[u8], global: &Globals) -> anyhow::Result<()> {
+    let transfer: TransferType = serde_json::from_slice(buffer)
         .with_context(|| format!("Failed to deserialize buffer: {buffer:?}"))?;
     debug!("Received command: {transfer:?}");
-
-    handle_transfer(transfer, global).warn("Failed to handle transfer");
-    Ok(())
-}
-
-fn handle_transfer(transfer: TransferType, global: &Globals) -> anyhow::Result<()> {
     match transfer {
-        TransferType::OpenOverview(config) => {
-            if let Some(global) = &global.window {
-                windows_lib::open_overview(config, global)?;
-            } else {
-                return Err(anyhow::anyhow!("No window global data available"));
-            };
-            if let Some(global) = &global.launcher {
-                launcher_lib::open_launcher(global)?;
-            }
-        }
-        TransferType::OpenSwitch(config) => {
-            if let Some(global) = &global.window {
-                windows_lib::open_switch(config, global)?;
-            } else {
-                return Err(anyhow::anyhow!("No window global data available"));
-            }
-        }
-        TransferType::Switch(config) => {
-            if let Some(l_global) = &global.launcher {
-                let launcher_active = l_global
-                    .data
-                    .as_ref()
-                    .map(|d| {
-                        let b = d.borrow();
-                        b.entry.text_length() > 0 && b.results.first_child().is_some()
-                    })
-                    .unwrap_or(false);
-
-                // don't switch selected window if launcher is active
-                if !launcher_active {
-                    if let Some(global) = &global.window {
-                        windows_lib::update_overview(config, global)?;
-                    } else {
-                        return Err(anyhow::anyhow!("No window global data available"));
-                    }
-                }
-            } else {
-                if let Some(global) = &global.window {
-                    windows_lib::update_overview(config, global)?;
-                }
-            }
-        }
-        TransferType::Close => {
-            if let Some(global) = &global.window {
-                windows_lib::close_overview(None, global);
-            }
-            if let Some(l_global) = &global.launcher {
-                launcher_lib::close_launcher(None, l_global, &global.data_dir);
-            }
-        }
-        TransferType::Return(config) => match config.r#override {
-            None => {
-                let launch = global
-                    .launcher
-                    .as_ref()
-                    .and_then(|l| {
-                        l.data.as_ref().map(|d| {
-                            let b = d.borrow();
-                            b.entry.text_length() > 0
-                        })
-                    })
-                    .unwrap_or(false);
-                if launch {
-                    // kill overview, launch program
-                    if let Some(global) = &global.window {
-                        windows_lib::close_overview(None, global);
-                    }
-                    if let Some(l_global) = &global.launcher {
-                        launcher_lib::close_launcher(Some(0), l_global, &global.data_dir);
-                    }
-                } else {
-                    // close overview, kill launcher
-                    if let Some(global) = &global.window {
-                        windows_lib::close_overview(Some(None), global);
-                    }
-                    if let Some(l_global) = &global.launcher {
-                        launcher_lib::close_launcher(None, l_global, &global.data_dir);
-                    }
-                };
-            }
-            Some(Override::Offset(offset)) => {
-                // kill overview, launch program
-                if let Some(global) = &global.window {
-                    windows_lib::close_overview(None, global);
-                }
-                if let Some(l_global) = &global.launcher {
-                    launcher_lib::close_launcher(Some(offset), l_global, &global.data_dir);
-                }
-            }
-            Some(Override::ClientId(client_id)) => {
-                // close overview, kill launcher
-                if let Some(global) = &global.window {
-                    windows_lib::close_overview(
-                        Some(Some(IdOverride::ClientId(client_id))),
-                        global,
-                    );
-                }
-                if let Some(l_global) = &global.launcher {
-                    launcher_lib::close_launcher(None, l_global, &global.data_dir);
-                }
-            }
-            Some(Override::WorkspaceID(workspace_id)) => {
-                // close overview, kill launcher
-                if let Some(global) = &global.window {
-                    windows_lib::close_overview(
-                        Some(Some(IdOverride::WorkspaceID(workspace_id))),
-                        global,
-                    );
-                }
-                if let Some(l_global) = &global.launcher {
-                    launcher_lib::close_launcher(None, l_global, &global.data_dir);
-                }
-            }
-        },
-        TransferType::Restart => {
-            if let Some(global) = &global.window {
-                windows_lib::stop_overview(global);
-            }
-            if let Some(global) = &global.launcher {
-                launcher_lib::stop_launcher(global);
-            }
-        }
+        TransferType::OpenOverview(config) => open_overview(global, config),
+        TransferType::OpenSwitch(config) => open_switch(global, config),
+        TransferType::Switch(config) => switch(global, config),
+        TransferType::Exit => exit(global),
+        TransferType::Type(text) => r#type(global, text),
+        TransferType::Close(config) => close(global, config),
+        TransferType::Restart => restart(global),
     }
     Ok(())
 }

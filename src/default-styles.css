@@ -20,6 +20,10 @@ flowboxchild {
     filter: grayscale(100%);
 }
 
+.underline {
+    text-decoration: underline;
+}
+
 /* window text color */
 .window {
     color: var(--text-color, rgba(245, 245, 245, 1));

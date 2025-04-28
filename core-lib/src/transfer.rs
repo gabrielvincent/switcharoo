@@ -1,15 +1,21 @@
 use crate::{ClientId, WorkspaceId};
-use anyhow::Context;
-use ron::extensions::Extensions;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub enum TransferType {
+    /// send from the keybind to open the overview
     OpenOverview(OpenOverview),
+    /// send from the keybind to open the switch
     OpenSwitch(OpenSwitch),
+    /// send from the keybinds like arrow keys or tab on overview or switch
     Switch(SwitchConfig),
-    Return(ReturnConfig),
-    Close,
+    /// send by pressing enter / ctrl + <n> / or from the gui itself to close the overview / switch
+    Close(CloseConfig),
+    /// send from the gui itself when typing the launcher
+    Type(String),
+    /// send from pressing ESC
+    Exit,
+    /// send from the app itself when new monitor / config changes detected
     Restart,
 }
 #[derive(Debug, Serialize, Deserialize)]
@@ -40,13 +46,13 @@ pub struct SwitchConfig {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct ReturnConfig {
-    pub r#override: Option<Override>,
+pub enum CloseConfig {
+    Launcher(char),
+    Windows(WindowsOverride),
+    None,
 }
-
-#[derive(Debug, Serialize, Deserialize, Eq, PartialEq)]
-pub enum Override {
-    Offset(u8),
+#[derive(Debug, Serialize, Deserialize)]
+pub enum WindowsOverride {
     ClientId(ClientId),
     WorkspaceID(WorkspaceId),
 }
@@ -57,22 +63,4 @@ pub enum Direction {
     Left,
     Up,
     Down,
-}
-
-pub fn to_ron_string(transfer: &TransferType) -> anyhow::Result<String> {
-    ron::Options::default()
-        .with_default_extension(Extensions::IMPLICIT_SOME)
-        .with_default_extension(Extensions::UNWRAP_VARIANT_NEWTYPES)
-        .with_default_extension(Extensions::EXPLICIT_STRUCT_NAMES)
-        .to_string(transfer)
-        .context("Failed to serialize ron transfer data")
-}
-
-pub fn from_ron_string(transfer: &str) -> anyhow::Result<TransferType> {
-    ron::Options::default()
-        .with_default_extension(Extensions::IMPLICIT_SOME)
-        .with_default_extension(Extensions::UNWRAP_VARIANT_NEWTYPES)
-        .with_default_extension(Extensions::EXPLICIT_STRUCT_NAMES)
-        .from_str(transfer)
-        .context("Failed to deserialize ron transfer data")
 }

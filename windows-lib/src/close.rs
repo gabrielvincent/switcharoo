@@ -5,7 +5,7 @@ use exec_lib::{activate_submap, to_client_address};
 use gtk::prelude::*;
 use tracing::{debug, span, trace, Level};
 
-pub fn close_overview(ids: Option<Option<IdOverride>>, global: &WindowsGlobal) {
+pub fn close_overview(global: &WindowsGlobal, ids: Option<Option<IdOverride>>) {
     let _span = span!(Level::TRACE, "close_overview").entered();
 
     activate_submap("reset").warn("Failed to reset submap");

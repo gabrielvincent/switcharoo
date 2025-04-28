@@ -17,6 +17,7 @@ pkgs.rustPlatform.buildRustPackage {
   ];
 
   buildInputs = with pkgs; [
+    gtk4
     gtk4-layer-shell
   ];
 

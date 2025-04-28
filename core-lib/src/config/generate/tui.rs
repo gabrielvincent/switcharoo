@@ -3,7 +3,10 @@ use crate::config::generate::config::ConfigData;
 use crate::config::structs::{KeyMaybeMod, Mod};
 use crate::util::TERMINALS;
 use anyhow::bail;
-use inquire::{Confirm, Text};
+use inquire::formatter::MultiOptionFormatter;
+use inquire::{Confirm, MultiSelect, Text};
+
+const LAUNCHER_PLUGINS: [&str; 3] = ["Run in shell", "Run in terminal", "Web search"];
 
 pub fn prompt_config() -> anyhow::Result<ConfigData> {
     let open_overview = {
@@ -30,16 +33,31 @@ pub fn prompt_config() -> anyhow::Result<ConfigData> {
             .with_help_message("Used to start applications, opens with overview")
             .prompt()?;
 
-        let default_terminal = if enable_launcher {
-            Text::new("Default Terminal")
+        let (default_terminal, launcher_plugins) = if enable_launcher {
+            let default_terminal = Text::new("Default Terminal")
                 .with_autocomplete(StringAutoCompleter::from(Box::from(TERMINALS)))
                 .with_help_message("used to open terminal applications (htop), leave empty to chose from installed terminals]\n[↑↓ to move, tab to autocomplete, enter to submit")
                 .prompt()
-                .map_or(None, |term| if term.trim().is_empty() { None } else { Some(term) })
+                .map_or(None, |term| if term.trim().is_empty() { None } else { Some(term.into_boxed_str()) });
+
+            let formatter: MultiOptionFormatter<'_, &str> =
+                &|a| format!("{} different fruits", a.len());
+            let plugins = MultiSelect::new(
+                "Plugins for launcher (not working)",
+                LAUNCHER_PLUGINS.to_vec(),
+            )
+            .with_all_selected_by_default()
+            .with_formatter(formatter)
+            .prompt()
+            .map_or(vec![], |selected| {
+                selected.into_iter().map(Box::from).collect()
+            });
+
+            (default_terminal, plugins)
         } else {
-            None
+            (None, vec![])
         };
-        Some((enable_launcher, default_terminal))
+        Some((enable_launcher, default_terminal, launcher_plugins))
     } else {
         None
     };
@@ -65,9 +83,10 @@ pub fn prompt_config() -> anyhow::Result<ConfigData> {
 
     Ok(ConfigData {
         enable_launcher: launcher.as_ref().map(|l| l.0).unwrap_or(false),
-        default_terminal: launcher.and_then(|l| l.1),
+        default_terminal: launcher.as_ref().and_then(|l| l.1.clone()),
         overview: open_overview.map(|o| (o.0, KeyMaybeMod::from(&*o.1))),
         switch: open_switch,
+        launcher_plugins: launcher.map(|l| l.2).unwrap_or_default(),
         grave_reverse,
     })
 }

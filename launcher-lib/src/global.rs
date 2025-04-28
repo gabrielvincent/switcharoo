@@ -1,31 +1,30 @@
-use core_lib::config::Launcher;
+use crate::plugins::MatchData;
+use core_lib::config::{Launcher, Plugins};
 use gtk::{ApplicationWindow, Entry, ListBox};
 use std::cell::RefCell;
+use std::path::Path;
 
 #[derive(Debug)]
 pub struct LauncherGlobal {
-    pub default_terminal: Option<String>,
-    pub animate_launch_time_ms: u64,
-    pub show_execs: bool,
+    pub default_terminal: Option<Box<str>>,
     pub max_items: u8,
     pub width: u32,
-    pub run_cache_weeks: u8,
-    pub show_shell: bool,
+    pub data_dir: Box<Path>,
+    pub plugins: Vec<Plugins>,
     pub data: Option<RefCell<LauncherGlobalData>>,
 }
 
 impl LauncherGlobal {
-    pub fn new(config: &Launcher) -> Self {
-        Self {
+    pub fn new(data_dir: &Path) -> Box<dyn FnOnce(Launcher) -> LauncherGlobal> {
+        let data_dir = Box::from(data_dir);
+        Box::from(move |config: Launcher| Self {
             default_terminal: config.default_terminal.clone(),
-            animate_launch_time_ms: config.animate_launch_time_ms,
-            show_execs: config.show_execs,
             max_items: config.max_items,
             width: config.width,
-            run_cache_weeks: config.run_cache_weeks,
-            show_shell: config.shell_commands,
+            data_dir,
+            plugins: config.plugins.clone(),
             data: None,
-        }
+        })
     }
 }
 
@@ -34,4 +33,5 @@ pub struct LauncherGlobalData {
     pub window: ApplicationWindow,
     pub entry: Entry,
     pub results: ListBox,
+    pub matches: Vec<MatchData>,
 }

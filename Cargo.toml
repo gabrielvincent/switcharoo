@@ -19,6 +19,7 @@ exclude = [
 anyhow.workspace = true
 tracing.workspace = true
 gtk.workspace = true
+serde_json.workspace = true
 clap = { version = "4.5.23", features = ["derive"] }
 tracing-subscriber = { version = "0.3.19", features = ["fmt", "env-filter", "ansi"], default-features = false }
 
@@ -31,9 +32,8 @@ windows-lib.workspace = true
 launcher-lib.workspace = true
 
 [features]
-default = ["json_config", "toml_config", "generate_config_command"]
+default = ["toml_config", "generate_config_command"]
 generate_config_command = ["core-lib/generate_config"]
-json_config = ["core-lib/json_config"]
 toml_config = ["core-lib/toml_config"]
 debug_command = []
 bar = []

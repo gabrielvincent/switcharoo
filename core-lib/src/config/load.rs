@@ -23,7 +23,6 @@ pub fn load_config(config_path: &Path) -> anyhow::Result<Config> {
                 .from_reader(file)
                 .context("Failed to read ron config")?
         }
-        #[cfg(feature = "json_config")]
         Some("json") => {
             let file = std::fs::File::open(config_path)
                 .with_context(|| format!("Failed to open config at ({config_path:?})"))?;
@@ -39,7 +38,7 @@ pub fn load_config(config_path: &Path) -> anyhow::Result<Config> {
                 .context("Failed to read toml config")?;
             toml::from_str(&content).context("Failed to parse toml config")?
         }
-        Some(ext) => bail!("Invalid config file extension: {}", ext),
+        Some(ext) => bail!("Invalid config file extension: {} (check `FEATURES: ` debug log to see enabled extensions)", ext),
     };
 
     Ok(config)

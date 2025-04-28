@@ -1,10 +1,10 @@
+use crate::next::find_next;
+use crate::WindowsGlobal;
 use core_lib::transfer::SwitchConfig;
 use gtk::prelude::*;
 use tracing::{span, Level};
-use crate::next::find_next;
-use crate::WindowsGlobal;
 
-pub fn update_overview(config: SwitchConfig, global: &WindowsGlobal) -> anyhow::Result<()> {
+pub fn update_overview(global: &WindowsGlobal, config: SwitchConfig) {
     let _span = span!(Level::TRACE, "update_overview").entered();
 
     let mut data = global.data.borrow_mut();
@@ -12,9 +12,9 @@ pub fn update_overview(config: SwitchConfig, global: &WindowsGlobal) -> anyhow::
         &config.direction,
         config.workspace,
         &data.hypr_data,
-        &data.active,
+        data.active,
         global.workspaces_per_row as usize,
-    )?;
+    );
     data.active = active;
 
     for monitor_data in data.monitor_list.values_mut() {
@@ -40,5 +40,4 @@ pub fn update_overview(config: SwitchConfig, global: &WindowsGlobal) -> anyhow::
             }
         }
     }
-    Ok(())
 }

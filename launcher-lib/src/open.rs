@@ -3,7 +3,7 @@ use gtk::prelude::*;
 use gtk4_layer_shell::{KeyboardMode, LayerShell};
 use tracing::{span, trace, Level};
 
-pub fn open_launcher(global: &LauncherGlobal) -> anyhow::Result<()> {
+pub fn open_launcher(global: &LauncherGlobal) {
     let _span = span!(Level::TRACE, "open_launcher").entered();
 
     if let Some(data) = &global.data {
@@ -19,6 +19,4 @@ pub fn open_launcher(global: &LauncherGlobal) -> anyhow::Result<()> {
         data.window.grab_focus();
         data.entry.grab_focus();
     }
-
-    Ok(())
 }

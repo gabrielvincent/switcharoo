@@ -14,7 +14,7 @@ pub struct WindowsGlobal {
 }
 
 impl WindowsGlobal {
-    pub fn new(config: &Windows) -> Self {
+    pub fn new(config: Windows) -> Self {
         Self {
             workspaces_per_row: config.workspaces_per_row,
             size_factor: config.size_factor,
