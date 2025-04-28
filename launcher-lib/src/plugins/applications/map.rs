@@ -106,6 +106,6 @@ fn fill_desktop_file_map(
             })
             .warn(&format!("Failed to read file: {:?}", entry.path()));
     }
-    trace!("filled icon map in {}ms", now.elapsed().as_millis());
+    trace!("filled launcher desktop file map in {}ms", now.elapsed().as_millis());
     Ok(())
 }

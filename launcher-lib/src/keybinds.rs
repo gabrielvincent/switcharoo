@@ -1,4 +1,5 @@
 use crate::plugins::get_static_options_chars;
+use core::str::FromStr;
 use core_lib::config::Launcher;
 use core_lib::generate_socat;
 use core_lib::transfer::{CloseConfig, TransferType};
@@ -18,7 +19,7 @@ pub fn generate_keybinds(keyword_list: &mut Vec<(&str, String)>, launcher: &Laun
                 "ctrl, {}, exec, {}",
                 i,
                 generate_launcher_return(CloseConfig::Launcher(
-                    char::from_u32(i).expect("Failed to convert u32 to char")
+                    char::from_str(&i.to_string()).expect("Failed to convert u32 to char")
                 ))
             ),
         ));

@@ -78,7 +78,7 @@ fn fill_desktop_file_map(map: &mut IconPathMap, files: &Vec<DirEntry>) -> anyhow
             })
             .warn(&format!("Failed to read file: {:?}", entry.path()));
     }
-    trace!("filled icon map in {}ms", now.elapsed().as_millis());
+    trace!("filled icon desktop file map in {}ms", now.elapsed().as_millis());
     Ok(())
 }
 

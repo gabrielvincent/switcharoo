@@ -33,7 +33,7 @@ pub struct Launcher {
     pub default_terminal: Option<Box<str>>,
     #[default = 650]
     pub width: u32,
-    #[default = 6]
+    #[default = 5]
     pub max_items: u8,
     #[default(vec![
         Plugins::Applications(ApplicationsPluginOptions::default()),

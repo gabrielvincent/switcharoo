@@ -1,5 +1,3 @@
-extern crate alloc;
-
 mod close;
 mod create;
 mod css;

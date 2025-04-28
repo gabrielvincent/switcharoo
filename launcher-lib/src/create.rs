@@ -48,7 +48,8 @@ pub fn create_launcher_window(
 
     let plugin_box = gtk::Box::builder()
         .orientation(Orientation::Horizontal)
-        .spacing(4)
+        .css_classes(["launcher-plugins"])
+        .spacing(5)
         .hexpand(false)
         .vexpand(false)
         .build();
