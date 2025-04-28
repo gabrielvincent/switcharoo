@@ -20,3 +20,7 @@ pub fn get_static_options() -> Vec<StaticLaunchOption> {
 pub fn launch_static_options(text: &str, default_terminal: Option<String>) {
     run_program(text, None, false, default_terminal);
 }
+
+pub(crate) fn get_chars() -> Vec<char> {
+    vec!['r']
+}

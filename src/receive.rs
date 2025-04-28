@@ -1,14 +1,13 @@
 use crate::recive_handle::{close, exit, open_overview, open_switch, r#type, restart, switch};
 use anyhow::Context;
 use core_lib::transfer::TransferType;
-use core_lib::{from_ron_string, get_daemon_socket_path_buff};
+use core_lib::get_daemon_socket_path_buff;
 use exec_lib::toast;
 use gtk::gio::{Cancellable, InputStream, SocketListener, UnixSocketAddress};
 use gtk::prelude::*;
 use gtk::{gio, glib};
 use rand::Rng;
 use std::fs::remove_file;
-use std::path::Path;
 use std::time::Instant;
 use tracing::{debug, error, info, span, trace, Level};
 

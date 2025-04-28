@@ -67,7 +67,7 @@ pub fn get_sortable_launch_options(
     matches.sort_by(|a, b| a.score.cmp(&b.score));
     matches
 }
-pub fn get_static_launch_options(plugins: Vec<Plugins>) {
+pub fn get_static_launch_options(plugins: &Vec<Plugins>) -> Vec<StaticLaunchOption> {
     let mut matches = Vec::new();
 
     for plugins in plugins {
@@ -81,8 +81,27 @@ pub fn get_static_launch_options(plugins: Vec<Plugins>) {
             _ => {}
         }
     }
+
+    matches
 }
 
 pub fn launch_static_options(key: &str, default_terminal: Option<String>) {}
 
 pub fn launch_sortable_options(text: &str, offset: u8) {}
+
+pub fn get_static_options_chars(plugins: &Vec<Plugins>) -> Vec<char> {
+    let mut chars = Vec::new();
+
+    for plugins in plugins {
+        match plugins {
+            Plugins::Shell() => {
+                chars.append(&mut shell::get_chars());
+            }
+            Plugins::Terminal() => {
+                chars.append(&mut terminal::get_chars());
+            }
+            _ => {}
+        }
+    }
+    chars
+}

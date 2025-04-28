@@ -5,12 +5,10 @@ use core_lib::transfer::{
     CloseConfig, Direction, OpenOverview, OpenSwitch, SwitchConfig, TransferType,
 };
 use core_lib::{
-    generate_socat, get_daemon_socket_path_buff, to_ron_string, LAUNCHER_NAMESPACE,
+    generate_socat, to_ron_string, LAUNCHER_NAMESPACE,
     OVERVIEW_NAMESPACE,
 };
 use launcher_lib::generate_keybinds;
-use std::env;
-use std::path::PathBuf;
 use tracing::{span, Level};
 
 pub fn create_binds_and_submaps<'a>(config: &Config) -> anyhow::Result<Vec<(&'a str, String)>> {

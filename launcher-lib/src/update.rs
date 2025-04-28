@@ -1,17 +1,13 @@
-use crate::global::LauncherGlobalData;
-use crate::plugins::{get_sortable_launch_options, get_static_launch_options};
+use crate::plugins::{get_sortable_launch_options, get_static_launch_options, StaticLaunchOption};
 use crate::LauncherGlobal;
-use core_lib::config::Plugins;
 use core_lib::theme_icon_cache::theme_has_icon_name;
 use core_lib::transfer::{CloseConfig, TransferType};
 use core_lib::{send_to_socket, Warn};
 use gtk::pango::EllipsizeMode;
 use gtk::prelude::{BoxExt, GestureExt, WidgetExt};
 use gtk::{
-    glib, Align, EventSequenceState, GestureClick, IconSize, Image, Label, ListBox, ListBoxRow,
-    Orientation,
+    glib, Align, EventSequenceState, GestureClick, IconSize, Image, Label, ListBoxRow, Orientation,
 };
-use std::cell::RefCell;
 use std::path::Path;
 use tracing::{debug, span, trace, warn, Level};
 
@@ -51,35 +47,42 @@ pub fn update_launcher(global: &LauncherGlobal, text: String) {
             ));
             data1.results.append(&row);
         }
+
+        let (static_row, static_box) = create_static_plugin_row();
+        data1.results.append(&static_row);
+
+        let static_launch_options = get_static_launch_options(&global.plugins);
+        for opt in static_launch_options.into_iter() {
+            let r#box = create_static_plugin_box(opt);
+            static_box.append(&r#box);
+        }
     }
+}
 
-    // TODO static_launch_options
-    // let static_launch_options = get_static_launch_options(text, show_shell);
-    // for (char, r#match) in other_matches.into_iter() {
-    //     if items <= 0 {
-    //         break;
-    //     }
-    //     items -= 1;
-    //     let row = create_entry(
-    //         format!("Ctrl+{char}"),
-    //         r#match.icon,
-    //         &r#match.name,
-    //         Some(String::from(r#match.exec)),
-    //     );
-    //     // row.add_controller(click_entry(LauncherOverride::));
-    //     list.append(&row);
-    // }
+fn create_static_plugin_box(opt: StaticLaunchOption) -> gtk::Box {
+    let hbox = gtk::Box::builder()
+        .orientation(Orientation::Horizontal)
+        .build();
+    hbox
+}
 
-    // matches
-    //     .into_iter()
-    //     .take(launcher_max_items)
-    // trace!(
-    //     "Matches: {:?}",
-    //     matches
-    //         .iter()
-    //         .map(|(v, e)| format!("{:?}: {}", v, e.name))
-    //         .collect::<Vec<_>>()
-    // );
+fn create_static_plugin_row() -> (ListBoxRow, gtk::Box) {
+    let hbox = gtk::Box::builder()
+        .orientation(Orientation::Horizontal)
+        .spacing(8)
+        .hexpand(true)
+        .vexpand(true)
+        .build();
+
+    // TODO
+    let row = ListBoxRow::builder()
+        .css_classes(vec!["launcher-item"])
+        .height_request(45)
+        .hexpand(true)
+        .vexpand(true)
+        .child(&hbox)
+        .build();
+    (row, hbox)
 }
 
 fn create_entry(
@@ -170,49 +173,4 @@ fn click_entry(char: char) -> GestureClick {
             .warn("unable send return to socket");
     });
     gesture
-}
-
-fn get_exec_label(exec: &str) -> String {
-    let exec_trim = exec.replace("'", "").replace("\"", "");
-    // pwa detection
-    if exec.contains("--app-id=") && exec.contains("--profile-directory=") {
-        // "flatpak 'run'" = pwa from browser inside flatpak
-        if exec.contains("flatpak run") || exec.contains("flatpak 'run'") {
-            format!(
-                "[Flatpak + PWA] {}",
-                exec_trim
-                    .split(' ')
-                    .find(|s| s.contains("--command="))
-                    .and_then(|s| s
-                        .split('=')
-                        .next_back()
-                        .and_then(|s| s.split('/').next_back()))
-                    .unwrap_or_default()
-            )
-        } else {
-            // normal PWA
-            format!(
-                "[PWA] {}",
-                exec.split(' ')
-                    .next()
-                    .and_then(|s| s.split('/').next_back())
-                    .unwrap_or_default()
-            )
-        }
-        // flatpak detection
-    } else if exec.contains("flatpak run") || exec.contains("flatpak 'run'") {
-        format!(
-            "[Flatpak] {}",
-            exec_trim
-                .split(' ')
-                .find(|s| s.contains("--command="))
-                .and_then(|s| s
-                    .split('=')
-                    .next_back()
-                    .and_then(|s| s.split('/').next_back()))
-                .unwrap_or_default()
-        )
-    } else {
-        format!("{}", exec_trim) // show full exec instead of only last part of /path/to/exec
-    }
 }

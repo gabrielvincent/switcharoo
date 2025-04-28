@@ -1,7 +1,6 @@
 use crate::data::get_cached_runs;
 use crate::plugins::applications::maps::{get_all_desktop_files, DesktopEntry};
 use crate::plugins::{Identifier, SortableLaunchOption};
-use core_lib::Warn;
 use exec_lib::run::run_program;
 use std::collections::HashMap;
 use std::path::Path;
@@ -9,10 +8,8 @@ use tracing::warn;
 
 const PLUGIN_NAME: &str = "applications";
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
 enum MatchType {
-    Other = 1,
-    Keyword = 5,
+    Keyword = 2,
     Name = 10,
     Exact = 15,
 }
@@ -25,11 +22,7 @@ impl SortableLaunchOption {
         show_execs: bool,
     ) -> Self {
         let (details, details_long) = if show_execs {
-            if let Some(short_exec) = entry.exec.as_ref().rsplit('/').find(|s| !s.is_empty()) {
-                (Box::from(short_exec), Some(entry.exec.clone()))
-            } else {
-                (entry.exec.clone(), None)
-            }
+            get_exec_labels(&entry.exec)
         } else {
             (Box::from(""), None)
         };
@@ -98,9 +91,10 @@ pub fn get_sortable_options(
 pub fn launch_option(r#match: SortableLaunchOption, default_terminal: Option<String>) {
     let entries = get_all_desktop_files();
     let entry = entries
-        .iter().find(|entry| r#match.data.identifier.as_deref() == Some(&*entry.source.to_string_lossy()));
+        .iter()
+        .find(|entry| r#match.data.identifier.as_deref() == Some(&*entry.source.to_string_lossy()));
     if let Some(entry) = entry {
-        let mut exec = entry.exec.clone();
+        let exec = entry.exec.clone();
         run_program(
             &*exec,
             entry.exec_path.clone(),
@@ -109,6 +103,75 @@ pub fn launch_option(r#match: SortableLaunchOption, default_terminal: Option<Str
         );
     } else {
         warn!("Failed to find entry for {:?}", r#match.data.identifier);
+    }
+}
+
+fn get_exec_labels(exec: &str) -> (Box<str>, Option<Box<str>>) {
+    let exec_trim = exec.replace("'", "").replace("\"", "");
+    // pwa detection
+    if exec.contains("--app-id=") && exec.contains("--profile-directory=") {
+        // "flatpak 'run'" = pwa from browser inside flatpak
+        if exec.contains("flatpak run") || exec.contains("flatpak 'run'") {
+            (
+                format!(
+                    "[Flatpak + PWA] {}",
+                    exec_trim
+                        .split(' ')
+                        .find(|s| s.contains("--command="))
+                        .and_then(|s| s
+                            .split('=')
+                            .next_back()
+                            .and_then(|s| s.split('/').next_back()))
+                        .unwrap_or_default()
+                )
+                .into_boxed_str(),
+                Some(Box::from(exec)),
+            )
+        } else {
+            // normal PWA
+            (
+                format!(
+                    "[PWA] {}",
+                    exec.split(' ')
+                        .next()
+                        .and_then(|s| s.split('/').next_back())
+                        .unwrap_or_default()
+                )
+                .into_boxed_str(),
+                Some(Box::from(exec)),
+            )
+        }
+        // flatpak detection
+    } else if exec.contains("flatpak run") || exec.contains("flatpak 'run'") {
+        (
+            format!(
+                "[Flatpak] {}",
+                exec_trim
+                    .split(' ')
+                    .find(|s| s.contains("--command="))
+                    .and_then(|s| s
+                        .split('=')
+                        .next_back()
+                        .and_then(|s| s.split('/').next_back()))
+                    .unwrap_or_default()
+            )
+            .into_boxed_str(),
+            Some(Box::from(exec)),
+        )
+    } else {
+        if exec_trim.starts_with("/") {
+            (
+                Box::from(
+                    exec_trim
+                        .rsplit('/')
+                        .find(|s| !s.is_empty())
+                        .unwrap_or_default(),
+                ),
+                Some(Box::from(exec)),
+            )
+        } else {
+            (Box::from(exec_trim), None)
+        }
     }
 }
 

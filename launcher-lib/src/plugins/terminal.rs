@@ -24,3 +24,7 @@ pub fn launch_static_options(text: &str, default_terminal: Option<String>) {
         default_terminal,
     );
 }
+
+pub(crate) fn get_chars() -> Vec<char> {
+    vec!['t']
+}

@@ -10,7 +10,7 @@ mod cli;
 mod receive;
 mod start;
 mod recive_handle;
-mod gen_keybinds;
+mod keybinds;
 
 fn main() -> anyhow::Result<()> {
     malloc::limit_mmap_threshold();

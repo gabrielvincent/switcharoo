@@ -1,4 +1,4 @@
-use crate::gen_keybinds::create_binds_and_submaps;
+use crate::keybinds::create_binds_and_submaps;
 use crate::receive::{socket_handler, Globals};
 use core_lib::theme_icon_cache::init_icon_map;
 use core_lib::transfer::TransferType;

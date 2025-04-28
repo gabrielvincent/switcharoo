@@ -1,14 +1,7 @@
-use crate::data::save_run;
 use crate::global::LauncherGlobalData;
 use crate::LauncherGlobal;
-use core_lib::Warn;
-use gtk::glib;
-use gtk::glib::clone;
 use gtk::prelude::*;
-use gtk4_layer_shell::{KeyboardMode, LayerShell};
 use std::cell::RefCell;
-use std::path::Path;
-use std::time::Duration;
 use tracing::{span, trace, Level};
 
 pub fn close_launcher(global: &LauncherGlobal, char: Option<char>) {

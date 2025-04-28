@@ -1,21 +1,19 @@
 use crate::global::LauncherGlobalData;
 use crate::LauncherGlobal;
-use core_lib::theme_icon_cache::theme_has_icon_name;
-use core_lib::transfer::{CloseConfig, TransferType};
+use core_lib::transfer::TransferType;
 use core_lib::{send_to_socket, Warn, LAUNCHER_NAMESPACE};
 use gtk::gdk::Key;
 use gtk::glib::{clone, Propagation};
-use gtk::pango::EllipsizeMode;
 use gtk::prelude::*;
-use gtk::{glib, EventSequenceState, GestureClick, IconSize, Image, ListBoxRow};
+use gtk::glib;
 use gtk::{
-    Align, Application, ApplicationWindow, Entry, EventControllerKey, Label, ListBox, Orientation,
+    Application, ApplicationWindow, Entry, EventControllerKey, ListBox,
     SelectionMode,
 };
 use gtk4_layer_shell::{Edge, Layer, LayerShell};
 use std::cell::RefCell;
-use std::path::{Path, PathBuf};
-use tracing::{debug, span, trace, warn, Level};
+use std::path::Path;
+use tracing::{debug, span, trace, Level};
 
 pub fn create_launcher_window(
     app: &Application,

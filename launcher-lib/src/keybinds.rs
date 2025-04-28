@@ -1,3 +1,4 @@
+use crate::plugins::get_static_options_chars;
 use core_lib::config::Launcher;
 use core_lib::transfer::{CloseConfig, TransferType};
 use core_lib::{generate_socat, to_ron_string};
@@ -22,20 +23,14 @@ pub fn generate_keybinds(keyword_list: &mut Vec<(&str, String)>, launcher: &Laun
             ),
         ));
     }
-    // TODO extend this
-    if true {
+
+    for char in get_static_options_chars(&launcher.plugins) {
         keyword_list.push((
             "bind",
             format!(
-                "ctrl, r, exec, {}",
-                generate_launcher_return(CloseConfig::Launcher('r'))
-            ),
-        ));
-        keyword_list.push((
-            "bind",
-            format!(
-                "ctrl, t, exec, {}",
-                generate_launcher_return(CloseConfig::Launcher('t'))
+                "ctrl, {}, exec, {}",
+                char,
+                generate_launcher_return(CloseConfig::Launcher(char))
             ),
         ));
     }
