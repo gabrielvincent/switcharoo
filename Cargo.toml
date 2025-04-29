@@ -2,7 +2,7 @@
 name = "hyprshell"
 readme = "README.md"
 documentation = "https://docs.rs/hyprshell"
-version = "0.3.1"
+version = "0.4.0"
 edition.workspace = true
 description.workspace = true
 license.workspace = true
@@ -44,7 +44,7 @@ resolver = "2"
 
 
 [workspace.package]
-version = "0.3.1"
+version = "0.4.0"
 description = "hyprshell is a Rust-based GUI designed to enhance window management in hyprland"
 license = "MIT"
 authors = ["h3rmt"]
@@ -61,10 +61,10 @@ serde_json = { version = "1.0.135" }
 gtk = { version = "0.9.6", package = "gtk4", default-features = false, features = ["v4_12"] }
 gtk4-layer-shell = { version = "0.5.0" }
 
-core-lib = { path = "core-lib", package = "hyprshell-core-lib", version = "0.3.0" }
-exec-lib = { path = "exec-lib", package = "hyprshell-exec-lib", version = "0.3.0" }
-windows-lib = { path = "windows-lib", package = "hyprshell-windows-lib", version = "0.3.0" }
-launcher-lib = { path = "launcher-lib", package = "hyprshell-launcher-lib", version = "0.3.0" }
+core-lib = { path = "core-lib", package = "hyprshell-core-lib", version = "0.4.0" }
+exec-lib = { path = "exec-lib", package = "hyprshell-exec-lib", version = "0.4.0" }
+windows-lib = { path = "windows-lib", package = "hyprshell-windows-lib", version = "0.4.0" }
+launcher-lib = { path = "launcher-lib", package = "hyprshell-launcher-lib", version = "0.4.0" }
 
 [profile.release]
 strip = "debuginfo"
