@@ -2,7 +2,7 @@ use crate::receive::Globals;
 use core_lib::transfer::{CloseConfig, OpenOverview, OpenSwitch, SwitchConfig, WindowsOverride};
 use core_lib::{IdOverride, Warn};
 use gtk::prelude::EntryExt;
-use tracing::warn;
+use tracing::{debug, warn};
 
 macro_rules! if_some {
     ($global:expr, $func:path $(, $args:expr)*) => {
@@ -60,20 +60,25 @@ pub fn r#type(global: &Globals, text: String) {
 pub fn close(global: &Globals, config: CloseConfig) {
     match config {
         CloseConfig::None => {
-            let launch = global
+            let (launcher_active, launcher_empty) = global
                 .launcher
                 .as_ref()
                 .and_then(|l| {
                     l.data.as_ref().map(|d| {
                         let b = d.borrow();
-                        b.entry.text_length() > 0
+                        (b.entry.text_length() > 0, b.sorted_matches.is_empty())
                     })
                 })
-                .unwrap_or(false);
-            if launch {
-                // kill overview, close launcher
-                if_some!(global.window, windows_lib::close_overview, None);
-                if_some!(global.launcher, launcher_lib::close_launcher, Some('0'));
+                .unwrap_or((false, false));
+
+            if launcher_active {
+                if !launcher_empty {
+                    // kill overview, close launcher
+                    if_some!(global.window, windows_lib::close_overview, None);
+                    if_some!(global.launcher, launcher_lib::close_launcher, Some('0'));
+                } else {
+                    debug!("Launcher is empty, not closing");
+                }
             } else {
                 // close overview, kill launcher
                 if_some!(global.window, windows_lib::close_overview, Some(None));

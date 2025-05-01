@@ -2,7 +2,7 @@ use crate::global::LauncherGlobalData;
 use crate::{plugins, LauncherGlobal};
 use gtk::prelude::*;
 use gtk4_layer_shell::{KeyboardMode, LayerShell};
-use std::cell::RefCell;
+use std::cell::{Ref, RefCell};
 use tracing::{span, trace, warn, Level};
 
 pub fn close_launcher(global: &LauncherGlobal, char: Option<char>) {
@@ -27,19 +27,24 @@ pub fn close_launcher(global: &LauncherGlobal, char: Option<char>) {
                     &global.default_terminal,
                     &global.data_dir,
                 );
-
-                let data1 = data.borrow();
-                while let Some(child) = data1.results.first_child() {
-                    data1.results.remove(&child);
-                }
-                data1.entry.set_text("");
-                trace!("Hiding window {:?}", data1.window.id());
-                data1.window.set_visible(false);
+                drop(data1);
             } else {
                 warn!("No match found for char: {}", char);
             }
         }
+        // close launcher
+        let data1 = data.borrow();
+        close(data1);
     }
+}
+
+fn close(data: Ref<LauncherGlobalData>) {
+    while let Some(child) = data.results.first_child() {
+        data.results.remove(&child);
+    }
+    data.entry.set_text("");
+    trace!("Hiding window {:?}", data.window.id());
+    data.window.set_visible(false);
 }
 
 /// no longer used, but would look cool when launching apps
