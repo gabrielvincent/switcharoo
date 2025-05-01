@@ -17,7 +17,7 @@ pub fn close_launcher(global: &LauncherGlobal, char: Option<char>) {
                 '0'..='9' => data1
                     .sorted_matches
                     .get(char.to_digit(10).expect("unable to convert char") as usize),
-                char => data1.static_matches.get(&char),
+                _ => data1.static_matches.get(&char),
             } {
                 data1.window.set_keyboard_mode(KeyboardMode::None);
                 // show_launch(data, offset);
@@ -27,17 +27,18 @@ pub fn close_launcher(global: &LauncherGlobal, char: Option<char>) {
                     &global.default_terminal,
                     &global.data_dir,
                 );
+
+                let data1 = data.borrow();
+                while let Some(child) = data1.results.first_child() {
+                    data1.results.remove(&child);
+                }
+                data1.entry.set_text("");
+                trace!("Hiding window {:?}", data1.window.id());
+                data1.window.set_visible(false);
             } else {
                 warn!("No match found for char: {}", char);
             }
         }
-        let data1 = data.borrow();
-        while let Some(child) = data1.results.first_child() {
-            data1.results.remove(&child);
-        }
-        data1.entry.set_text("");
-        trace!("Hiding window {:?}", data1.window.id());
-        data1.window.set_visible(false);
     }
 }
 

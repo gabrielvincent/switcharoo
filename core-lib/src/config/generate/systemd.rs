@@ -56,7 +56,7 @@ pub fn write_systemd_unit(
     std::fs::write(&path, unit_text)
         .with_context(|| format!("Failed to write Systemd unit file at ({path:?})"))?;
 
-    info!("Systemd unit file generated successfully");
+    info!("Systemd unit file generated successfully at {path:?}");
     Ok(())
 }
 

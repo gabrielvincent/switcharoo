@@ -1,11 +1,8 @@
-use crate::transfer::TransferType;
 use anyhow::Context;
-use ron::extensions::Extensions;
 use semver::Version;
 use std::fs::DirEntry;
 use std::os::unix::net::UnixStream;
 use std::path::PathBuf;
-use std::sync::OnceLock;
 use std::{env, fmt};
 use tracing::{debug, trace, warn};
 
@@ -159,42 +156,11 @@ fn find_application_dirs() -> Vec<PathBuf> {
     dirs
 }
 
-static RON_OPTIONS: OnceLock<ron::Options> = OnceLock::new();
-
-fn get_ron_options() -> ron::Options {
-    ron::Options::default()
-        .with_default_extension(Extensions::IMPLICIT_SOME)
-        .with_default_extension(Extensions::UNWRAP_VARIANT_NEWTYPES)
-        .with_default_extension(Extensions::EXPLICIT_STRUCT_NAMES)
-}
-
-pub fn to_ron_string(transfer: &TransferType) -> anyhow::Result<String> {
-    RON_OPTIONS
-        .get_or_init(get_ron_options)
-        .to_string(transfer)
-        .context("Failed to serialize ron transfer data")
-}
-
-pub fn from_ron_string(transfer: &str) -> anyhow::Result<TransferType> {
-    RON_OPTIONS
-        .get_or_init(get_ron_options)
-        .from_str(transfer)
-        .context("Failed to deserialize ron transfer data")
-}
-
-static SOCAT_PATH: OnceLock<String> = OnceLock::new();
-
-fn get_socat_path() -> String {
-    env::var("HYPRSHELL_SOCAT_PATH")
-        .or_else(|_| which::which("socat").map(|path| path.to_string_lossy().to_string()))
-        .expect("`socat` command not found. Please ensure it is installed and available in PATH.")
-}
-
 pub fn generate_socat(echo: &str) -> String {
     format!(
         r#"echo '{}' | {} - UNIX-CONNECT:{}"#,
         echo,
-        SOCAT_PATH.get_or_init(get_socat_path),
+        env!("SOCAT_PATH"),
         get_daemon_socket_path_buff().to_string_lossy()
     )
 }

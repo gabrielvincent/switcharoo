@@ -21,6 +21,6 @@ pub fn write_css(css_path: PathBuf, override_file: bool) -> anyhow::Result<()> {
     std::fs::write(&css_path, CSS_CONFIG)
         .with_context(|| format!("Failed to write css file at ({css_path:?})"))?;
 
-    info!("CSS file generated successfully");
+    info!("CSS file generated successfully at {css_path:?}");
     Ok(())
 }

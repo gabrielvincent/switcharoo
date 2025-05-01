@@ -10,6 +10,7 @@ use std::ffi::OsStr;
 use std::fs::{create_dir_all, write, File};
 use std::path::Path;
 use tracing::{info, span, Level};
+use crate::config::generate::tui::CONFIGURABLE_LAUNCHER_PLUGINS;
 
 #[derive(Debug)]
 pub struct ConfigData {
@@ -26,6 +27,13 @@ pub fn generate_config(data: ConfigData) -> Config {
         launcher: if data.enable_launcher {
             Some(Launcher {
                 default_terminal: data.default_terminal,
+                plugins: data.launcher_plugins.into_iter()
+                    .filter_map(|plugin| {
+                        CONFIGURABLE_LAUNCHER_PLUGINS
+                            .iter()
+                            .find(|(name, _)| *name == plugin.as_ref())
+                            .map(|(_, constructor)| constructor())
+                    }).collect(),
                 ..Default::default()
             })
         } else {
@@ -110,6 +118,6 @@ pub fn write_config(config_path: &Path, config: Config, override_file: bool) -> 
         Some(ext) => bail!("Invalid config file extension: {} (check `FEATURES: ` debug log to see enabled extensions)", ext),
     };
 
-    info!("Config file generated successfully");
+    info!("Config file generated successfully at {:?}", config_path);
     Ok(())
 }

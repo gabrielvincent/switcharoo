@@ -19,12 +19,9 @@ pkgs.rustPlatform.buildRustPackage {
   buildInputs = with pkgs; [
     gtk4
     gtk4-layer-shell
+    # hyprshell-core-lib gets the path at build time
+    socat
   ];
-
-  # Makes dependency `socat` available to hyprshell
-  postInstall = ''
-    wrapProgram $out/bin/${pname} --set HYPRSHELL_SOCAT_PATH ${pkgs.lib.getExe pkgs.socat}
-  '';
 
   meta = {
     mainProgram = pname;

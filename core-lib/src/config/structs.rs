@@ -48,6 +48,7 @@ pub enum Plugins {
     Applications(ApplicationsPluginOptions),
     Terminal(),
     Shell(),
+    WebSearch(WebSearchPluginOptions),
 }
 #[derive(SmartDefault, Debug, Clone, Deserialize, Serialize)]
 #[serde(default, deny_unknown_fields)]
@@ -56,6 +57,12 @@ pub struct ApplicationsPluginOptions {
     pub run_cache_weeks: u8,
     #[default = true]
     pub show_execs: bool,
+}
+
+#[derive(SmartDefault, Debug, Clone, Deserialize, Serialize)]
+#[serde(default, deny_unknown_fields)]
+pub struct WebSearchPluginOptions {
+
 }
 
 #[derive(SmartDefault, Debug, Clone, Deserialize, Serialize)]

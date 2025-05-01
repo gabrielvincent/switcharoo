@@ -34,7 +34,7 @@ pub fn launch_option(text: &str, default_terminal: &Option<Box<str>>) {
     run_program(
         // exec shell to prevent needing 2 exits
         // echo to make the shell look better and show the executed command
-        &format!("$SHELL -c \"echo '{text}';{text};echo;exec $SHELL\""),
+        &format!("$SHELL -c \"echo '> {text}';{text};echo;exec $SHELL\""),
         None,
         true,
         default_terminal,

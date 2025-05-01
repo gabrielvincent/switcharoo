@@ -1,5 +1,6 @@
 use core_lib::config::Plugins;
 use std::path::Path;
+use tracing::warn;
 
 mod applications;
 mod shell;
@@ -31,6 +32,7 @@ pub enum PluginNames {
     Applications,
     Shell,
     Terminal,
+    WebSearch,
 }
 
 #[derive(Debug)]
@@ -83,6 +85,10 @@ pub fn get_static_launch_options(
             Plugins::Terminal() => {
                 terminal::get_static_options(&mut matches, default_terminal);
             }
+            Plugins::WebSearch(_config) => {
+                warn!("Web search plugin not yet implemented");
+                continue;
+            }
             _ => {}
         }
     }
@@ -97,6 +103,7 @@ pub fn launch(iden: &Identifier, text: &str, default_terminal: &Option<Box<str>>
         }
         PluginNames::Shell => shell::launch_option(text, default_terminal),
         PluginNames::Terminal => terminal::launch_option(text, default_terminal),
+        PluginNames::WebSearch => warn!("Web search plugin not yet implemented"),
     }
 }
 

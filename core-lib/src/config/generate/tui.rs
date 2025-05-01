@@ -1,13 +1,20 @@
 use crate::config::generate::autocomplete::StringAutoCompleter;
 use crate::config::generate::config::ConfigData;
 use crate::config::structs::{KeyMaybeMod, Mod};
+use crate::config::Plugins;
 use crate::util::TERMINALS;
 use anyhow::bail;
 use inquire::formatter::MultiOptionFormatter;
 use inquire::{Confirm, MultiSelect, Text};
 
-const LAUNCHER_PLUGINS: [&str; 3] = ["Run in shell", "Run in terminal", "Web search"];
-
+pub const CONFIGURABLE_LAUNCHER_PLUGINS: &[(&str, fn() -> Plugins)] = &[
+    ("Open Applications", || {
+        Plugins::Applications(Default::default())
+    }),
+    ("Run in shell", || Plugins::Shell()),
+    ("Run in terminal", || Plugins::Terminal()),
+    ("Web search", || Plugins::WebSearch(Default::default())),
+];
 pub fn prompt_config() -> anyhow::Result<ConfigData> {
     let open_overview = {
         let open_overview = Text::new("Key combination to open the overview (and launcher)")
@@ -41,10 +48,13 @@ pub fn prompt_config() -> anyhow::Result<ConfigData> {
                 .map_or(None, |term| if term.trim().is_empty() { None } else { Some(term.into_boxed_str()) });
 
             let formatter: MultiOptionFormatter<'_, &str> =
-                &|a| format!("{} different fruits", a.len());
+                &|a| format!("{} plugins active", a.len());
             let plugins = MultiSelect::new(
-                "Plugins for launcher (not working)",
-                LAUNCHER_PLUGINS.to_vec(),
+                "Plugins for launcher",
+                CONFIGURABLE_LAUNCHER_PLUGINS
+                    .iter()
+                    .map(|(name, _)| *name)
+                    .collect(),
             )
             .with_all_selected_by_default()
             .with_formatter(formatter)
