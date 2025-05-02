@@ -8,7 +8,7 @@ use exec_lib::get_initial_active;
 #[derive(Debug)]
 pub struct WindowsGlobal {
     pub workspaces_per_row: u8,
-    pub size_factor: f64,
+    pub scale: f64,
     pub strip_html_from_workspace_title: bool,
     pub data: RefCell<OverviewGlobalData>,
 }
@@ -17,7 +17,7 @@ impl WindowsGlobal {
     pub fn new(config: Windows) -> Self {
         Self {
             workspaces_per_row: config.workspaces_per_row,
-            size_factor: config.size_factor,
+            scale: config.scale,
             strip_html_from_workspace_title: config.strip_html_from_workspace_title,
             data: RefCell::new(OverviewGlobalData::default()),
         }

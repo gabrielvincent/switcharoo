@@ -8,12 +8,11 @@ use core_lib::{send_to_socket, ClientData, ClientId, FindByFirst, Warn};
 use exec_lib::activate_submap;
 use gtk::prelude::*;
 use gtk::{pango, EventSequenceState, Frame, GestureClick, Image, Label, Overflow, Overlay};
-use std::cmp::min;
 use tracing::{debug, span, trace, Level};
-
-fn scale(value: i16, size_factor: f64) -> i32 {
-    (value as f64 / 31.0 * size_factor) as i32
+fn scale(value: i16, scale: f64) -> i32 {
+    (value as f64 / (15f64 - scale)) as i32
 }
+
 pub fn open_switch(global: &WindowsGlobal, config: OpenSwitch) -> anyhow::Result<()> {
     let _span = span!(Level::TRACE, "open_switch").entered();
     let (clients_data, active) = collect_data(&SortConfig {
@@ -82,31 +81,12 @@ pub fn open_switch(global: &WindowsGlobal, config: OpenSwitch) -> anyhow::Result
                     .build();
 
                 // hide picture if client so small
-                // 2 => > infinity
-                // 2.1  > 800
-                // 3 => > 800
-                // 3.9  > 800
-                // 4 => > 538
-                // 5 => > 473
-                // 6 => > 408
-                // 7 => > 343
-                // 8 => > 278
-                // 9 => > 250
-                if match global.size_factor {
-                    ..2.5 => false,
-                    2.5..3.9 => monitor.height > 800,
-                    _ => {
-                        monitor.height as i16
-                            > 700 - min(((global.size_factor - 1.5) * 65.0) as i16, 450)
-                    }
-                } {
+                let client_h_w =
+                    scale(client.height, global.scale).min(scale(client.width, global.scale));
+                if client_h_w > 70 {
                     let image = Image::builder()
                         .css_classes(["client-image"])
-                        .pixel_size(
-                            (scale(monitor.height as i16, global.size_factor).clamp(50, 200) as f64
-                                / 1.5) as i32
-                                - 20,
-                        )
+                        .pixel_size((client_h_w.clamp(50, 600) as f64 / 1.5) as i32 - 20)
                         .build();
                     if !client.enabled {
                         image.add_css_class("monochrome");
@@ -119,8 +99,8 @@ pub fn open_switch(global: &WindowsGlobal, config: OpenSwitch) -> anyhow::Result
                     .css_classes(["client"])
                     .overflow(Overflow::Hidden)
                     .child(&client_frame)
-                    .width_request(scale(monitor.width as i16, global.size_factor))
-                    .height_request(scale(monitor.height as i16, global.size_factor))
+                    .width_request(scale(monitor.width as i16, global.scale))
+                    .height_request(scale(monitor.height as i16, global.scale))
                     .build();
 
                 // add border around initial active client

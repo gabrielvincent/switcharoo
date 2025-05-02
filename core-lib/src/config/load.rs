@@ -41,5 +41,19 @@ pub fn load_config(config_path: &Path) -> anyhow::Result<Config> {
         Some(ext) => bail!("Invalid config file extension: {} (check `FEATURES: ` debug log to see enabled extensions)", ext),
     };
 
+    check(&config)?;
+
     Ok(config)
+}
+
+fn check(config: &Config) -> anyhow::Result<()> {
+    if config
+        .windows
+        .as_ref()
+        .map(|w| w.scale >= 15f64 || w.scale <= 0f64)
+        .unwrap_or(false)
+    {
+        bail!("Scale factor must be less than 15 and greater than 0");
+    }
+    Ok(())
 }

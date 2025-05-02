@@ -8,12 +8,12 @@ use exec_lib::activate_submap;
 use gtk::prelude::*;
 use gtk::{pango, EventSequenceState, Fixed, Frame, GestureClick, Image, Label, Overflow, Overlay};
 use std::borrow::Cow;
-use std::cmp::min;
 use tracing::{debug, span, trace, Level};
 
-fn scale(value: i16, size_factor: f64) -> i32 {
-    (value as f64 / 30.0 * size_factor) as i32
+fn scale(value: i16, scale: f64) -> i32 {
+    (value as f64 / (15f64 - scale)) as i32
 }
+
 pub fn open_overview(global: &WindowsGlobal, config: OpenOverview) -> anyhow::Result<()> {
     let _span = span!(Level::TRACE, "open_overview").entered();
     let (clients_data, active) = collect_data(&SortConfig {
@@ -54,12 +54,12 @@ pub fn open_overview(global: &WindowsGlobal, config: OpenOverview) -> anyhow::Re
             trace!(
                 "Creating workspace {:?} with ({}x{})",
                 wid,
-                scale(workspace.width as i16, global.size_factor),
-                scale(workspace.height as i16, global.size_factor)
+                scale(workspace.width as i16, global.scale),
+                scale(workspace.height as i16, global.scale)
             );
             let workspace_fixed = Fixed::builder()
-                .width_request(scale(workspace.width as i16, global.size_factor))
-                .height_request(scale(workspace.height as i16, global.size_factor))
+                .width_request(scale(workspace.width as i16, global.scale))
+                .height_request(scale(workspace.height as i16, global.scale))
                 .build();
 
             let id_string = wid.to_string();
@@ -129,31 +129,12 @@ pub fn open_overview(global: &WindowsGlobal, config: OpenOverview) -> anyhow::Re
                         .build();
 
                     // hide picture if client so small
-                    // 2 => > infinity
-                    // 2.1  > 800
-                    // 3 => > 800
-                    // 3.9  > 800
-                    // 4 => > 538
-                    // 5 => > 473
-                    // 6 => > 408
-                    // 7 => > 343
-                    // 8 => > 278
-                    // 9 => > 250
-                    if match global.size_factor {
-                        ..2.5 => false,
-                        2.5..3.9 => client.height > 800,
-                        _ => {
-                            client.height
-                                > 700 - min(((global.size_factor - 1.5) * 65.0) as i16, 450)
-                        }
-                    } {
+                    let client_h_w =
+                        scale(client.height, global.scale).min(scale(client.width, global.scale));
+                    if client_h_w > 70 {
                         let image = Image::builder()
                             .css_classes(["client-image"])
-                            .pixel_size(
-                                (scale(client.height, global.size_factor).clamp(50, 200) as f64
-                                    / 1.5) as i32
-                                    - 20,
-                            )
+                            .pixel_size((client_h_w.clamp(50, 600) as f64 / 1.5) as i32 - 20)
                             .build();
                         if !client.enabled {
                             image.add_css_class("monochrome");
@@ -166,8 +147,8 @@ pub fn open_overview(global: &WindowsGlobal, config: OpenOverview) -> anyhow::Re
                         .css_classes(["client"])
                         .overflow(Overflow::Hidden)
                         .child(&client_frame)
-                        .width_request(scale(client.width, global.size_factor))
-                        .height_request(scale(client.height, global.size_factor))
+                        .width_request(scale(client.width, global.scale))
+                        .height_request(scale(client.height, global.scale))
                         .build();
 
                     // add initial border around initial active client
@@ -181,15 +162,15 @@ pub fn open_overview(global: &WindowsGlobal, config: OpenOverview) -> anyhow::Re
                 trace!(
                     "Creating Client {:?} with ({}x{}) at ({}x{})",
                     address,
-                    scale(client.width, global.size_factor),
-                    scale(client.height, global.size_factor),
-                    scale(client.x - workspace.x as i16, global.size_factor) as f64,
-                    scale(client.y - workspace.y as i16, global.size_factor) as f64
+                    scale(client.width, global.scale),
+                    scale(client.height, global.scale),
+                    scale(client.x - workspace.x as i16, global.scale) as f64,
+                    scale(client.y - workspace.y as i16, global.scale) as f64
                 );
                 workspace_fixed.put(
                     &client_overlay,
-                    scale(client.x - workspace.x as i16, global.size_factor) as f64,
-                    scale(client.y - workspace.y as i16, global.size_factor) as f64,
+                    scale(client.x - workspace.x as i16, global.scale) as f64,
+                    scale(client.y - workspace.y as i16, global.scale) as f64,
                 );
                 monitor_data.client_refs.insert(*address, client_overlay);
             }
