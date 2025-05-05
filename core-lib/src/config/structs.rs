@@ -18,7 +18,7 @@ pub struct Config {
 pub struct Windows {
     #[default = 6.5]
     pub size_factor: f64,
-    #[default = 7.0]
+    #[default = 8.5]
     pub scale: f64,
     #[default = 5]
     pub workspaces_per_row: u8,
@@ -38,9 +38,9 @@ pub struct Launcher {
     #[default = 5]
     pub max_items: u8,
     #[default(vec![
-        Plugins::Applications(ApplicationsPluginOptions::default()),
+        Plugins::Applications(Default::default()),
         Plugins::Terminal(),
-        Plugins::Shell(),
+        Plugins::WebSearch(Default::default()),
     ])]
     pub plugins: Vec<Plugins>,
 }
@@ -50,8 +50,9 @@ pub enum Plugins {
     Applications(ApplicationsPluginOptions),
     Terminal(),
     Shell(),
-    WebSearch(WebSearchPluginOptions),
+    WebSearch(Vec<SearchEngine>),
 }
+
 #[derive(SmartDefault, Debug, Clone, Deserialize, Serialize)]
 #[serde(default, deny_unknown_fields)]
 pub struct ApplicationsPluginOptions {
@@ -61,10 +62,12 @@ pub struct ApplicationsPluginOptions {
     pub show_execs: bool,
 }
 
-#[derive(SmartDefault, Debug, Clone, Deserialize, Serialize)]
-#[serde(default, deny_unknown_fields)]
-pub struct WebSearchPluginOptions {
-
+#[derive(Debug, Clone, Deserialize, Serialize)]
+#[serde(deny_unknown_fields)]
+pub struct SearchEngine {
+    pub url: String,
+    pub name: String,
+    pub key: String,
 }
 
 #[derive(SmartDefault, Debug, Clone, Deserialize, Serialize)]

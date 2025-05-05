@@ -1,9 +1,9 @@
-use crate::config::get_data_dir;
 use anyhow::{bail, Context};
 use std::env;
 use std::fs::create_dir_all;
 use std::path::PathBuf;
 use tracing::{info, span, trace, Level};
+use crate::get_data_dir;
 
 const UNIT: &str = include_str!("default.service");
 pub fn write_systemd_unit(
@@ -36,10 +36,10 @@ pub fn write_systemd_unit(
         params.push_str(&format!("--data-dir {data_dir:?} "));
     }
 
-    let wd = if params.is_empty() {
-        "~".to_string()
+    let extra = if params.is_empty() {
+        "".to_string()
     } else {
-        env::current_dir()?.to_string_lossy().to_string()
+        format!("WorkingDirectory={}", env::current_dir()?.to_string_lossy())
     };
 
     let unit_text = UNIT
@@ -50,7 +50,7 @@ pub fn write_systemd_unit(
                 .replace("(deleted)", ""),
         )
         .replace("{params}", &params)
-        .replace("{wd}", &wd);
+        .replace("{extra}", &extra);
 
     trace!("writing {unit_text} to {path:?}");
     std::fs::write(&path, unit_text)

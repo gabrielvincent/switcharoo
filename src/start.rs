@@ -17,6 +17,7 @@ use gtk::{
 };
 use launcher_lib::{create_launcher_window, LauncherGlobal};
 use std::path::{Path, PathBuf};
+use std::time::Duration;
 use tracing::{debug, info, span, trace, warn, Level};
 use windows_lib::{create_windows_window, WindowsGlobal};
 
@@ -50,7 +51,8 @@ fn activate(app: &Application, config_path: &Path, css_path: &Path, data_dir: &P
 
     let desktop_files = collect_desktop_files();
     windows_lib::reload_desktop_map(&desktop_files);
-    launcher_lib::reload_desktop_map(&desktop_files);
+    launcher_lib::reload_applications_desktop_map(&desktop_files);
+    launcher_lib::reload_search_default_browser(&desktop_files);
 
     let config = match config::load_config(config_path) {
         Err(err) => {
@@ -140,18 +142,24 @@ async fn restart_listener(config_path: PathBuf, css_path: PathBuf) {
         #[strong]
         tx,
         async move {
-            hyprland_config_listener(move |mess| {
+            monitor_listener(move |mess| {
                 let _ = tx.send_blocking(mess);
             })
             .await;
         }
     ));
-    glib::spawn_future_local(async move {
-        monitor_listener(move |mess| {
-            let _ = tx.send_blocking(mess);
-        })
-        .await;
-    });
+    glib::timeout_add_local_once(
+        // delay for 1 second to allow the config to be reloaded before listening for reload
+        Duration::from_secs(1),
+        || {
+            glib::spawn_future_local(async move {
+                hyprland_config_listener(move |mess| {
+                    let _ = tx.send_blocking(mess);
+                })
+                .await;
+            });
+        },
+    );
     let cause = rx.recv().await.unwrap_or_default();
     info!("Restarting gui ({cause})");
     send_to_socket(&TransferType::Restart).warn("unable to send restart");
@@ -159,7 +167,9 @@ async fn restart_listener(config_path: PathBuf, css_path: PathBuf) {
 
 fn apply_css(custom_css: &Path) {
     let provider_app = CssProvider::new();
-    provider_app.load_from_bytes(&glib::Bytes::from_static(include_bytes!("default-styles.css")));
+    provider_app.load_from_bytes(&glib::Bytes::from_static(include_bytes!(
+        "default-styles.css"
+    )));
     style_context_add_provider_for_display(
         &Display::default().expect("Could not connect to a display."),
         &provider_app,

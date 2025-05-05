@@ -1,7 +1,6 @@
 use anyhow::bail;
 use clap::Parser;
-use core_lib::config::{get_default_config_path, get_default_css_path, get_default_data_dir};
-use core_lib::{check_version, daemon_running, Warn};
+use core_lib::{check_version, daemon_running, get_default_config_path, get_default_css_path, get_default_data_dir, Warn};
 use exec_lib::get_version;
 use std::env;
 use tracing::{debug, warn};
@@ -75,10 +74,10 @@ fn main() -> anyhow::Result<()> {
                     )
                     .warn("create");
                 }
-                core_lib::config::check::check_config(&config_path).warn("check");
+                core_lib::config::explain::check_config(&config_path).warn("check");
             }
             cli::ConfigCommand::Check {} => {
-                core_lib::config::check::check_config(&config_path).warn("check");
+                core_lib::config::explain::check_config(&config_path).warn("check");
             }
         },
         #[cfg(feature = "debug_command")]

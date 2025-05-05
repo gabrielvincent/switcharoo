@@ -1,4 +1,5 @@
 use crate::config::Config;
+use crate::config::Plugins::WebSearch;
 use anyhow::{bail, Context};
 use ron::extensions::Extensions;
 use ron::Options;
@@ -55,5 +56,21 @@ fn check(config: &Config) -> anyhow::Result<()> {
     {
         bail!("Scale factor must be less than 15 and greater than 0");
     }
+
+    if let Some(l) = &config.launcher {
+        for plugin in &l.plugins {
+            if let WebSearch(config) = plugin {
+                let mut used: Vec<&str> = vec![];
+                for engine in config {
+                    if used.contains(&engine.key.as_str()) {
+                        bail!("Duplicate search engine key: {}", engine.key);
+                    } else {
+                        used.push(&engine.key);
+                    }
+                }
+            }
+        }
+    };
+
     Ok(())
 }

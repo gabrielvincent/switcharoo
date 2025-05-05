@@ -1,7 +1,9 @@
+use crate::config::generate::tui::{CONFIGURABLE_LAUNCHER_PLUGINS, WEB_SEARCH_ENGINES};
 use crate::config::structs::{
     Config, KeyMaybeMod, Launcher, Mod, Navigate, OpenOverview, OpenSwitch, Overview, Reverse,
     Switch, Windows,
 };
+use crate::config::Plugins;
 use anyhow::{bail, Context};
 use ron::extensions::Extensions;
 use ron::ser::PrettyConfig;
@@ -10,7 +12,6 @@ use std::ffi::OsStr;
 use std::fs::{create_dir_all, write, File};
 use std::path::Path;
 use tracing::{info, span, Level};
-use crate::config::generate::tui::CONFIGURABLE_LAUNCHER_PLUGINS;
 
 #[derive(Debug)]
 pub struct ConfigData {
@@ -19,6 +20,7 @@ pub struct ConfigData {
     pub overview: Option<(Mod, KeyMaybeMod)>,
     pub switch: Option<Mod>,
     pub launcher_plugins: Vec<Box<str>>,
+    pub launcher_engines: Vec<Box<str>>,
     pub grave_reverse: bool,
 }
 
@@ -27,13 +29,33 @@ pub fn generate_config(data: ConfigData) -> Config {
         launcher: if data.enable_launcher {
             Some(Launcher {
                 default_terminal: data.default_terminal,
-                plugins: data.launcher_plugins.into_iter()
+                plugins: data
+                    .launcher_plugins
+                    .into_iter()
                     .filter_map(|plugin| {
                         CONFIGURABLE_LAUNCHER_PLUGINS
                             .iter()
                             .find(|(name, _)| *name == plugin.as_ref())
                             .map(|(_, constructor)| constructor())
-                    }).collect(),
+                            .map(|plugin| {
+                                if let Plugins::WebSearch(_) = plugin {
+                                    Plugins::WebSearch(
+                                        data.launcher_engines
+                                            .iter()
+                                            .filter_map(|engine| {
+                                                WEB_SEARCH_ENGINES
+                                                    .iter()
+                                                    .find(|(name, _)| *name == engine.as_ref())
+                                                    .map(|(_, constructor)| constructor())
+                                            })
+                                            .collect(),
+                                    )
+                                } else {
+                                    plugin
+                                }
+                            })
+                    })
+                    .collect(),
                 ..Default::default()
             })
         } else {

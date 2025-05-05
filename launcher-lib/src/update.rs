@@ -112,8 +112,7 @@ fn create_static_plugin_box(
 
     hbox.append(&vbox);
 
-    let button = Button::builder().child(&hbox).build();
-    button
+    Button::builder().child(&hbox).build()
 }
 
 fn create_entry(

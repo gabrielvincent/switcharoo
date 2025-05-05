@@ -1,10 +1,8 @@
-pub mod check;
+pub mod explain;
 #[cfg(feature = "generate_config")]
 pub mod generate;
 mod load;
-mod path;
 mod structs;
 
 pub use load::load_config;
-pub use path::*;
 pub use structs::*;

@@ -1,12 +1,13 @@
 use core_lib::config::Plugins;
 use std::path::Path;
-use tracing::warn;
 
 mod applications;
 mod shell;
 mod terminal;
+mod search;
 
-pub use applications::reload_desktop_map;
+pub use applications::reload_desktop_map as reload_applications_desktop_map;
+pub use search::reload_default_browser as reload_search_default_browser;
 
 #[derive(Debug)]
 pub struct SortableLaunchOption {
@@ -85,9 +86,8 @@ pub fn get_static_launch_options(
             Plugins::Terminal() => {
                 terminal::get_static_options(&mut matches, default_terminal);
             }
-            Plugins::WebSearch(_config) => {
-                warn!("Web search plugin not yet implemented");
-                continue;
+            Plugins::WebSearch(config) => {
+                search::get_static_options(&mut matches, config);
             }
             _ => {}
         }
@@ -103,7 +103,7 @@ pub fn launch(iden: &Identifier, text: &str, default_terminal: &Option<Box<str>>
         }
         PluginNames::Shell => shell::launch_option(text, default_terminal),
         PluginNames::Terminal => terminal::launch_option(text, default_terminal),
-        PluginNames::WebSearch => warn!("Web search plugin not yet implemented"),
+        PluginNames::WebSearch => search::launch_option(&iden.identifier, text),
     }
 }
 
@@ -117,6 +117,9 @@ pub fn get_static_options_chars(plugins: &Vec<Plugins>) -> Vec<char> {
             }
             Plugins::Terminal() => {
                 chars.append(&mut terminal::get_chars());
+            }
+            Plugins::WebSearch(config) => {
+                chars.append(&mut search::get_chars(config));
             }
             _ => {}
         }

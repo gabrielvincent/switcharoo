@@ -4,7 +4,8 @@ use std::fs::DirEntry;
 use std::os::unix::net::UnixStream;
 use std::path::PathBuf;
 use std::{env, fmt};
-use tracing::{debug, trace, warn};
+use tracing::{debug, warn};
+use crate::find_application_dirs;
 
 pub const MIN_VERSION: Version = Version::new(0, 42, 0);
 
@@ -124,37 +125,6 @@ pub fn collect_desktop_files() -> Vec<DirEntry> {
     res
 }
 
-fn find_application_dirs() -> Vec<PathBuf> {
-    let mut dirs = env::var_os("XDG_DATA_DIRS")
-        .map(|val| env::split_paths(&val).collect())
-        .unwrap_or_else(|| {
-            vec![
-                PathBuf::from("/usr/local/share"),
-                PathBuf::from("/usr/share"),
-            ]
-        });
-
-    if let Some(data_home) = env::var_os("XDG_DATA_HOME").map(PathBuf::from).map_or_else(
-        || {
-            env::var_os("HOME")
-                .map(|p| PathBuf::from(p).join(".local/share"))
-                .or_else(|| {
-                    warn!("No XDG_DATA_HOME and HOME environment variable found");
-                    None
-                })
-        },
-        Some,
-    ) {
-        dirs.push(data_home)
-    }
-
-    let dirs = dirs
-        .into_iter()
-        .map(|dir| dir.join("applications"))
-        .collect();
-    trace!("searching for icons in dirs: {:?}", dirs);
-    dirs
-}
 
 pub fn generate_socat(echo: &str) -> String {
     format!(

@@ -184,5 +184,3 @@ fn get_exec_labels(exec: &str) -> (Box<str>, Option<Box<str>>) {
         (Box::from(exec_trim), None)
     }
 }
-
-pub mod maps {}

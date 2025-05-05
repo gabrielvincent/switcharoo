@@ -21,7 +21,7 @@ fn get_desktop_file_map() -> &'static Mutex<Vec<DesktopEntry>> {
     MAP_LOCK.get_or_init(|| Mutex::new(Vec::new()))
 }
 
-pub(super) fn get_all_desktop_files<'a>() -> MutexGuard<'a, Vec<DesktopEntry>> {
+pub(crate) fn get_all_desktop_files<'a>() -> MutexGuard<'a, Vec<DesktopEntry>> {
     let map = get_desktop_file_map()
         .lock()
         .expect("Failed to lock desktop file map");
@@ -36,15 +36,13 @@ pub fn reload_desktop_map(files: &[DirEntry]) {
     fill_desktop_file_map(&mut map, files).warn("Failed to fill desktop file map");
 }
 
-fn fill_desktop_file_map(
-    map: &mut Vec<DesktopEntry>,
-    files: &[DirEntry],
-) -> anyhow::Result<()> {
+fn fill_desktop_file_map(map: &mut Vec<DesktopEntry>, files: &[DirEntry]) -> anyhow::Result<()> {
     let _span = span!(Level::TRACE, "fill_desktop_file_map").entered();
 
     let now = Instant::now();
     for entry in files {
         read_to_string(entry.path())
+            // TODO someday improve parsing to allow for [Desktop Action new-window] etc to have different entries
             .map(|content| {
                 let lines: Vec<&str> = content.lines().collect();
                 let icon = lines
@@ -106,6 +104,9 @@ fn fill_desktop_file_map(
             })
             .warn(&format!("Failed to read file: {:?}", entry.path()));
     }
-    trace!("filled launcher desktop file map in {}ms", now.elapsed().as_millis());
+    trace!(
+        "filled launcher desktop file map in {}ms",
+        now.elapsed().as_millis()
+    );
     Ok(())
 }
