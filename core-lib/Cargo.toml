@@ -29,3 +29,4 @@ which = { version = "7.0.3", default-features = false }
 [features]
 toml_config = ["dep:toml"]
 generate_config = ["dep:inquire"]
+calc = []

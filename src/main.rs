@@ -1,24 +1,25 @@
 use anyhow::bail;
 use clap::Parser;
-use core_lib::{check_version, daemon_running, get_default_config_path, get_default_css_path, get_default_data_dir, Warn};
+use core_lib::{check_version, daemon_running, get_default_config_path, get_default_css_path, get_default_data_dir};
 use exec_lib::get_version;
 use std::env;
 use tracing::{debug, warn};
 
 mod cli;
-mod receive;
-mod start;
-mod recive_handle;
 mod keybinds;
+mod receive;
+mod recive_handle;
+mod start;
 
 fn main() -> anyhow::Result<()> {
     malloc::limit_mmap_threshold();
     let cli = cli::App::parse();
+    let opts = cli.global_opts.clone();
 
-    let level = if cli.global_opts.quiet {
+    let level = if opts.quiet {
         "off"
     } else {
-        match cli.global_opts.verbose {
+        match opts.verbose {
             0 => "info",
             1 => "debug",
             2.. => "trace",
@@ -40,7 +41,6 @@ fn main() -> anyhow::Result<()> {
 
     check_features();
 
-    let opts = cli.global_opts.clone();
     let config_path = cli
         .global_opts
         .config_file
@@ -53,13 +53,15 @@ fn main() -> anyhow::Result<()> {
             if daemon_running() {
                 bail!("Daemon already running");
             }
-            check_version(get_version())
-                .unwrap_or_else(|e| warn!("Unable to check hyprland version, continuing anyway: {e}"));
+            check_version(get_version()).unwrap_or_else(|e| {
+                warn!("Unable to check hyprland version, continuing anyway: {e}")
+            });
             start::start(config_path, css_path, data_dir)?;
         }
         #[cfg(feature = "generate_config_command")]
         cli::Command::Config { command } => match command {
             cli::ConfigCommand::Generate { force, no_systemd } => {
+                use core_lib::Warn;
                 let config_data = core_lib::config::generate::prompt_config()?;
                 let config = core_lib::config::generate::generate_config(config_data);
                 core_lib::config::generate::write_config(&config_path, config, force)
@@ -77,6 +79,7 @@ fn main() -> anyhow::Result<()> {
                 core_lib::config::explain::check_config(&config_path).warn("check");
             }
             cli::ConfigCommand::Check {} => {
+                use core_lib::Warn;
                 core_lib::config::explain::check_config(&config_path).warn("check");
             }
         },
@@ -120,7 +123,8 @@ pub mod malloc {
 }
 
 fn check_features() {
-    debug!("FEATURES: TOML support: {}, Bar: {}, Config command: {}, Debug command: {}",
+    debug!(
+        "FEATURES: TOML support: {}, Bar: {}, Config command: {}, Debug command: {}",
         cfg!(feature = "toml_config"),
         cfg!(feature = "bar"),
         cfg!(feature = "generate_config_command"),

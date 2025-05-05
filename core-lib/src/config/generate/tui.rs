@@ -15,6 +15,8 @@ pub const CONFIGURABLE_LAUNCHER_PLUGINS: &[(&str, fn() -> Plugins)] = &[
     ("Run in shell", || Plugins::Shell()),
     ("Run in terminal", || Plugins::Terminal()),
     ("Web search", || Plugins::WebSearch(Default::default())),
+    #[cfg(feature = "calc")]
+    ("Calculator", || Plugins::Calc()),
 ];
 
 #[allow(clippy::type_complexity)]

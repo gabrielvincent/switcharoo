@@ -1,5 +1,4 @@
-use crate::config::Config;
-use crate::config::Plugins::WebSearch;
+use crate::config::{Config, Plugins};
 use anyhow::{bail, Context};
 use ron::extensions::Extensions;
 use ron::Options;
@@ -59,7 +58,7 @@ fn check(config: &Config) -> anyhow::Result<()> {
 
     if let Some(l) = &config.launcher {
         for plugin in &l.plugins {
-            if let WebSearch(config) = plugin {
+            if let Plugins::WebSearch(config) = plugin {
                 let mut used: Vec<&str> = vec![];
                 for engine in config {
                     if used.contains(&engine.key.as_str()) {
@@ -67,6 +66,14 @@ fn check(config: &Config) -> anyhow::Result<()> {
                     } else {
                         used.push(&engine.key);
                     }
+                }
+            }
+            if let Plugins::Calc() = plugin {
+                #[cfg(not(feature = "calc"))]
+                {
+                    bail!(
+                        "Calc Plugin enabled but not compiled in, please enable the calc feature"
+                    );
                 }
             }
         }

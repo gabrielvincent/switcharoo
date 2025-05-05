@@ -50,6 +50,7 @@ pub fn explain(config: Config) -> String {
                 Plugins::WebSearch(engines) =>
                     builder.push_str(&format!("Press \x1b[34mCtrl + \x1b[1m\x1b[34m<key>\x1b[0m to search the typed text in any of the configured SearchEngines: {}.\n",
                                               engines.iter().map(|e| e.name.as_str()).collect::<Vec<_>>().join(", "))),
+                _ => {}
             };
         }
     } else {

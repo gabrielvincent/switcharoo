@@ -39,6 +39,7 @@ pub struct Launcher {
     pub max_items: u8,
     #[default(vec![
         Plugins::Applications(Default::default()),
+        Plugins::Calc(),
         Plugins::Terminal(),
         Plugins::WebSearch(Default::default()),
     ])]
@@ -51,6 +52,7 @@ pub enum Plugins {
     Terminal(),
     Shell(),
     WebSearch(Vec<SearchEngine>),
+    Calc(),
 }
 
 #[derive(SmartDefault, Debug, Clone, Deserialize, Serialize)]

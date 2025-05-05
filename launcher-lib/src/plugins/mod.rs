@@ -1,10 +1,14 @@
 use core_lib::config::Plugins;
 use std::path::Path;
+use tracing::warn;
 
 mod applications;
+mod search;
 mod shell;
 mod terminal;
-mod search;
+
+#[cfg(feature = "calc")]
+mod calc;
 
 pub use applications::reload_desktop_map as reload_applications_desktop_map;
 pub use search::reload_default_browser as reload_search_default_browser;
@@ -34,6 +38,7 @@ pub enum PluginNames {
     Shell,
     Terminal,
     WebSearch,
+    Calc,
 }
 
 #[derive(Debug)]
@@ -51,7 +56,6 @@ pub fn get_sortable_launch_options(
     let mut matches = Vec::new();
 
     for plugins in plugins {
-        #[allow(clippy::single_match)]
         match plugins {
             Plugins::Applications(config) => {
                 applications::get_sortable_options(
@@ -61,6 +65,12 @@ pub fn get_sortable_launch_options(
                     config.show_execs,
                     data_dir,
                 );
+            }
+            Plugins::Calc() => {
+                #[cfg(feature = "calc")]
+                calc::get_calc_options(&mut matches, text);
+                #[cfg(not(feature = "calc"))]
+                tracing::warn!("calc plugin is not enabled");
             }
             _ => {}
         }
@@ -104,6 +114,12 @@ pub fn launch(iden: &Identifier, text: &str, default_terminal: &Option<Box<str>>
         PluginNames::Shell => shell::launch_option(text, default_terminal),
         PluginNames::Terminal => terminal::launch_option(text, default_terminal),
         PluginNames::WebSearch => search::launch_option(&iden.identifier, text),
+        PluginNames::Calc => {
+            #[cfg(feature = "calc")]
+            warn!("TODO: copy to clipboard");
+            #[cfg(not(feature = "calc"))]
+            tracing::warn!("calc plugin is not enabled");
+        }
     }
 }
 
