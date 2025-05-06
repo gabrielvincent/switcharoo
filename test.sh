@@ -4,8 +4,8 @@ set -euo pipefail
 export RUSTFLAGS=-Awarnings
 
 # Define the features as an array
-declare -a features=("generate_config_command" "toml_config" "debug_command" "bar")
-#declare -a features=("generate_config_command" "bar")
+#declare -a features=("generate_config_command" "toml_config" "debug_command" "bar" "launcher_calc")
+declare -a features=("generate_config_command" "toml_config" "launcher_calc")
 
 # Get the total number of features
 num_features=${#features[@]}

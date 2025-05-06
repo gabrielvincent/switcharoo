@@ -14,7 +14,7 @@ enum MatchType {
 }
 
 impl SortableLaunchOption {
-    fn from(
+    fn from_desktop_entry(
         entry: &DesktopEntry,
         r#match: MatchType,
         runs: &HashMap<Box<Path>, u64>,
@@ -52,37 +52,53 @@ pub fn get_sortable_options(
 
     let lower_text = text.to_ascii_lowercase();
     for entry in entries.iter() {
-        if entry.name.to_ascii_lowercase().contains(&lower_text)
+        let opt = if entry.name.to_ascii_lowercase().contains(&lower_text)
             || entry.exec.to_ascii_lowercase().contains(&lower_text)
         {
             if entry.name.to_ascii_lowercase().starts_with(&lower_text)
                 || entry.exec.to_ascii_lowercase().starts_with(&lower_text)
             {
-                matches.push(SortableLaunchOption::from(
+                Some(SortableLaunchOption::from_desktop_entry(
                     entry,
                     MatchType::Exact,
                     &runs,
                     show_execs,
-                ));
+                ))
             } else {
-                matches.push(SortableLaunchOption::from(
+                Some(SortableLaunchOption::from_desktop_entry(
                     entry,
                     MatchType::Name,
                     &runs,
                     show_execs,
-                ));
+                ))
             }
         } else if entry
             .keywords
             .iter()
             .any(|k| k.to_ascii_lowercase().starts_with(&lower_text))
         {
-            matches.push(SortableLaunchOption::from(
+            Some(SortableLaunchOption::from_desktop_entry(
                 entry,
                 MatchType::Keyword,
                 &runs,
                 show_execs,
-            ));
+            ))
+        } else {
+            None
+        };
+
+        if let Some(opt) = opt {
+            if !matches
+                .iter()
+                .find(|m| {
+                    m.name == opt.name
+                        && m.details == opt.details
+                        && m.details_long == opt.details_long
+                })
+                .is_some()
+            {
+                matches.push(opt);
+            }
         }
     }
 }

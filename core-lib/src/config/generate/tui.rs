@@ -51,6 +51,11 @@ pub const WEB_SEARCH_ENGINES: &[(&str, fn() -> SearchEngine)] = &[
         name: "YouTube".into(),
         key: "y".into(),
     }),
+    ("Reddit", || SearchEngine {
+        url: "https://www.reddit.com/search?q={}".into(),
+        name: "Reddit".into(),
+        key: "r".into(),
+    }),
 ];
 
 pub fn prompt_config() -> anyhow::Result<ConfigData> {
