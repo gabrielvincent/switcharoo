@@ -1,9 +1,9 @@
-use crate::global::LauncherGlobalData;
+use crate::plugins::Identifier;
+use crate::util::DataInWidget;
 use crate::{plugins, LauncherGlobal};
-use gtk::glib;
 use gtk::prelude::*;
+use gtk::{glib, Widget};
 use gtk4_layer_shell::{KeyboardMode, LayerShell};
-use std::cell::RefCell;
 use std::time::Duration;
 use tracing::{span, trace, warn, Level};
 
@@ -15,7 +15,7 @@ pub fn close_launcher(global: &LauncherGlobal, char: Option<char>) {
             trace!("Closing launcher with char: {}", char);
 
             let data1 = data.borrow();
-            if let Some(r#match) = match char {
+            if let Some(iden) = match char {
                 '0'..='9' => data1
                     .sorted_matches
                     .get(char.to_digit(10).expect("unable to convert char") as usize),
@@ -23,7 +23,7 @@ pub fn close_launcher(global: &LauncherGlobal, char: Option<char>) {
             } {
                 data1.window.set_keyboard_mode(KeyboardMode::None);
                 let animate = plugins::launch(
-                    r#match,
+                    iden,
                     &data1.entry.text(),
                     &global.default_terminal,
                     &global.data_dir,
@@ -31,15 +31,21 @@ pub fn close_launcher(global: &LauncherGlobal, char: Option<char>) {
                 // copy pointer for later close
                 let window = data1.window.clone();
                 let entry = data1.entry.clone();
+                let results = data1.results.clone();
+                let plugin_box = data1.plugin_box.clone();
+                let iden = iden.clone();
                 drop(data1);
 
                 if animate {
-                    // show_launch(data);
+                    show_launch(results, plugin_box, &iden);
                     entry.set_editable(false);
-                    glib::timeout_add_local_once(Duration::from_millis(400), move || {
-                        // close launcher
-                        close(&entry, &window);
-                    });
+                    glib::timeout_add_local_once(
+                        Duration::from_millis(global.animate_launch_ms),
+                        move || {
+                            // close launcher
+                            close(&entry, &window);
+                        },
+                    );
                     return;
                 }
             } else {
@@ -56,25 +62,29 @@ fn close(entry: &gtk::Entry, window: &gtk::ApplicationWindow) {
     trace!("Hiding window {:?}", window.id());
     window.set_visible(false);
     entry.set_text("");
-    // while let Some(child) = data.results.first_child() {
-    //     data.results.remove(&child);
-    // }
 }
 
-/// no longer used, but would look cool when launching apps
-#[allow(dead_code)]
-fn show_launch(data: &RefCell<LauncherGlobalData>, offset: u8) {
-    let _span = span!(Level::TRACE, "show_launch").entered();
-
-    let data = data.borrow();
-
-    let mut i = 0;
-    while let Some(child) = data.results.row_at_index(i) {
-        if i == offset as i32 {
-            child.add_css_class("launch");
-        } else {
-            child.add_css_class("monochrome");
+fn show_launch(results: gtk::ListBox, plugin_box: gtk::Box, iden: &Identifier) {
+    for child in results.observe_children().into_iter().flatten() {
+        if let Some(child) = child.dynamic_cast_ref::<Widget>() {
+            // trace!("A Child: {:?}, {:?}", child.get_iden_data(), iden.str());
+            if let Some(data) = child.get_iden_data() {
+                if data == iden.str() {
+                    child.add_css_class("launch");
+                    return;
+                }
+            }
         }
-        i += 1;
+    }
+    for child in plugin_box.observe_children().into_iter().flatten() {
+        if let Some(child) = child.dynamic_cast_ref::<Widget>() {
+            // trace!("B Child: {:?}, {:?}", child.get_iden_data(), iden.str());
+            if let Some(data) = child.get_iden_data() {
+                if data == iden.str() {
+                    child.add_css_class("launch");
+                    return;
+                }
+            }
+        }
     }
 }

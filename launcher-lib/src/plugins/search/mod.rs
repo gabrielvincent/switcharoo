@@ -50,7 +50,7 @@ pub fn launch_option(iden: &Option<Box<str>>, text: &str) -> bool {
             trace!("not class to browser available")
         }
     }
-    false
+    true
 }
 
 pub(crate) fn get_chars(config: &[SearchEngine]) -> Vec<char> {

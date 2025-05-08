@@ -1,6 +1,6 @@
 use core_lib::config::Plugins;
 use std::path::Path;
-use tracing::{span, warn, Level};
+use tracing::{span, Level};
 
 mod applications;
 mod search;
@@ -32,7 +32,7 @@ pub struct StaticLaunchOption {
     pub data: Identifier,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 pub enum PluginNames {
     Applications,
     Shell,
@@ -41,11 +41,21 @@ pub enum PluginNames {
     Calc,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Identifier {
     /// identify the plugin that created this option.
     pub plugin: PluginNames,
     pub identifier: Option<Box<str>>,
+}
+
+impl Identifier {
+    pub fn str(&self) -> String {
+        format!(
+            "{}:{}",
+            self.plugin as u8,
+            self.identifier.as_deref().unwrap_or_default()
+        )
+    }
 }
 
 pub fn get_sortable_launch_options(
@@ -123,7 +133,7 @@ pub fn launch(
         PluginNames::WebSearch => search::launch_option(&iden.identifier, text),
         PluginNames::Calc => {
             #[cfg(feature = "calc")]
-            warn!("TODO: copy to clipboard");
+            calc::copy_result(&iden.identifier);
             #[cfg(not(feature = "calc"))]
             tracing::warn!("calc plugin is not enabled");
             false

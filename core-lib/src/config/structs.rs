@@ -37,6 +37,8 @@ pub struct Launcher {
     pub width: u32,
     #[default = 5]
     pub max_items: u8,
+    #[default = 450]
+    pub animate_launch_ms: u64,
     #[default(vec![
         Plugins::Applications(Default::default()),
         Plugins::Calc(),

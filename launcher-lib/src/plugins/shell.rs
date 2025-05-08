@@ -17,7 +17,7 @@ pub fn get_static_options(matches: &mut Vec<StaticLaunchOption>) {
 
 pub fn launch_option(text: &str, default_terminal: &Option<Box<str>>) -> bool {
     run_program(text, None, false, default_terminal);
-    false
+    true
 }
 
 pub(crate) fn get_chars() -> Vec<char> {

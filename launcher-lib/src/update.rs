@@ -1,4 +1,5 @@
 use crate::plugins::{get_sortable_launch_options, get_static_launch_options};
+use crate::util::DataInWidget;
 use crate::LauncherGlobal;
 use core_lib::theme_icon_cache::theme_has_icon_name;
 use core_lib::transfer::{CloseConfig, TransferType};
@@ -29,7 +30,7 @@ pub fn update_launcher(global: &LauncherGlobal, text: String) {
 
         let sortable_launch_options =
             get_sortable_launch_options(&global.plugins, &text, &global.data_dir);
-        let mut items = global.max_items;
+        let mut items = global.max_items.min(9);
         for (index, opt) in sortable_launch_options.into_iter().enumerate() {
             if items == 0 {
                 break;
@@ -50,6 +51,7 @@ pub fn update_launcher(global: &LauncherGlobal, text: String) {
                 &button,
                 char::from_str(&index.to_string()).expect("Failed to convert u32 to char"),
             );
+            row.set_iden_data(opt.data.str());
             data1.results.append(&row);
             data1.sorted_matches.push(opt.data);
         }
@@ -59,6 +61,7 @@ pub fn update_launcher(global: &LauncherGlobal, text: String) {
         for opt in static_launch_options.into_iter() {
             let button = create_static_plugin_box(opt.icon, &opt.text, &opt.details, opt.key);
             click_entry(&button, opt.key);
+            button.set_iden_data(opt.data.str());
             data1.plugin_box.append(&button);
             data1.static_matches.insert(opt.key, opt.data);
         }
@@ -73,7 +76,6 @@ fn create_static_plugin_box(
 ) -> Button {
     let hbox = gtk::Box::builder()
         .orientation(Orientation::Horizontal)
-        .css_classes(["launcher-plugin"])
         .spacing(6)
         .build();
 
@@ -111,7 +113,10 @@ fn create_static_plugin_box(
 
     hbox.append(&vbox);
 
-    Button::builder().child(&hbox).build()
+    Button::builder()
+        .child(&hbox)
+        .css_classes(["launcher-plugin"])
+        .build()
 }
 
 fn create_entry(
