@@ -34,31 +34,16 @@ pub fn open_switch(global: &WindowsGlobal, config: OpenSwitch) -> anyhow::Result
 
     let mut data = global.data.borrow_mut();
     for (window, monitor_data) in &mut data.monitor_list.iter_mut() {
+        if monitor_data.id != active.monitor {
+            continue;
+        }
         let monitor = if let Some(monitor) = clients_data.monitors.find_by_first(&monitor_data.id) {
             monitor
         } else {
             continue;
         };
-        if config.hide_filtered && !monitor.enabled {
-            continue;
-        }
 
-        let clients: Vec<&(ClientId, ClientData)> = {
-            let mut clients = clients_data
-                .clients
-                .iter()
-                .filter(|(_, client)| client.monitor == monitor_data.id)
-                .collect::<Vec<_>>();
-            clients.sort_by(|(_, a), (_, b)| {
-                // prefer smaller windows
-                if a.floating && b.floating {
-                    (b.width * b.height).cmp(&(a.width * a.height))
-                } else {
-                    a.floating.cmp(&b.floating)
-                }
-            });
-            clients
-        };
+        let clients: &Vec<(ClientId, ClientData)> = &clients_data.clients;
         for (address, client) in clients {
             if config.hide_filtered && !client.enabled {
                 continue;
@@ -81,8 +66,8 @@ pub fn open_switch(global: &WindowsGlobal, config: OpenSwitch) -> anyhow::Result
                     .build();
 
                 // hide picture if client so small
-                let client_h_w =
-                    scale(client.height, global.scale).min(scale(client.width, global.scale));
+                let client_h_w = scale(monitor.height as i16, global.scale)
+                    .min(scale(monitor.width as i16, global.scale));
                 if client_h_w > 70 {
                     let image = Image::builder()
                         .css_classes(["client-image"])
