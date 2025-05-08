@@ -1,11 +1,17 @@
+use crate::config::generate::tui::DEFAULT_COLORS;
 use anyhow::{bail, Context};
 use std::fs::create_dir_all;
 use std::path::PathBuf;
 use tracing::{info, span, Level};
 
+#[derive(Debug)]
+pub struct StyleData {
+    pub default_color: Box<str>,
+}
+
 const CSS_CONFIG: &str = include_str!("default.css");
 
-pub fn write_css(css_path: PathBuf, override_file: bool) -> anyhow::Result<()> {
+pub fn write_css(css_path: PathBuf, override_file: bool, data: StyleData) -> anyhow::Result<()> {
     let _span = span!(Level::TRACE, "write_css").entered();
 
     if css_path.exists() && !override_file {
@@ -18,7 +24,16 @@ pub fn write_css(css_path: PathBuf, override_file: bool) -> anyhow::Result<()> {
             .with_context(|| format!("Failed to create config dir at ({parent:?})"))?;
     }
 
-    std::fs::write(&css_path, CSS_CONFIG)
+    let repl = CSS_CONFIG.replace(
+        "(active-color)",
+        DEFAULT_COLORS
+            .iter()
+            .find(|&&(n, _)| *n == *data.default_color)
+            .map(|&(_, color)| color)
+            .unwrap_or(DEFAULT_COLORS[0].1),
+    );
+
+    std::fs::write(&css_path, repl)
         .with_context(|| format!("Failed to write css file at ({css_path:?})"))?;
 
     info!("CSS file generated successfully at {css_path:?}");

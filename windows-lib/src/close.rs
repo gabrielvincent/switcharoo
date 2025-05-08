@@ -34,7 +34,7 @@ pub fn close_overview(global: &WindowsGlobal, ids: Option<Option<IdOverride>>) {
                         .map(|c| c.title.clone())
                         .unwrap_or_else(|| "<Unknown>".to_string())
                 );
-                switch_client(&to_client_address(client_id))
+                switch_client(to_client_address(client_id))
                     .warn(&format!("Failed to execute with id {client_id:?}"));
             }
             IdOverride::WorkspaceID(workspace_id) => {

@@ -7,6 +7,24 @@ use hyprland::prelude::*;
 use hyprland::shared::{Address, WorkspaceId};
 use tracing::{trace, warn};
 
+pub fn switch_client(address: Address) -> anyhow::Result<()> {
+    trace!("execute switch to client: {}", address);
+    Dispatch::call(DispatchType::FocusWindow(WindowIdentifier::Address(
+        address,
+    )))?;
+    Dispatch::call(DispatchType::BringActiveToTop)?;
+    Ok(())
+}
+
+pub fn switch_client_by_initial_class(class: &Box<str>) -> anyhow::Result<()> {
+    trace!("execute switch to client: {} by initial_class", class);
+    Dispatch::call(DispatchType::FocusWindow(
+        WindowIdentifier::ClassRegularExpression(&format!("initialclass:{}", class.to_ascii_lowercase())),
+    ))?;
+    Dispatch::call(DispatchType::BringActiveToTop)?;
+    Ok(())
+}
+
 pub fn switch_workspace(workspace_id: WorkspaceId) -> anyhow::Result<()> {
     // check if already on workspace (if so, don't switch because it throws an error `Previous workspace doesn't exist`)
     let current_workspace = Workspace::get_active();
@@ -22,23 +40,13 @@ pub fn switch_workspace(workspace_id: WorkspaceId) -> anyhow::Result<()> {
             "Special workspace id detected, not switching to special workspace, TODO not supported"
         );
     } else {
-        switch_normal_workspace(workspace_id)
-            .with_context(|| {
-                format!(
-                    "Failed to execute switch workspace with id {}",
-                    workspace_id
-                )
-            })?;
+        switch_normal_workspace(workspace_id).with_context(|| {
+            format!(
+                "Failed to execute switch workspace with id {}",
+                workspace_id
+            )
+        })?;
     }
-    Ok(())
-}
-
-pub fn switch_client(address: &Address) -> anyhow::Result<()> {
-    trace!("execute switch to next_client: {}", address);
-    Dispatch::call(DispatchType::FocusWindow(WindowIdentifier::Address(
-        address.clone(),
-    )))?;
-    Dispatch::call(DispatchType::BringActiveToTop)?;
     Ok(())
 }
 

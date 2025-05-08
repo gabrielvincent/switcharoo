@@ -1,6 +1,9 @@
 use anyhow::bail;
 use clap::Parser;
-use core_lib::{check_version, daemon_running, get_default_config_path, get_default_css_path, get_default_data_dir};
+use core_lib::{
+    check_version, daemon_running, get_default_config_path, get_default_css_path,
+    get_default_data_dir,
+};
 use exec_lib::get_version;
 use std::env;
 use tracing::{debug, warn};
@@ -62,11 +65,11 @@ fn main() -> anyhow::Result<()> {
         cli::Command::Config { command } => match command {
             cli::ConfigCommand::Generate { force, no_systemd } => {
                 use core_lib::Warn;
-                let config_data = core_lib::config::generate::prompt_config()?;
+                let (config_data, css_data) = core_lib::config::generate::prompt_config()?;
                 let config = core_lib::config::generate::generate_config(config_data);
                 core_lib::config::generate::write_config(&config_path, config, force)
                     .warn("create");
-                core_lib::config::generate::write_css(css_path, force).warn("create");
+                core_lib::config::generate::write_css(css_path, force, css_data).warn("create");
                 if !no_systemd {
                     core_lib::config::generate::write_systemd_unit(
                         force,

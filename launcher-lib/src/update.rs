@@ -80,7 +80,6 @@ fn create_static_plugin_box(
     if let Some(icon) = icon {
         // trace!("icon: {:?}", icon);
         let icon = Image::builder()
-            .css_classes(["launcher-icon"])
             .icon_size(IconSize::Large)
             .icon_name(icon.to_string_lossy())
             .build();
@@ -105,7 +104,7 @@ fn create_static_plugin_box(
         .halign(Align::Center)
         .valign(Align::End)
         .ellipsize(EllipsizeMode::End)
-        .css_classes(["launcher-plugin-key"])
+        .css_classes(["launcher-key"])
         .label(format!("Ctrl + {key}"))
         .build();
     vbox.append(&exec);
@@ -129,10 +128,7 @@ fn create_entry(
         .vexpand(true)
         .build();
 
-    let icon = Image::builder()
-        .css_classes(["launcher-icon"])
-        .icon_size(IconSize::Large)
-        .build();
+    let icon = Image::builder().icon_size(IconSize::Large).build();
     if let Some(icon_path) = icon_path {
         if icon_path.is_absolute() {
             if let Some(icon_name) = icon_path.file_stem() {

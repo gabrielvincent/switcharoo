@@ -1,12 +1,14 @@
 mod default;
 
-use crate::plugins::search::default::get_browser_exec;
+use crate::plugins::search::default::get_browser_info;
 use crate::plugins::{Identifier, PluginNames, StaticLaunchOption};
 use core_lib::config::SearchEngine;
+use core_lib::Warn;
 pub use default::reload_default_browser;
 use exec_lib::run::run_program;
+use exec_lib::switch::switch_client_by_initial_class;
 use exec_lib::toast;
-use tracing::debug;
+use tracing::{debug, trace};
 
 pub fn get_static_options(matches: &mut Vec<StaticLaunchOption>, config: &[SearchEngine]) {
     for engine in config.iter() {
@@ -27,22 +29,28 @@ pub fn get_static_options(matches: &mut Vec<StaticLaunchOption>, config: &[Searc
     }
 }
 
-pub fn launch_option(iden: &Option<Box<str>>, text: &str) {
+pub fn launch_option(iden: &Option<Box<str>>, text: &str) -> bool {
     if let Some(iden) = iden {
         let url = iden.replace("{}", text);
         debug!("Launching URL: {}", url);
-        let browser = get_browser_exec();
+        let browser = get_browser_info();
+        let mut cmdline = format!("{} '{}'", browser.0, url);
         for repl in ["%u", "%U", "%f", "%F"] {
-            if browser.contains(repl) {
-                let browser = browser.replace(repl, &format!("'{url}'"));
-                debug!("Launching browser: {}", browser);
-                run_program(&browser, None, false, &None);
-                return;
+            if browser.0.contains(repl) {
+                cmdline = browser.0.replace(repl, &format!("'{url}'"));
             }
         }
-        run_program(&format!("{browser} '{url}'"), None, false, &None);
-        // TODO maybe try to focus the browser if it is already open
+        debug!("Launching browser: {}", cmdline);
+        run_program(&cmdline, None, false, &None);
+
+        // try to focus browser
+        if let Some(class) = &browser.1 {
+            switch_client_by_initial_class(class).warn("unable to focus browser");
+        } else {
+            trace!("not class to browser available")
+        }
     }
+    false
 }
 
 pub(crate) fn get_chars(config: &[SearchEngine]) -> Vec<char> {

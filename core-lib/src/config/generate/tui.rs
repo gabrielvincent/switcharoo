@@ -1,11 +1,12 @@
 use crate::config::generate::autocomplete::StringAutoCompleter;
 use crate::config::generate::config::ConfigData;
+use crate::config::generate::css::StyleData;
 use crate::config::structs::{KeyMaybeMod, Mod};
 use crate::config::{ApplicationsPluginOptions, Plugins, SearchEngine};
 use crate::util::TERMINALS;
 use anyhow::bail;
 use inquire::formatter::MultiOptionFormatter;
-use inquire::{Confirm, MultiSelect, Text};
+use inquire::{Confirm, MultiSelect, Select, Text};
 
 #[allow(clippy::type_complexity)]
 pub const CONFIGURABLE_LAUNCHER_PLUGINS: &[(&str, fn() -> Plugins)] = &[
@@ -58,7 +59,18 @@ pub const WEB_SEARCH_ENGINES: &[(&str, fn() -> SearchEngine)] = &[
     }),
 ];
 
-pub fn prompt_config() -> anyhow::Result<ConfigData> {
+pub const DEFAULT_COLORS: [(&str, &str); 8] = [
+    ("Red", "rgba(239, 9, 9, 0.9)"),
+    ("Blue", "rgba(21, 162, 211, 0.9)"),
+    ("Green", "rgba(9, 239, 9, 0.9)"),
+    ("Yellow", "rgba(239, 239, 9, 0.9)"),
+    ("Purple", "rgba(239, 9, 239, 0.9)"),
+    ("Pink", "rgba(239, 9, 139, 0.9)"),
+    ("Orange", "rgba(239, 139, 9, 0.9)"),
+    ("White", "rgba(255, 255, 255, 0.9)"),
+];
+
+pub fn prompt_config() -> anyhow::Result<(ConfigData, StyleData)> {
     let open_overview = {
         let open_overview = Text::new("Key combination to open the overview (and launcher)")
             .with_autocomplete(StringAutoCompleter::from(vec![
@@ -154,15 +166,26 @@ pub fn prompt_config() -> anyhow::Result<ConfigData> {
             .with_default(false)
             .prompt()?;
 
-    Ok(ConfigData {
-        enable_launcher: launcher.as_ref().map(|l| l.0).unwrap_or(false),
-        default_terminal: launcher.as_ref().and_then(|l| l.1.clone()),
-        overview: open_overview.map(|o| (o.0, KeyMaybeMod::from(&*o.1))),
-        switch: open_switch,
-        launcher_plugins: launcher.as_ref().map(|l| l.2.clone()).unwrap_or_default(),
-        launcher_engines: launcher.map(|l| l.3).unwrap_or_default(),
-        grave_reverse,
-    })
+    let default_color = Select::new(
+        "Default Focused Color",
+        DEFAULT_COLORS.iter().map(|(name, _)| *name).collect(),
+    )
+    .prompt()
+    .map(|color| color.trim().to_string().into_boxed_str())
+    .unwrap_or_default();
+
+    Ok((
+        ConfigData {
+            enable_launcher: launcher.as_ref().map(|l| l.0).unwrap_or(false),
+            default_terminal: launcher.as_ref().and_then(|l| l.1.clone()),
+            overview: open_overview.map(|o| (o.0, KeyMaybeMod::from(&*o.1))),
+            switch: open_switch,
+            launcher_plugins: launcher.as_ref().map(|l| l.2.clone()).unwrap_or_default(),
+            launcher_engines: launcher.map(|l| l.3).unwrap_or_default(),
+            grave_reverse,
+        },
+        StyleData { default_color },
+    ))
 }
 
 fn get_mod(modifier: &str) -> anyhow::Result<(Mod, String)> {

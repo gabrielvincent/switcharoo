@@ -106,7 +106,7 @@ pub fn launch_option(
     iden: &Option<Box<str>>,
     default_terminal: &Option<Box<str>>,
     data_dir: &Path,
-) {
+) -> bool {
     let entries = get_all_desktop_files();
     let entry = entries
         .iter()
@@ -121,8 +121,10 @@ pub fn launch_option(
         );
         trace!("Saving run: {:?}", entry.source);
         save_run(&entry.source, data_dir).warn("Failed to cache run");
+        true
     } else {
         warn!("Failed to find entry for {:?}", iden);
+        false
     }
 }
 

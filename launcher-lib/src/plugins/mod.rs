@@ -1,6 +1,6 @@
 use core_lib::config::Plugins;
 use std::path::Path;
-use tracing::warn;
+use tracing::{span, warn, Level};
 
 mod applications;
 mod search;
@@ -106,8 +106,15 @@ pub fn get_static_launch_options(
     matches
 }
 
-pub fn launch(iden: &Identifier, text: &str, default_terminal: &Option<Box<str>>, data_dir: &Path) {
-    match iden.plugin {
+pub fn launch(
+    iden: &Identifier,
+    text: &str,
+    default_terminal: &Option<Box<str>>,
+    data_dir: &Path,
+) -> bool {
+    let _span = span!(Level::TRACE, "launch_plugin").entered();
+
+    let animate = match iden.plugin {
         PluginNames::Applications => {
             applications::launch_option(&iden.identifier, default_terminal, data_dir)
         }
@@ -119,8 +126,10 @@ pub fn launch(iden: &Identifier, text: &str, default_terminal: &Option<Box<str>>
             warn!("TODO: copy to clipboard");
             #[cfg(not(feature = "calc"))]
             tracing::warn!("calc plugin is not enabled");
+            false
         }
-    }
+    };
+    animate
 }
 
 pub fn get_static_options_chars(plugins: &Vec<Plugins>) -> Vec<char> {

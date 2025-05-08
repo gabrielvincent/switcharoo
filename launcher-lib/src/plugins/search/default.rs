@@ -3,7 +3,7 @@ use std::fs::{read_to_string, DirEntry};
 use std::sync::{Mutex, MutexGuard, OnceLock};
 use tracing::{debug, span, trace, warn, Level};
 
-pub(super) fn get_browser_exec<'a>() -> MutexGuard<'a, Box<str>> {
+pub(super) fn get_browser_info<'a>() -> MutexGuard<'a, (Box<str>, Option<Box<str>>)> {
     BROWSER_EXEC
         .get()
         .expect("browser exec no initialized")
@@ -11,7 +11,7 @@ pub(super) fn get_browser_exec<'a>() -> MutexGuard<'a, Box<str>> {
         .expect("Failed to lock browser exec")
 }
 
-static BROWSER_EXEC: OnceLock<Mutex<Box<str>>> = OnceLock::new();
+static BROWSER_EXEC: OnceLock<Mutex<(Box<str>, Option<Box<str>>)>> = OnceLock::new();
 
 pub fn reload_default_browser(files: &[DirEntry]) {
     let _span = span!(Level::TRACE, "reload_default_browser").entered();
@@ -22,21 +22,31 @@ pub fn reload_default_browser(files: &[DirEntry]) {
             if let Some(content) = read_to_string(entry.path())
                 .warn(&format!("Failed to read file: {:?}", entry.path()))
             {
-                trace!("Found default browser file: {:?}", entry.path());
                 let lines: Vec<&str> = content.lines().collect();
                 let exec = lines
-                    .into_iter()
+                    .iter()
                     .find(|l| l.starts_with("Exec="))
                     .map(|l| l.trim_start_matches("Exec="));
+                let startup_wm_class = lines
+                    .iter()
+                    .find(|l| l.starts_with("StartupWMClass="))
+                    .map(|l| l.trim_start_matches("StartupWMClass="));
                 if let Some(exec) = exec {
-                    let _ = BROWSER_EXEC.set(Mutex::new(Box::from(exec)));
+                    trace!("Found default browser file: {:?} with exec: {:?} and startup_wm_class: {:?}", entry.path(), exec, startup_wm_class);
+                    let _ = BROWSER_EXEC.set(Mutex::new((
+                        Box::from(exec),
+                        startup_wm_class.map(Box::from),
+                    )));
                     return;
                 }
             };
         }
     }
     warn!("No default browser found! (using firefox)");
-    let _ = BROWSER_EXEC.set(Mutex::new(Box::from("firefox")));
+    let _ = BROWSER_EXEC.set(Mutex::new((
+        Box::from("firefox"),
+        Some(Box::from("org.mozilla.firefox")),
+    )));
 }
 
 fn get_default_browser_desktop_file() -> Option<Box<str>> {

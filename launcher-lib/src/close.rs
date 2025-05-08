@@ -1,8 +1,10 @@
 use crate::global::LauncherGlobalData;
 use crate::{plugins, LauncherGlobal};
+use gtk::glib;
 use gtk::prelude::*;
 use gtk4_layer_shell::{KeyboardMode, LayerShell};
-use std::cell::{Ref, RefCell};
+use std::cell::RefCell;
+use std::time::Duration;
 use tracing::{span, trace, warn, Level};
 
 pub fn close_launcher(global: &LauncherGlobal, char: Option<char>) {
@@ -20,31 +22,43 @@ pub fn close_launcher(global: &LauncherGlobal, char: Option<char>) {
                 _ => data1.static_matches.get(&char),
             } {
                 data1.window.set_keyboard_mode(KeyboardMode::None);
-                // show_launch(data, offset);
-                plugins::launch(
+                let animate = plugins::launch(
                     r#match,
                     &data1.entry.text(),
                     &global.default_terminal,
                     &global.data_dir,
                 );
+                // copy pointer for later close
+                let window = data1.window.clone();
+                let entry = data1.entry.clone();
                 drop(data1);
+
+                if animate {
+                    // show_launch(data);
+                    entry.set_editable(false);
+                    glib::timeout_add_local_once(Duration::from_millis(400), move || {
+                        // close launcher
+                        close(&entry, &window);
+                    });
+                    return;
+                }
             } else {
                 warn!("No match found for char: {}", char);
             }
         }
         // close launcher
         let data1 = data.borrow();
-        close(data1);
+        close(&data1.entry, &data1.window);
     }
 }
 
-fn close(data: Ref<LauncherGlobalData>) {
-    while let Some(child) = data.results.first_child() {
-        data.results.remove(&child);
-    }
-    data.entry.set_text("");
-    trace!("Hiding window {:?}", data.window.id());
-    data.window.set_visible(false);
+fn close(entry: &gtk::Entry, window: &gtk::ApplicationWindow) {
+    trace!("Hiding window {:?}", window.id());
+    window.set_visible(false);
+    entry.set_text("");
+    // while let Some(child) = data.results.first_child() {
+    //     data.results.remove(&child);
+    // }
 }
 
 /// no longer used, but would look cool when launching apps
@@ -53,7 +67,6 @@ fn show_launch(data: &RefCell<LauncherGlobalData>, offset: u8) {
     let _span = span!(Level::TRACE, "show_launch").entered();
 
     let data = data.borrow();
-    data.entry.set_editable(false);
 
     let mut i = 0;
     while let Some(child) = data.results.row_at_index(i) {

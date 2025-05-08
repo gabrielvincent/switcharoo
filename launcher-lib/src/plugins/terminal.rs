@@ -30,7 +30,7 @@ pub fn get_static_options(
     });
 }
 
-pub fn launch_option(text: &str, default_terminal: &Option<Box<str>>) {
+pub fn launch_option(text: &str, default_terminal: &Option<Box<str>>) -> bool {
     run_program(
         // exec shell to prevent needing 2 exits
         // echo to make the shell look better and show the executed command
@@ -39,6 +39,7 @@ pub fn launch_option(text: &str, default_terminal: &Option<Box<str>>) {
         true,
         default_terminal,
     );
+    true
 }
 
 pub(crate) fn get_chars() -> Vec<char> {

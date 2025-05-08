@@ -180,7 +180,7 @@ fn apply_css(custom_css: &Path) {
     launcher_lib::get_css();
 
     if !custom_css.exists() {
-        warn!("Custom css file {custom_css:?} does not exist");
+        info!("Custom css file {custom_css:?} does not exist");
     } else {
         debug!("Loading custom css file {custom_css:?}");
         let provider_user = CssProvider::new();
@@ -245,7 +245,7 @@ fn check_theme(theme_name: &str, search_path: Vec<PathBuf>) {
                 return;
             }
         }
-        warn!("Unable to find icon theme: {theme_name:?}");
+        warn!("Unable to find theme: {theme_name:?}");
     } else {
         warn!("No theme set");
     }
