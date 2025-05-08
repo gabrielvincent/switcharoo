@@ -38,7 +38,8 @@ jobs:
           git fetch --tags origin hyprshell
           git checkout ${{ github.ref }} -b hyprshell
           echo "removing old tag"
-          git tag -d ${{ github.ref_name }}
+          git tag --delete ${{ github.ref_name }}
+          git push --delete origin ${{ github.ref_name }}
           version=$(echo ${{ github.ref_name }} | sed 's/v//')
           cargo ws publish custom $version -m "chore(release): bump rust versions to $version" --no-individual-tags --allow-branch hyprshell --exact --yes --force "hyprshell*" --token ${{ secrets.CRATES_TOKEN }}
           git push origin hyprshell
