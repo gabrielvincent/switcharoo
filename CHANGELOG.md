@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.4](https://github.com/H3rmt/hyprshell-test/compare/v0.5.3...v0.5.4) (2025-05-08)
+
+
+### Continuous Integration
+
+* fix ci release ([a24657b](https://github.com/H3rmt/hyprshell-test/commit/a24657bb9e237e69ff2f8687577114c25de921fe))
+
 ## [0.5.3](https://github.com/H3rmt/hyprshell-test/compare/v0.5.2...v0.5.3) (2025-05-08)
 
 
