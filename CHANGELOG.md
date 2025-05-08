@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.5.2](https://github.com/H3rmt/hyprshell-test/compare/v0.5.1...v0.5.2) (2025-05-08)
+
+
+### Bug Fixes
+
+* make css optional ([b0c36ee](https://github.com/H3rmt/hyprshell-test/commit/b0c36eeb3f9dfbe9a85933505dc618cd0c231308))
+
+
+### Continuous Integration
+
+* fix ci release ([d8d481d](https://github.com/H3rmt/hyprshell-test/commit/d8d481d672809a4f8907a156eed1705caa27a9aa))
+
 ## [0.5.1](https://github.com/H3rmt/hyprshell-test/compare/v0.5.0...v0.5.1) (2025-05-08)
 
 
