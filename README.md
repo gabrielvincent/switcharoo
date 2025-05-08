@@ -117,4 +117,4 @@ systemctl --user enable --now hyprshell.service
 ```
 
 ![image.png](imgs/swappy-20250420_000818.png)
-![image.png](imgs/swappy-20250420_000857.png)
+![image.png](imgs/swappy-20250509_010715.png)
