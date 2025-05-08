@@ -14,9 +14,6 @@ exclude = [
     ".idea/*",
     ".github/*",
 ]
-include = [
-    "img/*"
-]
 
 [dependencies]
 anyhow.workspace = true
