@@ -3,7 +3,7 @@ name: publish
 on:
   push:
     tags:
-      - '*'
+      - 'v*'
 
 jobs:
   publish:
@@ -39,7 +39,7 @@ jobs:
           git checkout ${{ github.ref }} -b hyprshell
           echo "removing old tag"
           git tag -d ${{ github.ref_name }}
-          cargo ws publish custom ${{ github.ref_name }} -m "chore(release): bump rust versions to ${{ github.ref_name }}" --tag-prefix "" --no-individual-tags --allow-branch hyprshell --exact --yes --force "hyprshell*" --dry-run
+          cargo ws publish custom ${{ github.ref_name }} -m "chore(release): bump rust versions to ${{ github.ref_name }}" --no-individual-tags --allow-branch hyprshell --exact --yes --force "hyprshell*" --token ${{ secrets.CRATES_TOKEN }}
           git push origin hyprshell
           git push -f --tags origin hyprshell
         env:
