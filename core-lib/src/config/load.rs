@@ -1,8 +1,9 @@
-use crate::config::{Config, Plugins};
+use crate::config::{Config, Plugin};
 use anyhow::{bail, Context};
 use ron::extensions::Extensions;
 use ron::Options;
 use std::ffi::OsStr;
+use std::mem;
 use std::path::Path;
 use tracing::{span, Level};
 
@@ -57,8 +58,18 @@ fn check(config: &Config) -> anyhow::Result<()> {
     }
 
     if let Some(l) = &config.launcher {
+        let mut active_plugins: Vec<&Plugin> = vec![];
         for plugin in &l.plugins {
-            if let Plugins::WebSearch(config) = plugin {
+            if active_plugins
+                .iter()
+                .any(|p| mem::discriminant(*p) == mem::discriminant(plugin))
+            {
+                bail!("Duplicate plugin: {:?}", plugin);
+            } else {
+                active_plugins.push(plugin);
+            }
+
+            if let Plugin::WebSearch(config) = plugin {
                 let mut used: Vec<&str> = vec![];
                 for engine in config {
                     if used.contains(&engine.key.as_str()) {
@@ -68,7 +79,7 @@ fn check(config: &Config) -> anyhow::Result<()> {
                     }
                 }
             }
-            if let Plugins::Calc() = plugin {
+            if let Plugin::Calc() = plugin {
                 #[cfg(not(feature = "calc"))]
                 {
                     bail!(

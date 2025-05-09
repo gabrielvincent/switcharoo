@@ -1,5 +1,5 @@
 use crate::plugins::Identifier;
-use core_lib::config::{Launcher, Plugins};
+use core_lib::config::{Launcher, Plugin};
 use gtk::{ApplicationWindow, Entry, ListBox};
 use std::cell::RefCell;
 use std::collections::HashMap;
@@ -12,7 +12,7 @@ pub struct LauncherGlobal {
     pub animate_launch_ms: u64,
     pub width: u32,
     pub data_dir: Box<Path>,
-    pub plugins: Vec<Plugins>,
+    pub plugins: Vec<Plugin>,
     pub data: Option<RefCell<LauncherGlobalData>>,
 }
 

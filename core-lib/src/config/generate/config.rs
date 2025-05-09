@@ -3,7 +3,7 @@ use crate::config::structs::{
     Config, KeyMaybeMod, Launcher, Mod, Navigate, OpenOverview, OpenSwitch, Overview, Reverse,
     Switch, Windows,
 };
-use crate::config::Plugins;
+use crate::config::Plugin;
 use anyhow::{bail, Context};
 use ron::extensions::Extensions;
 use ron::ser::PrettyConfig;
@@ -38,8 +38,8 @@ pub fn generate_config(data: ConfigData) -> Config {
                             .find(|(name, _)| *name == plugin.as_ref())
                             .map(|(_, constructor)| constructor())
                             .map(|plugin| {
-                                if let Plugins::WebSearch(_) = plugin {
-                                    Plugins::WebSearch(
+                                if let Plugin::WebSearch(_) = plugin {
+                                    Plugin::WebSearch(
                                         data.launcher_engines
                                             .iter()
                                             .filter_map(|engine| {

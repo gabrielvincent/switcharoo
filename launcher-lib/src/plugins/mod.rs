@@ -1,4 +1,4 @@
-use core_lib::config::Plugins;
+use core_lib::config::Plugin;
 use std::path::Path;
 use tracing::{span, Level};
 
@@ -59,7 +59,7 @@ impl Identifier {
 }
 
 pub fn get_sortable_launch_options(
-    plugins: &[Plugins],
+    plugins: &[Plugin],
     text: &str,
     data_dir: &Path,
 ) -> Vec<SortableLaunchOption> {
@@ -67,7 +67,7 @@ pub fn get_sortable_launch_options(
 
     for plugins in plugins {
         match plugins {
-            Plugins::Applications(config) => {
+            Plugin::Applications(config) => {
                 applications::get_sortable_options(
                     &mut matches,
                     text,
@@ -76,7 +76,7 @@ pub fn get_sortable_launch_options(
                     data_dir,
                 );
             }
-            Plugins::Calc() => {
+            Plugin::Calc() => {
                 #[cfg(feature = "calc")]
                 calc::get_calc_options(&mut matches, text);
                 #[cfg(not(feature = "calc"))]
@@ -93,20 +93,20 @@ pub fn get_sortable_launch_options(
 }
 
 pub fn get_static_launch_options(
-    plugins: &[Plugins],
+    plugins: &[Plugin],
     default_terminal: &Option<Box<str>>,
 ) -> Vec<StaticLaunchOption> {
     let mut matches = Vec::new();
 
     for plugins in plugins {
         match plugins {
-            Plugins::Shell() => {
+            Plugin::Shell() => {
                 shell::get_static_options(&mut matches);
             }
-            Plugins::Terminal() => {
+            Plugin::Terminal() => {
                 terminal::get_static_options(&mut matches, default_terminal);
             }
-            Plugins::WebSearch(config) => {
+            Plugin::WebSearch(config) => {
                 search::get_static_options(&mut matches, config);
             }
             _ => {}
@@ -142,18 +142,18 @@ pub fn launch(
     animate
 }
 
-pub fn get_static_options_chars(plugins: &Vec<Plugins>) -> Vec<char> {
+pub fn get_static_options_chars(plugins: &Vec<Plugin>) -> Vec<char> {
     let mut chars = Vec::new();
 
     for plugins in plugins {
         match plugins {
-            Plugins::Shell() => {
+            Plugin::Shell() => {
                 chars.append(&mut shell::get_chars());
             }
-            Plugins::Terminal() => {
+            Plugin::Terminal() => {
                 chars.append(&mut terminal::get_chars());
             }
-            Plugins::WebSearch(config) => {
+            Plugin::WebSearch(config) => {
                 chars.append(&mut search::get_chars(config));
             }
             _ => {}

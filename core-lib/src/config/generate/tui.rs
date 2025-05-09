@@ -2,22 +2,22 @@ use crate::config::generate::autocomplete::StringAutoCompleter;
 use crate::config::generate::config::ConfigData;
 use crate::config::generate::css::StyleData;
 use crate::config::structs::{KeyMaybeMod, Mod};
-use crate::config::{ApplicationsPluginOptions, Plugins, SearchEngine};
+use crate::config::{ApplicationsPluginOptions, Plugin, SearchEngine};
 use crate::util::TERMINALS;
 use anyhow::bail;
 use inquire::formatter::MultiOptionFormatter;
 use inquire::{Confirm, MultiSelect, Select, Text};
 
 #[allow(clippy::type_complexity)]
-pub const CONFIGURABLE_LAUNCHER_PLUGINS: &[(&str, fn() -> Plugins)] = &[
+pub const CONFIGURABLE_LAUNCHER_PLUGINS: &[(&str, fn() -> Plugin)] = &[
     ("Open Applications", || {
-        Plugins::Applications(ApplicationsPluginOptions::default())
+        Plugin::Applications(ApplicationsPluginOptions::default())
     }),
-    ("Run in shell", || Plugins::Shell()),
-    ("Run in terminal", || Plugins::Terminal()),
-    ("Web search", || Plugins::WebSearch(Default::default())),
+    ("Run in shell", || Plugin::Shell()),
+    ("Run in terminal", || Plugin::Terminal()),
+    ("Web search", || Plugin::WebSearch(Default::default())),
     #[cfg(feature = "calc")]
-    ("Calculator", || Plugins::Calc()),
+    ("Calculator", || Plugin::Calc()),
 ];
 
 #[allow(clippy::type_complexity)]

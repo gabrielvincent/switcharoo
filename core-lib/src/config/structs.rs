@@ -40,16 +40,16 @@ pub struct Launcher {
     #[default = 450]
     pub animate_launch_ms: u64,
     #[default(vec![
-        Plugins::Applications(Default::default()),
-        Plugins::Calc(),
-        Plugins::Terminal(),
-        Plugins::WebSearch(Default::default()),
+        Plugin::Applications(Default::default()),
+        Plugin::Calc(),
+        Plugin::Terminal(),
+        Plugin::WebSearch(Default::default()),
     ])]
-    pub plugins: Vec<Plugins>,
+    pub plugins: Vec<Plugin>,
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
-pub enum Plugins {
+pub enum Plugin {
     Applications(ApplicationsPluginOptions),
     Terminal(),
     Shell(),
@@ -85,19 +85,19 @@ pub struct Overview {
 #[derive(SmartDefault, Debug, Clone, Deserialize, Serialize)]
 #[serde(default, deny_unknown_fields)]
 pub struct OtherOverview {
-    #[default = false]
-    pub hide_filtered: bool,
     #[default(Vec::new())]
     pub filter_by: Vec<FilterBy>,
+    #[default = false]
+    pub hide_filtered: bool,
 }
 
 #[derive(SmartDefault, Debug, Clone, Deserialize, Serialize)]
 #[serde(default, deny_unknown_fields)]
 pub struct OpenOverview {
-    #[default(Mod::Super)]
-    pub modifier: Mod,
     #[default = "super"]
     pub key: KeyMaybeMod,
+    #[default(Mod::Super)]
+    pub modifier: Mod,
 }
 
 #[derive(SmartDefault, Debug, Clone, Deserialize, Serialize)]
@@ -127,10 +127,10 @@ pub struct OpenSwitch {
 #[derive(SmartDefault, Debug, Clone, Deserialize, Serialize)]
 #[serde(default, deny_unknown_fields)]
 pub struct OtherSwitch {
-    #[default = true]
-    pub hide_filtered: bool,
     #[default(Vec::new())]
     pub filter_by: Vec<FilterBy>,
+    #[default = true]
+    pub hide_filtered: bool,
 }
 
 #[derive(Debug, Clone, Copy, Deserialize, Serialize, Eq, PartialEq)]
