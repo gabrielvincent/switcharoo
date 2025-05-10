@@ -2,7 +2,7 @@
 use std::collections::BTreeSet;
 use std::fs::read_dir;
 use std::path::{Path, PathBuf};
-use std::sync::{Mutex, OnceLock};
+use std::sync::{Mutex, MutexGuard, OnceLock};
 use tracing::debug;
 
 fn get_icon_map() -> &'static Mutex<BTreeSet<Box<str>>> {
@@ -31,6 +31,10 @@ pub fn init_icon_map(icon_names: Vec<String>, search_path: Option<Vec<PathBuf>>)
             }
         }
     }
+}
+
+pub fn get_all_icons<'a>() -> MutexGuard<'a, BTreeSet<Box<str>>> {
+    get_icon_map().lock().expect("Failed to lock icon map")
 }
 
 pub fn theme_has_icon_name(name: &str) -> bool {

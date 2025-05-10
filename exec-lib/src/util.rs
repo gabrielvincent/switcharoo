@@ -1,11 +1,15 @@
 use anyhow::Context;
 use core_lib::{Active, ClientId, Warn};
 use hyprland::ctl::{notify, reload, Color};
-use hyprland::data::{Client, Monitor, Monitors, Workspace};
+use hyprland::data::{Client, Clients, Monitor, Monitors, Workspace};
 use hyprland::dispatch::{Dispatch, DispatchType};
 use hyprland::keyword::Keyword;
 use hyprland::prelude::*;
 use tracing::{debug, info, span, trace, warn, Level};
+
+pub fn get_clients() -> Vec<Client> {
+    Clients::get().map_or(vec![], |clients| clients.to_vec())
+}
 
 pub fn get_monitors() -> Vec<Monitor> {
     Monitors::get().map_or(vec![], |monitors| monitors.to_vec())

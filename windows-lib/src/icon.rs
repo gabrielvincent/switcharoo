@@ -1,9 +1,9 @@
-use crate::desktop_map::{add_path_for_icon_by_pid_exec, get_icon_name_by_name};
-use core_lib::theme_icon_cache;
+use crate::desktop_map::{add_path_for_icon_by_pid_exec, get_icon_name_by_name_from_desktop_files};
 use gtk::Image;
 use std::fs;
 use std::path::Path;
 use tracing::{span, trace, warn, Level};
+use core_lib::theme_icon_cache::theme_has_icon_name;
 
 pub fn set_icon(class: &str, pid: i32, image: &Image) {
     let class = class.to_string();
@@ -41,12 +41,12 @@ pub fn set_icon(class: &str, pid: i32, image: &Image) {
 
 fn load_icon_from_cache(name: &str, pic: &Image) -> Option<Box<Path>> {
     // check if the icon is in theme and apply it
-    if theme_icon_cache::theme_has_icon_name(name) {
+    if theme_has_icon_name(name) {
         pic.set_icon_name(Some(name));
         Some(Box::from(Path::new(name)))
     } else {
         // check if icon is in desktop file cache and apply it
-        if let Some((icon_path, path, source)) = get_icon_name_by_name(name) {
+        if let Some((icon_path, path, source)) = get_icon_name_by_name_from_desktop_files(name) {
             trace!(
                 "Found icon for {name}/{icon_path:?} in cache from source: {source:?} at {path:?}"
             );

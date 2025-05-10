@@ -14,7 +14,7 @@ mod css;
 
 pub use close::close_overview;
 pub use create::create_windows_window;
-pub use desktop_map::reload_desktop_map;
+pub use desktop_map::{reload_desktop_map, get_icon_name_by_name_from_desktop_files};
 pub use global::WindowsGlobal;
 pub use open_overview::open_overview;
 pub use open_switch::open_switch;

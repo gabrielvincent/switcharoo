@@ -32,9 +32,9 @@ windows-lib.workspace = true
 launcher-lib.workspace = true
 
 [features]
-default = ["toml_config", "generate_config_command", "launcher_calc"]
-generate_config_command = ["core-lib/generate_config"]
+default = ["toml_config", "generate_config_command", "launcher_calc", "debug_command"]
 toml_config = ["core-lib/toml_config"]
+generate_config_command = ["core-lib/generate_config"]
 launcher_calc = ["launcher-lib/calc", "core-lib/calc"]
 debug_command = []
 bar = []

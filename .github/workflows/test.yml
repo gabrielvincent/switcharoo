@@ -34,7 +34,7 @@ jobs:
         with:
           prefix-key: rust-build
       - name: Build
-        run: ./test.sh
+        run: ./scripts/test.sh
         env:
           HYPRSHELL_SOCAT_PATH: ''
 
