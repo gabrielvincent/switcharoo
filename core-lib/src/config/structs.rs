@@ -16,8 +16,6 @@ pub struct Config {
 #[derive(SmartDefault, Debug, Clone, Deserialize, Serialize)]
 #[serde(default, deny_unknown_fields)]
 pub struct Windows {
-    #[default = 6.5]
-    pub size_factor: f64,
     #[default = 8.5]
     pub scale: f64,
     #[default = 5]
