@@ -174,14 +174,10 @@ impl From<&str> for KeyMaybeMod {
     }
 }
 
-pub trait ToKey {
-    fn to_key(&self) -> String;
-}
-
 // https://wiki.hyprland.org/Configuring/Variables/#variable-types
 // SHIFT CAPS CTRL/CONTROL ALT MOD2 MOD3 SUPER/WIN/LOGO/MOD4 MOD5
-impl ToKey for KeyMaybeMod {
-    fn to_key(&self) -> String {
+impl KeyMaybeMod {
+    pub fn to_key(&self) -> String {
         match &*self.0.to_ascii_lowercase() {
             "alt" => "alt_l".to_string(),
             "ctrl" => "ctrl_l".to_string(),
@@ -192,13 +188,13 @@ impl ToKey for KeyMaybeMod {
     }
 }
 
-impl ToKey for Mod {
-    fn to_key(&self) -> String {
+impl Mod {
+    pub fn mod_to_keys(&self) -> [&'static str; 2] {
         match self {
-            Mod::Alt => "alt_l".to_string(),
-            Mod::Ctrl => "ctrl_l".to_string(),
-            Mod::Super => "super_l".to_string(),
-            Mod::Shift => "shift_l".to_string(),
+            Mod::Alt => ["alt_l", "alt_r"],
+            Mod::Ctrl => ["control_l", "control_r"], // WHY is this not ctrl_l and ctrl_r?
+            Mod::Super => ["super_l", "super_r"],
+            Mod::Shift => ["shift_l", "shift_r"],
         }
     }
 }

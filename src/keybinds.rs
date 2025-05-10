@@ -1,6 +1,6 @@
 use anyhow::Context;
 use core_lib::config::Launcher;
-use core_lib::config::{Config, FilterBy, Overview, Reverse, Switch, ToKey};
+use core_lib::config::{Config, FilterBy, Overview, Reverse, Switch};
 use core_lib::transfer::{
     CloseConfig, Direction, OpenOverview, OpenSwitch, SwitchConfig, TransferType,
 };
@@ -272,27 +272,33 @@ fn generate_switch(
 
     keyword_list.push(("submap", submap_name.to_string()));
     keyword_list.push(("bind", format!(", escape, exec, {}", generate_exit()?)));
-    keyword_list.push((
-        "bindrt",
-        format!(
-            "{}, {}, exec, {}",
-            switch.open.modifier,
-            switch.open.modifier.to_key(),
-            generate_return(CloseConfig::None)?
-        ),
-    ));
-    // second keybinding to close of mod + reverse mod is released
-    if let Reverse::Mod(modk) = &switch.navigate.reverse {
+
+    // register left and right release
+    for mods in switch.open.modifier.mod_to_keys() {
         keyword_list.push((
             "bindrt",
             format!(
-                "{} {}, {}, exec, {}",
+                "{}, {}, exec, {}",
                 switch.open.modifier,
-                modk,
-                switch.open.modifier.to_key(),
-                generate_return(CloseConfig::None)?,
+                mods,
+                generate_return(CloseConfig::None)?
             ),
         ));
+    }
+    // second keybinding to close of mod + reverse mod is released
+    if let Reverse::Mod(modk) = &switch.navigate.reverse {
+        for mods in switch.open.modifier.mod_to_keys() {
+            keyword_list.push((
+                "bindrt",
+                format!(
+                    "{} {}, {}, exec, {}",
+                    switch.open.modifier,
+                    modk,
+                    mods,
+                    generate_return(CloseConfig::None)?,
+                ),
+            ));
+        }
     }
 
     keyword_list.push((

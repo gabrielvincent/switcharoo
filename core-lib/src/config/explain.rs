@@ -1,4 +1,3 @@
-use crate::config::structs::ToKey;
 use crate::config::{load_config, Config, Plugin, Reverse};
 use crate::daemon_running;
 use std::path::Path;

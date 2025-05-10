@@ -122,6 +122,5 @@ These settings will take priority over the default values set by the application
 If you want to change colors borders, etc. you can edit the CSS variables in the `:root {}` section.
 These styles are automatically used everywhere in the application, so you don't have to set them for every class.
 
-- `.monitor`: TODO
-- `.workspace`: TODO
-- TODO
+![image.png](./imgs/css/swappy-20250510_222852.png)
+![image.png](./imgs/css/swappy-20250510_224344.png)

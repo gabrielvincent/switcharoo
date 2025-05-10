@@ -4,6 +4,7 @@
 
 ![image.png](imgs/swappy-20250420_000613.png)
 
+
 ## Overview
 
 Hyprshell (previously hyprswitch) is a Rust-based GUI designed to enhance window management in [Hyprland](https://github.com/hyprwm/Hyprland).
@@ -92,7 +93,7 @@ hyprshell config generate
 This launches an interactive prompt to set up your configuration.
 The generated file will be located at `~/.config/hypr/hyprshell.conf`.
 
-If you want to modify these settings look at the [Documentation](Configure.md) for the config file.
+If you want to modify these settings look at the [Documentation](CONFIGURE.md) for the config file.
 
 ### Config validation
 
