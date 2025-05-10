@@ -1,6 +1,6 @@
 use crate::receive::Globals;
 use core_lib::transfer::{CloseConfig, OpenOverview, OpenSwitch, SwitchConfig, WindowsOverride};
-use core_lib::{IdOverride, Warn};
+use core_lib::{collect_desktop_files, IdOverride, Warn};
 use gtk::prelude::EntryExt;
 use tracing::{debug, warn};
 
@@ -109,6 +109,12 @@ pub fn close(global: &Globals, config: CloseConfig) {
             if_some!(global.launcher, launcher_lib::close_launcher, None);
         }
     }
+
+    // reload the desktop maps for the launcher and overview
+    let desktop_files = collect_desktop_files();
+    windows_lib::reload_desktop_map(&desktop_files);
+    launcher_lib::reload_applications_desktop_map(&desktop_files);
+    launcher_lib::reload_search_default_browser(&desktop_files);
 }
 
 pub fn restart(global: &Globals) {

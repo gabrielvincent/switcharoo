@@ -64,14 +64,13 @@ fn activate(app: &Application, config_path: &Path, css_path: &Path, data_dir: &P
         Ok(config) => config,
     };
 
+    if let Ok(keybinds) = create_binds_and_submaps(&config) {
+        apply_keybinds(keybinds);
+    } else {
+        warn!("Failed to apply keybinds");
+        toast("Failed to create keybinds");
+    }
     apply_css(css_path);
-    match create_binds_and_submaps(&config) {
-        Ok(keybinds) => apply_keybinds(keybinds),
-        Err(err) => {
-            warn!("Failed to apply keybinds: {:?}", err);
-            toast("Failed to create keybinds");
-        }
-    };
 
     let windows_data: Option<WindowsGlobal> = config.windows.map(WindowsGlobal::new);
     let mut launcher_data: Option<LauncherGlobal> =
