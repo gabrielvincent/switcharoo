@@ -16,6 +16,7 @@ use gtk::{
     STYLE_PROVIDER_PRIORITY_APPLICATION, STYLE_PROVIDER_PRIORITY_USER,
 };
 use launcher_lib::{create_launcher_window, LauncherGlobal};
+use std::env;
 use std::path::{Path, PathBuf};
 use std::time::Duration;
 use tracing::{debug, info, span, trace, warn, Level};
@@ -98,7 +99,9 @@ fn activate(app: &Application, config_path: &Path, css_path: &Path, data_dir: &P
     let config_path = PathBuf::from(config_path);
     let css_path = PathBuf::from(css_path);
     glib::spawn_future_local(async move {
-        restart_listener(config_path, css_path).await;
+        if env::var_os("HYPRSHELL_NO_LISTENERS").is_none() {
+            restart_listener(config_path, css_path).await;
+        }
     });
 
     glib::spawn_future_local(async move {
@@ -251,7 +254,9 @@ fn check_theme(theme_name: &str, search_path: Vec<PathBuf>) {
     }
 }
 
-fn fill_icon_map() {
+pub fn fill_icon_map() {
+    gtk::init().expect("Failed to initialize GTK");
+
     let icon_theme = IconTheme::new();
     let gtk_icons = icon_theme
         .icon_names()

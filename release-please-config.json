@@ -2,7 +2,7 @@
   "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
   "always-update": true,
   "include-v-in-tag": true,
-  "draft": true,
+  "draft": false,
   "packages": {
     ".": {
       "release-type": "simple",

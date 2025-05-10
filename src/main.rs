@@ -6,13 +6,16 @@ use core_lib::{
 };
 use exec_lib::get_version;
 use std::env;
-use tracing::{debug, warn};
+use tracing::{debug, info, warn};
 
 mod cli;
 mod keybinds;
 mod receive;
 mod recive_handle;
 mod start;
+
+#[cfg(feature = "debug_command")]
+mod debug;
 
 fn main() -> anyhow::Result<()> {
     malloc::limit_mmap_threshold();
@@ -88,20 +91,16 @@ fn main() -> anyhow::Result<()> {
         },
         #[cfg(feature = "debug_command")]
         cli::Command::Debug { command } => {
-            println!("use with -vv ... to see full logs!");
+            info!("use with -vv ... to see full logs!");
             match command {
                 cli::DebugCommand::Search { class } => {
-                    let _ = class;
-                    todo!("Config command not implemented")
+                    debug::search(class);
                 }
                 cli::DebugCommand::List => {
-                    todo!("Config command not implemented")
+                    debug::list();
                 }
                 cli::DebugCommand::DesktopFiles => {
-                    todo!("Config command not implemented")
-                }
-                cli::DebugCommand::LaunchCache => {
-                    todo!("Config command not implemented")
+                    debug::desktop_files();
                 }
             };
         }

@@ -88,14 +88,14 @@ pub fn get_sortable_options(
         };
 
         if let Some(opt) = opt {
-            if !matches
+            if matches
                 .iter()
                 .find(|m| {
                     m.name == opt.name
                         && m.details == opt.details
                         && m.details_long == opt.details_long
                 })
-                .is_some()
+                .is_none()
             {
                 matches.push(opt);
             }

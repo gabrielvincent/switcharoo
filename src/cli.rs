@@ -80,8 +80,10 @@ pub enum DebugCommand {
     /// Search for an icon with a window class
     Search {
         /// The class (from `hyprctl clients -j | jq -e ".[] | {title, class}"`) of a window to find an icon for
+        ///
+        /// If not provided, all open windows will be searched
         #[arg(long)]
-        class: String,
+        class: Option<String>,
     },
 
     /// List all icons in the theme
@@ -89,7 +91,4 @@ pub enum DebugCommand {
 
     /// List all desktop files
     DesktopFiles,
-
-    /// List cache for launched apps
-    LaunchCache,
 }
