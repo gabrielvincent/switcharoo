@@ -4,10 +4,9 @@
 
 ![image.png](imgs/swappy-20250420_000613.png)
 
-
 ## Overview
 
-Hyprshell (previously hyprswitch) is a Rust-based GUI designed to enhance window management in [Hyprland](https://github.com/hyprwm/Hyprland).
+Hyprshell _(previously hyprswitch)_ is a Rust-based GUI designed to enhance window management in [Hyprland](https://github.com/hyprwm/Hyprland).
 It provides a powerful and customizable interface for switching between windows using keyboard shortcuts and GUI.
 The application also includes a launcher for running applications directly from the GUI.
 
@@ -15,10 +14,10 @@ The application also includes a launcher for running applications directly from 
 
 - **Window Switching**: Switch between windows using keyboard shortcuts in a GUI.
 - **Customizable Keybindings**: Define your own keybindings for window switching and GUI interactions.
-- **Config**: Interactive config file generation for easy setup.
+- **Config**: Interactive [config file](./CONFIGURE.md) generation for easy setup.
 - **Launcher Integration**: Launch applications directly from the GUI, sorted by usage frequency.
 - **Sorting and Filtering**: windows sorted by position, can be filtered by class, workspace, or monitor.
-- **Theming**: Customize the GUI appearance using CSS.
+- **Theming**: Customize the GUI appearance using [CSS](./CONFIGURE.md).
 - **Dynamic Configuration**: Automatically reloads configuration/style changes without restarting the application.
 
 ## Installation
@@ -121,3 +120,18 @@ systemctl --user enable --now hyprshell.service
 
 ![image.png](imgs/swappy-20250420_000818.png)
 ![image.png](imgs/swappy-20250509_010715.png)
+
+### Env Variables
+
+- `HYPRSHELL_NO_LISTENERS`: Disable all config listeners (config file, css file, hyprland config, monitor count)
+- `HYPRSHELL_SOCAT_PATH`: Override the path to socat set during build-time.
+- `HYPRSHELL_SHOW_OUTPUT`: Show the output of an opened application in the terminal.
+
+### Feature Flags
+
+- default: `["toml_config", "generate_config_command", "launcher_calc"]`
+- generate_config_command: Adds the `hyprshell config generate` command to interactively generate a config file.
+- toml_config: Adds support for a toml config file.
+- launcher_calc: Adds support for the calc plugin in the launcher.
+- debug_command: Adds the `hyprshell debug` command to debug icons in the window mode.
+- bar: Unused

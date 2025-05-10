@@ -1,4 +1,4 @@
-# Configuration
+# Config
 
 The main config file is located at `~/.config/hyprshell/config.ron` but can be configured using the `-c` argument. You can also use `.json` and `.toml` as config file formats.
 The config is loaded at startup but is reloaded when the file changes.
@@ -19,7 +19,6 @@ The config is split into three sections:
 
 - `launcher`: the launcher settings
 - `windows`: the window settings
-- `bar`: Not yet implemented
 
 ## General Settings
 
@@ -27,6 +26,8 @@ The config is split into three sections:
   They are currently used in [this part of the code](src/keybinds.rs) to disable the default animations and dim the background around the launcher.
 
 ## Launcher Options
+
+This option itself is optional, if not set, the launcher is not shown.
 
 - **default_terminal:**_[string]_ Defined the name of the default terminal to use. This value is optional, if unset a list of [default terminals](./core-lib/src/util.rs) is used to find a default terminal.
   This is used to launch programs like micro from the launcher that need to be run in a terminal.
@@ -63,10 +64,10 @@ The config is split into three sections:
 
 ### Overview Mode Options
 
-This mode displays the windows in a downscaled view of the screen. It also shows the launcher if enabled.
+This mode displays the windows in a downscaled view of the screen. It also shows the launcher if enabled. This option itself is optional, if not set, this mode is disabled.
 
 - **open:**_[OpenOverview]_ Configuration for opening the Overview mode.
-    - **key:**_[string]_ The key to use to open the Overview mode (like "tab"). This is used to register the keybinding to open the Overview mode.
+    - **key:**_[string]_ The key to use to open the Overview mode (like "tab" or "alt_r"). This is used to register the keybinding to open the Overview mode.
       If you want to only open using a modifier, set this to the modifier name like `super`. This value is then turned into a modifier keybind like `super_l` as `super` cant be bound as a key.
     - **modifier:**_[MODIFIER]_ The modifier that must be pressed together with the key to open the Overview mode (like ctrl). This MUST be one of these modifiers: `Alt, Ctrl, Super, Shift`.
       DON'T enclose the value in `""` as this is not a string but an enum variant.
@@ -86,7 +87,7 @@ This mode displays the windows in a downscaled view of the screen. It also shows
 
 ### Switch Mode Options
 
-This mode displays the windows sorted by their most recent access.
+This mode displays the windows sorted by their most recent access. This option itself is optional, if not set, this mode is disabled.
 
 - **open:**_[OpenSwitch]_ Configuration for opening the Switch mode.
     - **modifier:**_[MODIFIER]_ The modifier that must be helled down together with the `navigate>forward` key to open the Switch mode (like alt). Letting go of this key will close the Switch mode.
@@ -119,6 +120,7 @@ The default override file can also be found in [the code](./core-lib/src/config/
 
 The override file contains many empty classes that can be used to configure padding, fonts, etc.
 These settings will take priority over the default values set by the application itself. The application defaults can be found in the CSS files inside the codebase (for example, [this one](./src/default-styles.css) or [that one](./windows-lib/src/styles.css)).
+
 If you want to change colors borders, etc. you can edit the CSS variables in the `:root {}` section.
 These styles are automatically used everywhere in the application, so you don't have to set them for every class.
 
