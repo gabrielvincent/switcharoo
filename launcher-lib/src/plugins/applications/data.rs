@@ -12,12 +12,12 @@ pub fn save_run(desktop_file: &Path, data_dir: &Path) -> anyhow::Result<()> {
         let file = OpenOptions::new()
             .read(true)
             .open(&file)
-            .context("Failed to open cache file")?;
+            .context("Failed to open data file")?;
         from_reader(file).unwrap_or_else(|_| serde_json::json!({}))
     } else {
         // create the file and folder
         std::fs::create_dir_all(file.parent().unwrap())
-            .context("Failed to create cache directory")?;
+            .context("Failed to create data directory")?;
         serde_json::json!({})
     };
 
@@ -32,8 +32,8 @@ pub fn save_run(desktop_file: &Path, data_dir: &Path) -> anyhow::Result<()> {
         .create(true)
         .truncate(true)
         .open(&file)
-        .context("Failed to open cache file for writing")?;
-    serde_json::to_writer_pretty(file, &data).context("Failed to write to cache file")?;
+        .context("Failed to open data file for writing")?;
+    serde_json::to_writer_pretty(file, &data).context("Failed to write to data file")?;
     Ok(())
 }
 
@@ -65,7 +65,7 @@ fn get_name_from_timestamp(week: u8) -> Box<Path> {
     )))
 }
 
-pub fn get_cached_runs(run_cache_weeks: u8, data_dir: &Path) -> HashMap<Box<Path>, u64> {
+pub fn get_stored_runs(run_cache_weeks: u8, data_dir: &Path) -> HashMap<Box<Path>, u64> {
     let mut runs = HashMap::new();
 
     for week in get_all_weeks(run_cache_weeks, data_dir) {

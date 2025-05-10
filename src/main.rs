@@ -104,6 +104,20 @@ fn main() -> anyhow::Result<()> {
                 }
             };
         }
+        cli::Command::Data { command } => match command {
+            cli::DataCommand::LaunchHistory { run_cache_weeks } => {
+                let runs = launcher_lib::get_applications_stored_runs(
+                    run_cache_weeks.unwrap_or(1),
+                    &data_dir,
+                );
+                for (path, run) in runs {
+                    info!("{}: {run}", path.display());
+                    // TODO: extract name from path
+                    // maybe add a init parse lib,
+                    // also for the desktop files with more entries
+                }
+            }
+        },
     }
     Ok(())
 }

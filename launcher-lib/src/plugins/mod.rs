@@ -10,6 +10,7 @@ mod terminal;
 #[cfg(feature = "calc")]
 mod calc;
 
+pub use applications::get_stored_runs as get_applications_stored_runs;
 pub use applications::reload_desktop_map as reload_applications_desktop_map;
 pub use search::reload_default_browser as reload_search_default_browser;
 

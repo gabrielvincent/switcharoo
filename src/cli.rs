@@ -57,6 +57,11 @@ pub enum Command {
         #[clap(subcommand)]
         command: DebugCommand,
     },
+
+    Data {
+        #[clap(subcommand)]
+        command: DataCommand,
+    },
 }
 
 #[derive(Subcommand, Debug, Clone)]
@@ -73,6 +78,15 @@ pub enum ConfigCommand {
     },
     /// Check the config file for errors and explain how to use the program based on the config
     Check {},
+}
+
+#[derive(Subcommand, Debug, Clone)]
+pub enum DataCommand {
+    /// Show the history of launched applications
+    LaunchHistory {
+        // TODO allow time range as input
+        run_cache_weeks: Option<u8>
+    },
 }
 
 #[derive(Subcommand, Debug, Clone)]

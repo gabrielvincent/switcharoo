@@ -1,4 +1,4 @@
-use crate::plugins::applications::cache::{get_cached_runs, save_run};
+use crate::plugins::applications::data::{get_stored_runs, save_run};
 use crate::plugins::applications::map::{get_all_desktop_files, DesktopEntry};
 use crate::plugins::{Identifier, PluginNames, SortableLaunchOption};
 use core_lib::Warn;
@@ -48,7 +48,7 @@ pub fn get_sortable_options(
     data_dir: &Path,
 ) {
     let entries = get_all_desktop_files();
-    let runs = get_cached_runs(run_cache_weeks, data_dir);
+    let runs = get_stored_runs(run_cache_weeks, data_dir);
 
     let lower_text = text.to_ascii_lowercase();
     for entry in entries.iter() {
