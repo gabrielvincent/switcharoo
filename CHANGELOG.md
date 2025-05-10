@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.7.0](https://github.com/H3rmt/hyprshell-test/compare/v0.6.3...v0.7.0) (2025-05-10)
+
+
+### Features
+
+* added `data` command to see LaunchHistory ([8e3de53](https://github.com/H3rmt/hyprshell-test/commit/8e3de53b31834c8a034d28d26d72ebcbbd4d9815))
+
+
+### Bug Fixes
+
+* reload desktop maps on close ([204358d](https://github.com/H3rmt/hyprshell-test/commit/204358dc20ad49ff44d79444f707d20a4535d0da))
+* remove size_factor from config ([77b53bd](https://github.com/H3rmt/hyprshell-test/commit/77b53bd205d32c0619d244a601cea8304f4a4b9c))
+* update documentation ([229921d](https://github.com/H3rmt/hyprshell-test/commit/229921d82167d59670cdeab488677b372ecafe73))
+
 ## [0.6.3](https://github.com/H3rmt/hyprshell-test/compare/v0.5.4...v0.6.3) (2025-05-10)
 
 
