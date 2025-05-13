@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.7.1](https://github.com/H3rmt/hyprshell-test/compare/v0.7.0...v0.7.1) (2025-05-13)
+
+
+### Bug Fixes
+
+* arrow keys in the launcher ([179ca7b](https://github.com/H3rmt/hyprshell-test/commit/179ca7b45e865875584a4c658a0455ea00af0bc6))
+* speedup animation ([179ca7b](https://github.com/H3rmt/hyprshell-test/commit/179ca7b45e865875584a4c658a0455ea00af0bc6))
+
 ## [0.7.0](https://github.com/H3rmt/hyprshell-test/compare/v0.6.3...v0.7.0) (2025-05-10)
 
 
