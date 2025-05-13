@@ -3,7 +3,7 @@ use std::path::Path;
 use tracing::info;
 
 pub(crate) fn get_calc_options(matches: &mut Vec<SortableLaunchOption>, text: &str) {
-    let mut context: calc::Context<u64> = Default::default();
+    let mut context: calc::Context<f64> = Default::default();
     let eval = context.evaluate(text);
     if let Ok(eval) = eval {
         matches.push(SortableLaunchOption {

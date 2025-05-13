@@ -30,8 +30,7 @@ jobs:
           sudo ldconfig
       - name: Install cargo-workspaces
         run: |
-          # use --debug to install faster
-          cargo install cargo-workspaces --debug
+          curl --location --silent --show-error --fail "https://github.com/cargo-bins/cargo-quickinstall/releases/download/cargo-workspaces-0.3.6/cargo-workspaces-0.3.6-x86_64-unknown-linux-gnu.tar.gz" | tar -xzvvf - -C /home/user/.cargo/bin
       - name: Publish to crates.io
         run: |
           git config user.name "github-actions[bot]"

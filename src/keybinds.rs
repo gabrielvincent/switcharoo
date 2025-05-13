@@ -138,28 +138,28 @@ fn generate_overview(
     }
 
     keyword_list.push((
-        "binde",
+        "binden",
         format!(
             ", right, exec, {}",
             generate_switch_press(Direction::Right, true)?
         ),
     ));
     keyword_list.push((
-        "binde",
+        "binden",
         format!(
             ", left, exec, {}",
             generate_switch_press(Direction::Left, true)?
         ),
     ));
     keyword_list.push((
-        "binde",
+        "binden",
         format!(
             ", down, exec, {}",
             generate_switch_press(Direction::Down, true)?
         ),
     ));
     keyword_list.push((
-        "binde",
+        "binden",
         format!(
             ", up, exec, {}",
             generate_switch_press(Direction::Up, true)?
@@ -302,7 +302,7 @@ fn generate_switch(
     }
 
     keyword_list.push((
-        "bind",
+        "binden",
         format!(
             "{}, right, exec, {}",
             switch.open.modifier,
@@ -310,7 +310,7 @@ fn generate_switch(
         ),
     ));
     keyword_list.push((
-        "binde",
+        "binden",
         format!(
             "{}, left, exec, {}",
             switch.open.modifier,
@@ -318,7 +318,7 @@ fn generate_switch(
         ),
     ));
     keyword_list.push((
-        "binde",
+        "binden",
         format!(
             "{}, down, exec, {}",
             switch.open.modifier,
@@ -326,7 +326,7 @@ fn generate_switch(
         ),
     ));
     keyword_list.push((
-        "binde",
+        "binden",
         format!(
             "{}, up, exec, {}",
             switch.open.modifier,
