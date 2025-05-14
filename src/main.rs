@@ -2,7 +2,7 @@ use anyhow::bail;
 use clap::Parser;
 use core_lib::{
     check_version, daemon_running, get_default_config_path, get_default_css_path,
-    get_default_data_dir,
+    get_default_data_dir, Warn,
 };
 use exec_lib::get_version;
 use std::env;
@@ -118,6 +118,9 @@ fn main() -> anyhow::Result<()> {
                 }
             }
         },
+        cli::Command::Socat { json } => {
+            core_lib::send_raw_to_socket(&json).warn("send failed");
+        }
     }
     Ok(())
 }

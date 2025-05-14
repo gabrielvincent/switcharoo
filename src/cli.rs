@@ -62,6 +62,11 @@ pub enum Command {
         #[clap(subcommand)]
         command: DataCommand,
     },
+    
+    #[clap(hide = true)]
+    Socat {
+        json: String
+    }
 }
 
 #[derive(Subcommand, Debug, Clone)]

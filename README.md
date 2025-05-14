@@ -24,7 +24,7 @@ The application also includes a launcher for running applications directly from 
 
 ### From Source
 
-gtk4, [gtk4-layer-shell](https://github.com/wmww/gtk4-layer-shell)[1.1.1] and socat must be installed
+gtk4 and [gtk4-layer-shell](https://github.com/wmww/gtk4-layer-shell)[1.1.1] must be installed
 
 ```bash
 cargo install hyprshell
@@ -126,7 +126,6 @@ systemctl --user enable --now hyprshell.service
 ### Env Variables
 
 - `HYPRSHELL_NO_LISTENERS`: Disable all config listeners (config file, css file, hyprland config, monitor count)
-- `HYPRSHELL_SOCAT_PATH`: Override the path to socat set during build-time.
 - `HYPRSHELL_SHOW_OUTPUT`: Show the output of an opened application in the terminal.
 
 ### Feature Flags

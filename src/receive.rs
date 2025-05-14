@@ -74,15 +74,15 @@ fn handle_client(stream: InputStream, size: isize, global: &Globals) -> anyhow::
         return Ok(());
     }
 
-    handle_client_transfer(&buffer, global)?;
+    handle_client_transfer(&String::from_utf8_lossy(&buffer), global)?;
 
     trace!("Handled client in {:?}", now.elapsed());
     Ok(())
 }
 
-fn handle_client_transfer(buffer: &[u8], global: &Globals) -> anyhow::Result<()> {
-    let transfer: TransferType = serde_json::from_slice(buffer)
-        .with_context(|| format!("Failed to deserialize buffer: {buffer:?}"))?;
+fn handle_client_transfer(str: &str, global: &Globals) -> anyhow::Result<()> {
+    let transfer: TransferType = serde_json::from_str(str)
+        .with_context(|| format!("Failed to deserialize str: {str:?}"))?;
     debug!("Received command: {transfer:?}");
     match transfer {
         TransferType::OpenOverview(config) => open_overview(global, config),

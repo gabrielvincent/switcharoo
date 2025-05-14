@@ -1,3 +1,4 @@
+use crate::find_application_dirs;
 use anyhow::Context;
 use semver::Version;
 use std::fs::DirEntry;
@@ -5,7 +6,6 @@ use std::os::unix::net::UnixStream;
 use std::path::PathBuf;
 use std::{env, fmt};
 use tracing::{debug, warn};
-use crate::find_application_dirs;
 
 pub const MIN_VERSION: Version = Version::new(0, 42, 0);
 
@@ -125,12 +125,14 @@ pub fn collect_desktop_files() -> Vec<DirEntry> {
     res
 }
 
+fn get_hyprshell_path() -> String {
+    env::current_exe()
+        .expect("Current executable not found")
+        .display()
+        .to_string()
+        .replace("(deleted)", "")
+}
 
 pub fn generate_socat(echo: &str) -> String {
-    format!(
-        r#"echo '{}' | {} - UNIX-CONNECT:{}"#,
-        echo,
-        env!("SOCAT_PATH"),
-        get_daemon_socket_path_buff().to_string_lossy()
-    )
+    format!(r#"{} socat '{}'"#, get_hyprshell_path(), echo)
 }

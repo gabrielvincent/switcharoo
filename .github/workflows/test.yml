@@ -35,8 +35,6 @@ jobs:
           prefix-key: rust-build
       - name: Build
         run: ./scripts/test.sh
-        env:
-          HYPRSHELL_SOCAT_PATH: ''
 
   clippy:
     name: Run Clippy
@@ -62,5 +60,3 @@ jobs:
           prefix-key: rust-build
       - name: Run Clippy
         run: cargo clippy --all-targets
-        env:
-          HYPRSHELL_SOCAT_PATH: ''

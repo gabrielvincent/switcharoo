@@ -14,9 +14,6 @@ pkgs.rustPlatform.buildRustPackage {
     wrapGAppsHook4
     pkg-config
     makeBinaryWrapper
-
-    # hyprshell-core-lib gets the path at build time
-    socat
   ];
 
   buildInputs = with pkgs; [

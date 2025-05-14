@@ -50,4 +50,3 @@ jobs:
           gh release edit ${{ github.ref_name }} --latest --draft=false --title "Hyprshell ${{ github.ref_name }}"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          HYPRSHELL_SOCAT_PATH: ''
