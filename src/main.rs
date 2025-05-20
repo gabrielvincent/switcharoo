@@ -70,7 +70,7 @@ fn main() -> anyhow::Result<()> {
                 use core_lib::Warn;
                 let (config_data, css_data) = core_lib::config::generate::prompt_config()?;
                 let config = core_lib::config::generate::generate_config(config_data);
-                core_lib::config::generate::write_config(&config_path, config, force)
+                core_lib::config::write_config(&config_path, &config, force)
                     .warn("create");
                 core_lib::config::generate::write_css(css_path, force, css_data).warn("create");
                 if !no_systemd {

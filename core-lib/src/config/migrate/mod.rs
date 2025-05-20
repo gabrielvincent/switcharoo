@@ -1,16 +1,30 @@
 use crate::config;
-use crate::config::{check, Config};
+use crate::config::save::write_config;
 use anyhow::{bail, Context};
 use ron::extensions::Extensions;
 use ron::Options;
 use std::ffi::OsStr;
 use std::path::Path;
-use tracing::{info, span, warn, Level};
+use tracing::{span, Level};
 
-pub fn load_config(config_path: &Path) -> anyhow::Result<Config> {
-    let _span = span!(Level::TRACE, "load_config").entered();
+mod old_structs;
+mod convert;
+
+pub fn migrate(config_path: &Path) -> anyhow::Result<config::Config> {
+    let _span = span!(Level::TRACE, "migrate_if_needed").entered();
+    if let Ok(config_old) = load_old_config(config_path) {
+        let new_config = config::Config::from(config_old);
+        write_config(config_path, &new_config, true)?;
+        Ok(new_config)
+    } else {
+        bail!("Failed to load old config for migration");
+    }
+}
+
+fn load_old_config(config_path: &Path) -> anyhow::Result<old_structs::Config> {
+    let _span = span!(Level::TRACE, "load_old_config").entered();
     if !config_path.exists() {
-        bail!("Config file does not exist, create it using `hyprshell config generate`");
+        bail!("Config file does not exist no need to migrate");
     }
     let config = match config_path.extension().and_then(OsStr::to_str) {
         None | Some("ron") => {
@@ -22,12 +36,12 @@ pub fn load_config(config_path: &Path) -> anyhow::Result<Config> {
                 .with_context(|| format!("Failed to open config at ({config_path:?})"))?;
             options
                 .from_reader(file)
-                .context("Failed to read ron config")
+                .context("Failed to read ron config")?
         }
         Some("json") => {
             let file = std::fs::File::open(config_path)
                 .with_context(|| format!("Failed to open config at ({config_path:?})"))?;
-            serde_json::from_reader(file).context("Failed to read json config")
+            serde_json::from_reader(file).context("Failed to read json config")?
         }
         #[cfg(feature = "toml_config")]
         Some("toml") => {
@@ -37,23 +51,10 @@ pub fn load_config(config_path: &Path) -> anyhow::Result<Config> {
             let mut content = String::new();
             file.read_to_string(&mut content)
                 .context("Failed to read toml config")?;
-            toml::from_str(&content).context("Failed to parse toml config")
+            toml::from_str(&content).context("Failed to parse toml config")?
         }
         Some(ext) => bail!("Invalid config file extension: {} (check `FEATURES: ` debug log to see enabled extensions)", ext),
     };
-
-    let config = match config {
-        Ok(cfg) => cfg,
-        Err(err) => {
-            warn!("Failed to load config: {err}, attempting migration");
-            let migrated = config::migrate::migrate(config_path)
-                .with_context(|| format!("Migration failed. Original error: {err};"))?;
-            info!("Config migrated successfully");
-            migrated
-        }
-    };
-
-    check(&config)?;
 
     Ok(config)
 }
