@@ -64,7 +64,7 @@ pub fn create_launcher_window(
     window.set_namespace(Some(LAUNCHER_NAMESPACE));
     window.set_layer(Layer::Overlay);
     window.set_anchor(Edge::Top, true);
-    window.set_margin(Edge::Top, 20);
+    window.set_margin(Edge::Top, 15);
     window.present();
     window.set_visible(false);
 

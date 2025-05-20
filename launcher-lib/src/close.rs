@@ -4,7 +4,7 @@ use crate::{plugins, LauncherGlobal};
 use gtk::prelude::*;
 use gtk::{glib, Widget};
 use gtk4_layer_shell::{KeyboardMode, LayerShell};
-use std::time::Duration;
+use std::time::{Duration, Instant};
 use tracing::{span, trace, warn, Level};
 
 pub fn close_launcher(global: &LauncherGlobal, char: Option<char>) {
@@ -13,6 +13,7 @@ pub fn close_launcher(global: &LauncherGlobal, char: Option<char>) {
     if let Some(data) = &global.data {
         if let Some(char) = char {
             trace!("Closing launcher with char: {}", char);
+            let instant = Instant::now();
 
             let data1 = data.borrow();
             if let Some(iden) = match char {
@@ -39,11 +40,14 @@ pub fn close_launcher(global: &LauncherGlobal, char: Option<char>) {
                 if animate {
                     show_launch(results, plugin_box, &iden);
                     entry.set_editable(false);
+                    trace!("starting timeout({}ms) animation after {:?} time", global.animate_launch_ms, instant.elapsed());
                     glib::timeout_add_local_once(
                         Duration::from_millis(global.animate_launch_ms),
                         move || {
+                            let _span = _span.clone();
                             // close launcher
                             close(&entry, &window);
+                            trace!("closed launcher after {:?} time", instant.elapsed());
                         },
                     );
                     return;
@@ -59,7 +63,7 @@ pub fn close_launcher(global: &LauncherGlobal, char: Option<char>) {
 }
 
 fn close(entry: &gtk::Entry, window: &gtk::ApplicationWindow) {
-    trace!("Hiding window {:?}", window.id());
+    trace!("Hiding window (launcher) {:?}", window.id());
     window.set_visible(false);
     entry.set_text("");
 }

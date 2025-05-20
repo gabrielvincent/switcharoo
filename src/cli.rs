@@ -97,17 +97,26 @@ pub enum DataCommand {
 #[derive(Subcommand, Debug, Clone)]
 pub enum DebugCommand {
     /// Search for an icon with a window class
-    Search {
+    CheckClass {
         /// The class (from `hyprctl clients -j | jq -e ".[] | {title, class}"`) of a window to find an icon for
         ///
         /// If not provided, all open windows will be searched
-        #[arg(long)]
         class: Option<String>,
     },
 
     /// List all icons in the theme
-    List,
+    ListIcons,
 
     /// List all desktop files
-    DesktopFiles,
+    ListDesktopFiles,
+
+    /// display search insights
+    Search {
+        /// text entered into the search box
+        text: String,
+
+        /// Show all matchesma, not just x ones like configured in config
+        #[arg(short = 'a', long)]
+        all: bool
+    }
 }

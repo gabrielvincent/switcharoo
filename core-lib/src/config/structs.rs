@@ -35,7 +35,7 @@ pub struct Launcher {
     pub width: u32,
     #[default = 5]
     pub max_items: u8,
-    #[default = 400]
+    #[default = 250]
     pub animate_launch_ms: u64,
     #[default(vec![
         Plugin::Applications(Default::default()),
@@ -69,7 +69,7 @@ pub struct ApplicationsPluginOptions {
 pub struct SearchEngine {
     pub url: String,
     pub name: String,
-    pub key: String,
+    pub key: char,
 }
 
 #[derive(SmartDefault, Debug, Clone, Deserialize, Serialize)]

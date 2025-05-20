@@ -84,7 +84,7 @@ fn fill_desktop_file_map(map: &mut IconPathMap, files: &[DirEntry]) -> anyhow::R
 
 fn extract_exec_name(l: &str) -> &str {
     // is a flatpak and isn't a PWA
-    // (PWAs work out of the box by using the class = to the icon-name)
+    // (PWAs work out of the box by using the class being equal to the icon-name)
     // else chromium/chrome/etc would be detected as exec
     if l.contains("flatpak") && l.contains("--command") && !l.contains("--app-id") {
         // trim all text until --command

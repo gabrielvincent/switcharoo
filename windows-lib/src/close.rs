@@ -58,7 +58,7 @@ pub fn close_overview(global: &WindowsGlobal, ids: Option<Option<IdOverride>>) {
         while let Some(child) = monitor_data.workspaces_flow.first_child() {
             monitor_data.workspaces_flow.remove(&child);
         }
-        trace!("Hiding window {:?}", window.id());
+        trace!("Hiding window (windows) {:?}", window.id());
         window.set_visible(false);
     }
 }

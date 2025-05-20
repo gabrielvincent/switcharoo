@@ -1,16 +1,20 @@
 use crate::plugins::applications::data::{get_stored_runs, save_run};
 use crate::plugins::applications::map::{get_all_desktop_files, DesktopEntry};
 use crate::plugins::{Identifier, PluginNames, SortableLaunchOption};
-use core_lib::Warn;
+use core_lib::{analyse_exec, ExecType, Warn};
 use exec_lib::run::run_program;
 use std::collections::HashMap;
 use std::path::Path;
 use tracing::{trace, warn};
 
+//maybe prevent Keyword run many times from surpassing Exact
+#[derive(Debug, Clone, Copy)]
 enum MatchType {
     Keyword = 2,
-    Name = 10,
-    Exact = 15,
+    ExecName = 10,
+    ExecExact = 15,
+    Name = 16,
+    Exact = 21,
 }
 
 impl SortableLaunchOption {
@@ -21,17 +25,32 @@ impl SortableLaunchOption {
         show_execs: bool,
     ) -> Self {
         let (details, details_long) = if show_execs {
-            get_exec_labels(&entry.exec)
+            match analyse_exec(&entry.exec) {
+                ExecType::Flatpak(a, b)
+                | ExecType::PWA(a, b)
+                | ExecType::FlatpakPWA(a, b)
+                | ExecType::Absolute(a, b) => (a, Some(b)),
+                ExecType::Relative(a) => (a, None),
+            }
         } else {
             (Box::from(""), None)
         };
-        let score = r#match as u64 + runs.get(&entry.source).unwrap_or(&0);
+
+        let runs = runs.get(&entry.source).unwrap_or(&0);
+        trace!(
+            "entry {} has match:{:?}({}) and runs:{} => {}",
+            entry.name,
+            r#match,
+            r#match as u64,
+            runs,
+            r#match as u64 + runs
+        );
         SortableLaunchOption {
             name: entry.name.clone(),
             icon: entry.icon.clone(),
             details,
             details_long,
-            score,
+            score: r#match as u64 + runs,
             data: Identifier {
                 identifier: Some(Box::from(entry.source.to_string_lossy())),
                 plugin: PluginNames::Applications,
@@ -52,12 +71,8 @@ pub fn get_sortable_options(
 
     let lower_text = text.to_ascii_lowercase();
     for entry in entries.iter() {
-        let opt = if entry.name.to_ascii_lowercase().contains(&lower_text)
-            || entry.exec.to_ascii_lowercase().contains(&lower_text)
-        {
-            if entry.name.to_ascii_lowercase().starts_with(&lower_text)
-                || entry.exec.to_ascii_lowercase().starts_with(&lower_text)
-            {
+        let opt = if entry.name.to_ascii_lowercase().contains(&lower_text) {
+            if entry.name.to_ascii_lowercase().starts_with(&lower_text) {
                 Some(SortableLaunchOption::from_desktop_entry(
                     entry,
                     MatchType::Exact,
@@ -68,6 +83,26 @@ pub fn get_sortable_options(
                 Some(SortableLaunchOption::from_desktop_entry(
                     entry,
                     MatchType::Name,
+                    &runs,
+                    show_execs,
+                ))
+            }
+        } else if entry.exec_search.to_ascii_lowercase().contains(&lower_text) {
+            if entry
+                .exec_search
+                .to_ascii_lowercase()
+                .starts_with(&lower_text)
+            {
+                Some(SortableLaunchOption::from_desktop_entry(
+                    entry,
+                    MatchType::ExecExact,
+                    &runs,
+                    show_execs,
+                ))
+            } else {
+                Some(SortableLaunchOption::from_desktop_entry(
+                    entry,
+                    MatchType::ExecName,
                     &runs,
                     show_execs,
                 ))
@@ -125,80 +160,5 @@ pub fn launch_option(
     } else {
         warn!("Failed to find entry for {:?}", iden);
         false
-    }
-}
-
-fn get_exec_labels(exec: &str) -> (Box<str>, Option<Box<str>>) {
-    let exec_trim = exec.replace("'", "").replace("\"", "");
-    // pwa detection
-    if exec.contains("--app-id=") && exec.contains("--profile-directory=") {
-        // "flatpak 'run'" = pwa from browser inside flatpak
-        if exec.contains("flatpak run") || exec.contains("flatpak 'run'") {
-            (
-                format!(
-                    "[Flatpak + PWA] {}",
-                    exec_trim
-                        .split_whitespace()
-                        .find(|s| s.contains("--command="))
-                        .and_then(|s| s
-                            .split('=')
-                            .next_back()
-                            .and_then(|s| s.split('/').next_back()))
-                        .unwrap_or_default()
-                )
-                .into_boxed_str(),
-                exec_trim
-                    .split_whitespace()
-                    .skip(2)
-                    .find(|arg| !arg.starts_with("--"))
-                    .map(Box::from),
-            )
-        } else {
-            // normal PWA
-            (
-                format!(
-                    "[PWA] {}",
-                    exec.split_whitespace()
-                        .next()
-                        .and_then(|s| s.split('/').next_back())
-                        .unwrap_or_default()
-                )
-                .into_boxed_str(),
-                exec.split_whitespace().next().map(Box::from),
-            )
-        }
-        // flatpak detection
-    } else if exec.contains("flatpak run") || exec.contains("flatpak 'run'") {
-        (
-            format!(
-                "[Flatpak] {}",
-                exec_trim
-                    .split(' ')
-                    .find(|s| s.contains("--command="))
-                    .and_then(|s| s
-                        .split('=')
-                        .next_back()
-                        .and_then(|s| s.split('/').next_back()))
-                    .unwrap_or_default()
-            )
-            .into_boxed_str(),
-            exec_trim
-                .split_whitespace()
-                .skip(2)
-                .find(|arg| !arg.starts_with("--"))
-                .map(Box::from),
-        )
-    } else if exec_trim.starts_with("/") {
-        (
-            Box::from(
-                exec_trim
-                    .rsplit('/')
-                    .find(|s| !s.is_empty())
-                    .unwrap_or_default(),
-            ),
-            Some(Box::from(exec)),
-        )
-    } else {
-        (Box::from(exec_trim), None)
     }
 }

@@ -1,4 +1,4 @@
-use core_lib::Warn;
+use core_lib::{analyse_exec, ExecType, Warn};
 use std::fs::{read_to_string, DirEntry};
 use std::path::Path;
 use std::sync::{Mutex, MutexGuard, OnceLock};
@@ -10,6 +10,7 @@ pub(super) struct DesktopEntry {
     pub(super) name: Box<str>,
     pub(super) icon: Option<Box<Path>>,
     pub(crate) keywords: Vec<Box<str>>,
+    pub(crate) exec_search: Box<str>,
     pub(crate) exec: Box<str>,
     pub(super) exec_path: Option<Box<Path>>,
     pub(super) terminal: bool,
@@ -88,12 +89,21 @@ fn fill_desktop_file_map(map: &mut Vec<DesktopEntry>, files: &[DirEntry]) -> any
                                 exec = exec.replace(repl, "");
                             }
                         }
+                        let exec_info = analyse_exec(&exec);
+                        let exec_search = match exec_info {
+                            ExecType::Flatpak(flatpak_identifier, _) => flatpak_identifier,
+                            ExecType::PWA(_, _) => Box::from(""),
+                            ExecType::FlatpakPWA(flatpak_identifier, _) => flatpak_identifier,
+                            ExecType::Absolute(exec_name, _) => exec_name,
+                            ExecType::Relative(exec_name) => exec_name
+                        };
                         map.push(DesktopEntry {
                             name: name.trim().into(),
                             icon: icon.map(|p| Box::from(Path::new(p))),
                             keywords: keywords
                                 .map(|k| k.split(';').map(|k| k.trim().into()).collect())
                                 .unwrap_or_else(Vec::new),
+                            exec_search,
                             exec: exec.trim().into(),
                             exec_path: exec_path.map(|p| Box::from(Path::new(p))),
                             terminal,

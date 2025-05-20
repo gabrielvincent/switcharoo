@@ -11,13 +11,16 @@ use exec_lib::toast;
 use tracing::{debug, trace};
 
 pub fn get_static_options(matches: &mut Vec<StaticLaunchOption>, config: &[SearchEngine]) {
+    let browser = get_browser_info();
+    let icon = browser.2.clone();
+    drop(browser);
     for engine in config.iter() {
-        if let Some(key) = engine.key.chars().next() {
+        if !engine.key.is_whitespace() {
             matches.push(StaticLaunchOption {
                 text: engine.name.clone().into_boxed_str(),
                 details: format!("Search with {}", engine.name).into_boxed_str(),
-                icon: None,
-                key,
+                icon: icon.clone(),
+                key: engine.key,
                 data: Identifier {
                     plugin: PluginNames::WebSearch,
                     identifier: Some(engine.url.clone().into_boxed_str()),
@@ -54,16 +57,5 @@ pub fn launch_option(iden: &Option<Box<str>>, text: &str) -> bool {
 }
 
 pub(crate) fn get_chars(config: &[SearchEngine]) -> Vec<char> {
-    config
-        .iter()
-        .flat_map(|engine| {
-            engine.key.chars().next().map_or_else(
-                || {
-                    toast(&format!("Plugin {} has no valid key set", engine.name));
-                    None
-                },
-                Some,
-            )
-        })
-        .collect()
+    config.iter().map(|engine| engine.key).collect()
 }

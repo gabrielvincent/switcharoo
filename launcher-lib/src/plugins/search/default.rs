@@ -1,9 +1,11 @@
 use core_lib::{find_config_dirs, get_config_dir, Warn};
 use std::fs::{read_to_string, DirEntry};
+use std::path::Path;
 use std::sync::{Mutex, MutexGuard, OnceLock};
 use tracing::{debug, span, trace, warn, Level};
 
-pub(super) fn get_browser_info<'a>() -> MutexGuard<'a, (Box<str>, Option<Box<str>>)> {
+pub(super) fn get_browser_info<'a>(
+) -> MutexGuard<'a, (Box<str>, Option<Box<str>>, Option<Box<Path>>)> {
     BROWSER_EXEC
         .get()
         .expect("browser exec no initialized")
@@ -11,7 +13,8 @@ pub(super) fn get_browser_info<'a>() -> MutexGuard<'a, (Box<str>, Option<Box<str
         .expect("Failed to lock browser exec")
 }
 
-static BROWSER_EXEC: OnceLock<Mutex<(Box<str>, Option<Box<str>>)>> = OnceLock::new();
+static BROWSER_EXEC: OnceLock<Mutex<(Box<str>, Option<Box<str>>, Option<Box<Path>>)>> =
+    OnceLock::new();
 
 pub fn reload_default_browser(files: &[DirEntry]) {
     let _span = span!(Level::TRACE, "reload_default_browser").entered();
@@ -31,11 +34,16 @@ pub fn reload_default_browser(files: &[DirEntry]) {
                     .iter()
                     .find(|l| l.starts_with("StartupWMClass="))
                     .map(|l| l.trim_start_matches("StartupWMClass="));
+                let icon = lines
+                    .iter()
+                    .find(|l| l.starts_with("Icon="))
+                    .map(|l| l.trim_start_matches("Icon="));
                 if let Some(exec) = exec {
                     trace!("Found default browser file: {:?} with exec: {:?} and startup_wm_class: {:?}", entry.path(), exec, startup_wm_class);
                     let _ = BROWSER_EXEC.set(Mutex::new((
                         Box::from(exec),
                         startup_wm_class.map(Box::from),
+                        icon.map(Path::new).map(Box::from),
                     )));
                     return;
                 }
@@ -46,6 +54,7 @@ pub fn reload_default_browser(files: &[DirEntry]) {
     let _ = BROWSER_EXEC.set(Mutex::new((
         Box::from("firefox"),
         Some(Box::from("org.mozilla.firefox")),
+        Some(Box::from(Path::new("firefox"))),
     )));
 }
 

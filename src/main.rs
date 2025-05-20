@@ -93,23 +93,45 @@ fn main() -> anyhow::Result<()> {
         cli::Command::Debug { command } => {
             info!("use with -vv ... to see full logs!");
             match command {
-                cli::DebugCommand::Search { class } => {
+                cli::DebugCommand::CheckClass { class } => {
                     debug::search(class);
                 }
-                cli::DebugCommand::List => {
+                cli::DebugCommand::ListIcons => {
                     debug::list();
                 }
-                cli::DebugCommand::DesktopFiles => {
+                cli::DebugCommand::ListDesktopFiles => {
                     debug::desktop_files();
+                }
+                cli::DebugCommand::Search { text, all } => {
+                    let (plugins, max_items) = core_lib::config::load_config(&config_path)
+                        .ok()
+                        .and_then(|c| c.launcher.map(|l| (l.plugins, l.max_items)))
+                        .unwrap_or((vec![], 5));
+                    launcher_lib::debug::get_matches(&plugins, &text, all, max_items, &data_dir);
                 }
             };
         }
         cli::Command::Data { command } => match command {
             cli::DataCommand::LaunchHistory { run_cache_weeks } => {
-                let runs = launcher_lib::get_applications_stored_runs(
-                    run_cache_weeks.unwrap_or(1),
-                    &data_dir,
-                );
+                let run_cache_weeks = run_cache_weeks.unwrap_or_else(|| {
+                    core_lib::config::load_config(&config_path)
+                        .ok()
+                        .and_then(|c| {
+                            c.launcher.and_then(|l| {
+                                l.plugins.iter().find_map(|p| {
+                                    if let core_lib::config::Plugin::Applications(opts) = p {
+                                        Some(opts.run_cache_weeks)
+                                    } else {
+                                        None
+                                    }
+                                })
+                            })
+                        })
+                        .unwrap_or(4)
+                });
+
+                let runs = launcher_lib::get_applications_stored_runs(run_cache_weeks, &data_dir);
+
                 for (path, run) in runs {
                     info!("{}: {run}", path.display());
                     // TODO: extract name from path
