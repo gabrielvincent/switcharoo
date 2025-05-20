@@ -5,11 +5,28 @@ use ron::extensions::Extensions;
 use ron::Options;
 use std::ffi::OsStr;
 use std::path::Path;
-use tracing::{info, span, warn, Level};
+use tracing::{debug, info, span, warn, Level};
 
 pub fn load_config(config_path: &Path) -> anyhow::Result<Config> {
     let _span = span!(Level::TRACE, "load_config").entered();
     if !config_path.exists() {
+        warn!("Config file does not exist at {config_path:?}, trying other extensions");
+        let mut new_path = config_path.to_path_buf();
+        new_path.set_extension("json");
+        if new_path.exists() {
+            debug!("Found config file at {new_path:?}, loading it");
+            // recurse (can only go one layer deep as the file definitely exists)
+            return load_config(&new_path);
+        }
+        #[cfg(feature = "toml_config")]
+        {
+            new_path.set_extension("toml");
+            if new_path.exists() {
+                debug!("Found config file at {new_path:?}, loading it");
+                // recurse (can only go one layer deep as the file definitely exists)
+                return load_config(&new_path);
+            }
+        }
         bail!("Config file does not exist, create it using `hyprshell config generate`");
     }
     let config = match config_path.extension().and_then(OsStr::to_str) {
