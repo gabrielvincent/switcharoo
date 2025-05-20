@@ -3,7 +3,7 @@ use crate::config::structs::{
     Config, KeyMaybeMod, Launcher, Mod, Navigate, OpenOverview, OpenSwitch, Overview, Reverse,
     Switch, Windows,
 };
-use crate::config::Plugins;
+use crate::config::{Plugins, WebSearchConfig};
 
 #[derive(Debug)]
 pub struct ConfigData {
@@ -41,8 +41,9 @@ pub fn generate_config(data: ConfigData) -> Config {
                         .launcher_plugins
                         .iter()
                         .find(|pl| pl.as_ref().eq(configurable_launcher_plugins::WEB_SEARCH))
-                        .map(|_| {
-                            data.launcher_engines
+                        .map(|_| WebSearchConfig {
+                            engines: data
+                                .launcher_engines
                                 .iter()
                                 .filter_map(|engine| {
                                     WEB_SEARCH_ENGINES
@@ -50,7 +51,7 @@ pub fn generate_config(data: ConfigData) -> Config {
                                         .find(|(name, _)| *name == engine.as_ref())
                                         .map(|(_, constructor)| constructor())
                                 })
-                                .collect()
+                                .collect(),
                         }),
                     calc: data
                         .launcher_plugins

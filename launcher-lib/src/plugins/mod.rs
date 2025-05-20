@@ -100,8 +100,8 @@ pub fn get_static_launch_options(
     if plugins.terminal.is_some() {
         terminal::get_static_options(&mut matches, default_terminal);
     }
-    if let Some(engines) = plugins.web_search.as_ref() {
-        search::get_static_options(&mut matches, engines);
+    if let Some(web_search) = plugins.web_search.as_ref() {
+        search::get_static_options(&mut matches, &web_search.engines);
     }
 
     matches
@@ -141,8 +141,8 @@ pub fn get_static_options_chars(plugins: &Plugins) -> Vec<char> {
     if plugins.terminal.is_some() {
         chars.append(&mut terminal::get_chars());
     }
-    if let Some(engines) = plugins.web_search.as_ref() {
-        chars.append(&mut search::get_chars(engines));
+    if let Some(web_search) = plugins.web_search.as_ref() {
+        chars.append(&mut search::get_chars(&web_search.engines));
     }
 
     chars

@@ -45,17 +45,13 @@ pub struct Launcher {
 #[serde(default, deny_unknown_fields)]
 pub struct Plugins {
     #[default(Some(Default::default()))]
-    pub applications: Option<ApplicationsPluginOptions>,
+    pub applications: Option<ApplicationsPluginConfig>,
     #[default(Some(Default::default()))]
     pub terminal: Option<EmptyConfig>,
     #[default(None)]
     pub shell: Option<EmptyConfig>,
-    #[default(Some(vec![SearchEngine {
-        url: "https://www.google.com/search?q={}".into(),
-        name: "Google".into(),
-        key: 'g',
-    }]))]
-    pub web_search: Option<Vec<SearchEngine>>,
+    #[default(Some(Default::default()))]
+    pub web_search: Option<WebSearchConfig>,
     #[default(Some(Default::default()))]
     pub calc: Option<EmptyConfig>,
 }
@@ -66,11 +62,22 @@ pub struct EmptyConfig {}
 
 #[derive(SmartDefault, Debug, Clone, Deserialize, Serialize)]
 #[serde(default, deny_unknown_fields)]
-pub struct ApplicationsPluginOptions {
+pub struct ApplicationsPluginConfig {
     #[default = 4]
     pub run_cache_weeks: u8,
     #[default = true]
     pub show_execs: bool,
+}
+
+#[derive(SmartDefault, Debug, Clone, Deserialize, Serialize)]
+#[serde(default, deny_unknown_fields)]
+pub struct WebSearchConfig {
+    #[default(vec![SearchEngine {
+        url: "https://www.google.com/search?q={}".into(),
+        name: "Google".into(),
+        key: 'g',
+    }])]
+    pub engines: Vec<SearchEngine>,
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]

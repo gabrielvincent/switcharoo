@@ -50,7 +50,7 @@ pub struct Launcher {
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub enum Plugin {
-    Applications(config::ApplicationsPluginOptions),
+    Applications(config::ApplicationsPluginConfig),
     Terminal(),
     Shell(),
     WebSearch(Vec<SearchEngine>),

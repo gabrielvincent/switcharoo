@@ -109,7 +109,7 @@ in
           terminal = {
             enable = mkOpt "Run in Terminal" bool true;
           };
-          websearch = {
+          web_search = {
             enable = mkOpt "Web search" bool true;
             engines =
               mkOpt "Search engines" (listOf (submodule {

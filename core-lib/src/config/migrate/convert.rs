@@ -45,14 +45,17 @@ impl From<old_structs::Launcher> for config::Launcher {
                     _ => None,
                 }),
                 web_search: value.plugins.iter().find_map(|p| match p {
-                    old_structs::Plugin::WebSearch(engines) => Some(
-                        engines
-                            .iter()
-                            .map(|e| e.clone().into())
-                            .collect::<Vec<_>>(),
-                    ),
-                    _ => None,
-                }),
+                        old_structs::Plugin::WebSearch(engines) => Some(
+                            config::WebSearchConfig {
+                                engines:
+                                engines
+                                    .iter()
+                                    .map(|e| e.clone().into())
+                                    .collect::<Vec<_>>(),
+                            }
+                        ),
+                        _ => None,
+                    }),
                 calc: value.plugins.iter().find_map(|p| match p {
                     old_structs::Plugin::Calc() => Some(Default::default()),
                     _ => None,
