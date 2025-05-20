@@ -25,37 +25,37 @@ pub const WEB_SEARCH_ENGINES: &[(&str, fn() -> SearchEngine)] = &[
     ("Google", || SearchEngine {
         url: "https://www.google.com/search?q={}".into(),
         name: "Google".into(),
-        key: "g".into(),
+        key: 'g',
     }),
     ("DuckDuckGo", || SearchEngine {
         url: "https://duckduckgo.com/?q={}".into(),
         name: "DuckDuckGo".into(),
-        key: "d".into(),
+        key:'d',
     }),
     ("Bing", || SearchEngine {
         url: "https://www.bing.com/search?q={}".into(),
         name: "Bing".into(),
-        key: "b".into(),
+        key: 'b',
     }),
     ("Wikipedia", || SearchEngine {
         url: "https://en.wikipedia.org/wiki/Special:Search?search={}".into(),
         name: "Wikipedia".into(),
-        key: "w".into(),
+        key: 'w',
     }),
     ("ChatGpt", || SearchEngine {
         url: "https://chatgpt.com/?q={}".into(),
         name: "ChatGpt".into(),
-        key: "c".into(),
+        key: 'c',
     }),
     ("YouTube", || SearchEngine {
         url: "https://www.youtube.com/results?search_query={}".into(),
         name: "YouTube".into(),
-        key: "y".into(),
+        key: 'y',
     }),
     ("Reddit", || SearchEngine {
         url: "https://www.reddit.com/search?q={}".into(),
         name: "Reddit".into(),
-        key: "r".into(),
+        key: 'r',
     }),
 ];
 

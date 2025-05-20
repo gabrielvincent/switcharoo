@@ -70,12 +70,12 @@ fn check(config: &Config) -> anyhow::Result<()> {
             }
 
             if let Plugin::WebSearch(config) = plugin {
-                let mut used: Vec<&str> = vec![];
+                let mut used: Vec<char> = vec![];
                 for engine in config {
-                    if used.contains(&engine.key.as_str()) {
+                    if used.contains(&engine.key) {
                         bail!("Duplicate search engine key: {}", engine.key);
                     } else {
-                        used.push(&engine.key);
+                        used.push(engine.key);
                     }
                 }
             }
