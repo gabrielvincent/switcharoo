@@ -1,6 +1,7 @@
 {
-  self
-}: {
+  self,
+}:
+{
   pkgs,
   config,
   lib,
@@ -26,6 +27,19 @@ let
   mkOpt =
     description: type: default:
     lib.mkOption { inherit description type default; };
+  filterDisabledAndDropEnable =
+    value:
+    if lib.isAttrs value then
+      if value ? enable && value.enable == false then
+        null
+      else
+        lib.filterAttrs (k: v: v != null && k != "enable") (
+          lib.mapAttrs (_: filterDisabledAndDropEnable) value
+        )
+    else if lib.isList value then
+      lib.filter (v: v != null) (map filterDisabledAndDropEnable value)
+    else
+      value;
 in
 {
   options.programs.hyprshell = {
@@ -38,7 +52,9 @@ in
     };
 
     systemd = {
-      enable = lib.mkEnableOption "Hyprshell systemd service" // { default = true; };
+      enable = lib.mkEnableOption "Hyprshell systemd service" // {
+        default = true;
+      };
       target = lib.mkOption {
         description = "The systemd target that will automatically start the Hyprshell service";
         type = str;
@@ -56,7 +72,7 @@ in
 
     configFile = lib.mkOption {
       description = ''
-        File containing Hyprshell configuration (either a file or text).
+        File containing Hyprshell configuration !JSON! (either a file or text).
         Can be used instead of generated config via settings.
       '';
       type = nullOr (either path lines);
@@ -73,13 +89,19 @@ in
         default_terminal = mkOpt "Default terminal" (nullOr (str)) null;
 
         plugins = {
-          calc = mkOpt "Calculator" bool true;
-          shell = mkOpt "Run in Shell" bool false;
-          terminal = mkOpt "Run in Terminal" bool true;
           applications = {
             enable = mkOpt "Open applications" bool true;
             cache = mkOpt "Run Cache weeks" int 4;
             execs = mkOpt "Show execs" bool true;
+          };
+          calc = {
+            enable = mkOpt "Enable calculator" bool true;
+          };
+          shell = {
+            enable = mkOpt "Run in Shell" bool false;
+          };
+          terminal = {
+            enable = mkOpt "Run in Terminal" bool true;
           };
           websearch = {
             enable = mkOpt "Web search" bool true;
@@ -104,64 +126,64 @@ in
               };
           };
         };
+      };
 
-        window = {
-          enable = mkOpt "Enable windows (overview, switch)" bool true;
-          scale = mkOpt "Scale" float 8.5 // {
-            apply = num: if (num >= 0 && num <= 15) then num else throw "Value must be between 0 and 15";
+      window = {
+        enable = mkOpt "Enable windows (overview, switch)" bool true;
+        scale = mkOpt "Scale" float 8.5 // {
+          apply = num: if (num >= 0 && num <= 15) then num else throw "Value must be between 0 and 15";
+        };
+        workspaces_per_row = mkOpt "Workspaces per row" int 5;
+        strip_html_from_workspace_title = mkOpt "Strip HTML from workspace title" bool true;
+        overview = {
+          enable = mkOpt "Enable overview" bool true;
+          open = {
+            key = mkOpt "Key to open overview" str "tab";
+            modifier = mkOpt "Modifier key" (enum [
+              "alt"
+              "ctrl"
+              "super"
+              "shift"
+            ]) "super";
           };
-          workspaces_per_row = mkOpt "Workspaces per row" int 5;
-          strip_html_from_workspace_title = mkOpt "Strip HTML from workspace title" bool true;
-          overview = {
-            enable = mkOpt "Enable overview" bool true;
-            open = {
-              key = mkOpt "Key to open overview" str "tab";
-              modifier = mkOpt "Modifier key" (enum [
-                "alt"
-                "ctrl"
-                "super"
-                "shift"
-              ]) "super";
-            };
-            navigate = {
-              forward = mkOpt "Key to navigate forwards" str "tab";
-              reverse = mkOpt "Key to navigate backwards" str "Mod(shift)" // {
-                example = "Key(grave)";
-              };
-            };
-            other = {
-              filter_by = mkOpt "Filter by" (listOf (enum [
-                "same_class"
-                "current_monitor"
-                "current_workspace"
-              ])) [ ];
-              hide_filtered = mkOpt "Hide filtered windows" bool false;
+          navigate = {
+            forward = mkOpt "Key to navigate forwards" str "tab";
+            reverse = mkOpt "Key to navigate backwards" str "Mod(shift)" // {
+              example = "Key(grave)";
             };
           };
-          switcher = {
-            enable = mkOpt "Enable window switcher" bool true;
-            open = {
-              modifier = mkOpt "Modifier key" (enum [
-                "alt"
-                "ctrl"
-                "super"
-                "shift"
-              ]) "alt";
+          other = {
+            filter_by = mkOpt "Filter by" (listOf (enum [
+              "same_class"
+              "current_monitor"
+              "current_workspace"
+            ])) [ ];
+            hide_filtered = mkOpt "Hide filtered windows" bool false;
+          };
+        };
+        switcher = {
+          enable = mkOpt "Enable window switcher" bool true;
+          open = {
+            modifier = mkOpt "Modifier key" (enum [
+              "alt"
+              "ctrl"
+              "super"
+              "shift"
+            ]) "alt";
+          };
+          navigate = {
+            forward = mkOpt "Key to navigate forwards" str "tab";
+            reverse = mkOpt "Key to navigate backwards" str "Mod(shift)" // {
+              example = "Key(grave)";
             };
-            navigate = {
-              forward = mkOpt "Key to navigate forwards" str "tab";
-              reverse = mkOpt "Key to navigate backwards" str "Mod(shift)" // {
-                example = "Key(grave)";
-              };
-            };
-            other = {
-              filter_by = mkOpt "Filter by" (listOf (enum [
-                "same_class"
-                "current_monitor"
-                "current_workspace"
-              ])) [ ];
-              hide_filtered = mkOpt "Hide filtered windows" bool true;
-            };
+          };
+          other = {
+            filter_by = mkOpt "Filter by" (listOf (enum [
+              "same_class"
+              "current_monitor"
+              "current_workspace"
+            ])) [ ];
+            hide_filtered = mkOpt "Hide filtered windows" bool true;
           };
         };
       };
@@ -184,18 +206,32 @@ in
       Install.WantedBy = [ cfg.systemd.target ];
     };
 
-    xdg.configFile."hyprshell/config.ron" = {
-      # source = if (lib.isPath cfg.configFile || lib.isStorePath cfg.configFile) then cfg.configFile else null;
-      text =
-        if (builtins.isString cfg.configFile) then
-          cfg.configFile
-        else
-          builtins.toJSON cfg.settings;
-    };
+    xdg.configFile."hyprshell/config.json" =
+      if (lib.isPath cfg.configFile || lib.isStorePath cfg.configFile) then
+        {
+          source = cfg.configFile;
+        }
+      else if (builtins.isString cfg.configFile) then
+        {
+          text = cfg.configFile;
+        }
+      else
+        {
+          text = builtins.toJSON (filterDisabledAndDropEnable cfg.settings);
+        };
 
-    xdg.configFile."hyprshell/style.css" = {
-      # source = if (lib.isPath cfg.styleFile || lib.isStorePath cfg.styleFile) then cfg.styleFile else null;
-      text = if (builtins.isString cfg.styleFile) then cfg.styleFile else "";
-    };
+    xdg.configFile."hyprshell/style.css" =
+      if (lib.isPath cfg.styleFile || lib.isStorePath cfg.styleFile) then
+        {
+          source = cfg.styleFile;
+        }
+      else if (builtins.isString cfg.styleFile) then
+        {
+          text = cfg.styleFile;
+        }
+      else
+        {
+          text = "";
+        };
   });
 }
