@@ -87,10 +87,9 @@ pub fn get_stored_runs(run_cache_weeks: u8, data_dir: &Path) -> HashMap<Box<Path
         };
         if let Some(obj) = cache_data.as_object() {
             for (path, runs_count) in obj {
-                runs.insert(
-                    PathBuf::from(path).into_boxed_path(),
-                    runs_count.as_u64().unwrap_or(0),
-                );
+                runs.entry(PathBuf::from(path).into_boxed_path())
+                    .and_modify(|e| *e += runs_count.as_u64().unwrap_or(0))
+                    .or_insert(runs_count.as_u64().unwrap_or(0));
             }
         } else {
             warn!("Cache data is not an object");
