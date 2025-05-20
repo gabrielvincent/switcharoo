@@ -13,7 +13,6 @@ pkgs.rustPlatform.buildRustPackage {
   nativeBuildInputs = with pkgs; [
     wrapGAppsHook4
     pkg-config
-    makeBinaryWrapper
   ];
 
   buildInputs = with pkgs; [

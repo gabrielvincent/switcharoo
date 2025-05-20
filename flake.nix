@@ -17,12 +17,13 @@
         hyprshell = pkgsFor.${system}.callPackage ./nix/default.nix { inherit self; };
         default = hyprshell;
       });
-      devShells = forAllSystems (system: {
-        default = pkgsFor.${system}.callPackage ./nix/shell.nix { inherit self; };
+      devShells = forAllSystems (system: rec {
+        hyprshell = pkgsFor.${system}.callPackage ./nix/shell.nix { inherit self; };
+        default = hyprshell;
       });
-      homeModules = {
-        hyprshell = import ./nix/module.nix self;
-        default = self.homeModules.hyprshell;
+      homeModules = rec {
+        hyprshell = import ./nix/module.nix { inherit self; };
+        default = hyprshell;
       };
     };
 }

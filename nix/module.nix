@@ -1,35 +1,18 @@
-self:
 {
-  config,
+  self
+}: {
   pkgs,
+  config,
   lib,
   ...
 }:
 let
-  inherit (builtins)
-    concatStringsSep
-    isPath
-    map
-    readFile
-    stringLength
-    throw
-    toString
-    ;
-  inherit (lib)
-    getExe
-    isStorePath
-    mapAttrsToList
-    mkEnableOption
-    mkIf
-    mkMerge
-    mkOption
-    optionalString
-    types
-    ;
-  inherit (types)
+  inherit (lib.types)
     either
+    bool
     float
     int
+    enum
     lines
     listOf
     nullOr
@@ -39,312 +22,180 @@ let
     submodule
     ;
 
-  boolStr = opt: if opt then "true" else "false";
-  mkEnableOption' = _: mkEnableOption _ // { default = true; };
+  cfg = config.programs.hyprshell;
   mkOpt =
     description: type: default:
-    mkOption { inherit description type default; };
-  cfg = config.programs.hyprshell;
+    lib.mkOption { inherit description type default; };
 in
 {
   options.programs.hyprshell = {
-    enable = mkEnableOption "Configure Hyprshell";
+    enable = lib.mkEnableOption "Configure Hyprshell";
 
-    package = mkOption {
+    package = lib.mkOption {
       description = "The Hyprshell package";
       type = package;
       default = self.packages.${pkgs.stdenv.hostPlatform.system}.hyprshell;
     };
 
     systemd = {
-      enable = mkEnableOption "Hyprshell systemd service";
-      target = mkOption {
+      enable = lib.mkEnableOption "Hyprshell systemd service" // { default = true; };
+      target = lib.mkOption {
         description = "The systemd target that will automatically start the Hyprshell service";
         type = str;
         default = config.wayland.systemd.target;
       };
     };
 
-    style = mkOption {
+    styleFile = lib.mkOption {
       description = ''
-        CSS style of Hyprshell
-        If value is a path, then that will be used as the CSS file
+        File containing Hyprshell CSS overrides (either a file or text).
       '';
       type = nullOr (either path lines);
-      default = readFile ../core-lib/src/config/generate/default.css;
+      default = null;
     };
 
-    declarative = mkEnableOption' ''
-      Declarative configuration of Hyprshell settings
-      If enabled, then the configuration will be generated from `programs.hyprshell.settings`
-      Otherwise `programs.hyprshell.configFile` will be used
-    '';
-
-    configFile = mkOption {
+    configFile = lib.mkOption {
       description = ''
-        File containing Hyprshell configuration
-        If value is a string, then that will be used as the contents of the file
+        File containing Hyprshell configuration (either a file or text).
+        Can be used instead of generated config via settings.
       '';
       type = nullOr (either path lines);
       default = null;
     };
 
     settings = {
-      layerrules = mkEnableOption' "Enable layer rules";
+      layerrules = mkOpt "Enable layer rules" bool true;
       launcher = {
-        enable = mkEnableOption' "Enable app launcher";
+        enable = mkOpt "Enable app launcher" bool true;
         width = mkOpt "Launcher width" int 650;
         max_items = mkOpt "Max shown items" int 5;
-        animate_launch_ms = mkOpt "Launcher close duration" int 450;
-        default_terminal = mkOption {
-          description = "Default terminal";
-          type = types.nullOr (
-            types.enum [
-              "alacritty"
-              "console"
-              "foot"
-              "kitty"
-              "lilyterm"
-              "qterminal"
-              "tilix"
-              "wezterm"
-            ]
-          );
-          default = null;
-        };
+        animate_launch_ms = mkOpt "Launcher close duration" int 250;
+        default_terminal = mkOpt "Default terminal" (nullOr (str)) null;
 
         plugins = {
-          calc = mkEnableOption' "Calculator";
-          shell = mkEnableOption' "Run in Shell";
-          terminal = mkEnableOption' "Run in Terminal";
+          calc = mkOpt "Calculator" bool true;
+          shell = mkOpt "Run in Shell" bool false;
+          terminal = mkOpt "Run in Terminal" bool true;
           applications = {
-            enable = mkEnableOption' "Open applications";
+            enable = mkOpt "Open applications" bool true;
             cache = mkOpt "Run Cache weeks" int 4;
-            execs = mkEnableOption' "Show execs";
+            execs = mkOpt "Show execs" bool true;
           };
           websearch = {
-            enable = mkEnableOption' "Web search";
-            engines = mkOption {
-              description = "Search engines";
-              type = listOf (submodule {
+            enable = mkOpt "Web search" bool true;
+            engines =
+              mkOpt "Search engines" (listOf (submodule {
                 options = {
-                  url = mkOption {
-                    description = "Search engine URL";
-                    type = str;
-                  };
-                  name = mkOption {
-                    description = "Name of search engine";
-                    type = str;
-                  };
-                  key = mkOption {
-                    description = "Key to use for search engine";
-                    type = str;
-                    apply = key: if (stringLength key) != 1 then throw "Key must be single character" else key;
+                  url = mkOpt "Search engine URL" str null;
+                  name = mkOpt "Search engine name" str null;
+                  key = mkOpt "Key to use for search engine" str null // {
+                    apply = key: if (builtins.stringLength key) != 1 then throw "Key must be single character" else key;
                   };
                 };
-              });
-              default = [ ];
-              example = [
-                {
-                  url = "https://www.google.com/search?q={}";
-                  name = "Google";
-                  key = "g";
-                }
-              ];
-            };
+              })) [ ]
+              // {
+                example = [
+                  {
+                    url = "https://www.google.com/search?q={}";
+                    name = "Google";
+                    key = "g";
+                  }
+                ];
+              };
           };
         };
-      };
 
-      window =
-        let
-          build = key: {
-            open = {
-              modifier = mkOption {
-                description = "Modifier key";
-                type = types.nullOr (
-                  types.enum [
-                    "alt"
-                    "ctrl"
-                    "super"
-                    "shift"
-                  ]
-                );
-                default = null;
-                apply = mod: if (mod != null) then mod else throw "Modifier key must be set";
-              };
-              key =
-                if key then
-                  mkOption {
-                    description = "Key to open overview";
-                    type = str;
-                    default = "tab";
-                  }
-                else
-                  { };
-            };
-            navigate = {
-              forward = mkOption {
-                description = "Key to navigate forwards";
-                type = str;
-                default = "tab";
-              };
-              reverse = mkOption {
-                description = "Key to navigate backwards";
-                type = str;
-                default = "Mod(shift)";
-                example = "Key(grave)";
-              };
-            };
-            filter = {
-              hide = mkEnableOption "Hide filtered windows";
-              by = mkOption {
-                description = "Filter by";
-                type = listOf (
-                  types.enum [
-                    "same_class"
-                    "current_monitor"
-                    "current_workspace"
-                  ]
-                );
-                default = [ ];
-              };
-            };
-          };
-        in
-        {
+        window = {
+          enable = mkOpt "Enable windows (overview, switch)" bool true;
           scale = mkOpt "Scale" float 8.5 // {
             apply = num: if (num >= 0 && num <= 15) then num else throw "Value must be between 0 and 15";
           };
           workspaces_per_row = mkOpt "Workspaces per row" int 5;
-          strip_html_from_workspace_title = mkEnableOption' "Strip HTML from workspace title";
-          overview = build true;
-          switcher = build false;
+          strip_html_from_workspace_title = mkOpt "Strip HTML from workspace title" bool true;
+          overview = {
+            enable = mkOpt "Enable overview" bool true;
+            open = {
+              key = mkOpt "Key to open overview" str "tab";
+              modifier = mkOpt "Modifier key" (enum [
+                "alt"
+                "ctrl"
+                "super"
+                "shift"
+              ]) "super";
+            };
+            navigate = {
+              forward = mkOpt "Key to navigate forwards" str "tab";
+              reverse = mkOpt "Key to navigate backwards" str "Mod(shift)" // {
+                example = "Key(grave)";
+              };
+            };
+            other = {
+              filter_by = mkOpt "Filter by" (listOf (enum [
+                "same_class"
+                "current_monitor"
+                "current_workspace"
+              ])) [ ];
+              hide_filtered = mkOpt "Hide filtered windows" bool false;
+            };
+          };
+          switcher = {
+            enable = mkOpt "Enable window switcher" bool true;
+            open = {
+              modifier = mkOpt "Modifier key" (enum [
+                "alt"
+                "ctrl"
+                "super"
+                "shift"
+              ]) "alt";
+            };
+            navigate = {
+              forward = mkOpt "Key to navigate forwards" str "tab";
+              reverse = mkOpt "Key to navigate backwards" str "Mod(shift)" // {
+                example = "Key(grave)";
+              };
+            };
+            other = {
+              filter_by = mkOpt "Filter by" (listOf (enum [
+                "same_class"
+                "current_monitor"
+                "current_workspace"
+              ])) [ ];
+              hide_filtered = mkOpt "Hide filtered windows" bool true;
+            };
+          };
         };
+      };
     };
   };
 
-  config = mkIf cfg.enable (mkMerge [
-    {
-      assertions = [
-        {
-          assertion = cfg.declarative || cfg.configFile != null;
-          message = "Configuration must be specified either declaratively or by using `configFile`";
-        }
-      ];
+  config = lib.mkIf cfg.enable ({
+    home.packages = [ cfg.package ];
 
-      home.packages = [ cfg.package ];
-
-      systemd.user.services.hyprshell = mkIf cfg.systemd.enable {
-        Install.WantedBy = [ cfg.systemd.target ];
-        Unit = {
-          Description = "Starts Hyprshell daemon";
-          PartOf = [ cfg.systemd.target ];
-          After = [ cfg.systemd.target ];
-        };
-        Service = {
-          ExecStart = "${getExe cfg.package} run";
-          Type = "simple";
-          Restart = "on-failure";
-          RestartSec = 1;
-        };
+    systemd.user.services.hyprshell = lib.mkIf cfg.systemd.enable {
+      Unit = {
+        Description = "Starts Hyprshell daemon";
+        After = [ cfg.systemd.target ];
       };
+      Service = {
+        Type = "simple";
+        ExecStart = "${lib.getExe cfg.package} run";
+        Restart = "on-failure";
+      };
+      Install.WantedBy = [ cfg.systemd.target ];
+    };
 
-      xdg.configFile =
-        let
-          source' =
-            conf: file:
-            if (isPath conf || isStorePath conf) then cfg.style else pkgs.writeText "hyprshell/${file}" conf;
-        in
-        {
-          "hyprshell/styles.css" = mkIf (cfg.style != null) {
-            source = source' cfg.style "styles.css";
-          };
-          "hyprshell/config.ron" = mkIf (!cfg.declarative) {
-            source = source' cfg.configFile "config.ron";
-          };
-        };
-    }
+    xdg.configFile."hyprshell/config.ron" = {
+      # source = if (lib.isPath cfg.configFile || lib.isStorePath cfg.configFile) then cfg.configFile else null;
+      text =
+        if (builtins.isString cfg.configFile) then
+          cfg.configFile
+        else
+          builtins.toJSON cfg.settings;
+    };
 
-    (mkIf cfg.declarative (
-      with cfg.settings;
-      {
-        assertions = [
-          {
-            assertion = with launcher; !enable || (default_terminal != null);
-            message = "Default terminal must be set";
-          }
-        ];
-
-        xdg.configFile."hyprshell/config.ron".text =
-          let
-            launcher' =
-              with launcher;
-              if launcher.enable then
-                ''
-                  (
-                    default_terminal: "${default_terminal}",
-                    width: ${toString width},
-                    max_items: ${toString max_items},
-                    animate_launch_ms: ${toString animate_launch_ms},
-                    plugins: [
-                      ${optionalString plugins.calc "Calc(),"}
-                      ${optionalString plugins.shell "Shell(),"}
-                      ${optionalString plugins.terminal "Terminal(),"}
-                      ${optionalString plugins.applications.enable ''
-                        Applications(
-                          run_cache_weeks: ${toString plugins.applications.cache},
-                          show_execs: ${boolStr plugins.applications.execs},
-                        ),
-                      ''}
-                      ${optionalString plugins.websearch.enable ''
-                        WebSearch([
-                          ${concatStringsSep "" (
-                            map (engine: ''
-                              (
-                                ${concatStringsSep "," (mapAttrsToList (name: value: "${name}: \"${value}\"") engine)},
-                              ),
-                            '') plugins.websearch.engines
-                          )}
-                        ]),
-                      ''}
-                    ],
-                  )
-                ''
-              else
-                "None";
-
-            build = conf: key: ''
-              (
-                open: (
-                  modifier: ${conf.open.modifier},
-                  ${optionalString key "key: \"${conf.open.key}\","}
-                ),
-                navigate: (
-                  forward: "${conf.navigate.forward}",
-                  reverse: ${conf.navigate.reverse},
-                ),
-                other: (
-                  hide_filtered: ${boolStr conf.filter.hide},
-                  filter_by: [${concatStringsSep "," conf.filter.by}],
-                ),
-              )
-            '';
-          in
-          ''
-            (
-              layerrules: ${boolStr layerrules},
-              launcher: ${launcher'},
-              windows: (
-                scale: ${toString window.scale},
-                workspaces_per_row: ${toString window.workspaces_per_row},
-                strip_html_from_workspace_title: ${boolStr window.strip_html_from_workspace_title},
-                overview: ${build window.overview true},
-                switch: ${build window.switcher false},
-              ),
-            )
-          '';
-      }
-    ))
-  ]);
+    xdg.configFile."hyprshell/style.css" = {
+      # source = if (lib.isPath cfg.styleFile || lib.isStorePath cfg.styleFile) then cfg.styleFile else null;
+      text = if (builtins.isString cfg.styleFile) then cfg.styleFile else "";
+    };
+  });
 }
