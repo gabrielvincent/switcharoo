@@ -60,6 +60,12 @@ in
         type = str;
         default = config.wayland.systemd.target;
       };
+      args = lib.mkOption {
+        description = "Arguments to pass to the Hyprshell service";
+        type = str;
+        default = "";
+        example = "-vv";
+      };
     };
 
     styleFile = lib.mkOption {
@@ -212,7 +218,7 @@ in
       };
       Service = {
         Type = "simple";
-        ExecStart = "${lib.getExe cfg.package} run";
+        ExecStart = "${lib.getExe cfg.package} run ${cfg.systemd.args}";
         Restart = "on-failure";
       };
       Install.WantedBy = [ cfg.systemd.target ];
