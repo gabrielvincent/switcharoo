@@ -1,10 +1,8 @@
-use anyhow::bail;
 use clap::Parser;
 use core_lib::{
     check_version, daemon_running, get_default_config_path, get_default_css_path,
     get_default_data_dir, Warn,
 };
-use exec_lib::get_version;
 use std::env;
 use tracing::{debug, info, warn};
 
@@ -57,9 +55,9 @@ fn main() -> anyhow::Result<()> {
     match cli.command {
         cli::Command::Run {} => {
             if daemon_running() {
-                bail!("Daemon already running");
+                anyhow::bail!("Daemon already running");
             }
-            check_version(get_version()).unwrap_or_else(|e| {
+            check_version(exec_lib::get_version()).unwrap_or_else(|e| {
                 warn!("Unable to check hyprland version, continuing anyway: {e}")
             });
             start::start(config_path, css_path, data_dir)?;
@@ -70,8 +68,7 @@ fn main() -> anyhow::Result<()> {
                 use core_lib::Warn;
                 let (config_data, css_data) = core_lib::config::generate::prompt_config()?;
                 let config = core_lib::config::generate::generate_config(config_data);
-                core_lib::config::write_config(&config_path, &config, force)
-                    .warn("create");
+                core_lib::config::write_config(&config_path, &config, force).warn("create");
                 core_lib::config::generate::write_css(css_path, force, css_data).warn("create");
                 if !no_systemd {
                     core_lib::config::generate::write_systemd_unit(
@@ -106,7 +103,12 @@ fn main() -> anyhow::Result<()> {
                     let (plugins, max_items) = core_lib::config::load_config(&config_path)
                         .ok()
                         .and_then(|c| c.launcher.map(|l| (l.plugins, l.max_items)))
-                        .unwrap_or((vec![], 5));
+                        .unwrap_or((
+                            vec![core_lib::config::Plugin::Applications(
+                                core_lib::config::ApplicationsPluginOptions::default(),
+                            )],
+                            5,
+                        ));
                     launcher_lib::debug::get_matches(&plugins, &text, all, max_items, &data_dir);
                 }
             };

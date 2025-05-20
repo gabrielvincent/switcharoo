@@ -7,17 +7,20 @@ use std::ffi::OsStr;
 use std::path::Path;
 use tracing::{span, Level};
 
-mod old_structs;
 mod convert;
+mod old_structs;
 
 pub fn migrate(config_path: &Path) -> anyhow::Result<config::Config> {
     let _span = span!(Level::TRACE, "migrate_if_needed").entered();
-    if let Ok(config_old) = load_old_config(config_path) {
-        let new_config = config::Config::from(config_old);
-        write_config(config_path, &new_config, true)?;
-        Ok(new_config)
-    } else {
-        bail!("Failed to load old config for migration");
+    match load_old_config(config_path) {
+        Ok(old_config) => {
+            let new_config = config::Config::from(old_config);
+            write_config(config_path, &new_config, true)?;
+            Ok(new_config)
+        }
+        Err(e) => {
+            bail!("Failed to load old config for migration: {e:?}");
+        }
     }
 }
 

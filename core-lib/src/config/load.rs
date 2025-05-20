@@ -8,9 +8,12 @@ use std::path::Path;
 use tracing::{debug, info, span, warn, Level};
 
 pub fn load_config(config_path: &Path) -> anyhow::Result<Config> {
-    let _span = span!(Level::TRACE, "load_config").entered();
+    let _span = span!(Level::TRACE, "load_config", path =? config_path).entered();
     if !config_path.exists() {
-        warn!("Config file does not exist at {config_path:?}, trying other extensions");
+        warn!(
+            "Config file does not exist at, trying other extensions {}",
+            config_path.exists()
+        );
         let mut new_path = config_path.to_path_buf();
         new_path.set_extension("json");
         if new_path.exists() {
@@ -27,6 +30,14 @@ pub fn load_config(config_path: &Path) -> anyhow::Result<Config> {
                 return load_config(&new_path);
             }
         }
+        warn!(
+            "Tried all extensions(ron, json{}), None found",
+            if cfg!(feature = "toml_config") {
+                ", toml"
+            } else {
+                ""
+            }
+        );
         bail!("Config file does not exist, create it using `hyprshell config generate`");
     }
     let config = match config_path.extension().and_then(OsStr::to_str) {
@@ -63,12 +74,20 @@ pub fn load_config(config_path: &Path) -> anyhow::Result<Config> {
         Ok(cfg) => cfg,
         Err(err) => {
             warn!("Failed to load config: {err}, attempting migration");
-            let migrated = config::migrate::migrate(config_path)
-                .with_context(|| format!("Migration failed. Original error: {err};"))?;
-            info!("Config migrated successfully");
-            migrated
+            let migrated = config::migrate::migrate(config_path);
+            match migrated {
+                Ok(cfg) => {
+                    info!("Config migrated successfully");
+                    cfg
+                }
+                Err(err) => {
+                    warn!("Migration failed: {err}");
+                    bail!("Failed to load config and migration failed");
+                }
+            }
         }
     };
+    debug!("Loaded config");
 
     check(&config)?;
 
