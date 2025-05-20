@@ -97,8 +97,8 @@ in
         plugins = {
           applications = {
             enable = mkOpt "Open applications" bool true;
-            cache = mkOpt "Run Cache weeks" int 4;
-            execs = mkOpt "Show execs" bool true;
+            run_cache_weeks = mkOpt "Run Cache weeks" int 4;
+            show_execs = mkOpt "Show execs" bool true;
           };
           calc = {
             enable = mkOpt "Enable calculator" bool true;
