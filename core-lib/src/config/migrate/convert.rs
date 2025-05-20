@@ -31,23 +31,33 @@ impl From<old_structs::Launcher> for config::Launcher {
             width: value.width,
             animate_launch_ms: value.animate_launch_ms,
             default_terminal: value.default_terminal,
-            plugins: value.plugins.into_iter().map(Into::into).collect(),
-        }
-    }
-}
-
-impl From<old_structs::Plugin> for config::Plugin {
-    fn from(value: old_structs::Plugin) -> Self {
-        match value {
-            old_structs::Plugin::Applications(options) => {
-                config::Plugin::Applications(options)
-            }
-            old_structs::Plugin::Terminal() => config::Plugin::Terminal(()),
-            old_structs::Plugin::Shell() => config::Plugin::Shell(()),
-            old_structs::Plugin::WebSearch(engines) => {
-                config::Plugin::WebSearch(engines.into_iter().map(Into::into).collect())
-            }
-            old_structs::Plugin::Calc() => config::Plugin::Calc(()),
+            plugins: config::Plugins {
+                applications: value.plugins.iter().find_map(|p| match p {
+                    old_structs::Plugin::Applications(options) => Some(options.clone()),
+                    _ => None,
+                }),
+                terminal: value.plugins.iter().find_map(|p| match p {
+                    old_structs::Plugin::Terminal() => Some(Default::default()),
+                    _ => None,
+                }),
+                shell: value.plugins.iter().find_map(|p| match p {
+                    old_structs::Plugin::Shell() => Some(Default::default()),
+                    _ => None,
+                }),
+                web_search: value.plugins.iter().find_map(|p| match p {
+                    old_structs::Plugin::WebSearch(engines) => Some(
+                        engines
+                            .iter()
+                            .map(|e| e.clone().into())
+                            .collect::<Vec<_>>(),
+                    ),
+                    _ => None,
+                }),
+                calc: value.plugins.iter().find_map(|p| match p {
+                    old_structs::Plugin::Calc() => Some(Default::default()),
+                    _ => None,
+                }),
+            },
         }
     }
 }
@@ -68,7 +78,7 @@ impl From<old_structs::Overview> for config::Overview {
         Self {
             open: value.open,
             other: value.other,
-            navigate: value.navigate.into()
+            navigate: value.navigate.into(),
         }
     }
 }
@@ -77,7 +87,7 @@ impl From<old_structs::Switch> for config::Switch {
         Self {
             open: value.open,
             other: value.other,
-            navigate: value.navigate.into()
+            navigate: value.navigate.into(),
         }
     }
 }
@@ -85,7 +95,7 @@ impl From<old_structs::Navigate> for config::Navigate {
     fn from(value: old_structs::Navigate) -> Self {
         Self {
             forward: value.forward,
-            reverse: value.reverse.into()
+            reverse: value.reverse.into(),
         }
     }
 }

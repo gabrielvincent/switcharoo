@@ -1,9 +1,9 @@
-use crate::config::generate::tui::{CONFIGURABLE_LAUNCHER_PLUGINS, WEB_SEARCH_ENGINES};
+use crate::config::generate::tui::{configurable_launcher_plugins, WEB_SEARCH_ENGINES};
 use crate::config::structs::{
     Config, KeyMaybeMod, Launcher, Mod, Navigate, OpenOverview, OpenSwitch, Overview, Reverse,
     Switch, Windows,
 };
-use crate::config::Plugin;
+use crate::config::Plugins;
 
 #[derive(Debug)]
 pub struct ConfigData {
@@ -21,33 +21,43 @@ pub fn generate_config(data: ConfigData) -> Config {
         launcher: if data.enable_launcher {
             Some(Launcher {
                 default_terminal: data.default_terminal,
-                plugins: data
-                    .launcher_plugins
-                    .into_iter()
-                    .filter_map(|plugin| {
-                        CONFIGURABLE_LAUNCHER_PLUGINS
-                            .iter()
-                            .find(|(name, _)| *name == plugin.as_ref())
-                            .map(|(_, constructor)| constructor())
-                            .map(|plugin| {
-                                if let Plugin::WebSearch(_) = plugin {
-                                    Plugin::WebSearch(
-                                        data.launcher_engines
-                                            .iter()
-                                            .filter_map(|engine| {
-                                                WEB_SEARCH_ENGINES
-                                                    .iter()
-                                                    .find(|(name, _)| *name == engine.as_ref())
-                                                    .map(|(_, constructor)| constructor())
-                                            })
-                                            .collect(),
-                                    )
-                                } else {
-                                    plugin
-                                }
-                            })
-                    })
-                    .collect(),
+                plugins: Plugins {
+                    applications: data
+                        .launcher_plugins
+                        .iter()
+                        .find(|pl| pl.as_ref().eq(configurable_launcher_plugins::APPLICATIONS))
+                        .map(|_| Default::default()),
+                    terminal: data
+                        .launcher_plugins
+                        .iter()
+                        .find(|pl| pl.as_ref().eq(configurable_launcher_plugins::TERMINAL))
+                        .map(|_| Default::default()),
+                    shell: data
+                        .launcher_plugins
+                        .iter()
+                        .find(|pl| pl.as_ref().eq(configurable_launcher_plugins::SHELL))
+                        .map(|_| Default::default()),
+                    web_search: data
+                        .launcher_plugins
+                        .iter()
+                        .find(|pl| pl.as_ref().eq(configurable_launcher_plugins::WEB_SEARCH))
+                        .map(|_| {
+                            data.launcher_engines
+                                .iter()
+                                .filter_map(|engine| {
+                                    WEB_SEARCH_ENGINES
+                                        .iter()
+                                        .find(|(name, _)| *name == engine.as_ref())
+                                        .map(|(_, constructor)| constructor())
+                                })
+                                .collect()
+                        }),
+                    calc: data
+                        .launcher_plugins
+                        .iter()
+                        .find(|pl| pl.as_ref().eq(configurable_launcher_plugins::CALC))
+                        .map(|_| Default::default()),
+                },
                 ..Default::default()
             })
         } else {

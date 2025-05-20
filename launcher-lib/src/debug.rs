@@ -1,12 +1,12 @@
 use crate::plugins::get_sortable_launch_options;
 use crate::reload_applications_desktop_map;
-use core_lib::config::Plugin;
 use std::path::Path;
 use tracing::field::debug;
 use tracing::{debug, info};
+use core_lib::config::Plugins;
 
 pub fn get_matches(
-    plugins: &[Plugin],
+    plugins: &Plugins,
     text: &str,
     all_items: bool,
     max_items: u8,
@@ -14,7 +14,6 @@ pub fn get_matches(
 ) {
     let desktop_files = core_lib::collect_desktop_files();
     reload_applications_desktop_map(&desktop_files);
-    debug!("{} plugins loaded", plugins.len());
     debug!("text: {text}");
     let options = get_sortable_launch_options(plugins, text, data_dir);
     info!("{} options returned", options.len());

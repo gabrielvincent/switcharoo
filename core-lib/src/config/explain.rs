@@ -1,4 +1,4 @@
-use crate::config::{load_config, Config, Plugin, Reverse};
+use crate::config::{load_config, Config, Reverse};
 use crate::daemon_running;
 use std::path::Path;
 
@@ -39,18 +39,19 @@ pub fn explain(config: Config) -> String {
 
     if let Some(launcher) = &config.launcher {
         builder.push_str("After opening the Overview the launcher is available.\n");
-        for plugin in &launcher.plugins {
-            match plugin {
-                Plugin::Applications(_) =>
-                    builder.push_str("Start typing to search through applications (sorted by how often they were opened).\n\
-                    Press \x1b[34mreturn\x1b[0m to launch the first app, use \x1b[34mCtrl + 1/2/3/...\x1b[0m to open the second, third, etc.\n"),
-                Plugin::Terminal(_) => builder.push_str("Press \x1b[34mCtrl + t\x1b[0m to run the typed command in a terminal.\n"),
-                Plugin::Shell(_) => builder.push_str("Press \x1b[34mCtrl + r\x1b[0m to run the typed command in the background.\n"),
-                Plugin::WebSearch(engines) =>
-                    builder.push_str(&format!("Press \x1b[34mCtrl + \x1b[1m\x1b[34m<key>\x1b[0m to search the typed text in any of the configured SearchEngines: {}.\n",
-                                              engines.iter().map(|e| e.name.as_str()).collect::<Vec<_>>().join(", "))),
-                _ => {}
-            };
+        if let Some(_applications) = launcher.plugins.applications.as_ref() {
+            builder.push_str("Start typing to search through applications (sorted by how often they were opened).\n\
+                    Press \x1b[34mreturn\x1b[0m to launch the first app, use \x1b[34mCtrl + 1/2/3/...\x1b[0m to open the second, third, etc.\n");
+        }
+        if launcher.plugins.terminal.is_some() {
+            builder.push_str("Press \x1b[34mCtrl + t\x1b[0m to run the typed command in a terminal.\n");
+        }
+        if launcher.plugins.shell.is_some() {
+            builder.push_str("Press \x1b[34mCtrl + r\x1b[0m to run the typed command in the background.\n");
+        }
+        if let Some(engines) = &launcher.plugins.web_search {
+            builder.push_str(&format!("Press \x1b[34mCtrl + \x1b[1m\x1b[34m<key>\x1b[0m to search the typed text in any of the configured SearchEngines: {}.\n",
+                                      engines.iter().map(|e| e.name.as_str()).collect::<Vec<_>>().join(", ")));
         }
     } else {
         builder.push_str("<Launcher disabled>\n");

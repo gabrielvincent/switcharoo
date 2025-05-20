@@ -1,4 +1,4 @@
-use core_lib::config::Plugin;
+use core_lib::config::Plugins;
 use std::path::Path;
 use tracing::{span, Level};
 
@@ -60,31 +60,26 @@ impl Identifier {
 }
 
 pub fn get_sortable_launch_options(
-    plugins: &[Plugin],
+    plugins: &Plugins,
     text: &str,
     data_dir: &Path,
 ) -> Vec<SortableLaunchOption> {
     let mut matches = Vec::new();
 
-    for plugins in plugins {
-        match plugins {
-            Plugin::Applications(config) => {
-                applications::get_sortable_options(
-                    &mut matches,
-                    text,
-                    config.run_cache_weeks,
-                    config.show_execs,
-                    data_dir,
-                );
-            }
-            Plugin::Calc(_) => {
-                #[cfg(feature = "calc")]
-                calc::get_calc_options(&mut matches, text);
-                #[cfg(not(feature = "calc"))]
-                tracing::warn!("calc plugin is not enabled");
-            }
-            _ => {}
-        }
+    if let Some(config) = plugins.applications.as_ref() {
+        applications::get_sortable_options(
+            &mut matches,
+            text,
+            config.run_cache_weeks,
+            config.show_execs,
+            data_dir,
+        );
+    }
+    if plugins.calc.is_some() {
+        #[cfg(feature = "calc")]
+        calc::get_calc_options(&mut matches, text);
+        #[cfg(not(feature = "calc"))]
+        tracing::warn!("calc plugin is not enabled");
     }
 
     // sort in reverse
@@ -94,24 +89,19 @@ pub fn get_sortable_launch_options(
 }
 
 pub fn get_static_launch_options(
-    plugins: &[Plugin],
+    plugins: &Plugins,
     default_terminal: &Option<Box<str>>,
 ) -> Vec<StaticLaunchOption> {
     let mut matches = Vec::new();
 
-    for plugins in plugins {
-        match plugins {
-            Plugin::Shell(_) => {
-                shell::get_static_options(&mut matches);
-            }
-            Plugin::Terminal(_) => {
-                terminal::get_static_options(&mut matches, default_terminal);
-            }
-            Plugin::WebSearch(config) => {
-                search::get_static_options(&mut matches, config);
-            }
-            _ => {}
-        }
+    if plugins.shell.is_some() {
+        shell::get_static_options(&mut matches);
+    }
+    if plugins.terminal.is_some() {
+        terminal::get_static_options(&mut matches, default_terminal);
+    }
+    if let Some(engines) = plugins.web_search.as_ref() {
+        search::get_static_options(&mut matches, engines);
     }
 
     matches
@@ -142,22 +132,18 @@ pub fn launch(
     }
 }
 
-pub fn get_static_options_chars(plugins: &Vec<Plugin>) -> Vec<char> {
+pub fn get_static_options_chars(plugins: &Plugins) -> Vec<char> {
     let mut chars = Vec::new();
 
-    for plugins in plugins {
-        match plugins {
-            Plugin::Shell(_) => {
-                chars.append(&mut shell::get_chars());
-            }
-            Plugin::Terminal(_) => {
-                chars.append(&mut terminal::get_chars());
-            }
-            Plugin::WebSearch(config) => {
-                chars.append(&mut search::get_chars(config));
-            }
-            _ => {}
-        }
+    if plugins.shell.is_some() {
+        chars.append(&mut shell::get_chars());
     }
+    if plugins.terminal.is_some() {
+        chars.append(&mut terminal::get_chars());
+    }
+    if let Some(engines) = plugins.web_search.as_ref() {
+        chars.append(&mut search::get_chars(engines));
+    }
+
     chars
 }

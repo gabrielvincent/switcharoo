@@ -2,23 +2,28 @@ use crate::config::generate::autocomplete::StringAutoCompleter;
 use crate::config::generate::config::ConfigData;
 use crate::config::generate::css::StyleData;
 use crate::config::structs::{KeyMaybeMod, Mod};
-use crate::config::{ApplicationsPluginOptions, Plugin, SearchEngine};
+use crate::config::SearchEngine;
 use crate::util::TERMINALS;
 use anyhow::bail;
 use inquire::formatter::MultiOptionFormatter;
 use inquire::{Confirm, MultiSelect, Select, Text};
 
-#[allow(clippy::type_complexity)]
-pub const CONFIGURABLE_LAUNCHER_PLUGINS: &[(&str, fn() -> Plugin)] = &[
-    ("Open Applications", || {
-        Plugin::Applications(ApplicationsPluginOptions::default())
-    }),
-    ("Run in shell", || Plugin::Shell(())),
-    ("Run in terminal", || Plugin::Terminal(())),
-    ("Web search", || Plugin::WebSearch(Default::default())),
-    #[cfg(feature = "calc")]
-    ("Calculator", || Plugin::Calc(())),
-];
+pub mod configurable_launcher_plugins {
+    pub const APPLICATIONS: &str = "Open Applications";
+    pub const SHELL: &str = "Run in shell";
+    pub const TERMINAL: &str = "Run in terminal";
+    pub const WEB_SEARCH: &str = "Web search";
+    pub const CALC: &str = "Calculator";
+
+    pub const ALL: &[&str] = &[
+        APPLICATIONS,
+        SHELL,
+        TERMINAL,
+        WEB_SEARCH,
+        #[cfg(feature = "calc")]
+        CALC,
+    ];
+}
 
 #[allow(clippy::type_complexity)]
 pub const WEB_SEARCH_ENGINES: &[(&str, fn() -> SearchEngine)] = &[
@@ -30,7 +35,7 @@ pub const WEB_SEARCH_ENGINES: &[(&str, fn() -> SearchEngine)] = &[
     ("DuckDuckGo", || SearchEngine {
         url: "https://duckduckgo.com/?q={}".into(),
         name: "DuckDuckGo".into(),
-        key:'d',
+        key: 'd',
     }),
     ("Bing", || SearchEngine {
         url: "https://www.bing.com/search?q={}".into(),
@@ -106,10 +111,7 @@ pub fn prompt_config() -> anyhow::Result<(ConfigData, StyleData)> {
                 &|a| format!("{} plugins active", a.len());
             let plugins = MultiSelect::new(
                 "Plugins for launcher",
-                CONFIGURABLE_LAUNCHER_PLUGINS
-                    .iter()
-                    .map(|(name, _)| *name)
-                    .collect(),
+                configurable_launcher_plugins::ALL.into(),
             )
             .with_all_selected_by_default()
             .with_formatter(formatter)
@@ -118,7 +120,8 @@ pub fn prompt_config() -> anyhow::Result<(ConfigData, StyleData)> {
                 selected.into_iter().map(Box::from).collect()
             });
 
-            let engines = if plugins.contains(&Box::from(CONFIGURABLE_LAUNCHER_PLUGINS[3].0)) {
+            let engines = if plugins.contains(&Box::from(configurable_launcher_plugins::WEB_SEARCH))
+            {
                 let formatter: MultiOptionFormatter<'_, &str> =
                     &|a| format!("{} engines active", a.len());
                 MultiSelect::new(

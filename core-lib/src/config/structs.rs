@@ -37,23 +37,32 @@ pub struct Launcher {
     pub max_items: u8,
     #[default = 250]
     pub animate_launch_ms: u64,
-    #[default(vec![
-        Plugin::Applications(Default::default()),
-        Plugin::Calc(()),
-        Plugin::Terminal(()),
-        Plugin::WebSearch(Default::default()),
-    ])]
-    pub plugins: Vec<Plugin>,
+    #[default(Plugins::default())]
+    pub plugins: Plugins,
 }
 
-#[derive(Debug, Clone, Deserialize, Serialize)]
-pub enum Plugin {
-    Applications(ApplicationsPluginOptions),
-    Terminal(()),
-    Shell(()),
-    WebSearch(Vec<SearchEngine>),
-    Calc(()),
+#[derive(SmartDefault, Debug, Clone, Deserialize, Serialize)]
+#[serde(default, deny_unknown_fields)]
+pub struct Plugins {
+    #[default(Some(Default::default()))]
+    pub applications: Option<ApplicationsPluginOptions>,
+    #[default(Some(Default::default()))]
+    pub terminal: Option<EmptyConfig>,
+    #[default(None)]
+    pub shell: Option<EmptyConfig>,
+    #[default(Some(vec![SearchEngine {
+        url: "https://www.google.com/search?q={}".into(),
+        name: "Google".into(),
+        key: 'g',
+    }]))]
+    pub web_search: Option<Vec<SearchEngine>>,
+    #[default(Some(Default::default()))]
+    pub calc: Option<EmptyConfig>,
 }
+
+#[derive(SmartDefault, Debug, Clone, Deserialize, Serialize)]
+#[serde(default, deny_unknown_fields)]
+pub struct EmptyConfig {}
 
 #[derive(SmartDefault, Debug, Clone, Deserialize, Serialize)]
 #[serde(default, deny_unknown_fields)]

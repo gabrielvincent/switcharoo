@@ -10,10 +10,7 @@ use tracing::{debug, info, span, warn, Level};
 pub fn load_config(config_path: &Path) -> anyhow::Result<Config> {
     let _span = span!(Level::TRACE, "load_config", path =? config_path).entered();
     if !config_path.exists() {
-        warn!(
-            "Config file does not exist at, trying other extensions {}",
-            config_path.exists()
-        );
+        warn!("Config file does not exist at, trying other extensions");
         let mut new_path = config_path.to_path_buf();
         new_path.set_extension("json");
         if new_path.exists() {

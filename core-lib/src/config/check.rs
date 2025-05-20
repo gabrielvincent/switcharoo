@@ -1,6 +1,5 @@
-use crate::config::{Config, Plugin};
+use crate::config::Config;
 use anyhow::bail;
-use std::mem;
 
 pub fn check(config: &Config) -> anyhow::Result<()> {
     if config
@@ -13,34 +12,24 @@ pub fn check(config: &Config) -> anyhow::Result<()> {
     }
 
     if let Some(l) = &config.launcher {
-        let mut active_plugins: Vec<&Plugin> = vec![];
-        for plugin in &l.plugins {
-            if active_plugins
-                .iter()
-                .any(|p| mem::discriminant(*p) == mem::discriminant(plugin))
-            {
-                bail!("Duplicate plugin: {:?}", plugin);
+        let mut used: Vec<char> = vec![];
+        for engine in l.plugins.web_search.as_ref().unwrap_or(&vec![]) {
+            if engine.url.is_empty() {
+                bail!("Search engine url cannot be empty");
+            }
+            if engine.name.is_empty() {
+                bail!("Search engine name cannot be empty");
+            }
+            if used.contains(&engine.key) {
+                bail!("Duplicate search engine key: {}", engine.key);
             } else {
-                active_plugins.push(plugin);
+                used.push(engine.key);
             }
-
-            if let Plugin::WebSearch(config) = plugin {
-                let mut used: Vec<char> = vec![];
-                for engine in config {
-                    if used.contains(&engine.key) {
-                        bail!("Duplicate search engine key: {}", engine.key);
-                    } else {
-                        used.push(engine.key);
-                    }
-                }
-            }
-            if let Plugin::Calc(_) = plugin {
-                #[cfg(not(feature = "calc"))]
-                {
-                    bail!(
-                        "Calc Plugin enabled but not compiled in, please enable the calc feature"
-                    );
-                }
+        }
+        if l.plugins.calc.is_some() {
+            #[cfg(not(feature = "calc"))]
+            {
+                bail!("Calc Plugin enabled but not compiled in, please enable the calc feature");
             }
         }
     };

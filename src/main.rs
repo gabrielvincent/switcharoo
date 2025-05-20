@@ -104,9 +104,13 @@ fn main() -> anyhow::Result<()> {
                         .ok()
                         .and_then(|c| c.launcher.map(|l| (l.plugins, l.max_items)))
                         .unwrap_or((
-                            vec![core_lib::config::Plugin::Applications(
-                                core_lib::config::ApplicationsPluginOptions::default(),
-                            )],
+                            core_lib::config::Plugins {
+                                applications: Default::default(),
+                                shell: None,
+                                terminal: None,
+                                web_search: None,
+                                calc: None,
+                            },
                             5,
                         ));
                     launcher_lib::debug::get_matches(&plugins, &text, all, max_items, &data_dir);
@@ -120,13 +124,7 @@ fn main() -> anyhow::Result<()> {
                         .ok()
                         .and_then(|c| {
                             c.launcher.and_then(|l| {
-                                l.plugins.iter().find_map(|p| {
-                                    if let core_lib::config::Plugin::Applications(opts) = p {
-                                        Some(opts.run_cache_weeks)
-                                    } else {
-                                        None
-                                    }
-                                })
+                                l.plugins.applications.as_ref().map(|a| a.run_cache_weeks)
                             })
                         })
                         .unwrap_or(4)
