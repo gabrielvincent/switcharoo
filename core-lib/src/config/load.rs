@@ -73,7 +73,7 @@ pub fn load_config(config_path: &Path) -> anyhow::Result<Config> {
     let config = match config {
         Ok(cfg) => cfg,
         Err(err) => {
-            warn!("Failed to load config: {err}, attempting migration");
+            warn!("Failed to load config: {err:?}, attempting migration");
             let migrated = config::migrate::migrate(config_path);
             match migrated {
                 Ok(cfg) => {
@@ -81,7 +81,7 @@ pub fn load_config(config_path: &Path) -> anyhow::Result<Config> {
                     cfg
                 }
                 Err(err) => {
-                    warn!("Migration failed: {err}");
+                    warn!("Migration failed: {err:?}");
                     bail!("Failed to load config and migration failed");
                 }
             }
