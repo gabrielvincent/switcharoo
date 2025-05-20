@@ -140,6 +140,7 @@ pub enum FilterBy {
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "snake_case")]
 pub enum Reverse {
     Key(String),
     Mod(Mod),

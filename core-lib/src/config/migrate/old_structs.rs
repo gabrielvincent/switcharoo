@@ -24,8 +24,8 @@ pub struct Windows {
     pub workspaces_per_row: u8,
     #[default = true]
     pub strip_html_from_workspace_title: bool,
-    pub overview: Option<config::Overview>,
-    pub switch: Option<config::Switch>,
+    pub overview: Option<Overview>,
+    pub switch: Option<Switch>,
 }
 
 #[derive(SmartDefault, Debug, Clone, Deserialize, Serialize)]
@@ -62,4 +62,35 @@ pub struct SearchEngine {
     pub url: String,
     pub name: String,
     pub key: String,
+}
+
+#[derive(SmartDefault, Debug, Clone, Deserialize, Serialize)]
+#[serde(default, deny_unknown_fields)]
+pub struct Overview {
+    pub open: config::OpenOverview,
+    pub navigate: Navigate,
+    pub other: config::OtherOverview,
+}
+
+#[derive(SmartDefault, Debug, Clone, Deserialize, Serialize)]
+#[serde(default, deny_unknown_fields)]
+pub struct Switch {
+    pub open: config::OpenSwitch,
+    pub navigate: Navigate,
+    pub other: config::OtherSwitch,
+}
+
+#[derive(SmartDefault, Debug, Clone, Deserialize, Serialize)]
+#[serde(default, deny_unknown_fields)]
+pub struct Navigate {
+    #[default = "tab"]
+    pub forward: String,
+    #[default(Reverse::Mod(config::Mod::Shift))]
+    pub reverse: Reverse,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub enum Reverse {
+    Key(String),
+    Mod(config::Mod),
 }

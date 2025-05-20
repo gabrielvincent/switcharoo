@@ -18,8 +18,8 @@ impl From<old_structs::Windows> for config::Windows {
             scale: value.scale,
             workspaces_per_row: value.workspaces_per_row,
             strip_html_from_workspace_title: value.strip_html_from_workspace_title,
-            overview: value.overview,
-            switch: value.switch,
+            overview: value.overview.map(Into::into),
+            switch: value.switch.map(Into::into),
         }
     }
 }
@@ -59,6 +59,41 @@ impl From<old_structs::SearchEngine> for config::SearchEngine {
             url: value.url,
             // actual migration
             key: value.key.chars().next().unwrap_or('?'),
+        }
+    }
+}
+
+impl From<old_structs::Overview> for config::Overview {
+    fn from(value: old_structs::Overview) -> Self {
+        Self {
+            open: value.open,
+            other: value.other,
+            navigate: value.navigate.into()
+        }
+    }
+}
+impl From<old_structs::Switch> for config::Switch {
+    fn from(value: old_structs::Switch) -> Self {
+        Self {
+            open: value.open,
+            other: value.other,
+            navigate: value.navigate.into()
+        }
+    }
+}
+impl From<old_structs::Navigate> for config::Navigate {
+    fn from(value: old_structs::Navigate) -> Self {
+        Self {
+            forward: value.forward,
+            reverse: value.reverse.into()
+        }
+    }
+}
+impl From<old_structs::Reverse> for config::Reverse {
+    fn from(value: old_structs::Reverse) -> Self {
+        match value {
+            old_structs::Reverse::Key(key) => config::Reverse::Key(key),
+            old_structs::Reverse::Mod(modifier) => config::Reverse::Mod(modifier),
         }
     }
 }
