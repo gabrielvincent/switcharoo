@@ -148,8 +148,14 @@ in
           };
           navigate = {
             forward = mkOpt "Key to navigate forwards" str "tab";
-            reverse = mkOpt "Key to navigate backwards" str "Mod(shift)" // {
-              example = "Key(grave)";
+            reverse = {
+              key = mkOpt "Key to navigate backwards (mutely exclusive with mod)" (nullOr (str)) null // { example = "tab"; };
+              mod = mkOpt "Modifier to navigate backwards (mutely exclusive with key)" (nullOr (enum [
+                "alt"
+                "ctrl"
+                "super"
+                "shift"
+              ])) "shift";
             };
           };
           other = {
@@ -173,8 +179,14 @@ in
           };
           navigate = {
             forward = mkOpt "Key to navigate forwards" str "tab";
-            reverse = mkOpt "Key to navigate backwards" str "Mod(shift)" // {
-              example = "Key(grave)";
+            reverse = {
+              key = mkOpt "Key to navigate backwards (mutely exclusive with mod)" (nullOr (str)) null // { example = "tab"; };
+              mod = mkOpt "Modifier to navigate backwards (mutely exclusive with key)" (nullOr (enum [
+                "alt"
+                "ctrl"
+                "super"
+                "shift"
+              ])) "shift";
             };
           };
           other = {

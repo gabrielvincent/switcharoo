@@ -77,7 +77,7 @@ pub fn get_sortable_launch_options(
                     data_dir,
                 );
             }
-            Plugin::Calc() => {
+            Plugin::Calc(_) => {
                 #[cfg(feature = "calc")]
                 calc::get_calc_options(&mut matches, text);
                 #[cfg(not(feature = "calc"))]
@@ -101,10 +101,10 @@ pub fn get_static_launch_options(
 
     for plugins in plugins {
         match plugins {
-            Plugin::Shell() => {
+            Plugin::Shell(_) => {
                 shell::get_static_options(&mut matches);
             }
-            Plugin::Terminal() => {
+            Plugin::Terminal(_) => {
                 terminal::get_static_options(&mut matches, default_terminal);
             }
             Plugin::WebSearch(config) => {
@@ -147,10 +147,10 @@ pub fn get_static_options_chars(plugins: &Vec<Plugin>) -> Vec<char> {
 
     for plugins in plugins {
         match plugins {
-            Plugin::Shell() => {
+            Plugin::Shell(_) => {
                 chars.append(&mut shell::get_chars());
             }
-            Plugin::Terminal() => {
+            Plugin::Terminal(_) => {
                 chars.append(&mut terminal::get_chars());
             }
             Plugin::WebSearch(config) => {

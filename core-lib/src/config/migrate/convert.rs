@@ -42,12 +42,12 @@ impl From<old_structs::Plugin> for config::Plugin {
             old_structs::Plugin::Applications(options) => {
                 config::Plugin::Applications(options)
             }
-            old_structs::Plugin::Terminal() => config::Plugin::Terminal(),
-            old_structs::Plugin::Shell() => config::Plugin::Shell(),
+            old_structs::Plugin::Terminal() => config::Plugin::Terminal(()),
+            old_structs::Plugin::Shell() => config::Plugin::Shell(()),
             old_structs::Plugin::WebSearch(engines) => {
                 config::Plugin::WebSearch(engines.into_iter().map(Into::into).collect())
             }
-            old_structs::Plugin::Calc() => config::Plugin::Calc(),
+            old_structs::Plugin::Calc() => config::Plugin::Calc(()),
         }
     }
 }

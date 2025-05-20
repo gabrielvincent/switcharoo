@@ -19,7 +19,12 @@ pub fn load_config(config_path: &Path) -> anyhow::Result<Config> {
         if new_path.exists() {
             debug!("Found config file at {new_path:?}, loading it");
             // recurse (can only go one layer deep as the file definitely exists)
-            return load_config(&new_path);
+            match load_config(&new_path) {
+                Ok(cfg) => return Ok(cfg),
+                Err(err) => {
+                    warn!("Failed to load json config: {err:?}");
+                }
+            }
         }
         #[cfg(feature = "toml_config")]
         {
@@ -27,7 +32,12 @@ pub fn load_config(config_path: &Path) -> anyhow::Result<Config> {
             if new_path.exists() {
                 debug!("Found config file at {new_path:?}, loading it");
                 // recurse (can only go one layer deep as the file definitely exists)
-                return load_config(&new_path);
+                match load_config(&new_path) {
+                    Ok(cfg) => return Ok(cfg),
+                    Err(err) => {
+                        warn!("Failed to toml json config: {err:?}");
+                    }
+                }
             }
         }
         warn!(
@@ -38,7 +48,7 @@ pub fn load_config(config_path: &Path) -> anyhow::Result<Config> {
                 ""
             }
         );
-        bail!("Config file does not exist, create it using `hyprshell config generate`");
+        bail!("Unable to load valid config file, create it using `hyprshell config generate` or fix the existing");
     }
     let config = match config_path.extension().and_then(OsStr::to_str) {
         None | Some("ron") => {

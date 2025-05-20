@@ -39,8 +39,8 @@ pub struct Launcher {
     pub animate_launch_ms: u64,
     #[default(vec![
         Plugin::Applications(Default::default()),
-        Plugin::Calc(),
-        Plugin::Terminal(),
+        Plugin::Calc(()),
+        Plugin::Terminal(()),
         Plugin::WebSearch(Default::default()),
     ])]
     pub plugins: Vec<Plugin>,
@@ -49,10 +49,10 @@ pub struct Launcher {
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub enum Plugin {
     Applications(ApplicationsPluginOptions),
-    Terminal(),
-    Shell(),
+    Terminal(()),
+    Shell(()),
     WebSearch(Vec<SearchEngine>),
-    Calc(),
+    Calc(()),
 }
 
 #[derive(SmartDefault, Debug, Clone, Deserialize, Serialize)]

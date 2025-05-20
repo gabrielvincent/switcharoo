@@ -25,7 +25,7 @@ pub fn reload_config() {
 }
 
 pub fn toast(body: &str) {
-    warn!("{}", body);
+    warn!("toast: {}", body);
     let _ = notify::call(
         notify::Icon::Warning,
         std::time::Duration::from_secs(10),

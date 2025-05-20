@@ -34,7 +34,7 @@ pub fn check(config: &Config) -> anyhow::Result<()> {
                     }
                 }
             }
-            if let Plugin::Calc() = plugin {
+            if let Plugin::Calc(_) = plugin {
                 #[cfg(not(feature = "calc"))]
                 {
                     bail!(

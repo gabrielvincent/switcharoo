@@ -13,11 +13,11 @@ pub const CONFIGURABLE_LAUNCHER_PLUGINS: &[(&str, fn() -> Plugin)] = &[
     ("Open Applications", || {
         Plugin::Applications(ApplicationsPluginOptions::default())
     }),
-    ("Run in shell", || Plugin::Shell()),
-    ("Run in terminal", || Plugin::Terminal()),
+    ("Run in shell", || Plugin::Shell(())),
+    ("Run in terminal", || Plugin::Terminal(())),
     ("Web search", || Plugin::WebSearch(Default::default())),
     #[cfg(feature = "calc")]
-    ("Calculator", || Plugin::Calc()),
+    ("Calculator", || Plugin::Calc(())),
 ];
 
 #[allow(clippy::type_complexity)]
