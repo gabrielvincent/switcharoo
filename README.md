@@ -40,44 +40,9 @@ yay -S hyprshell
 
 ### NixOS
 
-- Supported Architectures: `x86_64-linux`, `aarch64-linux`
+This repository contains a `flake` and a `home-manager` module for configuration.
 
-#### With Flakes
-
-`flake.nix`:
-
-```nix
-{
-  inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
-    hyprshell.url = "github:H3rmt/hyprswitch?ref=hyprshell";
-  };
-
-  outputs = { nixpkgs, hyprshell }: {
-    nixosConfigurations.hostname = nixpkgs.lib.nixosSystem {
-      system = "x86_64-linux";
-      modules = [{ environment.systemPackages = [ hyprshell.packages.x86_64-linux.default ]; }];
-    };
-  };
-}
-```
-
-This repository also contains a [`home-manager`](https://github.com/nix-community/home-manager) module to configure Hyprshell, which can be accessed by using `hyprshell.homeModules.hyprshell`
-
-#### Without Flakes
-
-`configuration.nix`:
-
-```nix
-{pkgs, ...}: let
-  flake-compat = builtins.fetchTarball "https://github.com/edolstra/flake-compat/archive/master.tar.gz";
-  hyprshell = (import flake-compat {
-    src = builtins.fetchTarball "https://github.com/H3rmt/hyprswitch/archive/hyprshell.tar.gz";
-  }).defaultNix;
-in {
-   environment.systemPackages = [hyprshell.packages.${pkgs.system}.default];
-}
-```
+More information can be found in the [NixOS](NIX.md) section.
 
 ## Usage
 
