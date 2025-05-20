@@ -12,7 +12,7 @@ use tracing::{debug, trace};
 
 pub fn get_static_options(matches: &mut Vec<StaticLaunchOption>, config: &[SearchEngine]) {
     let browser = get_browser_info();
-    let icon = browser.2.clone();
+    let icon = browser.icon.clone();
     drop(browser);
     for engine in config.iter() {
         if !engine.key.is_whitespace() {
@@ -37,17 +37,18 @@ pub fn launch_option(iden: &Option<Box<str>>, text: &str) -> bool {
         let url = iden.replace("{}", text);
         debug!("Launching URL: {}", url);
         let browser = get_browser_info();
-        let mut cmdline = format!("{} '{}'", browser.0, url);
+        let mut cmdline = format!("{} '{}'", browser.exec, url);
         for repl in ["%u", "%U", "%f", "%F"] {
-            if browser.0.contains(repl) {
-                cmdline = browser.0.replace(repl, &format!("'{url}'"));
+            if browser.exec.contains(repl) {
+                cmdline = browser.exec.replace(repl, &format!("'{url}'"));
             }
         }
         debug!("Launching browser: {}", cmdline);
         run_program(&cmdline, None, false, &None);
 
         // try to focus browser
-        if let Some(class) = &browser.1 {
+        if let Some(class) = &browser.startup_wm_class {
+            debug!("trying to focus browser with class: {}", class);
             switch_client_by_initial_class(class).warn("unable to focus browser");
         } else {
             trace!("not class to browser available")

@@ -18,8 +18,8 @@ impl From<old_structs::Windows> for config::Windows {
             scale: value.scale,
             workspaces_per_row: value.workspaces_per_row,
             strip_html_from_workspace_title: value.strip_html_from_workspace_title,
-            overview: value.overview.map(Into::into),
-            switch: value.switch.map(Into::into),
+            overview: value.overview,
+            switch: value.switch,
         }
     }
 }
@@ -40,7 +40,7 @@ impl From<old_structs::Plugin> for config::Plugin {
     fn from(value: old_structs::Plugin) -> Self {
         match value {
             old_structs::Plugin::Applications(options) => {
-                config::Plugin::Applications(options.into())
+                config::Plugin::Applications(options)
             }
             old_structs::Plugin::Terminal() => config::Plugin::Terminal(),
             old_structs::Plugin::Shell() => config::Plugin::Shell(),

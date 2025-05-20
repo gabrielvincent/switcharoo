@@ -13,4 +13,4 @@ echo "Fixing main binary"
 cargo fix -p hyprshell --all --allow-dirty
 
 echo "Building main binary"
-cargo build --release
+cargo clippy --all-targets --all-features -- -D warnings

@@ -16,7 +16,7 @@ pub fn switch_client(address: Address) -> anyhow::Result<()> {
     Ok(())
 }
 
-pub fn switch_client_by_initial_class(class: &Box<str>) -> anyhow::Result<()> {
+pub fn switch_client_by_initial_class(class: &str) -> anyhow::Result<()> {
     trace!("execute switch to client: {} by initial_class", class);
     Dispatch::call(DispatchType::FocusWindow(
         WindowIdentifier::ClassRegularExpression(&format!("initialclass:{}", class.to_ascii_lowercase())),

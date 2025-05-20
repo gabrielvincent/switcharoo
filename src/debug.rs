@@ -22,12 +22,12 @@ pub fn search(class: Option<String>) {
 }
 
 fn check_icon(class: &str) {
-    let in_theme = core_lib::theme_icon_cache::theme_has_icon_name(&class);
+    let in_theme = core_lib::theme_icon_cache::theme_has_icon_name(class);
     info!(
         "Icon ({class}) {} in theme (first choice)",
         if in_theme { "is" } else { "is not" }
     );
-    let icon = windows_lib::get_icon_name_by_name_from_desktop_files(&class);
+    let icon = windows_lib::get_icon_name_by_name_from_desktop_files(class);
     info!(
         "Icon ({class}) {} in desktop files (second choice)",
         if icon.is_some() { "is" } else { "is not" }

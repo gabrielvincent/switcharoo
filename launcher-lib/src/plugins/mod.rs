@@ -125,7 +125,7 @@ pub fn launch(
 ) -> bool {
     let _span = span!(Level::TRACE, "launch_plugin").entered();
 
-    let animate = match iden.plugin {
+    match iden.plugin {
         PluginNames::Applications => {
             applications::launch_option(&iden.identifier, default_terminal, data_dir)
         }
@@ -139,8 +139,7 @@ pub fn launch(
             tracing::warn!("calc plugin is not enabled");
             false
         }
-    };
-    animate
+    }
 }
 
 pub fn get_static_options_chars(plugins: &Vec<Plugin>) -> Vec<char> {

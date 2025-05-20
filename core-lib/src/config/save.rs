@@ -4,7 +4,7 @@ use ron::extensions::Extensions;
 use ron::ser::PrettyConfig;
 use ron::Options;
 use std::ffi::OsStr;
-use std::fs::{create_dir_all, write, File};
+use std::fs::{create_dir_all, File};
 use std::path::Path;
 use tracing::{info, span, Level};
 
@@ -36,6 +36,7 @@ pub fn write_config(config_path: &Path, config: &Config, override_file: bool) ->
         }
         #[cfg(feature = "toml_config")]
         Some("toml") => {
+            use std::fs::write;
             let str = toml::to_string_pretty(config).context("Failed to write toml config")?;
             write(config_path, str)
                 .with_context(|| format!("Failed to create config at ({config_path:?})"))?;
