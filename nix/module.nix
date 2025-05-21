@@ -109,32 +109,31 @@ in
           terminal = {
             enable = mkOpt "Run in Terminal" bool true;
           };
-          web_search = {
+          websearch = {
             enable = mkOpt "Web search" bool true;
             engines =
-              mkOpt "Search engines" (listOf (submodule {
-                options = {
-                  url = mkOpt "Search engine URL" str null;
-                  name = mkOpt "Search engine name" str null;
-                  key = mkOpt "Key to use for search engine" str null // {
-                    apply = key: if (builtins.stringLength key) != 1 then throw "Key must be single character" else key;
+              mkOpt "Search engines"
+                (listOf (submodule {
+                  options = {
+                    url = mkOpt "Search engine URL" str null;
+                    name = mkOpt "Search engine name" str null;
+                    key = mkOpt "Key to use for search engine" str null // {
+                      apply = key: if (builtins.stringLength key) != 1 then throw "Key must be single character" else key;
+                    };
                   };
-                };
-              })) [ ]
-              // {
-                example = [
+                }))
+                [
                   {
                     url = "https://www.google.com/search?q={}";
                     name = "Google";
                     key = "g";
                   }
                 ];
-              };
           };
         };
       };
 
-      window = {
+      windows = {
         enable = mkOpt "Enable windows (overview, switch)" bool true;
         scale = mkOpt "Scale" float 8.5 // {
           apply = num: if (num >= 0 && num <= 15) then num else throw "Value must be between 0 and 15";
@@ -144,7 +143,7 @@ in
         overview = {
           enable = mkOpt "Enable overview" bool true;
           open = {
-            key = mkOpt "Key to open overview" str "tab";
+            key = mkOpt "Key to open overview" str "super";
             modifier = mkOpt "Modifier key" (enum [
               "alt"
               "ctrl"
@@ -155,7 +154,9 @@ in
           navigate = {
             forward = mkOpt "Key to navigate forwards" str "tab";
             reverse = {
-              key = mkOpt "Key to navigate backwards (mutely exclusive with mod)" (nullOr (str)) null // { example = "tab"; };
+              key = mkOpt "Key to navigate backwards (mutely exclusive with mod)" (nullOr (str)) null // {
+                example = "tab";
+              };
               mod = mkOpt "Modifier to navigate backwards (mutely exclusive with key)" (nullOr (enum [
                 "alt"
                 "ctrl"
@@ -173,8 +174,8 @@ in
             hide_filtered = mkOpt "Hide filtered windows" bool false;
           };
         };
-        switcher = {
-          enable = mkOpt "Enable window switcher" bool true;
+        switch = {
+          enable = mkOpt "Enable recent window switcher" bool true;
           open = {
             modifier = mkOpt "Modifier key" (enum [
               "alt"
@@ -186,7 +187,9 @@ in
           navigate = {
             forward = mkOpt "Key to navigate forwards" str "tab";
             reverse = {
-              key = mkOpt "Key to navigate backwards (mutely exclusive with mod)" (nullOr (str)) null // { example = "tab"; };
+              key = mkOpt "Key to navigate backwards (mutely exclusive with mod)" (nullOr (str)) null // {
+                example = "tab";
+              };
               mod = mkOpt "Modifier to navigate backwards (mutely exclusive with key)" (nullOr (enum [
                 "alt"
                 "ctrl"

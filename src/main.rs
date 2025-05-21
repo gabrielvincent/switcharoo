@@ -45,6 +45,7 @@ fn main() -> anyhow::Result<()> {
 
     check_features();
 
+    // TODO replace this this finding the first existing file
     let config_path = cli
         .global_opts
         .config_file
@@ -108,7 +109,7 @@ fn main() -> anyhow::Result<()> {
                                 applications: Default::default(),
                                 shell: None,
                                 terminal: None,
-                                web_search: None,
+                                websearch: None,
                                 calc: None,
                             },
                             5,

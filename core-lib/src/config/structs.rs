@@ -51,7 +51,7 @@ pub struct Plugins {
     #[default(None)]
     pub shell: Option<EmptyConfig>,
     #[default(Some(Default::default()))]
-    pub web_search: Option<WebSearchConfig>,
+    pub websearch: Option<WebSearchConfig>,
     #[default(Some(Default::default()))]
     pub calc: Option<EmptyConfig>,
 }

@@ -37,7 +37,7 @@ pub fn generate_config(data: ConfigData) -> Config {
                         .iter()
                         .find(|pl| pl.as_ref().eq(configurable_launcher_plugins::SHELL))
                         .map(|_| Default::default()),
-                    web_search: data
+                    websearch: data
                         .launcher_plugins
                         .iter()
                         .find(|pl| pl.as_ref().eq(configurable_launcher_plugins::WEB_SEARCH))

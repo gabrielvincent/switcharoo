@@ -44,7 +44,7 @@ impl From<old_structs::Launcher> for config::Launcher {
                     old_structs::Plugin::Shell() => Some(Default::default()),
                     _ => None,
                 }),
-                web_search: value.plugins.iter().find_map(|p| match p {
+                websearch: value.plugins.iter().find_map(|p| match p {
                         old_structs::Plugin::WebSearch(engines) => Some(
                             config::WebSearchConfig {
                                 engines:
