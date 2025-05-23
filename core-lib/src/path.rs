@@ -1,10 +1,29 @@
 use std::env;
 use std::path::PathBuf;
-use tracing::warn;
+use tracing::{trace, warn};
 
 pub fn get_default_config_path() -> PathBuf {
     let mut path = get_config_dir();
     path.push("hyprshell/config.ron");
+    if path.exists() {
+        trace!("Found config file at {path:?}");
+        return path;
+    }
+    path.set_extension("json");
+    if path.exists() {
+        trace!("Found config file at {path:?}");
+        return path;
+    }
+    #[cfg(feature = "toml_config")]
+    {
+        path.set_extension("toml");
+        if path.exists() {
+            trace!("Found config file at {path:?}");
+            return path;
+        }
+    }
+
+    // use .ron as default (for generating)
     path
 }
 

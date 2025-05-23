@@ -57,7 +57,7 @@ pub fn reload_default_browser(files: &[DirEntry]) {
     warn!("No default browser found! (using firefox)");
     let _ = BROWSER_EXEC.set(Mutex::new(DefaultPlugins {
         exec: Box::from("firefox"),
-        startup_wm_class: Some(Box::from("org.mozilla.firefox")),
+        startup_wm_class: Some(Box::from("firefox")),
         icon: Some(Box::from(Path::new("firefox"))),
     }));
 }

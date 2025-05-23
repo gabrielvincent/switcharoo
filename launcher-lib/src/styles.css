@@ -54,17 +54,20 @@
 }
 
 .launch {
-    animation: pulsing 0.4s ease-out infinite;
+    animation: pulsing 0.3s normal infinite;
 }
 
 @keyframes pulsing {
     0% {
-        background: rgba(0, 0, 0, 0);
+        background: rgba(21, 162, 211, 0);
     }
-    25% {
-        background: rgba(21, 162, 211, 0.8);
+    10% {
+        background: rgba(21, 162, 211, 0.7);
+    }
+    40% {
+        background: rgba(21, 162, 211, 1);
     }
     100% {
-        background: rgba(0, 0, 0, 0);
+        background: rgba(21, 162, 211, 0);
     }
 }

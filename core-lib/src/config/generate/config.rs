@@ -4,6 +4,41 @@ use crate::config::structs::{
     Switch, Windows,
 };
 use crate::config::{Plugins, WebSearchConfig};
+use std::path::Path;
+use tracing::warn;
+
+pub fn get_overrides(force: &[String]) -> (bool, bool) {
+    // force contains "config" or "css" or "all"
+    let mut override_config = false;
+    let mut override_css = false;
+    for item in force {
+        match item.as_str() {
+            "config" => override_config = true,
+            "css" => override_css = true,
+            "all" => {
+                override_config = true;
+                override_css = true;
+            }
+            _ => {}
+        }
+    }
+    (override_config, override_css)
+}
+
+pub fn check_file_exist(
+    config_path: &Path,
+    css_path: &Path,
+    override_config: bool,
+    override_css: bool,
+) -> anyhow::Result<()> {
+    if !override_config && config_path.exists() {
+        warn!("Config file {config_path:?} already exists, use -f to override all or -f config to override only the config file")
+    }
+    if !override_css && css_path.exists() {
+        warn!("CSS file {css_path:?} already exists, use -f to override all or -f css to override only the css file")
+    }
+    Ok(())
+}
 
 #[derive(Debug)]
 pub struct ConfigData {

@@ -1,13 +1,12 @@
-use anyhow::{bail, Context};
+use crate::get_data_dir;
+use anyhow::Context;
 use std::env;
 use std::fs::create_dir_all;
 use std::path::PathBuf;
 use tracing::{info, span, trace, Level};
-use crate::get_data_dir;
 
 const UNIT: &str = include_str!("default.service");
 pub fn write_systemd_unit(
-    override_file: bool,
     config_path: Option<&PathBuf>,
     css_path: Option<&PathBuf>,
     data_dir: Option<&PathBuf>,
@@ -15,11 +14,6 @@ pub fn write_systemd_unit(
     let _span = span!(Level::TRACE, "write_systemd_unit").entered();
     let path = get_path();
 
-    if path.exists() && !override_file {
-        bail!(
-            "Systemd unit file at {path:?} already exists, delete it before generating a new one or use -f to override"
-        );
-    }
     if let Some(parent) = path.parent() {
         create_dir_all(parent)
             .with_context(|| format!("Failed to create config dir at ({parent:?})"))?;

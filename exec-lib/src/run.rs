@@ -19,8 +19,10 @@ pub fn run_program(
         } else {
             info!("No default terminal found, trying to find one. (configure default_terminal in config to set a default terminal)");
             for term in TERMINALS {
+                // TODO fix this, command successfull if terminal not exists
                 let command = format!("{term} -e {run}");
                 if run_command(&command, &path).is_ok() {
+                    trace!("Found terminal: {term}");
                     return;
                 }
             }

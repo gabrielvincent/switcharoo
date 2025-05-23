@@ -38,9 +38,9 @@ pub fn close_launcher(global: &LauncherGlobal, char: Option<char>) {
                 drop(data1);
 
                 if animate {
+                    trace!("starting timeout({}ms) animation after {:?} time", global.animate_launch_ms, instant.elapsed());
                     show_launch(results, plugin_box, &iden);
                     entry.set_editable(false);
-                    trace!("starting timeout({}ms) animation after {:?} time", global.animate_launch_ms, instant.elapsed());
                     glib::timeout_add_local_once(
                         Duration::from_millis(global.animate_launch_ms),
                         move || {

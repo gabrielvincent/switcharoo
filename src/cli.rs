@@ -62,20 +62,20 @@ pub enum Command {
         #[clap(subcommand)]
         command: DataCommand,
     },
-    
+
     #[clap(hide = true)]
     Socat {
-        json: String
-    }
+        json: String,
+    },
 }
 
 #[derive(Subcommand, Debug, Clone)]
 pub enum ConfigCommand {
     /// Generate a default config file
     Generate {
-        /// Turn off all output
-        #[arg(short = 'f', long)]
-        force: bool,
+        /// Force overwrite of a config file, can be used multiple times
+        #[arg(short = 'f', long, default_missing_value = "all", value_parser = ["config", "css", "all"], num_args(0..=1))]
+        force: Vec<String>,
 
         /// dont generate systemd unit file
         #[arg(long)]
@@ -90,7 +90,7 @@ pub enum DataCommand {
     /// Show the history of launched applications
     LaunchHistory {
         // TODO allow time range as input
-        run_cache_weeks: Option<u8>
+        run_cache_weeks: Option<u8>,
     },
 }
 
@@ -117,6 +117,6 @@ pub enum DebugCommand {
 
         /// Show all matchesma, not just x ones like configured in config
         #[arg(short = 'a', long)]
-        all: bool
-    }
+        all: bool,
+    },
 }

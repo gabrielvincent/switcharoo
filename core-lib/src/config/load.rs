@@ -10,42 +10,7 @@ use tracing::{debug, info, span, warn, Level};
 pub fn load_config(config_path: &Path) -> anyhow::Result<Config> {
     let _span = span!(Level::TRACE, "load_config", path =? config_path).entered();
     if !config_path.exists() {
-        warn!("Config file does not exist at, trying other extensions");
-        let mut new_path = config_path.to_path_buf();
-        new_path.set_extension("json");
-        if new_path.exists() {
-            debug!("Found config file at {new_path:?}, loading it");
-            // recurse (can only go one layer deep as the file definitely exists)
-            match load_config(&new_path) {
-                Ok(cfg) => return Ok(cfg),
-                Err(err) => {
-                    warn!("Failed to load json config: {err:?}");
-                }
-            }
-        }
-        #[cfg(feature = "toml_config")]
-        {
-            new_path.set_extension("toml");
-            if new_path.exists() {
-                debug!("Found config file at {new_path:?}, loading it");
-                // recurse (can only go one layer deep as the file definitely exists)
-                match load_config(&new_path) {
-                    Ok(cfg) => return Ok(cfg),
-                    Err(err) => {
-                        warn!("Failed to toml json config: {err:?}");
-                    }
-                }
-            }
-        }
-        warn!(
-            "Tried all extensions(ron, json{}), None found",
-            if cfg!(feature = "toml_config") {
-                ", toml"
-            } else {
-                ""
-            }
-        );
-        bail!("Unable to load valid config file, create it using `hyprshell config generate` or fix the existing");
+        bail!("Config file does not exist, create it using `hyprshell config generate`");
     }
     let config = match config_path.extension().and_then(OsStr::to_str) {
         None | Some("ron") => {
@@ -80,7 +45,8 @@ pub fn load_config(config_path: &Path) -> anyhow::Result<Config> {
     let config = match config {
         Ok(cfg) => cfg,
         Err(err) => {
-            warn!("Failed to load config: {err:?}, attempting migration");
+            warn!("Failed to load config: {err:?}");
+            info!("Attempting to migrate config");
             let migrated = config::migrate::migrate(config_path);
             match migrated {
                 Ok(cfg) => {

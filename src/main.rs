@@ -45,11 +45,11 @@ fn main() -> anyhow::Result<()> {
 
     check_features();
 
-    // TODO replace this this finding the first existing file
     let config_path = cli
         .global_opts
         .config_file
         .unwrap_or(get_default_config_path());
+
     let css_path = cli.global_opts.css_file.unwrap_or(get_default_css_path());
     let data_dir = cli.global_opts.data_dir.unwrap_or(get_default_data_dir());
 
@@ -67,13 +67,15 @@ fn main() -> anyhow::Result<()> {
         cli::Command::Config { command } => match command {
             cli::ConfigCommand::Generate { force, no_systemd } => {
                 use core_lib::Warn;
+                let (override_config, override_css) = core_lib::config::generate::get_overrides(&force);
+                core_lib::config::generate::check_file_exist(&config_path, &css_path, override_config, override_css)?;
+
                 let (config_data, css_data) = core_lib::config::generate::prompt_config()?;
                 let config = core_lib::config::generate::generate_config(config_data);
-                core_lib::config::write_config(&config_path, &config, force).warn("create");
-                core_lib::config::generate::write_css(css_path, force, css_data).warn("create");
+                core_lib::config::write_config(&config_path, &config, override_config).warn("create");
+                core_lib::config::generate::write_css(&css_path, &css_data, override_css).warn("create");
                 if !no_systemd {
                     core_lib::config::generate::write_systemd_unit(
-                        force,
                         opts.config_file.as_ref(),
                         opts.css_file.as_ref(),
                         opts.data_dir.as_ref(),
