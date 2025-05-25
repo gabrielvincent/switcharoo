@@ -5,7 +5,7 @@ use std::fs::DirEntry;
 use std::os::unix::net::UnixStream;
 use std::path::PathBuf;
 use std::{env, fmt};
-use tracing::{debug, warn};
+use tracing::{debug, info, warn};
 
 pub const MIN_VERSION: Version = Version::new(0, 42, 0);
 
@@ -84,6 +84,16 @@ pub fn daemon_running() -> bool {
 
 pub fn check_version(version: anyhow::Result<String>) -> anyhow::Result<()> {
     if let Ok(version) = version {
+        info!(
+            "Starting hyprshell {} in {} mode on hyprland {}",
+            env!("CARGO_PKG_VERSION"),
+            if cfg!(debug_assertions) {
+                "debug"
+            } else {
+                "release"
+            },
+            version,
+        );
         let parsed_version =
             Version::parse(&version).context("Unable to parse hyprland Version")?;
         if parsed_version.lt(&MIN_VERSION) {

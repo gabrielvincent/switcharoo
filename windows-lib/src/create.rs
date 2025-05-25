@@ -6,7 +6,7 @@ use exec_lib::get_monitors;
 use gtk::gdk::{Display, Monitor};
 use gtk::prelude::*;
 use gtk::{Application, ApplicationWindow, FlowBox, Orientation, Overlay, SelectionMode};
-use gtk4_layer_shell::{Layer, LayerShell};
+use gtk4_layer_shell::{KeyboardMode, Layer, LayerShell};
 use tracing::{debug, span, Level};
 
 pub fn create_windows_window(app: &Application, global: &WindowsGlobal) -> anyhow::Result<()> {
@@ -50,6 +50,7 @@ pub fn create_windows_window(app: &Application, global: &WindowsGlobal) -> anyho
             window.init_layer_shell();
             window.set_namespace(Some(OVERVIEW_NAMESPACE));
             window.set_layer(Layer::Overlay);
+            window.set_keyboard_mode(KeyboardMode::OnDemand);
             window.set_monitor(Some(&monitor));
             window.present();
             window.set_visible(false);

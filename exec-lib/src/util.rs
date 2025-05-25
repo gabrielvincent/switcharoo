@@ -5,7 +5,7 @@ use hyprland::data::{Client, Clients, Monitor, Monitors, Workspace};
 use hyprland::dispatch::{Dispatch, DispatchType};
 use hyprland::keyword::Keyword;
 use hyprland::prelude::*;
-use tracing::{debug, info, span, trace, warn, Level};
+use tracing::{debug, span, trace, warn, Level};
 
 pub fn get_clients() -> Vec<Client> {
     Clients::get().map_or(vec![], |clients| clients.to_vec())
@@ -75,11 +75,6 @@ pub fn get_version() -> anyhow::Result<String> {
         .context("Failed to get version! (hyprland is probably outdated or too new??)")?;
 
     trace!("hyprland {version:?}");
-    info!(
-        "Starting hyprshell {} on hyprland {}",
-        env!("CARGO_PKG_VERSION"),
-        version.version.clone().unwrap_or(version.tag.clone()),
-    );
 
     Ok(version
         .version

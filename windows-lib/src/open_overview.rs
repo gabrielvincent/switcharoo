@@ -6,7 +6,7 @@ use core_lib::transfer::{CloseConfig, OpenOverview, TransferType, WindowsOverrid
 use core_lib::{send_to_socket, ClientData, ClientId, FindByFirst, Warn, WorkspaceId};
 use exec_lib::activate_submap;
 use gtk::prelude::*;
-use gtk::{pango, EventSequenceState, Fixed, Frame, GestureClick, Image, Label, Overflow, Overlay};
+use gtk::{pango, Button, Fixed, Frame, Image, Label, Overflow, Overlay};
 use std::borrow::Cow;
 use tracing::{debug, span, trace, Level};
 
@@ -79,16 +79,17 @@ pub fn open_overview(global: &WindowsGlobal, config: OpenOverview) -> anyhow::Re
                 .child(&workspace_fixed)
                 .build();
 
-            let workspace_overlay = {
-                let workspace_overlay = Overlay::builder()
+            let workspace_button = {
+                let workspace_overlay = Overlay::builder().child(&workspace_frame).build();
+                let button = Button::builder()
+                    .child(&workspace_overlay)
                     .css_classes(["workspace"])
-                    .child(&workspace_frame)
                     .build();
-                workspace_overlay.add_controller(click_workspace(*wid));
-                monitor_data.workspaces_flow.insert(&workspace_overlay, -1);
-                workspace_overlay
+                click_workspace(&button, *wid);
+                monitor_data.workspaces_flow.insert(&button, -1);
+                button
             };
-            monitor_data.workspace_refs.insert(*wid, workspace_overlay);
+            monitor_data.workspace_refs.insert(*wid, workspace_button);
 
             let clients: Vec<&(ClientId, ClientData)> = {
                 let mut clients = clients_data
@@ -111,7 +112,7 @@ pub fn open_overview(global: &WindowsGlobal, config: OpenOverview) -> anyhow::Re
                     continue;
                 }
 
-                let client_overlay = {
+                let client_button = {
                     let title = if !client.title.trim().is_empty() {
                         &client.title
                     } else {
@@ -144,20 +145,23 @@ pub fn open_overview(global: &WindowsGlobal, config: OpenOverview) -> anyhow::Re
                     }
 
                     let client_overlay = Overlay::builder()
-                        .css_classes(["client"])
                         .overflow(Overflow::Hidden)
                         .child(&client_frame)
+                        .build();
+                    let button = Button::builder()
+                        .child(&client_overlay)
+                        .css_classes(["client"])
                         .width_request(scale(client.width, global.scale))
                         .height_request(scale(client.height, global.scale))
                         .build();
 
                     // add initial border around initial active client
                     if active.client == Some(*address) {
-                        client_overlay.add_css_class("active");
+                        button.add_css_class("active");
                     }
 
-                    client_overlay.add_controller(click_client(*address));
-                    client_overlay
+                    click_client(&button, *address);
+                    button
                 };
                 trace!(
                     "Creating Client {:?} with ({}x{}) at ({}x{})",
@@ -168,11 +172,11 @@ pub fn open_overview(global: &WindowsGlobal, config: OpenOverview) -> anyhow::Re
                     scale(client.y - workspace.y as i16, global.scale) as f64
                 );
                 workspace_fixed.put(
-                    &client_overlay,
+                    &client_button,
                     scale(client.x - workspace.x as i16, global.scale) as f64,
                     scale(client.y - workspace.y as i16, global.scale) as f64,
                 );
-                monitor_data.client_refs.insert(*address, client_overlay);
+                monitor_data.client_refs.insert(*address, client_button);
             }
         }
 
@@ -187,28 +191,22 @@ pub fn open_overview(global: &WindowsGlobal, config: OpenOverview) -> anyhow::Re
     Ok(())
 }
 
-fn click_client(client_id: ClientId) -> GestureClick {
-    let gesture = GestureClick::new();
-    gesture.connect_pressed(move |gesture, _, _, _| {
-        gesture.set_state(EventSequenceState::Claimed);
+fn click_client(button: &Button, client_id: ClientId) {
+    button.connect_clicked(move |_| {
         debug!("Exiting on click of client box");
         send_to_socket(&TransferType::Close(CloseConfig::Windows(
             WindowsOverride::ClientId(client_id),
         )))
         .warn("unable send return to socket");
     });
-    gesture
 }
 
-fn click_workspace(workspace_id: WorkspaceId) -> GestureClick {
-    let gesture = GestureClick::new();
-    gesture.connect_pressed(move |gesture, _, _, _| {
-        gesture.set_state(EventSequenceState::Claimed);
+fn click_workspace(button: &Button, workspace_id: WorkspaceId) {
+    button.connect_clicked(move |_| {
         debug!("Exiting on click of workspace box");
         send_to_socket(&TransferType::Close(CloseConfig::Windows(
             WindowsOverride::WorkspaceID(workspace_id),
         )))
         .warn("unable send return to socket");
     });
-    gesture
 }

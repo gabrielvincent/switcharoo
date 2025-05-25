@@ -1,6 +1,6 @@
 use core_lib::config::Windows;
 use core_lib::{Active, ClientId, HyprlandData, MonitorId, WorkspaceId};
-use gtk::{ApplicationWindow, FlowBox, Overlay};
+use gtk::{ApplicationWindow, Button, FlowBox};
 use std::cell::RefCell;
 use std::collections::HashMap;
 use exec_lib::get_initial_active;
@@ -51,9 +51,9 @@ pub struct OverviewGlobalMonitorData {
     // used to store a ref to the FlowBox containing the workspaces
     pub workspaces_flow: FlowBox,
     // used to store refs to the Overlays over the workspace Frames
-    pub workspace_refs: HashMap<WorkspaceId, Overlay>,
+    pub workspace_refs: HashMap<WorkspaceId, Button>,
     // used to store refs to the Overlays containing the clients
-    pub client_refs: HashMap<ClientId, Overlay>,
+    pub client_refs: HashMap<ClientId, Button>,
 }
 
 impl OverviewGlobalMonitorData {

@@ -7,7 +7,7 @@ use core_lib::transfer::{CloseConfig, OpenSwitch, TransferType, WindowsOverride}
 use core_lib::{send_to_socket, ClientData, ClientId, FindByFirst, Warn};
 use exec_lib::activate_submap;
 use gtk::prelude::*;
-use gtk::{pango, EventSequenceState, Frame, GestureClick, Image, Label, Overflow, Overlay};
+use gtk::{pango, Button, Frame, Image, Label, Overflow, Overlay};
 use tracing::{debug, span, trace, Level};
 fn scale(value: i16, scale: f64) -> i32 {
     (value as f64 / (15f64 - scale)) as i32
@@ -48,7 +48,7 @@ pub fn open_switch(global: &WindowsGlobal, config: OpenSwitch) -> anyhow::Result
             if config.hide_filtered && !client.enabled {
                 continue;
             }
-            let client_overlay = {
+            let client_button = {
                 let title = if !client.title.trim().is_empty() {
                     &client.title
                 } else {
@@ -81,23 +81,26 @@ pub fn open_switch(global: &WindowsGlobal, config: OpenSwitch) -> anyhow::Result
                 }
 
                 let client_overlay = Overlay::builder()
-                    .css_classes(["client"])
                     .overflow(Overflow::Hidden)
                     .child(&client_frame)
+                    .build();
+                let button = Button::builder()
+                    .child(&client_overlay)
+                    .css_classes(["client"])
                     .width_request(scale(monitor.width as i16, global.scale))
                     .height_request(scale(monitor.height as i16, global.scale))
                     .build();
 
                 // add border around initial active client
                 if active.client == Some(*address) {
-                    client_overlay.add_css_class("active");
+                    button.add_css_class("active");
                 }
 
-                client_overlay.add_controller(click_client(*address));
-                client_overlay
+                click_client(&button, *address);
+                button
             };
-            monitor_data.workspaces_flow.insert(&client_overlay, -1);
-            monitor_data.client_refs.insert(*address, client_overlay);
+            monitor_data.workspaces_flow.insert(&client_button, -1);
+            monitor_data.client_refs.insert(*address, client_button);
         }
 
         trace!("Showing window {:?}", window.id());
@@ -112,15 +115,12 @@ pub fn open_switch(global: &WindowsGlobal, config: OpenSwitch) -> anyhow::Result
     Ok(())
 }
 
-fn click_client(client_id: ClientId) -> GestureClick {
-    let gesture = GestureClick::new();
-    gesture.connect_pressed(move |gesture, _, _, _| {
-        gesture.set_state(EventSequenceState::Claimed);
+fn click_client(button: &Button, client_id: ClientId) {
+    button.connect_clicked(move |_| {
         debug!("Exiting on click of client box");
         send_to_socket(&TransferType::Close(CloseConfig::Windows(
             WindowsOverride::ClientId(client_id),
         )))
         .warn("unable send return to socket");
     });
-    gesture
 }

@@ -23,9 +23,6 @@ ron = { version = "0.10.1" }
 semver = { version = "1.0.26" }
 toml = { version = "0.8.20", optional = true }
 
-[build-dependencies]
-which = { version = "7.0.3", default-features = false }
-
 [features]
 toml_config = ["dep:toml"]
 generate_config = ["dep:inquire"]
