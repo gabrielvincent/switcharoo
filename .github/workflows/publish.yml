@@ -47,7 +47,7 @@ jobs:
           version=$(echo ${{ github.ref_name }} | sed 's/v//')
           cargo ws publish custom $version -m "chore(release): bump rust versions to $version" --no-individual-tags --allow-branch hyprshell --exact --yes --force "hyprshell*" --token ${{ secrets.CRATES_TOKEN }}
           
-          gh release edit ${{ github.ref_name }} --latest --draft=false --title "Hyprshell ${{ github.ref_name }}"
+          gh release edit ${{ github.ref_name }} --latest --draft=false --title "hyprshell ${{ github.ref_name }}"
           
           # create a sqash merge commit onto release branch
           git fetch origin hyprshell-release
