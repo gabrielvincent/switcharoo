@@ -154,10 +154,10 @@ in
           navigate = {
             forward = mkOpt "Key to navigate forwards" str "tab";
             reverse = {
-              key = mkOpt "Key to navigate backwards (mutely exclusive with mod)" (nullOr (str)) null // {
+              key = mkOpt "Key to navigate backwards (mutually exclusive with mod)" (nullOr (str)) null // {
                 example = "tab";
               };
-              mod = mkOpt "Modifier to navigate backwards (mutely exclusive with key)" (nullOr (enum [
+              mod = mkOpt "Modifier to navigate backwards (mutually exclusive with key)" (nullOr (enum [
                 "alt"
                 "ctrl"
                 "super"
@@ -187,10 +187,10 @@ in
           navigate = {
             forward = mkOpt "Key to navigate forwards" str "tab";
             reverse = {
-              key = mkOpt "Key to navigate backwards (mutely exclusive with mod)" (nullOr (str)) null // {
+              key = mkOpt "Key to navigate backwards (mutually exclusive with mod)" (nullOr (str)) null // {
                 example = "tab";
               };
-              mod = mkOpt "Modifier to navigate backwards (mutely exclusive with key)" (nullOr (enum [
+              mod = mkOpt "Modifier to navigate backwards (mutually exclusive with key)" (nullOr (enum [
                 "alt"
                 "ctrl"
                 "super"
@@ -212,6 +212,17 @@ in
   };
 
   config = lib.mkIf cfg.enable ({
+    assertions = [
+      {
+        assertion = with cfg.settings.windows.overview.navigate.reverse; key == null || mod == null;
+        message = "'key' and 'mod' are mutually exclusive";
+      }
+      {
+        assertion = with cfg.settings.windows.switch.navigate.reverse; key == null || mod == null;
+        message = "'key' and 'mod' are mutually exclusive";
+      }
+    ];
+
     home.packages = [ cfg.package ];
 
     systemd.user.services.hyprshell = lib.mkIf cfg.systemd.enable {
@@ -241,7 +252,7 @@ in
           text = builtins.toJSON (filterDisabledAndDropEnable cfg.settings);
         };
 
-    xdg.configFile."hyprshell/style.css" =
+    xdg.configFile."hyprshell/styles.css" =
       if (lib.isPath cfg.styleFile || lib.isStorePath cfg.styleFile) then
         {
           source = cfg.styleFile;
