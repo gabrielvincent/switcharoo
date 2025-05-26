@@ -50,7 +50,7 @@ pub fn create_windows_window(app: &Application, global: &WindowsGlobal) -> anyho
             window.init_layer_shell();
             window.set_namespace(Some(OVERVIEW_NAMESPACE));
             window.set_layer(Layer::Overlay);
-            window.set_keyboard_mode(KeyboardMode::OnDemand);
+            window.set_keyboard_mode(KeyboardMode::None);
             window.set_monitor(Some(&monitor));
             window.present();
             window.set_visible(false);

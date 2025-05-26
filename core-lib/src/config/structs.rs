@@ -15,19 +15,6 @@ pub struct Config {
 
 #[derive(SmartDefault, Debug, Clone, Deserialize, Serialize)]
 #[serde(default, deny_unknown_fields)]
-pub struct Windows {
-    #[default = 8.5]
-    pub scale: f64,
-    #[default = 5]
-    pub workspaces_per_row: u8,
-    #[default = true]
-    pub strip_html_from_workspace_title: bool,
-    pub overview: Option<Overview>,
-    pub switch: Option<Switch>,
-}
-
-#[derive(SmartDefault, Debug, Clone, Deserialize, Serialize)]
-#[serde(default, deny_unknown_fields)]
 pub struct Launcher {
     #[default(None)]
     pub default_terminal: Option<Box<str>>,
@@ -86,6 +73,19 @@ pub struct SearchEngine {
     pub url: String,
     pub name: String,
     pub key: char,
+}
+
+#[derive(SmartDefault, Debug, Clone, Deserialize, Serialize)]
+#[serde(default, deny_unknown_fields)]
+pub struct Windows {
+    #[default = 8.5]
+    pub scale: f64,
+    #[default = 5]
+    pub workspaces_per_row: u8,
+    #[default = true]
+    pub strip_html_from_workspace_title: bool,
+    pub overview: Option<Overview>,
+    pub switch: Option<Switch>,
 }
 
 #[derive(SmartDefault, Debug, Clone, Deserialize, Serialize)]

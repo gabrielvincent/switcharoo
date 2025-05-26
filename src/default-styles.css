@@ -1,6 +1,19 @@
-/* style reset */
-* {
+/* buttons need to be transparent as they wrap everything clickable */
+button {
     all: unset;
+}
+
+/* no background and no hover effects by default */
+list {
+    background: transparent;
+}
+/* no background and no hover effects by default */
+row {
+    background: transparent;
+}
+
+entry {
+    background: transparent;
 }
 
 label {
@@ -12,6 +25,7 @@ label {
     -gtk-icon-size: 32px;
 }
 
+/* some fix for the workspaces? */
 flowboxchild {
     padding: 2px;
 }

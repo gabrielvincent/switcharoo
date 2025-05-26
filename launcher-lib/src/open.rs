@@ -8,14 +8,16 @@ pub fn open_launcher(global: &LauncherGlobal) {
 
     if let Some(data) = &global.data {
         let data = data.borrow();
+        trace!("Showing window {:?}", data.window.id());
+        data.window.set_monitor(None);
+        data.window.set_visible(true);
+
         trace!("Resetting launcher data");
         data.entry.set_editable(true);
         data.entry.set_text("");
 
-        trace!("Showing window {:?}", data.window.id());
+        // doesnt work, sometimes winows stay focused, maybe set to exclusive for 0.1 seconds?
         data.window.set_keyboard_mode(KeyboardMode::OnDemand);
-        data.window.set_visible(true);
-        data.window.set_monitor(None);
         data.window.grab_focus();
         data.entry.grab_focus();
     }

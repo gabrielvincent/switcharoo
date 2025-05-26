@@ -8,6 +8,7 @@ use exec_lib::activate_submap;
 use gtk::prelude::*;
 use gtk::{pango, Button, Fixed, Frame, Image, Label, Overflow, Overlay};
 use std::borrow::Cow;
+use gtk::gdk::Cursor;
 use tracing::{debug, span, trace, Level};
 
 fn scale(value: i16, scale: f64) -> i32 {
@@ -39,6 +40,8 @@ pub fn open_overview(global: &WindowsGlobal, config: OpenOverview) -> anyhow::Re
         {
             continue;
         }
+        trace!("Showing window {:?}", window.id());
+        window.set_visible(true);
 
         let workspaces = {
             let mut workspaces = clients_data
@@ -85,6 +88,7 @@ pub fn open_overview(global: &WindowsGlobal, config: OpenOverview) -> anyhow::Re
                     .child(&workspace_overlay)
                     .css_classes(["workspace"])
                     .build();
+                button.set_cursor(Cursor::from_name("pointer", None).as_ref());
                 click_workspace(&button, *wid);
                 monitor_data.workspaces_flow.insert(&button, -1);
                 button
@@ -154,6 +158,7 @@ pub fn open_overview(global: &WindowsGlobal, config: OpenOverview) -> anyhow::Re
                         .width_request(scale(client.width, global.scale))
                         .height_request(scale(client.height, global.scale))
                         .build();
+                    button.set_cursor(Cursor::from_name("pointer", None).as_ref());
 
                     // add initial border around initial active client
                     if active.client == Some(*address) {
@@ -179,9 +184,6 @@ pub fn open_overview(global: &WindowsGlobal, config: OpenOverview) -> anyhow::Re
                 monitor_data.client_refs.insert(*address, client_button);
             }
         }
-
-        trace!("Showing window {:?}", window.id());
-        window.set_visible(true);
     }
 
     data.active = active;

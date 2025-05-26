@@ -4,6 +4,7 @@ use crate::LauncherGlobal;
 use core_lib::theme_icon_cache::theme_has_icon_name;
 use core_lib::transfer::{CloseConfig, TransferType};
 use core_lib::{send_to_socket, Warn};
+use gtk::gdk::Cursor;
 use gtk::pango::EllipsizeMode;
 use gtk::prelude::{BoxExt, ButtonExt, WidgetExt};
 use gtk::{glib, Align, Button, IconSize, Image, Label, ListBoxRow, Orientation};
@@ -60,6 +61,7 @@ pub fn update_launcher(global: &LauncherGlobal, text: String) {
             get_static_launch_options(&global.plugins, &global.default_terminal);
         for opt in static_launch_options.into_iter() {
             let button = create_static_plugin_box(opt.icon, &opt.text, &opt.details, opt.key);
+            button.set_cursor(Cursor::from_name("pointer", None).as_ref());
             click_entry(&button, opt.key);
             button.set_iden_data(opt.data.str());
             data1.plugin_box.append(&button);
@@ -186,6 +188,7 @@ fn create_entry(
     hbox.append(&index_label);
 
     let button = Button::builder().child(&hbox).build();
+    button.set_cursor(Cursor::from_name("pointer", None).as_ref());
 
     let row = ListBoxRow::builder()
         .css_classes(["launcher-item"])

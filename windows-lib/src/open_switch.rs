@@ -8,7 +8,9 @@ use core_lib::{send_to_socket, ClientData, ClientId, FindByFirst, Warn};
 use exec_lib::activate_submap;
 use gtk::prelude::*;
 use gtk::{pango, Button, Frame, Image, Label, Overflow, Overlay};
+use gtk::gdk::Cursor;
 use tracing::{debug, span, trace, Level};
+
 fn scale(value: i16, scale: f64) -> i32 {
     (value as f64 / (15f64 - scale)) as i32
 }
@@ -42,6 +44,8 @@ pub fn open_switch(global: &WindowsGlobal, config: OpenSwitch) -> anyhow::Result
         } else {
             continue;
         };
+        trace!("Showing window {:?}", window.id());
+        window.set_visible(true);
 
         let clients: &Vec<(ClientId, ClientData)> = &clients_data.clients;
         for (address, client) in clients {
@@ -90,6 +94,7 @@ pub fn open_switch(global: &WindowsGlobal, config: OpenSwitch) -> anyhow::Result
                     .width_request(scale(monitor.width as i16, global.scale))
                     .height_request(scale(monitor.height as i16, global.scale))
                     .build();
+                button.set_cursor(Cursor::from_name("pointer", None).as_ref());
 
                 // add border around initial active client
                 if active.client == Some(*address) {
@@ -102,11 +107,7 @@ pub fn open_switch(global: &WindowsGlobal, config: OpenSwitch) -> anyhow::Result
             monitor_data.workspaces_flow.insert(&client_button, -1);
             monitor_data.client_refs.insert(*address, client_button);
         }
-
-        trace!("Showing window {:?}", window.id());
-        window.set_visible(true);
-
-        trace!("Refresh window {:?}", window.id());
+        //        trace!("Refresh window {:?}", window.id());
     }
 
     data.active = active;
