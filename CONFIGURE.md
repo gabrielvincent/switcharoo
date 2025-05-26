@@ -37,7 +37,7 @@ This option itself is optional, if not set, the launcher is not shown.
   This does not include the plugin row and only limits the number of items retuned by for examples the application search.
   This value will get reduced to 10 if it is set to a value higher than 10.
 - **animate_launch_ms:**_[boolean]_ Milliseconds to wait before the launcher is closed after launching an application or executing a plugin (should be a bit shorter than the `pulsing` css animation).
-- **plugins:**_[Vec\<Plugin\>]_ Array of plugin names to load. The plugins are loaded in the order they are defined in the array.
+- **plugins:**_[Plugins]_ Configuration for each Plugin. Set to None or ignore the individual extensions to deactivate them.
 
 ### Plugins
 
@@ -47,10 +47,11 @@ This option itself is optional, if not set, the launcher is not shown.
       The full exec can still be seen in the tooltip.
 - **Terminal:** Open a terminal and run the typed command in it. The terminal is defined in the `default_terminal` config option. This plugin doesn't accept any options.
 - **Shell:** Run the typed command in a shell (in the background). This plugin doesn't accept any options.
-- **WebSearch:** Allows searching for the typed query in a web browser. The different search engines can be configured in the options which is an array of `WebSearchEngine` objects.
-    - **url:**_[string]_ URL to open in the browser. This must include a `{}` to replace with the searched text.
-    - **name:**_[string]_ Name of the search engine. This is used to show the name in the launcher.
-    - **key:**_[string]_ Key to use to select this search engine. This is used to register the keybinding to select the search engine without clicking on it.
+- **WebSearch:** Allows searching for the typed query in a web browser.
+    - **engines:**_[Vec<WebSearchEngine>]_ A list of search engines to use. Each search engine is defined by a `SearchEngine` object.
+        - **url:**_[string]_ URL to open in the browser. This must include a `{}` to replace with the searched text (like `https://www.google.com/search?q={}`).
+        - **name:**_[string]_ Name of the search engine. This is used to show the name in the launcher.
+        - **key:**_[string]_ Key to use to select this search engine. This is used to register the keybinding to select the search engine without clicking on it.
 - **Calc:** Calculates any mathematical expression typed into the launcher. This plugin doesn't accept any options.
 
 ## Window Options
@@ -123,6 +124,7 @@ These settings will take priority over the default values set by the application
 
 If you want to change colors borders, etc. you can edit the CSS variables in the `:root {}` section.
 These styles are automatically used everywhere in the application, so you don't have to set them for every class.
+The values in the `:root {}` are set as fallbacks everywhere in the application, so you can just not set the ones you don't want to change.
 
 ![image.png](./imgs/css/swappy-20250510_222852.png)
 ![image.png](./imgs/css/swappy-20250510_224344.png)
