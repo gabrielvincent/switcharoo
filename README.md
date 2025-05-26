@@ -8,7 +8,7 @@
 
 Hyprshell _(previously hyprswitch)_ is a Rust-based GUI designed to enhance window management in [Hyprland](https://github.com/hyprwm/Hyprland).
 It provides a powerful and customizable interface for switching between windows using keyboard shortcuts and GUI.
-The application also includes a launcher for running applications, doing calculations etc.
+The application also includes a launcher for running applications, doing calculations, etc.
 
 ## Features
 
@@ -16,8 +16,8 @@ The application also includes a launcher for running applications, doing calcula
 - **Customizable Keybindings**: Define your own keybindings for window switching and GUI interactions.
 - **Config**: Interactive [config file](./CONFIGURE.md) generation for easy setup.
 - **Launcher Integration**: Launch applications directly from the GUI, sorted by usage frequency.
+- **Theming**: Customize the GUI appearance (gtk4) using [CSS](./CONFIGURE.md).
 - **Sorting and Filtering**: windows sorted by position, can be filtered by class, workspace, or monitor.
-- **Theming**: Customize the GUI appearance using [CSS](./CONFIGURE.md).
 - **Dynamic Configuration**: Automatically reloads configuration/style changes without restarting the application.
 
 ## Installation

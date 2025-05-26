@@ -119,6 +119,8 @@ hyprshell config generate
 
 The default override file can also be found in [the code](./core-lib/src/config/generate/default.css).
 
+GTK only supports a subset of CSS, so not all CSS properties will work. The supported properties are listed in the [GTK documentation](https://docs.gtk.org/gtk4/css-overview.html).
+
 The override file contains many empty classes that can be used to configure padding, fonts, etc.
 These settings will take priority over the default values set by the application itself. The application defaults can be found in the CSS files inside the codebase (for example, [this one](./src/default-styles.css) or [that one](./windows-lib/src/styles.css)).
 
