@@ -13,6 +13,7 @@ pub(super) struct DesktopEntry {
     pub(crate) exec_search: Box<str>,
     pub(crate) exec: Box<str>,
     pub(super) exec_path: Option<Box<Path>>,
+    pub(super) type_search: &'static str,
     pub(super) terminal: bool,
     pub(super) source: Box<Path>,
 }
@@ -90,12 +91,19 @@ fn fill_desktop_file_map(map: &mut Vec<DesktopEntry>, files: &[DirEntry]) -> any
                             }
                         }
                         let exec_info = analyse_exec(&exec);
-                        let exec_search = match exec_info {
-                            ExecType::Flatpak(flatpak_identifier, _) => flatpak_identifier,
-                            ExecType::PWA(_, _) => Box::from(""),
-                            ExecType::FlatpakPWA(flatpak_identifier, _) => flatpak_identifier,
-                            ExecType::Absolute(exec_name, _) => exec_name,
-                            ExecType::Relative(exec_name) => exec_name
+                        let (exec_search, type_search) = match exec_info {
+                            ExecType::Flatpak(flatpak_identifier, _) => {
+                                (flatpak_identifier, "flatpak")
+                            }
+                            ExecType::PWA(_, _) => (Box::from(""), "pwa"),
+                            ExecType::FlatpakPWA(flatpak_identifier, _) => {
+                                (flatpak_identifier, "flatpak-pwa")
+                            }
+                            ExecType::AppImage(app_image_identifier, _) => {
+                                (app_image_identifier, "appimage")
+                            }
+                            ExecType::Absolute(exec_name, _) => (exec_name, ""),
+                            ExecType::Relative(exec_name) => (exec_name, ""),
                         };
                         map.push(DesktopEntry {
                             name: name.trim().into(),
@@ -104,6 +112,7 @@ fn fill_desktop_file_map(map: &mut Vec<DesktopEntry>, files: &[DirEntry]) -> any
                                 .map(|k| k.split(';').map(|k| k.trim().into()).collect())
                                 .unwrap_or_else(Vec::new),
                             exec_search,
+                            type_search,
                             exec: exec.trim().into(),
                             exec_path: exec_path.map(|p| Box::from(Path::new(p))),
                             terminal,

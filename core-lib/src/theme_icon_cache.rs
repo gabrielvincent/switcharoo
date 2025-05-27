@@ -10,7 +10,7 @@ fn get_icon_map() -> &'static Mutex<BTreeSet<Box<str>>> {
     MAP_LOCK.get_or_init(|| Mutex::new(BTreeSet::new()))
 }
 
-pub fn init_icon_map(icon_names: Vec<String>, search_path: Option<Vec<PathBuf>>) {
+pub fn init_icon_map(icon_names: Vec<String>, search_path: Vec<PathBuf>) {
     let mut map = get_icon_map().lock().expect("Failed to lock icon map");
 
     debug!("found {} icons from theme", icon_names.len());
@@ -18,17 +18,15 @@ pub fn init_icon_map(icon_names: Vec<String>, search_path: Option<Vec<PathBuf>>)
         map.insert(icon.into_boxed_str());
     }
 
-    if let Some(search_path) = search_path {
-        // gtk4 only reports 500 icons for candy-theme, scan through the filesystem
-        for path in search_path {
-            if path.exists() {
-                let paths = collect_files_recursive(&path);
-                debug!("found {} icons from filesystem in {path:?}", paths.len());
-                for icon in paths {
-                    map.insert(icon);
-                }
-                return;
+    // gtk4 only reports 500 icons for candy-theme, scan through the filesystem
+    for path in search_path {
+        if path.exists() {
+            let paths = collect_files_recursive(&path);
+            debug!("found {} icons from filesystem in {path:?} paths", paths.len());
+            for icon in paths {
+                map.insert(icon);
             }
+            return;
         }
     }
 }

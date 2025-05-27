@@ -153,6 +153,7 @@ pub enum ExecType {
     PWA(Box<str>, Box<str>),
     FlatpakPWA(Box<str>, Box<str>),
     Absolute(Box<str>, Box<str>),
+    AppImage(Box<str>, Box<str>),
     Relative(Box<str>),
 }
 
@@ -209,13 +210,22 @@ pub fn analyse_exec(exec: &str) -> ExecType {
             .find(|arg| !arg.starts_with("--"))
             .unwrap_or(UNKNOWN_EXEC);
         ExecType::Flatpak(Box::from(flatpak_identifier), Box::from(command_in_flatpak))
+    } else if exec_trim. contains(".AppImage"){
+        // AppImage detection
+        // TODO add appimage PWA detection (IDK if possible, chromium didn't work as appimage for me)
+        let appimage_name = exec_trim
+            .split_whitespace()
+            .next()
+            .and_then(|s| s.split('/').next_back())
+            .and_then(|s| s.split('_').next())
+            .unwrap_or(UNKNOWN_EXEC);
+        ExecType::AppImage(Box::from(appimage_name), Box::from(exec))
     } else if exec_trim.starts_with("/") {
         let exec_name = exec_trim
             .split_whitespace()
             .next()
             .and_then(|s| s.split('/').next_back())
             .unwrap_or(UNKNOWN_EXEC);
-
         ExecType::Absolute(Box::from(exec_name), Box::from(exec))
     } else {
         ExecType::Relative(Box::from(exec_trim))

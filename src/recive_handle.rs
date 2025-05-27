@@ -51,6 +51,7 @@ pub fn switch(global: &Globals, config: SwitchConfig) {
 pub fn exit(global: &Globals) {
     if_some!(global.window, windows_lib::close_overview, None);
     if_some!(global.launcher, launcher_lib::close_launcher, None);
+    reload_data();
 }
 
 pub fn r#type(global: &Globals, text: String) {
@@ -109,15 +110,18 @@ pub fn close(global: &Globals, config: CloseConfig) {
             if_some!(global.launcher, launcher_lib::close_launcher, None);
         }
     }
-
-    // reload the desktop maps for the launcher and overview
-    let desktop_files = collect_desktop_files();
-    windows_lib::reload_desktop_map(&desktop_files);
-    launcher_lib::reload_applications_desktop_map(&desktop_files);
-    launcher_lib::reload_search_default_browser(&desktop_files);
+    reload_data();
 }
 
 pub fn restart(global: &Globals) {
     if_some!(&global.window, windows_lib::stop_overview);
     if_some!(&global.launcher, launcher_lib::stop_launcher);
+}
+
+pub fn reload_data() {
+    // reload the desktop maps for the launcher and overview
+    let desktop_files = collect_desktop_files();
+    windows_lib::reload_desktop_map(&desktop_files);
+    launcher_lib::reload_applications_desktop_map(&desktop_files);
+    launcher_lib::reload_search_default_browser(&desktop_files);
 }
