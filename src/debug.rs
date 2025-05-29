@@ -38,7 +38,7 @@ pub fn list() {
     start::fill_icon_map();
     let icons = get_all_icons();
     for icon in icons.iter() {
-        info!("{icon}");
+        info!("{} [{}]", icon.0, icon.1.display());
     }
 }
 

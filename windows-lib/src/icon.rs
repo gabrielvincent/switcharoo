@@ -1,12 +1,11 @@
 use crate::desktop_map::{add_path_for_icon_by_pid_exec, get_icon_name_by_name_from_desktop_files};
+use core_lib::theme_icon_cache::theme_has_icon_name;
 use gtk::Image;
 use std::fs;
 use std::path::Path;
 use tracing::{span, trace, warn, Level};
-use core_lib::theme_icon_cache::theme_has_icon_name;
 
 pub fn set_icon(class: &str, pid: i32, image: &Image) {
-    let class = class.to_string();
     let image = image.clone();
     let _span = span!(Level::TRACE, "icon", class = class).entered();
 
@@ -23,6 +22,9 @@ pub fn set_icon(class: &str, pid: i32, image: &Image) {
             .unwrap_or_default()
             .split('/')
             .next_back()
+            .unwrap_or_default()
+            .split(' ')
+            .next()
             .unwrap_or_default();
         if cmd.is_empty() {
             warn!("Failed to read cmdline for PID {}", pid);
@@ -39,11 +41,16 @@ pub fn set_icon(class: &str, pid: i32, image: &Image) {
     };
 }
 
+// check if the icon is in theme and apply it
 fn load_icon_from_cache(name: &str, pic: &Image) -> Option<Box<Path>> {
-    // check if the icon is in theme and apply it
+    let name_lower = name.to_ascii_lowercase();
+
     if theme_has_icon_name(name) {
         pic.set_icon_name(Some(name));
         Some(Box::from(Path::new(name)))
+    } else if theme_has_icon_name(&name_lower) {
+        pic.set_icon_name(Some(&name_lower));
+        Some(Box::from(Path::new(&name_lower)))
     } else {
         // check if icon is in desktop file cache and apply it
         if let Some((icon_path, path, source)) = get_icon_name_by_name_from_desktop_files(name) {

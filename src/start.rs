@@ -263,18 +263,11 @@ pub fn fill_icon_map() {
         .map(|s| s.to_string())
         .collect::<Vec<_>>();
 
-    let mut search_path = vec![];
-    search_path.push("/usr/share/pixmaps".into());
-
-    // if let Some(settings) = Settings::default() {
-    // if let Some(icon_theme_name) = settings.gtk_icon_theme_name() {
-    search_path.extend(icon_theme.search_path().into_iter().map(|path| {
-        // path.push(&icon_theme_name);
-        path
-    }));
-    // }
-    // }
-
+    let search_path = icon_theme
+        .search_path()
+        .into_iter()
+        .filter(|path| path.exists())
+        .collect::<Vec<_>>();
     trace!("Icon theme search path: {search_path:?}");
     init_icon_map(gtk_icons, search_path);
 }

@@ -10,7 +10,7 @@ use gtk::prelude::{BoxExt, ButtonExt, WidgetExt};
 use gtk::{glib, Align, Button, IconSize, Image, Label, ListBoxRow, Orientation};
 use std::path::Path;
 use std::str::FromStr;
-use tracing::{debug, span, trace, warn, Level};
+use tracing::{debug, span, warn, Level};
 
 pub fn update_launcher(global: &LauncherGlobal, text: String) {
     let _span = span!(Level::TRACE, "update_launcher").entered();
@@ -149,10 +149,10 @@ fn create_entry(
             }
         } else {
             // use filename as some files are named org.gnome.file
-            trace!(
-                "using name: {:?}",
-                icon_path.file_name().and_then(|name| name.to_str())
-            );
+            // trace!(
+            //     "using name: {:?}",
+            //     icon_path.file_name().and_then(|name| name.to_str())
+            // );
             icon.set_icon_name(icon_path.file_name().and_then(|name| name.to_str()));
         }
     }

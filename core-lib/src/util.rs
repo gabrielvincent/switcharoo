@@ -212,7 +212,6 @@ pub fn analyse_exec(exec: &str) -> ExecType {
         ExecType::Flatpak(Box::from(flatpak_identifier), Box::from(command_in_flatpak))
     } else if exec_trim. contains(".AppImage"){
         // AppImage detection
-        // TODO add appimage PWA detection (IDK if possible, chromium didn't work as appimage for me)
         let appimage_name = exec_trim
             .split_whitespace()
             .next()

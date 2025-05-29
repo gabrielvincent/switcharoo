@@ -7,7 +7,6 @@ use std::collections::HashMap;
 use std::path::Path;
 use tracing::{trace, warn};
 
-//TODO maybe prevent Keyword run many times from surpassing Exact
 #[derive(Debug, Clone, Copy)]
 enum MatchType {
     AppType = 1,

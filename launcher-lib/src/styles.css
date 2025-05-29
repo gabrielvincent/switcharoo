@@ -17,24 +17,6 @@
     margin: 2px;
 }
 
-.launch {
-    animation: pulsing 0.3s normal infinite;
-}
-@keyframes pulsing {
-    0% {
-        background: rgba(21, 162, 211, 0);
-    }
-    10% {
-        background: rgba(21, 162, 211, 0.7);
-    }
-    40% {
-        background: rgba(21, 162, 211, 1);
-    }
-    100% {
-        background: rgba(21, 162, 211, 0);
-    }
-}
-
 .launcher-item {
     padding: 0 6px;
     border-radius: var(--border-radius, 12px);
@@ -71,4 +53,21 @@
     background-color: var(--bg-color-hover, rgba(40, 40, 50, 1));
 }
 
+.launch {
+    animation: pulsing 0.4s normal infinite;
+}
 
+@keyframes pulsing {
+    0% {
+        background: rgba(21, 162, 211, 0);
+    }
+    10% {
+        background: rgba(21, 162, 211, 1);
+    }
+    50% {
+        background: rgba(21, 162, 211, 1);
+    }
+    100% {
+        background: rgba(21, 162, 211, 0);
+    }
+}
