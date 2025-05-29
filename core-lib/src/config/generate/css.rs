@@ -33,7 +33,7 @@ pub fn write_css(css_path: &Path, data: &StyleData, override_file: bool) -> anyh
             .unwrap_or(DEFAULT_COLORS[0].1),
     );
 
-    std::fs::write(&css_path, repl)
+    std::fs::write(css_path, repl)
         .with_context(|| format!("Failed to write css file at ({css_path:?})"))?;
 
     info!("CSS file generated successfully at {css_path:?}");

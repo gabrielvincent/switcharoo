@@ -9,7 +9,7 @@ pub fn set_icon(class: &str, pid: i32, image: &Image) {
     let image = image.clone();
     let _span = span!(Level::TRACE, "icon", class = class).entered();
 
-    if load_icon_from_cache(&class, &image).is_some() {
+    if load_icon_from_cache(class, &image).is_some() {
         return;
     }
 
@@ -33,7 +33,7 @@ pub fn set_icon(class: &str, pid: i32, image: &Image) {
             if let Some(icon_path) = load_icon_from_cache(cmd, &image) {
                 // add the icon path back into cache
                 // to directly link class name to icon without checking pid again
-                add_path_for_icon_by_pid_exec(&class, icon_path);
+                add_path_for_icon_by_pid_exec(class, icon_path);
             }
         }
     } else {
