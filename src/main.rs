@@ -4,6 +4,7 @@ use core_lib::{
     get_default_data_dir, Warn,
 };
 use std::env;
+use std::fs::read_to_string;
 use tracing::{debug, info, warn};
 
 mod cli;
@@ -67,13 +68,21 @@ fn main() -> anyhow::Result<()> {
         cli::Command::Config { command } => match command {
             cli::ConfigCommand::Generate { force, no_systemd } => {
                 use core_lib::Warn;
-                let (override_config, override_css) = core_lib::config::generate::get_overrides(&force);
-                core_lib::config::generate::check_file_exist(&config_path, &css_path, override_config, override_css)?;
+                let (override_config, override_css) =
+                    core_lib::config::generate::get_overrides(&force);
+                core_lib::config::generate::check_file_exist(
+                    &config_path,
+                    &css_path,
+                    override_config,
+                    override_css,
+                )?;
 
                 let (config_data, css_data) = core_lib::config::generate::prompt_config()?;
                 let config = core_lib::config::generate::generate_config(config_data);
-                core_lib::config::write_config(&config_path, &config, override_config).warn("create");
-                core_lib::config::generate::write_css(&css_path, &css_data, override_css).warn("create");
+                core_lib::config::write_config(&config_path, &config, override_config)
+                    .warn("create");
+                core_lib::config::generate::write_css(&css_path, &css_data, override_css)
+                    .warn("create");
                 if !no_systemd {
                     core_lib::config::generate::write_systemd_unit(
                         opts.config_file.as_ref(),
@@ -136,10 +145,21 @@ fn main() -> anyhow::Result<()> {
                 let runs = launcher_lib::get_applications_stored_runs(run_cache_weeks, &data_dir);
 
                 for (path, run) in runs {
-                    info!("{}: {run}", path.display());
-                    // TODO: extract name from path
-                    // maybe add a init parse lib,
-                    // also for the desktop files with more entries
+                    if let Ok(content) = read_to_string(&path) {
+                        if let Some(name_line) = content.lines().find(|l| l.starts_with("Name=")) {
+                            let name = name_line.trim_start_matches("Name=");
+                            // check if verbosity is set, if so, print the name
+                            if opts.verbose > 0 {
+                                info!("{}: {name} ({run})", path.display());
+                            } else if opts.verbose == 0 {
+                                info!("{}: {run}", name);
+                            }
+                        } else {
+                            info!("{}: {run}", path.display());
+                        }
+                    } else {
+                        info!("{}: {run}", path.display());
+                    }
                 }
             }
         },
@@ -168,10 +188,11 @@ pub mod malloc {
 
 fn check_features() {
     debug!(
-        "FEATURES: TOML support: {}, Bar: {}, Config command: {}, Debug command: {}",
+        "FEATURES: TOML support: {}, Bar: {}, Config command: {}, Debug command: {}, Launcher calc: {}",
         cfg!(feature = "toml_config"),
         cfg!(feature = "bar"),
         cfg!(feature = "generate_config_command"),
         cfg!(feature = "debug_command"),
+        cfg!(feature = "launcher_calc"),
     );
 }

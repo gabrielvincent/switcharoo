@@ -58,6 +58,7 @@ pub enum Command {
         command: DebugCommand,
     },
 
+    /// Show data, like launch history, etc.
     Data {
         #[clap(subcommand)]
         command: DataCommand,
@@ -89,7 +90,7 @@ pub enum ConfigCommand {
 pub enum DataCommand {
     /// Show the history of launched applications
     LaunchHistory {
-        // TODO allow time range as input
+        /// weeks to include in the history, defaults to set config value
         run_cache_weeks: Option<u8>,
     },
 }
