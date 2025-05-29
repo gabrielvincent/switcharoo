@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.1](https://github.com/H3rmt/hyprshell-test/compare/v0.8.0...v0.8.1) (2025-05-29)
+
+
+### Bug Fixes
+
+* fix ci publish ([bb1e659](https://github.com/H3rmt/hyprshell-test/commit/bb1e65987ac7c371b29cbf09000bb4f117f5b0e9))
+
 ## [0.8.0](https://github.com/H3rmt/hyprshell-test/compare/v0.7.2...v0.8.0) (2025-05-29)
 
 
