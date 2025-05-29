@@ -1,5 +1,36 @@
 # Changelog
 
+## [0.8.0](https://github.com/H3rmt/hyprshell-test/compare/v0.7.2...v0.8.0) (2025-05-29)
+
+
+### Features
+
+* Add NixOS `home-manager` module ([cd20717](https://github.com/H3rmt/hyprshell-test/commit/cd207178a0cfd44c7ad1069880ef35532f5547ae))
+* added config file migrations ([db2f6cd](https://github.com/H3rmt/hyprshell-test/commit/db2f6cd9fb3c08ab2f9858fb9c1dac61540353b5))
+* added custom args for hyprshell systemd ([aa01139](https://github.com/H3rmt/hyprshell-test/commit/aa01139aebfe2dcd717b670ac6ce557f93c2f1d0))
+* better debug commands ([b17a393](https://github.com/H3rmt/hyprshell-test/commit/b17a393b04201beab8b582a340d1bb80bef5cda2))
+
+
+### Bug Fixes
+
+* better icon detection ([453888e](https://github.com/H3rmt/hyprshell-test/commit/453888e61551946cfa3dec92409df606f7aa04db))
+* check for config file extensions at start ([7a41bb2](https://github.com/H3rmt/hyprshell-test/commit/7a41bb2bf8abea7b2bc2efc2544deb26243faf7c))
+* don't unset all CSS styles at the start, only necessary ([b42d25c](https://github.com/H3rmt/hyprshell-test/commit/b42d25c1d342d10a5af378e1ebcae167a83ca01f))
+* fix multiple run week caches not being added together ([c027209](https://github.com/H3rmt/hyprshell-test/commit/c027209d6f01ec10210420182ea3283380f8e74f))
+* fix overview click on client or workspace ([71d445c](https://github.com/H3rmt/hyprshell-test/commit/71d445c0f310f986b769eb420b55e21e9559d94d))
+* fix wrong name in hm module ([99386d5](https://github.com/H3rmt/hyprshell-test/commit/99386d56c0e40e65bc491e2b87cf28ef83305f6d))
+* force command now accepts args ([7a41bb2](https://github.com/H3rmt/hyprshell-test/commit/7a41bb2bf8abea7b2bc2efc2544deb26243faf7c))
+* nix allow source and text attributes ([dcd9e41](https://github.com/H3rmt/hyprshell-test/commit/dcd9e417071e80cfd489eaefc8908a6b12a324eb))
+* nix json config fixes ([ced4a45](https://github.com/H3rmt/hyprshell-test/commit/ced4a45ef6b8361663b30062298f3084f2219a37))
+* **nix:** Fix HM Module ([b8367b4](https://github.com/H3rmt/hyprshell-test/commit/b8367b4de9dcd2a5b6e49a3e9322534657de4886))
+* open windows earlier ([b42d25c](https://github.com/H3rmt/hyprshell-test/commit/b42d25c1d342d10a5af378e1ebcae167a83ca01f))
+* remove socat dependency ([01758a6](https://github.com/H3rmt/hyprshell-test/commit/01758a6d6384c5ad73a841c3f2e8b90ee9912393))
+* search for installed terminals from PATH ([453888e](https://github.com/H3rmt/hyprshell-test/commit/453888e61551946cfa3dec92409df606f7aa04db))
+* some focus fixes ([9fa8009](https://github.com/H3rmt/hyprshell-test/commit/9fa80093f943f6941aeaeb424a262cb3b4c40ec6))
+* sort launcher applications by shorted exec instead of full (removed /bin/flatpak...) ([b17a393](https://github.com/H3rmt/hyprshell-test/commit/b17a393b04201beab8b582a340d1bb80bef5cda2))
+* try all config extensions if file missing ([6cd4799](https://github.com/H3rmt/hyprshell-test/commit/6cd4799198c7b170537135a611c8ed88b97aa62f))
+* use char instead of String for key for websearch plugins ([eba4282](https://github.com/H3rmt/hyprshell-test/commit/eba42823569cbf19dcb35cf37cc78db7bcdb0e3b))
+
 ## [0.7.2](https://github.com/H3rmt/hyprshell-test/compare/v0.7.1...v0.7.2) (2025-05-13)
 
 
