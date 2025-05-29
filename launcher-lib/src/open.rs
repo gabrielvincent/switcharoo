@@ -18,14 +18,14 @@ pub fn open_launcher(global: &LauncherGlobal) {
         data.entry.set_editable(true);
         data.entry.set_text("");
 
-        data.window.set_keyboard_mode(KeyboardMode::OnDemand);
+        data.window.set_keyboard_mode(KeyboardMode::None);
         data.entry.grab_focus();
 
         // focus the entry after a short delay to ensure that the window underneath is not focused
         let entry = data.entry.clone();
         let window = data.window.clone();
         glib::timeout_add_local_once(Duration::from_millis(50), move || {
-            window.set_keyboard_mode(KeyboardMode::OnDemand);
+            window.set_keyboard_mode(KeyboardMode::Exclusive);
             entry.grab_focus();
         });
     }

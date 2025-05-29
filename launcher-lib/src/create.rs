@@ -29,13 +29,13 @@ pub fn create_launcher_window(
         send_to_socket(&TransferType::Type(e.text().to_string()))
             .warn("unable send return to socket");
     });
-    let controller = EventControllerKey::new();
-    controller.connect_key_pressed(move |_, k, _, m| match (k, m) {
-        (Key::Tab, _) => Propagation::Stop,
-        (Key::ISO_Left_Tab, _) => Propagation::Stop,
+    let key_controller = EventControllerKey::new();
+    key_controller.connect_key_pressed(move |_, k, _, _| match k {
+        Key::Tab => Propagation::Stop,
+        Key::ISO_Left_Tab => Propagation::Stop,
         _ => Propagation::Proceed,
     });
-    entry.add_controller(controller);
+    entry.add_controller(key_controller);
     main_vbox.append(&entry);
 
     let results = ListBox::builder()
