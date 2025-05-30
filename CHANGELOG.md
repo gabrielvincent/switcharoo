@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.8.2](https://github.com/H3rmt/hyprshell-test/compare/v0.8.1...v0.8.2) (2025-05-30)
+
+
+### Bug Fixes
+
+* background loading of icons ([f5c8ff0](https://github.com/H3rmt/hyprshell-test/commit/f5c8ff0e29713432726bb841bafd8dd6729331fa))
+* fix focus window problem ([3c702a1](https://github.com/H3rmt/hyprshell-test/commit/3c702a1da63d56168aa6e7ba2932842c55f97c8d))
+* fix slow start times ([0c4bb95](https://github.com/H3rmt/hyprshell-test/commit/0c4bb9585806de61f73e885026083e49b2fe2048))
+* fix switch mode monitor select ([b8c1d44](https://github.com/H3rmt/hyprshell-test/commit/b8c1d440d47fe4a6ca2c1690e1b0be65b81de1df))
+* Update Nix Package ([a147d38](https://github.com/H3rmt/hyprshell-test/commit/a147d385ee5928e0616d232f741657069242272f))
+
 ## [0.8.1](https://github.com/H3rmt/hyprshell-test/compare/v0.8.0...v0.8.1) (2025-05-29)
 
 
