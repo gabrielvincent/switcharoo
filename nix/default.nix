@@ -1,21 +1,42 @@
-{ self, pkgs }:
+{
+  self,
+  lib,
+  rustPlatform,
+  pkg-config,
+  wrapGAppsHook4,
+  gtk4,
+  gtk4-layer-shell,
+  ...
+}:
 let
+  inherit (builtins) baseNameOf toString;
+  inherit (lib.sources) cleanSource cleanSourceWith;
+  inherit (lib.strings) hasSuffix;
+  inherit (lib.trivial) importTOML;
+
   pname = "hyprshell";
 in
-pkgs.rustPlatform.buildRustPackage {
+rustPlatform.buildRustPackage {
   inherit pname;
-  version =
-    (pkgs.lib.importTOML ../Cargo.toml).workspace.package.version + "_" + (self.shortRev or "dirty");
+  version = (importTOML ../Cargo.toml).workspace.package.version + "_" + (self.shortRev or "dirty");
 
   cargoLock.lockFile = ../Cargo.lock;
-  src = pkgs.lib.cleanSource ../.;
+  src = cleanSourceWith {
+    src = cleanSource ../.;
+    filter =
+      name: _:
+      let
+        baseName = baseNameOf (toString name);
+      in
+      !(hasSuffix ".nix" baseName);
+  };
 
-  nativeBuildInputs = with pkgs; [
-    wrapGAppsHook4
+  nativeBuildInputs = [
     pkg-config
+    wrapGAppsHook4
   ];
 
-  buildInputs = with pkgs; [
+  buildInputs = [
     gtk4
     gtk4-layer-shell
   ];
@@ -24,7 +45,7 @@ pkgs.rustPlatform.buildRustPackage {
     mainProgram = pname;
     description = "hyprshell is a Rust-based GUI designed to enhance window management in hyprland";
     homepage = "https://github.com/h3rmt/hyprshell";
-    license = pkgs.lib.licenses.mit;
-    platforms = pkgs.lib.platforms.linux;
+    license = lib.licenses.mit;
+    platforms = lib.platforms.linux;
   };
 }
