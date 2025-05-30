@@ -17,7 +17,7 @@ fn scale(value: i16, scale: f64) -> i32 {
 
 pub fn open_switch(global: &WindowsGlobal, config: OpenSwitch) -> anyhow::Result<()> {
     let _span = span!(Level::TRACE, "open_switch").entered();
-    let (clients_data, active) = collect_data(&SortConfig {
+    let (clients_data, active_prev) = collect_data(&SortConfig {
         filter_current_monitor: config.filter_current_monitor,
         filter_current_workspace: config.filter_current_workspace,
         filter_same_class: config.filter_same_class,
@@ -28,7 +28,7 @@ pub fn open_switch(global: &WindowsGlobal, config: OpenSwitch) -> anyhow::Result
         &config.direction,
         false,
         &clients_data,
-        active,
+        active_prev,
         global.workspaces_per_row as usize,
     );
 
@@ -36,7 +36,7 @@ pub fn open_switch(global: &WindowsGlobal, config: OpenSwitch) -> anyhow::Result
 
     let mut data = global.data.borrow_mut();
     for (window, monitor_data) in &mut data.monitor_list.iter_mut() {
-        if monitor_data.id != active.monitor {
+        if monitor_data.id != active_prev.monitor {
             continue;
         }
         let monitor = if let Some(monitor) = clients_data.monitors.find_by_first(&monitor_data.id) {
