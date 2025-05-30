@@ -16,13 +16,13 @@ pub fn close_launcher(global: &LauncherGlobal, char: Option<char>) {
             let instant = Instant::now();
 
             let data1 = data.borrow();
+            data1.window.set_keyboard_mode(KeyboardMode::None);
             if let Some(iden) = match char {
                 '0'..='9' => data1
                     .sorted_matches
                     .get(char.to_digit(10).expect("unable to convert char") as usize),
                 _ => data1.static_matches.get(&char),
             } {
-                data1.window.set_keyboard_mode(KeyboardMode::None);
                 let animate = plugins::launch(
                     iden,
                     &data1.entry.text(),

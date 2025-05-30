@@ -1,8 +1,6 @@
 use crate::LauncherGlobal;
-use gtk::glib;
 use gtk::prelude::*;
 use gtk4_layer_shell::{KeyboardMode, LayerShell};
-use std::time::Duration;
 use tracing::{span, trace, Level};
 
 pub fn open_launcher(global: &LauncherGlobal) {
@@ -18,13 +16,8 @@ pub fn open_launcher(global: &LauncherGlobal) {
         data.entry.set_editable(true);
         data.entry.set_text("");
 
-        data.window.set_keyboard_mode(KeyboardMode::OnDemand);
+        data.window.set_keyboard_mode(KeyboardMode::Exclusive);
+        data.window.grab_focus();
         data.entry.grab_focus();
-
-        // focus the entry after a short delay to ensure that the window underneath is not focused
-        let entry = data.entry.clone();
-        glib::timeout_add_local_once(Duration::from_millis(50), move || {
-            entry.grab_focus();
-        });
     }
 }

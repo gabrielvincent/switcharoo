@@ -12,12 +12,12 @@ macro_rules! if_some {
     };
 }
 pub fn open_overview(global: &Globals, config: OpenOverview) {
-    if_some!(&global.launcher, launcher_lib::open_launcher);
     if let Some(global) = &global.window {
         windows_lib::open_overview(global, config).warn("Failed to open overview window");
     } else {
         warn!("Window overview not active");
     };
+    if_some!(&global.launcher, launcher_lib::open_launcher);
 }
 
 pub fn open_switch(global: &Globals, config: OpenSwitch) {
