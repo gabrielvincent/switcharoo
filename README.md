@@ -92,6 +92,7 @@ systemctl --user enable --now hyprshell.service
 
 - `HYPRSHELL_NO_LISTENERS`: Disable all config listeners (config file, css file, hyprland config, monitor count)
 - `HYPRSHELL_SHOW_OUTPUT`: Show the output of an opened application in the terminal.
+- `HYPRSHELL_NO_ALL_ICONS`: Don't check for all icons on fs and just use the ones provided by the `gtk4` icon theme.
 
 ### Feature Flags
 

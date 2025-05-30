@@ -43,7 +43,7 @@ pub fn run_program(
 
 fn get_command(command: &str) -> Command {
     // if run as systemd unit all programs exit when not run outside the units cgroup
-    if env::var("INVOCATION_ID").is_ok() {
+    if env::var_os("INVOCATION_ID").is_some() {
         let mut cmd = Command::new("systemd-run");
         cmd.args(["--user", "--scope", "--collect", "sh", "-c", command]);
         cmd

@@ -48,7 +48,7 @@ fn activate(app: &Application, config_path: &Path, css_path: &Path, data_dir: &P
     reload_config();
 
     check_themes();
-    fill_icon_map();
+    fill_icon_map(true);
 
     let desktop_files = collect_desktop_files();
     windows_lib::reload_desktop_map(&desktop_files);
@@ -253,7 +253,7 @@ fn check_theme(theme_name: &str, search_path: Vec<PathBuf>) {
     }
 }
 
-pub fn fill_icon_map() {
+pub fn fill_icon_map(threads: bool) {
     gtk::init().expect("Failed to initialize GTK");
 
     let icon_theme = IconTheme::new();
@@ -269,5 +269,5 @@ pub fn fill_icon_map() {
         .filter(|path| path.exists())
         .collect::<Vec<_>>();
     trace!("Icon theme search path: {search_path:?}");
-    init_icon_map(gtk_icons, search_path);
+    init_icon_map(gtk_icons, search_path, threads);
 }

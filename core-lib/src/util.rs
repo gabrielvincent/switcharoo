@@ -56,7 +56,7 @@ pub const TERMINALS: [&str; 9] = [
 ];
 
 pub fn get_daemon_socket_path_buff() -> PathBuf {
-    let mut buf = if let Ok(runtime_path) = env::var("XDG_RUNTIME_DIR") {
+    let mut buf = if let Some(runtime_path) = env::var_os("XDG_RUNTIME_DIR") {
         std::path::PathBuf::from(runtime_path)
     } else if let Ok(uid) = env::var("UID") {
         std::path::PathBuf::from("/run/user/".to_owned() + &uid)

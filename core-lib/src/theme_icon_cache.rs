@@ -1,17 +1,19 @@
 // https://github.com/H3rmt/hyprshell/discussions/137#discussioncomment-12078216
-use std::collections::{BTreeSet};
+use std::collections::BTreeSet;
+use std::env;
 use std::fs::read_dir;
 use std::path::{Path, PathBuf};
 use std::sync::{Mutex, MutexGuard, OnceLock};
 use std::time::Instant;
-use tracing::debug;
+use tracing::{debug, span, Level};
 
 fn get_icon_map() -> &'static Mutex<BTreeSet<Box<str>>> {
     static MAP_LOCK: OnceLock<Mutex<BTreeSet<Box<str>>>> = OnceLock::new();
     MAP_LOCK.get_or_init(|| Mutex::new(BTreeSet::new()))
 }
 
-pub fn init_icon_map(icon_names: Vec<String>, search_path: Vec<PathBuf>) {
+pub fn init_icon_map(icon_names: Vec<String>, search_path: Vec<PathBuf>, threads: bool) {
+    let _span = span!(Level::TRACE, "init_icon_map").entered();
     let mut map = get_icon_map().lock().expect("Failed to lock icon map");
     let instant = Instant::now();
 
@@ -22,16 +24,30 @@ pub fn init_icon_map(icon_names: Vec<String>, search_path: Vec<PathBuf>) {
     drop(map);
 
     // gtk4 only reports 500 icons for candy-theme, scan through the filesystem
-    for path in search_path {
-        if path.exists() {
-            let paths = collect_unique_files_recursive(&path);
-            debug!(
-                "found {} icons from filesystem in {path:?} paths",
-                paths.len()
-            );
-            let mut map = get_icon_map().lock().expect("Failed to lock icon map");
-            for icon in paths {
-                map.insert(icon);
+    if env::var_os("HYPRSHELL_NO_ALL_ICONS").is_none() {
+        for path in search_path {
+            if path.exists() {
+                if threads {
+                    std::thread::spawn(move || {
+                        let paths = collect_unique_files_recursive(&path);
+                        debug!(
+                            "found {} icons from filesystem in {path:?} paths (using threads)",
+                            paths.len()
+                        );
+                        let mut map2 = get_icon_map().lock().expect("Failed to lock icon map");
+                        map2.extend(paths);
+                        drop(map2)
+                    });
+                } else {
+                    let paths = collect_unique_files_recursive(&path);
+                    debug!(
+                        "found {} icons from filesystem in {path:?} paths",
+                        paths.len()
+                    );
+                    let mut map2 = get_icon_map().lock().expect("Failed to lock icon map");
+                    map2.extend(paths);
+                    drop(map2)
+                }
             }
         }
     }

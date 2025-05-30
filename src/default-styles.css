@@ -1,3 +1,8 @@
+/* no opacity */
+* {
+    opacity: unset;
+}
+
 /* buttons need to be transparent as they wrap everything clickable */
 button {
     all: unset;
@@ -7,6 +12,7 @@ button {
 list {
     background: transparent;
 }
+
 /* no background and no hover effects by default */
 row {
     background: transparent;
@@ -14,10 +20,12 @@ row {
 
 entry {
     background: transparent;
+    color: var(--text-color, rgba(245, 245, 245, 1));
 }
 
 label {
     padding-top: 2px;
+    color: var(--text-color, rgba(245, 245, 245, 1));
 }
 
 /* fix size for icons in launcher */

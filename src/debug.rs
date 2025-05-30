@@ -3,7 +3,7 @@ use core_lib::theme_icon_cache::get_all_icons;
 use tracing::{debug, info};
 
 pub fn search(class: Option<String>) {
-    start::fill_icon_map();
+    start::fill_icon_map(false);
     let desktop_files = core_lib::collect_desktop_files();
     windows_lib::reload_desktop_map(&desktop_files);
     debug!("prepared desktop files and icon map");
@@ -35,7 +35,7 @@ fn check_icon(class: &str) {
 }
 
 pub fn list() {
-    start::fill_icon_map();
+    start::fill_icon_map(false);
     let icons = get_all_icons();
     for icon in icons.iter() {
         info!("{}", icon);
