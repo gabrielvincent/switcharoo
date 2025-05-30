@@ -12,12 +12,12 @@ macro_rules! if_some {
     };
 }
 pub fn open_overview(global: &Globals, config: OpenOverview) {
+    if_some!(&global.launcher, launcher_lib::open_launcher);
     if let Some(global) = &global.window {
         windows_lib::open_overview(global, config).warn("Failed to open overview window");
     } else {
         warn!("Window overview not active");
     };
-    if_some!(&global.launcher, launcher_lib::open_launcher);
 }
 
 pub fn open_switch(global: &Globals, config: OpenSwitch) {
@@ -49,8 +49,8 @@ pub fn switch(global: &Globals, config: SwitchConfig) {
     }
 }
 pub fn exit(global: &Globals) {
-    if_some!(global.window, windows_lib::close_overview, None);
     if_some!(global.launcher, launcher_lib::close_launcher, None);
+    if_some!(global.window, windows_lib::close_overview, None);
     reload_data();
 }
 
@@ -75,39 +75,39 @@ pub fn close(global: &Globals, config: CloseConfig) {
             if launcher_active {
                 if !launcher_empty {
                     // kill overview, close launcher
-                    if_some!(global.window, windows_lib::close_overview, None);
                     if_some!(global.launcher, launcher_lib::close_launcher, Some('0'));
+                    if_some!(global.window, windows_lib::close_overview, None);
                 } else {
                     debug!("Launcher is empty, not closing");
                 }
             } else {
                 // close overview, kill launcher
-                if_some!(global.window, windows_lib::close_overview, Some(None));
                 if_some!(global.launcher, launcher_lib::close_launcher, None);
+                if_some!(global.window, windows_lib::close_overview, Some(None));
             };
         }
         CloseConfig::Launcher(key) => {
             // kill overview, close launcher
-            if_some!(global.window, windows_lib::close_overview, None);
             if_some!(global.launcher, launcher_lib::close_launcher, Some(key));
+            if_some!(global.window, windows_lib::close_overview, None);
         }
         CloseConfig::Windows(WindowsOverride::ClientId(client_id)) => {
             // close overview, kill launcher
+            if_some!(global.launcher, launcher_lib::close_launcher, None);
             if_some!(
                 global.window,
                 windows_lib::close_overview,
                 Some(Some(IdOverride::ClientId(client_id)))
             );
-            if_some!(global.launcher, launcher_lib::close_launcher, None);
         }
         CloseConfig::Windows(WindowsOverride::WorkspaceID(workspace_id)) => {
             // close overview, kill launcher
+            if_some!(global.launcher, launcher_lib::close_launcher, None);
             if_some!(
                 global.window,
                 windows_lib::close_overview,
                 Some(Some(IdOverride::WorkspaceID(workspace_id)))
             );
-            if_some!(global.launcher, launcher_lib::close_launcher, None);
         }
     }
     reload_data();

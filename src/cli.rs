@@ -116,7 +116,7 @@ pub enum DebugCommand {
         /// text entered into the search box
         text: String,
 
-        /// Show all matchesma, not just x ones like configured in config
+        /// Show all matches, not just x ones like configured in config
         #[arg(short = 'a', long)]
         all: bool,
     },

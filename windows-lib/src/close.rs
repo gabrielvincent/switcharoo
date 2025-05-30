@@ -9,11 +9,18 @@ pub fn close_overview(global: &WindowsGlobal, ids: Option<Option<IdOverride>>) {
     let _span = span!(Level::TRACE, "close_overview").entered();
 
     activate_submap("reset").warn("Failed to reset submap");
+    let mut data1 = global.data.borrow_mut();
+    for (window, monitor_data) in &mut data1.monitor_list.iter_mut() {
+        while let Some(child) = monitor_data.workspaces_flow.first_child() {
+            monitor_data.workspaces_flow.remove(&child);
+        }
+        trace!("Hiding window (windows) {:?}", window.id());
+        window.set_visible(false);
+    }
 
     if let Some(ids) = ids {
         let ids = match ids {
             None => {
-                let data1 = global.data.borrow();
                 data1
                     .active
                     .client
@@ -25,10 +32,9 @@ pub fn close_overview(global: &WindowsGlobal, ids: Option<Option<IdOverride>>) {
         };
         match ids {
             IdOverride::ClientId(client_id) => {
-                let data = global.data.borrow();
                 debug!(
                     "Switching to client {}",
-                    data.hypr_data
+                    data1.hypr_data
                         .clients
                         .find_by_first(&client_id)
                         .map(|c| c.title.clone())
@@ -38,10 +44,9 @@ pub fn close_overview(global: &WindowsGlobal, ids: Option<Option<IdOverride>>) {
                     .warn(&format!("Failed to execute with id {client_id:?}"));
             }
             IdOverride::WorkspaceID(workspace_id) => {
-                let data = global.data.borrow();
                 debug!(
                     "Switching to workspace {}",
-                    data.hypr_data
+                    data1.hypr_data
                         .workspaces
                         .find_by_first(&workspace_id)
                         .map(|c| c.name.clone())
@@ -53,12 +58,5 @@ pub fn close_overview(global: &WindowsGlobal, ids: Option<Option<IdOverride>>) {
             }
         }
     }
-    let mut data1 = global.data.borrow_mut();
-    for (window, monitor_data) in &mut data1.monitor_list.iter_mut() {
-        while let Some(child) = monitor_data.workspaces_flow.first_child() {
-            monitor_data.workspaces_flow.remove(&child);
-        }
-        trace!("Hiding window (windows) {:?}", window.id());
-        window.set_visible(false);
-    }
+
 }
