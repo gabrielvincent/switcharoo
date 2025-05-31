@@ -30,7 +30,7 @@ gtk4 and [gtk4-layer-shell](https://github.com/wmww/gtk4-layer-shell)[1.1.1] mus
 cargo install hyprshell
 ```
 
-### Arch Linux (TODO Add)
+### Arch Linux
 
 ```bash
 paru -S hyprshell
@@ -96,7 +96,7 @@ systemctl --user enable --now hyprshell.service
 
 ### Feature Flags
 
-- default: `["toml_config", "generate_config_command", "launcher_calc"]`
+- default: `["toml_config", "generate_config_command", "launcher_calc", "debug_command"]`
 - generate_config_command: Adds the `hyprshell config generate` command to interactively generate a config file.
 - toml_config: Adds support for a toml config file.
 - launcher_calc: Adds support for the calc plugin in the launcher.
