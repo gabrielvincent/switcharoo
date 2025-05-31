@@ -36,6 +36,7 @@ This option itself is optional, if not set, the launcher is not shown.
 - **max_items:**_[u8]_ Sets the maximum number of items to show in the launcher.
   This does not include the plugin row and only limits the number of items retuned by for examples the application search.
   This value will get reduced to 10 if it is set to a value higher than 10.
+- **show_when_empty:**_[boolean]_ Show entries in the launcher when no text is entered. This will show applications sorted by usage
 - **animate_launch_ms:**_[boolean]_ Milliseconds to wait before the launcher is closed after launching an application or executing a plugin (should be a bit shorter than the `pulsing` css animation).
 - **plugins:**_[Plugins]_ Configuration for each Plugin. Set to None or ignore the individual extensions to deactivate them.
 
