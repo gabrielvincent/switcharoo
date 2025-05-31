@@ -3,7 +3,6 @@ name: test
 on:
   push:
     branches-ignore:
-      - 'hyprshell'
       - 'release-please-**'
 
 concurrency:
