@@ -13,6 +13,7 @@ source=("$pkgname-$pkgver.tar.gz::https://static.crates.io/crates/$pkgname/$pkgn
 
 prepare() {
     export RUSTUP_TOOLCHAIN=stable
+    cd "$pkgname-$pkgver"
     cargo fetch --locked --target "$(rustc -vV | sed -n 's/host: //p')"
 }
 
@@ -24,5 +25,5 @@ build() {
 }
 
 package() {
-    install -Dm0755 -t "$pkgdir/usr/bin/" "target/release/$pkgname"
+    install -Dm0755 -t "$pkgdir/usr/bin/" "$pkgname-$pkgver/target/release/$pkgname"
 }
