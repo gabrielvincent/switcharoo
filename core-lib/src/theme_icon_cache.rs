@@ -74,15 +74,13 @@ fn collect_unique_files_recursive(dir: &Path) -> Vec<Box<str>> {
                     let path = entry.path();
                     if path.is_dir() {
                         dirs_to_visit.push(path);
-                    } else {
-                        if let Some(name_osstr) = path.file_stem() {
-                            // Avoid allocation unless needed
-                            let name = name_osstr.to_string_lossy();
-                            if !name.is_empty() && !names.contains(&*name) {
-                                let boxed_name = name.into_owned().into_boxed_str();
-                                files.push(boxed_name.clone());
-                                names.insert(boxed_name);
-                            }
+                    } else if let Some(name_osstr) = path.file_stem() {
+                        // Avoid allocation unless needed
+                        let name = name_osstr.to_string_lossy();
+                        if !name.is_empty() && !names.contains(&*name) {
+                            let boxed_name = name.into_owned().into_boxed_str();
+                            files.push(boxed_name.clone());
+                            names.insert(boxed_name);
                         }
                     }
                 }

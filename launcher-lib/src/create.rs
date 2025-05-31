@@ -10,7 +10,7 @@ use gtk::{Application, ApplicationWindow, Entry, EventControllerKey, ListBox, Se
 use gtk4_layer_shell::{Edge, Layer, LayerShell};
 use std::cell::RefCell;
 use std::collections::HashMap;
-use tracing::{debug, span, trace, Level};
+use tracing::{debug, span, Level};
 
 pub fn create_launcher_window(
     app: &Application,
