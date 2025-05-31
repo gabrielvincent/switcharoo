@@ -7,7 +7,7 @@ use clap::{Args, Parser, Subcommand};
     author,
     version,
     about,
-    long_about = "hyprshell is a Rust-based GUI designed to enhance window management in hyprland"
+    long_about = "A modern GTK4-based window switcher and application launcher for Hyprland"
 )]
 pub struct App {
     #[clap(flatten)]

@@ -46,7 +46,7 @@ resolver = "2"
 
 [workspace.package]
 version = "4.0.0"
-description = "hyprshell is a Rust-based GUI designed to enhance window management in hyprland"
+description = "A modern GTK4-based window switcher and application launcher for Hyprland"
 license = "MIT"
 authors = ["h3rmt"]
 keywords = ["hyprland"]

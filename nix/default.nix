@@ -43,7 +43,7 @@ rustPlatform.buildRustPackage {
 
   meta = {
     mainProgram = pname;
-    description = "hyprshell is a Rust-based GUI designed to enhance window management in hyprland";
+    description = "A modern GTK4-based window switcher and application launcher for Hyprland";
     homepage = "https://github.com/h3rmt/hyprshell";
     license = lib.licenses.mit;
     platforms = lib.platforms.linux;
