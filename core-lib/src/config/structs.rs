@@ -22,6 +22,8 @@ pub struct Launcher {
     pub width: u32,
     #[default = 5]
     pub max_items: u8,
+    #[default = true]
+    pub show_when_empty: bool,
     #[default = 250]
     pub animate_launch_ms: u64,
     #[default(Plugins::default())]

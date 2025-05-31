@@ -25,7 +25,7 @@ pub fn update_launcher(global: &LauncherGlobal, text: String) {
         }
         data1.sorted_matches.clear();
         data1.static_matches.clear();
-        if text.is_empty() {
+        if !global.show_when_empty && text.is_empty() {
             return;
         }
 

@@ -1,5 +1,5 @@
 use crate::global::LauncherGlobalData;
-use crate::LauncherGlobal;
+use crate::{update_launcher, LauncherGlobal};
 use core_lib::transfer::TransferType;
 use core_lib::{send_to_socket, Warn, LAUNCHER_NAMESPACE};
 use gtk::gdk::Key;
@@ -10,7 +10,7 @@ use gtk::{Application, ApplicationWindow, Entry, EventControllerKey, ListBox, Se
 use gtk4_layer_shell::{Edge, Layer, LayerShell};
 use std::cell::RefCell;
 use std::collections::HashMap;
-use tracing::{debug, span, Level};
+use tracing::{debug, span, trace, Level};
 
 pub fn create_launcher_window(
     app: &Application,
@@ -26,6 +26,7 @@ pub fn create_launcher_window(
 
     let entry = Entry::builder().css_classes(["launcher-input"]).build();
     entry.connect_changed(|e| {
+        // trace!("Launcher entry changed: {}", e.text());
         send_to_socket(&TransferType::Type(e.text().to_string()))
             .warn("unable send return to socket");
     });
@@ -77,6 +78,9 @@ pub fn create_launcher_window(
         sorted_matches: vec![],
         static_matches: HashMap::new(),
     }));
+
+    // initial update
+    update_launcher(global, "".to_string());
 
     Ok(())
 }

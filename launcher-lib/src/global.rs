@@ -9,6 +9,7 @@ use std::path::Path;
 pub struct LauncherGlobal {
     pub default_terminal: Option<Box<str>>,
     pub max_items: u8,
+    pub show_when_empty: bool,
     pub animate_launch_ms: u64,
     pub width: u32,
     pub data_dir: Box<Path>,
@@ -22,6 +23,7 @@ impl LauncherGlobal {
         Box::from(move |config: Launcher| Self {
             default_terminal: config.default_terminal.clone(),
             max_items: config.max_items,
+            show_when_empty: config.show_when_empty,
             animate_launch_ms: config.animate_launch_ms,
             width: config.width,
             data_dir,

@@ -72,6 +72,18 @@ pub fn get_sortable_options(
     let entries = get_all_desktop_files();
     let runs = get_stored_runs(run_cache_weeks, data_dir);
 
+    if text.is_empty() {
+        for entry in entries.iter() {
+            matches.push(SortableLaunchOption::from_desktop_entry(
+                entry,
+                MatchType::Exact,
+                &runs,
+                show_execs,
+            ));
+        }
+        return;
+    }
+
     let lower_text = text.to_ascii_lowercase();
     for entry in entries.iter() {
         let opt = if entry.name.to_ascii_lowercase().contains(&lower_text) {

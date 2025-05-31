@@ -61,6 +61,7 @@ impl From<old_structs::Launcher> for config::Launcher {
                     _ => None,
                 }),
             },
+            ..Default::default()
         }
     }
 }
