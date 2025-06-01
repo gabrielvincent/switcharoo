@@ -54,9 +54,9 @@ pub fn reload_default_browser(files: &[DirEntry]) {
             };
         }
     }
-    warn!("No default browser found! (using firefox)");
+    warn!("No default browser found! (using firefox and gdbus to open)");
     let _ = BROWSER_EXEC.set(Mutex::new(DefaultPlugins {
-        exec: Box::from("firefox"),
+        exec: Box::from(r#"gdbus call --session --dest="org.freedesktop.portal.Desktop" --object-path=/org/freedesktop/portal/desktop --method=org.freedesktop.portal.OpenURI.OpenURI '' '%u' '{}'"#),
         startup_wm_class: Some(Box::from("firefox")),
         icon: Some(Box::from(Path::new("firefox"))),
     }));
