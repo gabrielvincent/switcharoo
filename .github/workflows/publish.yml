@@ -37,6 +37,7 @@ jobs:
           
           git fetch --tags origin hyprshell
           git checkout ${{ github.ref }} -b hyprshell
+          git push origin HEAD:hyprshell-release
           
           echo "removing old tag"
           git tag --delete ${{ github.ref_name }}
@@ -46,7 +47,6 @@ jobs:
           cargo ws publish custom $version -m "chore(release): bump rust versions to $version" --no-individual-tags --allow-branch hyprshell --exact --yes --force "hyprshell*" --token ${{ secrets.CRATES_TOKEN }}
           
           gh release edit ${{ github.ref_name }} --latest --draft=false --title "hyprshell ${{ github.ref_name }}"
-          git push origin HEAD:hyprshell-release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Publish AUR package
