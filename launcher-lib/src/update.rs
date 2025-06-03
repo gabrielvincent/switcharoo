@@ -9,7 +9,10 @@ use core_lib::{Warn, send_to_socket};
 use gtk::gdk::Cursor;
 use gtk::pango::EllipsizeMode;
 use gtk::prelude::*;
-use gtk::{Align, Button, IconSize, Image, Label, ListBoxRow, Orientation, Popover, glib};
+use gtk::{
+    Align, Button, IconSize, Image, Label, ListBox, ListBoxRow, Orientation, Overflow, Popover,
+    SelectionMode, glib,
+};
 use std::path::Path;
 use tracing::{Level, debug, span, warn};
 
@@ -183,13 +186,19 @@ fn create_entry(
     hbox.append(&exec);
 
     if !details_menu.is_empty() {
+        let button = Button::builder()
+            .css_classes(["launcher-other-menu-button"])
+            .icon_name("open-menu-symbolic")
+            .halign(Align::End)
+            .valign(Align::Center)
+            .build();
         let menu = Popover::builder()
             .css_classes(["launcher-other-menu"])
-            .autohide(true)
             .has_arrow(false)
+            .overflow(Overflow::Hidden)
             .build();
-        let menu_box = gtk::Box::builder()
-            .orientation(Orientation::Vertical)
+        let menu_list_box = ListBox::builder()
+            .selection_mode(SelectionMode::None)
             .build();
 
         for item in details_menu {
@@ -197,17 +206,24 @@ fn create_entry(
                 .css_classes(["underline"])
                 .label(format!("{} [todo]", item.text))
                 .build();
-            let menu_item = Button::builder()
-                .css_classes(["launcher-other-menu-item"])
+            let menu_item_button = Button::builder()
                 .child(&menu_item_text)
-                .focusable(true)
                 .tooltip_text(item.exec)
                 .build();
+            let menu_item = ListBoxRow::builder()
+                .css_classes(["launcher-other-menu-item"])
+                .child(&menu_item_button)
+                .build();
             menu_item.set_cursor(Cursor::from_name("pointer", None).as_ref());
-            click_details_entry(&menu_item, item.iden);
-            menu_box.append(&menu_item);
+            click_details_entry(&menu_item_button, item.iden);
+            menu_list_box.append(&menu_item);
         }
-        menu.set_child(Some(&menu_box));
+        menu.set_parent(&button);
+        menu.set_child(Some(&menu_list_box));
+        button.connect_clicked(move |_button| {
+            menu.popup();
+        });
+        hbox.append(&button);
     }
 
     let index_label = Label::builder()

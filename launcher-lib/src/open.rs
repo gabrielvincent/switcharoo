@@ -16,7 +16,7 @@ pub fn open_launcher(global: &LauncherGlobal) {
         data.entry.set_editable(true);
         data.entry.set_text("");
 
-        data.window.set_keyboard_mode(KeyboardMode::Exclusive);
+        data.window.set_keyboard_mode(KeyboardMode::OnDemand);
         data.window.grab_focus();
         data.entry.grab_focus();
     }

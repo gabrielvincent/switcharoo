@@ -44,14 +44,19 @@ pub fn run_program(
 }
 
 fn get_command(command: &str) -> Command {
+    // replace common exec placeholders
+    let mut command = command.to_string();
+    for replacement in ["%f", "%F", "%u", "%U"] {
+        command = command.replace(replacement, "");
+    }
     // if run as systemd unit all programs exit when not run outside the units cgroup
     if env::var_os("INVOCATION_ID").is_some() {
         let mut cmd = Command::new("systemd-run");
-        cmd.args(["--user", "--scope", "--collect", "sh", "-c", command]);
+        cmd.args(["--user", "--scope", "--collect", "sh", "-c", &command]);
         cmd
     } else {
         let mut cmd = Command::new("sh");
-        cmd.args(["-c", command]);
+        cmd.args(["-c", &command]);
         cmd
     }
 }

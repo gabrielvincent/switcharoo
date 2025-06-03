@@ -100,7 +100,13 @@ pub(crate) fn find_next_workspace(
                     si as i64 - 1
                 }
             }
-            Direction::Up => si as i64 - workspaces_per_row as i64,
+            Direction::Up => {
+                if si < workspaces_per_row {
+                    0
+                } else {
+                    si as i64 - workspaces_per_row as i64
+                }
+            }
             Direction::Down => {
                 if si as i64 >= workspaces.len() as i64 - workspaces_per_row as i64 {
                     workspaces.len() as i64 - 1

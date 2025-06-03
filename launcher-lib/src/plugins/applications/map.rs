@@ -92,10 +92,10 @@ fn fill_desktop_file_map(map: &mut Vec<DesktopEntry>, files: &[DirEntry]) -> any
                             .filter_map(|(name, section)| {
                                 if name.starts_with("Desktop Action ") {
                                     let exec = section.get_boxed("Exec")?;
-                                    let name = section.get_boxed("Name")?;
+                                    let name_hr = section.get_boxed("Name")?;
                                     Some(DesktopAction {
-                                        id: Box::from(name.trim_start_matches("Desktop Action ")),
-                                        name,
+                                        id: Box::from(*name),
+                                        name: name_hr,
                                         exec,
                                     })
                                 } else {

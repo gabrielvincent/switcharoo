@@ -176,22 +176,48 @@ pub fn launch_option(
     data_dir: &Path,
 ) -> bool {
     let entries = get_all_desktop_files();
-    let entry = entries
-        .iter()
-        .find(|entry| iden.as_deref() == Some(&*entry.source.to_string_lossy()));
-    if let Some(entry) = entry {
-        let exec = entry.exec.clone();
-        run_program(
-            &exec,
-            entry.exec_path.clone(),
-            entry.terminal,
-            default_terminal,
-        );
-        trace!("Saving run: {:?}", entry.source);
-        save_run(&entry.source, data_dir).warn("Failed to cache run");
-        true
-    } else {
-        warn!("Failed to find entry for {:?}", iden);
-        false
-    }
+    if let Some(iden) = iden {
+        let (source, section) = if iden.contains('|') {
+            // split identifier for desktop action
+            let parts: Vec<&str> = iden.split('|').collect();
+            if parts.len() != 2 {
+                warn!("Invalid identifier format: {:?}", iden);
+                return false;
+            }
+            (parts[0], Some(parts[1]))
+        } else {
+            (iden.as_ref(), None)
+        };
+        let entry = entries
+            .iter()
+            .find(|entry| source == entry.source.to_string_lossy());
+        if let Some(entry) = entry {
+            let exec = if let Some(section) = section {
+                // find desktop action
+                if let Some(action) = entry.other.iter().find(|a| *a.id == *section) {
+                    action.exec.clone()
+                } else {
+                    warn!(
+                        "Failed to find action {:?} in entry {:?}",
+                        section, entry.name
+                    );
+                    return false;
+                }
+            } else {
+                entry.exec.clone()
+            };
+            run_program(
+                &exec,
+                entry.exec_path.clone(),
+                entry.terminal,
+                default_terminal,
+            );
+            trace!("Saving run: {:?}", entry.source);
+            save_run(&entry.source, data_dir).warn("Failed to cache run");
+            return true;
+        } else {
+            warn!("Failed to find entry for {:?}", iden);
+        };
+    };
+    false
 }

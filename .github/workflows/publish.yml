@@ -13,6 +13,13 @@ jobs:
         with:
           fetch-depth: 0
           ssh-key: ${{ secrets.SSH_KEY }}
+      - name: Check commit message
+        run: |
+          commit_msg=$(git log -1 --pretty=%B)
+          if [[ ! $commit_msg =~ ^chore\(hyprshell\) ]]; then
+            echo "Error: Commit message must start with 'chore(hyprshell)'"
+            exit 1
+          fi
       - name: install Rust stable
         uses: dtolnay/rust-toolchain@stable
       - name: Install gtk4-layer-shell
@@ -35,7 +42,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           
-          git fetch --tags origin hyprshell
+          git fetch --tags origin hyprshell--force --force
           git checkout ${{ github.ref }} -b hyprshell
           git push origin HEAD:hyprshell-release
           
