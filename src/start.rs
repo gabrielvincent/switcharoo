@@ -26,6 +26,14 @@ const APPLICATION_ID: &str = "com.github.h3rmt.hyprshell";
 
 pub fn start(config_path: PathBuf, css_path: PathBuf, data_dir: PathBuf) -> anyhow::Result<()> {
     let _span = span!(Level::TRACE, "start").entered();
+    gtk::init().expect("Failed to initialize GTK");
+
+    glib::unix_signal_add(SIGTERM, || {
+        info!("Received SIGTERM, exiting gracefully");
+        reset_submap().warn("Failed to reset submap on SIGTERM");
+        ControlFlow::Break
+    });
+
     loop {
         let application = Application::builder()
             .application_id(&if cfg!(debug_assertions) {
