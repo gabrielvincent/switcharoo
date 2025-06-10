@@ -143,31 +143,15 @@ pub fn get_hyprshell_path() -> String {
         .replace("(deleted)", "")
 }
 
-pub fn get_hyprctl_path() -> String {
-    env::var("PATH")
-        .unwrap_or_else(|_| String::from("/usr/bin:/bin:/usr/local/bin"))
-        .split(':')
-        .find_map(|dir| {
-            let path = PathBuf::from(dir).join("hyprctl");
-            if path.exists() {
-                Some(path.display().to_string())
-            } else {
-                None
-            }
-        })
-        .unwrap_or_else(|| String::from("hyprctl"))
-}
-
 pub fn generate_socat(echo: &str) -> String {
     format!(r#"{} socat '{}'"#, get_hyprshell_path(), echo)
 }
 
 pub fn generate_socat_and_activate_submap(echo: &str, submap: &str) -> String {
     format!(
-        r#"{} dispatch submap {} && {} socat '{}'"#,
-        get_hyprctl_path(),
-        submap,
+        r#"{} socat --submap {} '{}'"#,
         get_hyprshell_path(),
+        submap,
         echo
     )
 }
