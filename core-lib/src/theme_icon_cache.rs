@@ -62,8 +62,7 @@ pub fn theme_has_icon_name(name: &str) -> bool {
     let map = get_icon_map().lock().expect("Failed to lock icon map");
     map.contains(&Box::from(name))
 }
-fn collect_unique_files_recursive(dir: &Path) -> Vec<Box<str>> {
-    let mut files = Vec::with_capacity(5000);
+fn collect_unique_files_recursive(dir: &Path) -> BTreeSet<Box<str>> {
     let mut names = BTreeSet::new();
     let mut dirs_to_visit = vec![dir.to_path_buf()];
 
@@ -78,15 +77,12 @@ fn collect_unique_files_recursive(dir: &Path) -> Vec<Box<str>> {
                         // Avoid allocation unless needed
                         let name = name_osstr.to_string_lossy();
                         if !name.is_empty() && !names.contains(&*name) {
-                            let boxed_name = name.into_owned().into_boxed_str();
-                            files.push(boxed_name.clone());
-                            names.insert(boxed_name);
+                            names.insert(name.into_owned().into_boxed_str());
                         }
                     }
                 }
             }
         }
     }
-
-    files
+    names
 }

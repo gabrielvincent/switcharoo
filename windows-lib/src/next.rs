@@ -21,17 +21,15 @@ pub fn find_next(
             active.workspace,
             workspaces_per_row,
         )
+    } else if let Some(active_client) = active.client {
+        find_next_client(
+            direction,
+            &hypr_data.clients,
+            active_client,
+            workspaces_per_row,
+        )
     } else {
-        if let Some(active_client) = active.client {
-            find_next_client(
-                direction,
-                &hypr_data.clients,
-                active_client,
-                workspaces_per_row,
-            )
-        } else {
-            find_first_client(direction, &hypr_data.clients, active)
-        }
+        find_first_client(direction, &hypr_data.clients, active)
     }
     .unwrap_or(active)
 }
@@ -111,7 +109,7 @@ pub fn find_next_workspace(
     };
 
     workspaces
-        .into_iter()
+        .iter()
         .skip_while(|(id, _)| *id == active) // skip until current element
         .skip(1) // skip the current element itself
         .filter(|(_, c)| c.enabled)

@@ -1,8 +1,9 @@
 use crate::start;
 use core_lib::theme_icon_cache::get_all_icons;
+use std::path::Path;
 use tracing::{debug, info};
 
-pub fn search(class: Option<String>) {
+pub fn check_class(class: Option<String>) {
     start::fill_icon_map(false);
     let desktop_files = core_lib::collect_desktop_files();
     windows_lib::reload_desktop_map(&desktop_files);
@@ -34,7 +35,7 @@ fn check_icon(class: &str) {
     );
 }
 
-pub fn list() {
+pub fn list_icons() {
     start::fill_icon_map(false);
     let icons = get_all_icons();
     for icon in icons.iter() {
@@ -42,9 +43,26 @@ pub fn list() {
     }
 }
 
-pub fn desktop_files() {
+pub fn list_desktop_files() {
     let desktop_files = core_lib::collect_desktop_files();
     for file in desktop_files.iter() {
         info!("{}", file.path().display());
     }
+}
+
+pub fn search(text: &str, all: bool, config_path: &Path, data_dir: &Path) {
+    let (plugins, max_items) = core_lib::config::load_config(config_path)
+        .ok()
+        .and_then(|c| c.launcher.map(|l| (l.plugins, l.max_items)))
+        .unwrap_or((
+            core_lib::config::Plugins {
+                applications: Default::default(),
+                shell: None,
+                terminal: None,
+                websearch: None,
+                calc: None,
+            },
+            5,
+        ));
+    launcher_lib::debug::get_matches(&plugins, text, all, max_items, data_dir);
 }

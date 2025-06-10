@@ -4,10 +4,10 @@ use core_lib::{
     get_default_data_dir,
 };
 use std::env;
-use std::fs::read_to_string;
 use tracing::{debug, info, warn};
 
 mod cli;
+mod data;
 mod keybinds;
 mod receive;
 mod recive_handle;
@@ -46,13 +46,9 @@ fn main() -> anyhow::Result<()> {
 
     check_features();
 
-    let config_path = cli
-        .global_opts
-        .config_file
-        .unwrap_or(get_default_config_path());
-
-    let css_path = cli.global_opts.css_file.unwrap_or(get_default_css_path());
-    let data_dir = cli.global_opts.data_dir.unwrap_or(get_default_data_dir());
+    let data_dir = cli.global_opts.data_dir;
+    let css_file = cli.global_opts.css_file;
+    let config_path = cli.global_opts.config_file;
 
     match cli.command {
         cli::Command::Run {} => {
@@ -62,12 +58,19 @@ fn main() -> anyhow::Result<()> {
             check_version(exec_lib::get_version()).unwrap_or_else(|e| {
                 warn!("Unable to check hyprland version, continuing anyway: {e}")
             });
-            start::start(config_path, css_path, data_dir)?;
+            start::start(
+                config_path.unwrap_or(get_default_config_path()),
+                css_file.unwrap_or(get_default_css_path()),
+                data_dir.unwrap_or(get_default_data_dir()),
+            )?;
         }
         #[cfg(feature = "generate_config_command")]
         cli::Command::Config { command } => match command {
             cli::ConfigCommand::Generate { force, no_systemd } => {
                 use core_lib::Warn;
+                let config_path = config_path.unwrap_or(get_default_css_path());
+                let css_path = css_file.unwrap_or(get_default_css_path());
+
                 let (override_config, override_css) =
                     core_lib::config::generate::get_overrides(&force);
                 core_lib::config::generate::check_file_exist(
@@ -95,7 +98,10 @@ fn main() -> anyhow::Result<()> {
             }
             cli::ConfigCommand::Check {} => {
                 use core_lib::Warn;
-                core_lib::config::explain::check_config(&config_path).warn("check");
+                core_lib::config::explain::check_config(
+                    &config_path.unwrap_or(get_default_css_path()),
+                )
+                .warn("check");
             }
         },
         #[cfg(feature = "debug_command")]
@@ -103,65 +109,32 @@ fn main() -> anyhow::Result<()> {
             info!("use with -vv ... to see full logs!");
             match command {
                 cli::DebugCommand::CheckClass { class } => {
-                    debug::search(class);
+                    debug::check_class(class);
                 }
                 cli::DebugCommand::ListIcons => {
-                    debug::list();
+                    debug::list_icons();
                 }
                 cli::DebugCommand::ListDesktopFiles => {
-                    debug::desktop_files();
+                    debug::list_desktop_files();
                 }
                 cli::DebugCommand::Search { text, all } => {
-                    let (plugins, max_items) = core_lib::config::load_config(&config_path)
-                        .ok()
-                        .and_then(|c| c.launcher.map(|l| (l.plugins, l.max_items)))
-                        .unwrap_or((
-                            core_lib::config::Plugins {
-                                applications: Default::default(),
-                                shell: None,
-                                terminal: None,
-                                websearch: None,
-                                calc: None,
-                            },
-                            5,
-                        ));
-                    launcher_lib::debug::get_matches(&plugins, &text, all, max_items, &data_dir);
+                    debug::search(
+                        &text,
+                        all,
+                        &config_path.unwrap_or(get_default_data_dir()),
+                        &data_dir.unwrap_or(get_default_data_dir()),
+                    );
                 }
             };
         }
         cli::Command::Data { command } => match command {
             cli::DataCommand::LaunchHistory { run_cache_weeks } => {
-                let run_cache_weeks = run_cache_weeks.unwrap_or_else(|| {
-                    core_lib::config::load_config(&config_path)
-                        .ok()
-                        .and_then(|c| {
-                            c.launcher.and_then(|l| {
-                                l.plugins.applications.as_ref().map(|a| a.run_cache_weeks)
-                            })
-                        })
-                        .unwrap_or(4)
-                });
-
-                let runs = launcher_lib::get_applications_stored_runs(run_cache_weeks, &data_dir);
-
-                for (path, run) in runs {
-                    // ignore the ini parser for this, just read the file and find, is faster
-                    if let Ok(content) = read_to_string(&path) {
-                        if let Some(name_line) = content.lines().find(|l| l.starts_with("Name=")) {
-                            let name = name_line.trim_start_matches("Name=");
-                            // check if verbosity is set, if so, print the name
-                            if opts.verbose > 0 {
-                                info!("{}: {name} ({run})", path.display());
-                            } else if opts.verbose == 0 {
-                                info!("{}: {run}", name);
-                            }
-                        } else {
-                            info!("{}: {run}", path.display());
-                        }
-                    } else {
-                        info!("{}: {run}", path.display());
-                    }
-                }
+                data::launch_history(
+                    run_cache_weeks,
+                    &config_path.unwrap_or(get_default_data_dir()),
+                    &data_dir.unwrap_or(get_default_data_dir()),
+                    opts.verbose,
+                );
             }
         },
         cli::Command::Socat { json, submap } => {

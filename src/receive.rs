@@ -89,6 +89,7 @@ fn handle_client_transfer(str: &str, global: &Globals) -> anyhow::Result<bool> {
     let transfer: TransferType =
         serde_json::from_str(str).with_context(|| format!("Failed to deserialize str: {str:?}"))?;
     debug!("Received command: {transfer:?}");
+    let close_socket = matches!(transfer, TransferType::Restart);
     match transfer {
         TransferType::OpenOverview(config) => open_overview(global, config),
         TransferType::OpenSwitch(config) => open_switch(global, config),
@@ -98,5 +99,5 @@ fn handle_client_transfer(str: &str, global: &Globals) -> anyhow::Result<bool> {
         TransferType::Close(config) => close(global, config),
         TransferType::Restart => restart(global),
     }
-    Ok(matches!(transfer, TransferType::Restart))
+    Ok(close_socket)
 }

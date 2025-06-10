@@ -1,6 +1,8 @@
 use crate::find_application_dirs;
 use anyhow::Context;
 use semver::Version;
+use std::env::split_paths;
+use std::ffi::OsString;
 use std::fs::DirEntry;
 use std::os::unix::net::UnixStream;
 use std::path::PathBuf;
@@ -144,11 +146,12 @@ pub fn get_hyprshell_path() -> String {
 }
 
 pub fn get_hyprctl_path() -> String {
-    env::var("PATH")
-        .unwrap_or_else(|_| String::from("/usr/bin:/bin:/usr/local/bin"))
-        .split(':')
+    let path =
+        env::var_os("PATH").unwrap_or_else(|| OsString::from("/usr/bin:/bin:/usr/local/bin"));
+
+    split_paths(&path)
         .find_map(|dir| {
-            let path = PathBuf::from(dir).join("hyprctl");
+            let path = dir.join("hyprctl");
             if path.exists() {
                 Some(path.display().to_string())
             } else {

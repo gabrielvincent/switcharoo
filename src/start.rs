@@ -24,7 +24,7 @@ use tracing::{Level, debug, info, span, trace, warn};
 use windows_lib::{WindowsGlobal, create_windows_window};
 
 const APPLICATION_ID: &str = "com.github.h3rmt.hyprshell";
-const SIGTERM: i32 = 19;
+const SIGTERM: i32 = 15; // Signal number for SIGTERM
 
 pub fn start(config_path: PathBuf, css_path: PathBuf, data_dir: PathBuf) -> anyhow::Result<()> {
     let _span = span!(Level::TRACE, "start").entered();

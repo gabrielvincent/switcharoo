@@ -1,17 +1,18 @@
 use crate::config::{Config, Reverse, load_config};
 use crate::daemon_running;
 use std::path::Path;
+use tracing::{error, info};
 
 pub fn check_config(config_path: &Path) -> anyhow::Result<()> {
     let config = load_config(config_path)
-        .inspect_err(|err| eprintln!("\x1b[1m\x1b[31mConfig is invalid:\x1b[0m {err:?}\n"))?;
+        .inspect_err(|err| error!("\x1b[1m\x1b[31mConfig is invalid:\x1b[0m {err:?}\n"))?;
     let info = explain(config);
     println!("{info}");
 
     if daemon_running() {
-        println!("Daemon \x1b[32mrunning\x1b[0m")
+        info!("Daemon \x1b[32mrunning\x1b[0m")
     } else {
-        println!(
+        info!(
             "Daemon \x1b[31mnot running\x1b[0m, start it with `hyprshell run` or `systemctl --user enable --now hyprshell`"
         );
     }
