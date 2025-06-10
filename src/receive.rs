@@ -41,7 +41,7 @@ pub async fn socket_handler(global: Globals) {
         let path = listener.accept_future().await;
         match path {
             Ok((conn, _)) => {
-                handle_client(
+                let exit = handle_client(
                     conn.input_stream(),
                     conn.socket().available_bytes(),
                     &global,
@@ -49,7 +49,12 @@ pub async fn socket_handler(global: Globals) {
                 .context("Failed to handle client")
                 .unwrap_or_else(|e| {
                     toast(&format!("Failed to handle connection {:?}", e));
+                    false
                 });
+                if exit {
+                    debug!("Exiting socket handler");
+                    break;
+                }
             }
             Err(e) => {
                 error!("Failed to accept connection: {e}");
@@ -58,7 +63,7 @@ pub async fn socket_handler(global: Globals) {
     }
 }
 
-fn handle_client(stream: InputStream, size: isize, global: &Globals) -> anyhow::Result<()> {
+fn handle_client(stream: InputStream, size: isize, global: &Globals) -> anyhow::Result<bool> {
     let now = Instant::now();
     let rand_id = rand::rng().random_range(100..=255);
     let _span = span!(Level::TRACE, "handle_client", id = rand_id).entered();
@@ -71,16 +76,16 @@ fn handle_client(stream: InputStream, size: isize, global: &Globals) -> anyhow::
     // client checked if socket is OK
     if buffer.is_empty() {
         trace!("Received empty buffer");
-        return Ok(());
+        return Ok(false);
     }
 
-    handle_client_transfer(&String::from_utf8_lossy(&buffer), global)?;
+    let exit = handle_client_transfer(&String::from_utf8_lossy(&buffer), global)?;
 
     trace!("Handled client in {:?}", now.elapsed());
-    Ok(())
+    Ok(exit)
 }
 
-fn handle_client_transfer(str: &str, global: &Globals) -> anyhow::Result<()> {
+fn handle_client_transfer(str: &str, global: &Globals) -> anyhow::Result<bool> {
     let transfer: TransferType =
         serde_json::from_str(str).with_context(|| format!("Failed to deserialize str: {str:?}"))?;
     debug!("Received command: {transfer:?}");
@@ -93,5 +98,5 @@ fn handle_client_transfer(str: &str, global: &Globals) -> anyhow::Result<()> {
         TransferType::Close(config) => close(global, config),
         TransferType::Restart => restart(global),
     }
-    Ok(())
+    Ok(matches!(transfer, TransferType::Restart))
 }

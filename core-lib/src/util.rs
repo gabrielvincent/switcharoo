@@ -143,6 +143,21 @@ pub fn get_hyprshell_path() -> String {
         .replace("(deleted)", "")
 }
 
+pub fn get_hyprctl_path() -> String {
+    env::var("PATH")
+        .unwrap_or_else(|_| String::from("/usr/bin:/bin:/usr/local/bin"))
+        .split(':')
+        .find_map(|dir| {
+            let path = PathBuf::from(dir).join("hyprctl");
+            if path.exists() {
+                Some(path.display().to_string())
+            } else {
+                None
+            }
+        })
+        .unwrap_or_else(|| String::from("hyprctl"))
+}
+
 pub fn generate_socat(echo: &str) -> String {
     format!(r#"{} socat '{}'"#, get_hyprshell_path(), echo)
 }
@@ -237,5 +252,14 @@ pub fn analyse_exec(exec: &str) -> ExecType {
         ExecType::Absolute(Box::from(exec_name), Box::from(exec))
     } else {
         ExecType::Relative(Box::from(exec_trim))
+    }
+}
+
+pub trait GetFirstOrLast: Iterator + Sized {
+    fn get_first_or_last(self, last: bool) -> Option<Self::Item>;
+}
+impl<I: Iterator> GetFirstOrLast for I {
+    fn get_first_or_last(mut self, last: bool) -> Option<Self::Item> {
+        if last { self.last() } else { self.next() }
     }
 }

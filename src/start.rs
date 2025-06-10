@@ -7,9 +7,9 @@ use core_lib::{
     hyprshell_css_listener, send_to_socket,
 };
 use exec_lib::listener::{hyprland_config_listener, monitor_listener};
-use exec_lib::{apply_keybinds, reload_config, toast};
+use exec_lib::{apply_keybinds, reload_config, reset_submap, toast};
 use gtk::gdk::Display;
-use gtk::glib::clone;
+use gtk::glib::ControlFlow;
 use gtk::prelude::*;
 use gtk::{
     Application, CssProvider, IconTheme, STYLE_PROVIDER_PRIORITY_APPLICATION,
@@ -18,21 +18,44 @@ use gtk::{
 use launcher_lib::{LauncherGlobal, create_launcher_window};
 use std::env;
 use std::path::{Path, PathBuf};
+use std::rc::Rc;
 use std::time::Duration;
 use tracing::{Level, debug, info, span, trace, warn};
 use windows_lib::{WindowsGlobal, create_windows_window};
 
 const APPLICATION_ID: &str = "com.github.h3rmt.hyprshell";
+const SIGTERM: i32 = 19;
 
 pub fn start(config_path: PathBuf, css_path: PathBuf, data_dir: PathBuf) -> anyhow::Result<()> {
     let _span = span!(Level::TRACE, "start").entered();
+    let config_path = Rc::new(config_path);
+    let css_path = Rc::new(css_path);
+    let data_dir = Rc::new(data_dir);
+
     gtk::init().expect("Failed to initialize GTK");
+    check_themes();
+    fill_icon_map(true);
 
     glib::unix_signal_add(SIGTERM, || {
         info!("Received SIGTERM, exiting gracefully");
         reset_submap().warn("Failed to reset submap on SIGTERM");
         ControlFlow::Break
     });
+
+    let (restart_tx, restart_rx) = async_channel::bounded(1);
+    if env::var_os("HYPRSHELL_NO_LISTENERS").is_none() {
+        // delay for 1 second to allow the config to be reloaded before listening for reload
+        let config_path = config_path.clone();
+        let css_path = css_path.clone();
+        glib::timeout_add_local_once(Duration::from_secs(1), move || {
+            setup_restart_listener(&config_path, &css_path, restart_tx);
+        });
+        glib::spawn_future_local(async move {
+            let cause = restart_rx.recv().await.unwrap_or_default();
+            info!("Restarting gui ({cause})");
+            send_to_socket(&TransferType::Restart).warn("unable to send restart");
+        });
+    }
 
     loop {
         let application = Application::builder()
@@ -54,9 +77,6 @@ fn activate(app: &Application, config_path: &Path, css_path: &Path, data_dir: &P
     let _span = span!(Level::TRACE, "activate").entered();
     // reloading the config is needed to delete the old submaps
     reload_config();
-
-    check_themes();
-    fill_icon_map(true);
 
     let desktop_files = collect_desktop_files();
     windows_lib::reload_desktop_map(&desktop_files);
@@ -102,15 +122,6 @@ fn activate(app: &Application, config_path: &Path, css_path: &Path, data_dir: &P
         window: windows_data,
         launcher: launcher_data,
     };
-
-    let config_path = PathBuf::from(config_path);
-    let css_path = PathBuf::from(css_path);
-    glib::spawn_future_local(async move {
-        if env::var_os("HYPRSHELL_NO_LISTENERS").is_none() {
-            restart_listener(config_path, css_path).await;
-        }
-    });
-
     glib::spawn_future_local(async move {
         socket_handler(globals).await;
     });
@@ -118,61 +129,33 @@ fn activate(app: &Application, config_path: &Path, css_path: &Path, data_dir: &P
     debug!("Application initialized");
 }
 
-async fn restart_listener(config_path: PathBuf, css_path: PathBuf) {
-    let (tx, rx) = async_channel::bounded(1);
-    glib::spawn_future_local(clone!(
-        #[strong]
-        tx,
-        async move {
-            let (tx2, rx2) = async_channel::bounded(1);
-            // must be kept in scope to keep the watcher alive
-            let _watcher = hyprshell_config_listener(&config_path, move |mess| {
-                let _ = tx.send_blocking(mess);
-                let _ = tx2.send_blocking(mess);
-            });
-            // watcher.watch doesnt block so we block
-            let _ = rx2.recv().await;
-        }
-    ));
-    glib::spawn_future_local(clone!(
-        #[strong]
-        tx,
-        async move {
-            let (tx2, rx2) = async_channel::bounded(1);
-            // must be kept in scope to keep the watcher alive
-            let _watcher = hyprshell_css_listener(&css_path, move |mess| {
-                let _ = tx.send_blocking(mess);
-                let _ = tx2.send_blocking(mess);
-            });
-            // watcher.watch doesnt block so we block
-            let _ = rx2.recv().await;
-        }
-    ));
-    glib::spawn_future_local(clone!(
-        #[strong]
-        tx,
-        async move {
-            monitor_listener(move |mess| {
-                let _ = tx.send_blocking(mess);
-            })
-            .await;
-        }
-    ));
-    glib::timeout_add_local_once(
-        // delay for 1 second to allow the config to be reloaded before listening for reload
-        Duration::from_secs(1),
-        || {
-            glib::spawn_future_local(async move {
-                hyprland_config_listener(move |mess| {
-                    let _ = tx.send_blocking(mess);
-                })
-                .await;
-            });
-        },
-    );
-    let cause = rx.recv().await.unwrap_or_default();
-    info!("Restarting gui ({cause})");
-    send_to_socket(&TransferType::Restart).warn("unable to send restart");
+fn setup_restart_listener(
+    config_path: &Path,
+    css_path: &Path,
+    restart_tx: async_channel::Sender<&'static str>,
+) {
+    let tx = restart_tx.clone();
+    let _watcher = hyprshell_config_listener(config_path, move |mess| {
+        let _ = tx.send_blocking(mess);
+    });
+    let tx = restart_tx.clone();
+    let _watcher = hyprshell_css_listener(css_path, move |mess| {
+        let _ = tx.send_blocking(mess);
+    });
+    let tx = restart_tx.clone();
+    glib::spawn_future_local(async move {
+        monitor_listener(move |mess| {
+            let _ = tx.send_blocking(mess);
+        })
+        .await;
+    });
+    let tx = restart_tx.clone();
+    glib::spawn_future_local(async move {
+        hyprland_config_listener(move |mess| {
+            let _ = tx.send_blocking(mess);
+        })
+        .await;
+    });
 }
 
 fn apply_css(custom_css: &Path) {
@@ -216,8 +199,6 @@ fn check_themes() {
 }
 
 pub fn fill_icon_map(threads: bool) {
-    gtk::init().expect("Failed to initialize GTK");
-
     let icon_theme = IconTheme::new();
     let gtk_icons = icon_theme
         .icon_names()

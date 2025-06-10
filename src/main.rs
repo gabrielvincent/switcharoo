@@ -164,8 +164,12 @@ fn main() -> anyhow::Result<()> {
                 }
             }
         },
-        cli::Command::Socat { json } => {
-            core_lib::send_raw_to_socket(&json).warn("send failed");
+        cli::Command::Socat { json, submap } => {
+            exec_lib::activate_submap(&submap).warn("activate submap");
+            if let Err(err) = core_lib::send_raw_to_socket(&json) {
+                warn!("Failed to send JSON to socket: {err}, is hyprshell running?");
+                exec_lib::reset_submap().warn("activate submap");
+            };
         }
     }
     Ok(())

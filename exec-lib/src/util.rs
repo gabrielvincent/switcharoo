@@ -5,6 +5,7 @@ use hyprland::data::{Client, Clients, Monitor, Monitors, Workspace};
 use hyprland::dispatch::{Dispatch, DispatchType};
 use hyprland::keyword::Keyword;
 use hyprland::prelude::*;
+use std::sync::{Mutex, OnceLock};
 use tracing::{Level, debug, span, trace, warn};
 
 pub fn get_clients() -> Vec<Client> {
@@ -52,10 +53,34 @@ pub fn to_client_address(id: ClientId) -> hyprland::shared::Address {
     hyprland::shared::Address::new(format!("{:x}", id))
 }
 
+fn get_prev_follow_mouse() -> &'static Mutex<String> {
+    static PREV_FOLLOW_MOUSE: OnceLock<Mutex<String>> = OnceLock::new();
+    PREV_FOLLOW_MOUSE.get_or_init(|| Mutex::new("".to_string()))
+}
+
 pub fn activate_submap(submap_name: &str) -> anyhow::Result<()> {
     let _span = span!(Level::TRACE, "submap").entered();
+    if let Ok(follow) = Keyword::get("input:follow_mouse") {
+        get_prev_follow_mouse()
+            .lock()
+            .map(|mut lock| {
+                *lock = follow.value.to_string();
+            })
+            .warn("Failed to store previous follow_mouse value");
+    };
     Dispatch::call(DispatchType::Custom("submap", submap_name)).warn("unable to activate submap");
     debug!("Activated submap: {}", submap_name);
+    Ok(())
+}
+
+pub fn reset_submap() -> anyhow::Result<()> {
+    let _span = span!(Level::TRACE, "submap").entered();
+    Dispatch::call(DispatchType::Custom("submap", "reset")).warn("unable to activate submap");
+    if let Ok(follow) = get_prev_follow_mouse().lock() {
+        Keyword::set("input:follow_mouse", follow.to_string())
+            .warn("Failed to restore previous follow_mouse value");
+    }
+    debug!("reset submap");
     Ok(())
 }
 

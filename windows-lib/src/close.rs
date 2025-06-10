@@ -1,7 +1,7 @@
 use crate::WindowsGlobal;
 use core_lib::{FindByFirst, IdOverride, Warn};
 use exec_lib::switch::{switch_client, switch_workspace};
-use exec_lib::{activate_submap, to_client_address};
+use exec_lib::{reset_submap, to_client_address};
 use gtk::glib;
 use gtk::prelude::*;
 use tracing::{Level, debug, span, trace};
@@ -9,7 +9,7 @@ use tracing::{Level, debug, span, trace};
 pub fn close_overview(global: &WindowsGlobal, ids: Option<Option<IdOverride>>) {
     let _span = span!(Level::TRACE, "close_overview").entered();
 
-    activate_submap("reset").warn("Failed to reset submap");
+    reset_submap().warn("Failed to reset submap");
     let mut data1 = global.data.borrow_mut();
     for (window, monitor_data) in &mut data1.monitor_list.iter_mut() {
         while let Some(child) = monitor_data.workspaces_flow.first_child() {
