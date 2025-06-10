@@ -6,20 +6,31 @@ on:
       - 'v*'
 
 jobs:
-  publish:
+  check:
     runs-on: ubuntu-latest
+    outputs:
+      should_publish: ${{ steps.check_commit.outputs.should_publish }}
+    steps:
+      - name: Check commit message
+        id: check_commit
+        run: |
+          commit_msg=$(git log -1 --pretty=%B)
+          if [[ $commit_msg =~ ^chore\(hyprshell\):\ release ]]; then
+            echo "should_publish=true" >> $GITHUB_OUTPUT
+          else
+            echo "Error: Commit message must start with 'chore(hyprshell): release'"
+            echo "should_publish=false" >> $GITHUB_OUTPUT
+          fi
+
+  publish:
+    needs: check
+    runs-on: ubuntu-latest
+    if: needs.check.outputs.should_publish == 'true'
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
           ssh-key: ${{ secrets.SSH_KEY }}
-      - name: Check commit message
-        run: |
-          commit_msg=$(git log -1 --pretty=%B)
-          if [[ ! $commit_msg =~ ^chore\(hyprshell\) ]]; then
-            echo "Error: Commit message must start with 'chore(hyprshell)'"
-            exit 1
-          fi
       - name: install Rust stable
         uses: dtolnay/rust-toolchain@stable
       - name: Install gtk4-layer-shell
@@ -42,7 +53,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           
-          git fetch --tags origin hyprshell--force --force
+          git fetch --tags origin hyprshell
           git checkout ${{ github.ref }} -b hyprshell
           git push origin HEAD:hyprshell-release
           
