@@ -61,17 +61,18 @@ fn get_prev_follow_mouse() -> &'static Mutex<String> {
 pub fn activate_submap(submap_name: &str) -> anyhow::Result<()> {
     let _span = span!(Level::TRACE, "submap").entered();
     if let Ok(follow) = Keyword::get("input:follow_mouse") {
-        get_prev_follow_mouse()
-            .lock()
-            .map(|mut lock| {
-                if follow.value.to_string() != "3" {
-                    trace!("Storing previous follow_mouse value: {}", follow.value);
-                    *lock = follow.value.to_string();
-                }
-            })
-            .warn("Failed to store previous follow_mouse value");
-        Keyword::set("input:follow_mouse", "3").warn("Failed to set follow_mouse to 3");
-        trace!("Set follow_mouse to 3");
+        // TODO doesnt work as separate process
+        // get_prev_follow_mouse()
+        //     .lock()
+        //     .map(|mut lock| {
+        //         if follow.value.to_string() != "3" {
+        //             trace!("Storing previous follow_mouse value: {}", follow.value);
+        //             *lock = follow.value.to_string();
+        //         }
+        //     })
+        //     .warn("Failed to store previous follow_mouse value");
+        // Keyword::set("input:follow_mouse", "3").warn("Failed to set follow_mouse to 3");
+        // trace!("Set follow_mouse to 3");
     };
     Dispatch::call(DispatchType::Custom("submap", submap_name)).warn("unable to activate submap");
     debug!("Activated submap: {}", submap_name);
@@ -82,9 +83,9 @@ pub fn reset_submap() -> anyhow::Result<()> {
     let _span = span!(Level::TRACE, "submap").entered();
     Dispatch::call(DispatchType::Custom("submap", "reset")).warn("unable to activate submap");
     if let Ok(follow) = get_prev_follow_mouse().lock() {
-        Keyword::set("input:follow_mouse", follow.to_string())
-            .warn("Failed to restore previous follow_mouse value");
-        trace!("Restored previous follow_mouse value: {}", follow);
+        // Keyword::set("input:follow_mouse", follow.to_string())
+        //     .warn("Failed to restore previous follow_mouse value");
+        // trace!("Restored previous follow_mouse value: {}", follow);
     }
     debug!("reset submap");
     Ok(())

@@ -9,6 +9,7 @@ use core_lib::{
 use exec_lib::listener::{hyprland_config_listener, monitor_listener};
 use exec_lib::{apply_keybinds, reload_config, reset_submap, toast};
 use gtk::gdk::Display;
+use gtk::glib::ControlFlow;
 use gtk::prelude::*;
 use gtk::{
     Application, CssProvider, IconTheme, STYLE_PROVIDER_PRIORITY_APPLICATION,
@@ -17,7 +18,6 @@ use gtk::{
 use launcher_lib::{LauncherGlobal, create_launcher_window};
 use std::env;
 use std::path::{Path, PathBuf};
-use std::process::exit;
 use std::rc::Rc;
 use std::sync::{Mutex, OnceLock};
 use std::time::{Duration, Instant};
@@ -33,14 +33,18 @@ pub fn start(config_path: PathBuf, css_path: PathBuf, data_dir: PathBuf) -> anyh
     let css_path = Rc::new(css_path);
     let data_dir = Rc::new(data_dir);
 
-    gtk::init().expect("Failed to initialize GTK");
-    check_themes();
     fill_icon_map(true);
+    check_themes();
 
     glib::unix_signal_add(SIGTERM, || {
         info!("Received SIGTERM, exiting gracefully");
         reset_submap().warn("Failed to reset submap on SIGTERM");
-        exit(0);
+        // Continue with the default SIGTERM handler after cleanup
+        unsafe {
+            libc::signal(SIGTERM, libc::SIG_DFL);
+            libc::raise(SIGTERM);
+        }
+        ControlFlow::Continue
     });
 
     let (restart_tx, restart_rx) = async_channel::bounded(1);
@@ -227,6 +231,7 @@ fn check_themes() {
 }
 
 pub fn fill_icon_map(threads: bool) {
+    gtk::init().expect("Failed to initialize GTK");
     let icon_theme = IconTheme::new();
     let gtk_icons = icon_theme
         .icon_names()
