@@ -15,10 +15,10 @@ jobs:
     name: Build and Test
     runs-on: "ubuntu-latest"
     container:
-      image: archlinux:base
+      image: alpine:latest
     steps:
       - name: Install git and other dependencies
-        run: pacman -Syu --noconfirm git pkgconf rust gtk4 gtk4-layer-shell
+        run: apk add --no-cache git pkgconf rust gtk4-dev gtk-layer-shell-dev
       - uses: actions/checkout@v4
       - name: Load Rust Cache
         uses: Swatinem/rust-cache@v2
@@ -29,10 +29,10 @@ jobs:
     name: Run Clippy
     runs-on: "ubuntu-latest"
     container:
-      image: archlinux:base
+      image: alpine:latest
     steps:
       - name: Install git and other dependencies
-        run: pacman -Syu --noconfirm git pkgconf rust gtk4 gtk4-layer-shell
+        run: apk add --no-cache git pkgconf rust gtk4-dev gtk-layer-shell-dev
       - uses: actions/checkout@v4
       - name: Load Rust Cache
         uses: Swatinem/rust-cache@v2
