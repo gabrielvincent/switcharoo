@@ -19,7 +19,7 @@ use launcher_lib::{LauncherGlobal, create_launcher_window};
 use std::env;
 use std::path::{Path, PathBuf};
 use std::rc::Rc;
-use std::time::Duration;
+use std::time::{Duration, Instant};
 use tracing::{Level, debug, info, span, trace, warn};
 use windows_lib::{WindowsGlobal, create_windows_window};
 
@@ -51,9 +51,18 @@ pub fn start(config_path: PathBuf, css_path: PathBuf, data_dir: PathBuf) -> anyh
             setup_restart_listener(&config_path, &css_path, restart_tx);
         });
         glib::spawn_future_local(async move {
-            let cause = restart_rx.recv().await.unwrap_or_default();
-            info!("Restarting gui ({cause})");
-            send_to_socket(&TransferType::Restart).warn("unable to send restart");
+            let mut last_send = Instant::now();
+            loop {
+                let cause = restart_rx.recv().await.unwrap_or_default();
+                let now = Instant::now();
+                if now.duration_since(last_send) < Duration::from_secs(1) {
+                    debug!("Ignoring restart request too soon after last send");
+                    continue;
+                }
+                info!("Restarting gui ({cause})");
+                send_to_socket(&TransferType::Restart).warn("unable to send restart");
+                last_send = now;
+            }
         });
     }
 

@@ -67,6 +67,7 @@ pub fn activate_submap(submap_name: &str) -> anyhow::Result<()> {
                 *lock = follow.value.to_string();
             })
             .warn("Failed to store previous follow_mouse value");
+        Keyword::set("input:follow_mouse", "3").warn("Failed to set follow_mouse to 3");
     };
     Dispatch::call(DispatchType::Custom("submap", submap_name)).warn("unable to activate submap");
     debug!("Activated submap: {}", submap_name);

@@ -28,22 +28,25 @@ pub struct Launcher {
     pub show_when_empty: bool,
     #[default = 250]
     pub animate_launch_ms: u64,
-    #[default(Plugins::default())]
+    #[default(Plugins{
+        applications: Some(ApplicationsPluginConfig::default()),
+        terminal: Some(EmptyConfig::default()),
+        shell: None,
+        websearch: Some(WebSearchConfig::default()),
+        calc: Some(EmptyConfig::default()),
+    })]
     pub plugins: Plugins,
 }
 
-#[derive(SmartDefault, Debug, Clone, Deserialize, Serialize)]
-#[serde(default, deny_unknown_fields)]
+// no default for this, if some elements are missing, they should be None.
+// if no config for plugins is provided, use the default value from the launcher.
+#[derive(Debug, Clone, Deserialize, Serialize)]
+#[serde(deny_unknown_fields)]
 pub struct Plugins {
-    #[default(Some(Default::default()))]
     pub applications: Option<ApplicationsPluginConfig>,
-    #[default(Some(Default::default()))]
     pub terminal: Option<EmptyConfig>,
-    #[default(None)]
     pub shell: Option<EmptyConfig>,
-    #[default(Some(Default::default()))]
     pub websearch: Option<WebSearchConfig>,
-    #[default(Some(Default::default()))]
     pub calc: Option<EmptyConfig>,
 }
 
