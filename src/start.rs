@@ -19,6 +19,7 @@ use std::env;
 use std::path::{Path, PathBuf};
 use std::process::exit;
 use std::rc::Rc;
+use std::sync::{Mutex, OnceLock};
 use std::time::{Duration, Instant};
 use tracing::{Level, debug, info, span, trace, warn};
 use windows_lib::{WindowsGlobal, create_windows_window};
@@ -56,7 +57,7 @@ pub fn start(config_path: PathBuf, css_path: PathBuf, data_dir: PathBuf) -> anyh
                 let cause = restart_rx.recv().await.unwrap_or_default();
                 let now = Instant::now();
                 if now.duration_since(last_send) < Duration::from_secs(1) {
-                    debug!("Ignoring restart request too soon after last send");
+                    debug!("Ignoring restart request ({cause}) too soon after last send");
                     continue;
                 }
                 info!("Restarting gui ({cause})");
@@ -137,6 +138,7 @@ fn activate(app: &Application, config_path: &Path, css_path: &Path, data_dir: &P
 
     debug!("Application initialized");
 }
+static WATCHERS: OnceLock<Mutex<Vec<Box<dyn std::any::Any + Send>>>> = OnceLock::new();
 
 fn setup_restart_listener(
     config_path: &Path,
@@ -144,15 +146,26 @@ fn setup_restart_listener(
     restart_tx: async_channel::Sender<&'static str>,
 ) {
     let tx = restart_tx.clone();
-    let _watcher = hyprshell_config_listener(config_path, move |mess| {
+    if let Some(watcher) = hyprshell_config_listener(config_path, move |mess| {
         let _ = tx.send_blocking(mess);
-        // TODO these dont work
-    });
+    }) {
+        WATCHERS
+            .get_or_init(|| Mutex::new(Vec::new()))
+            .lock()
+            .expect("Failed to lock watchers")
+            .push(Box::new(watcher));
+    };
     let tx = restart_tx.clone();
-    let _watcher = hyprshell_css_listener(css_path, move |mess| {
+    if let Some(watcher) = hyprshell_css_listener(css_path, move |mess| {
         let _ = tx.send_blocking(mess);
-        // TODO these dont work
-    });
+    }) {
+        WATCHERS
+            .get_or_init(|| Mutex::new(Vec::new()))
+            .lock()
+            .expect("Failed to lock watchers")
+            .push(Box::new(watcher));
+    };
+
     let tx = restart_tx.clone();
     glib::spawn_future_local(async move {
         monitor_listener(move |mess| {
