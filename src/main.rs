@@ -17,7 +17,6 @@ mod start;
 mod debug;
 
 fn main() -> anyhow::Result<()> {
-    malloc::limit_mmap_threshold();
     let cli = cli::App::parse();
     let opts = cli.global_opts.clone();
 
@@ -150,22 +149,6 @@ fn main() -> anyhow::Result<()> {
         }
     }
     Ok(())
-}
-
-pub mod malloc {
-    use std::os::raw::c_int;
-    const M_MMAP_THRESHOLD: c_int = -3;
-
-    unsafe extern "C" {
-        fn mallopt(param: c_int, value: c_int) -> c_int;
-    }
-
-    /// Prevents glibc from hoarding memory via memory fragmentation.
-    pub fn limit_mmap_threshold() {
-        unsafe {
-            mallopt(M_MMAP_THRESHOLD, 65536);
-        }
-    }
 }
 
 fn check_features() {
