@@ -47,6 +47,7 @@ pub fn start(config_path: PathBuf, css_path: PathBuf, data_dir: PathBuf) -> anyh
     if env::var_os("HYPRSHELL_NO_LISTENERS").is_none() {
         // delay for 1 second to allow the config to be reloaded before listening for reload
         let config_path = config_path.clone();
+        let css_path = css_path.clone();
         let delay = env::var("HYPRSHELL_RELOAD_TIMEOUT")
             .ok()
             .and_then(|s| s.parse().ok())
