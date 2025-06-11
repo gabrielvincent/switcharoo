@@ -14,14 +14,18 @@ num_features=${#features[@]}
 build_with_features() {
   local feature_combination="$1"
   local iteration="$2"
+  local start_time=$(date +%s.%N)
 
   if [[ -z "$feature_combination" ]]; then
-    echo "[$iteration] Building without any features..."
+    echo -n "[$iteration] Building without any features..."
     cargo build --no-default-features --quiet
   else
-    echo "[$iteration] Building with features: $feature_combination"
+    echo -n "[$iteration] Building with features: $feature_combination"
     cargo build --no-default-features --features "$feature_combination" --quiet
   fi
+  
+  local duration=$(awk "BEGIN {print $(date +%s.%N) - $start_time}")
+  printf " took %.2f seconds\n" "$duration"
 }
 
 # Generate all combinations of features

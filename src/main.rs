@@ -33,7 +33,8 @@ fn main() -> anyhow::Result<()> {
         .with_timer(tracing_subscriber::fmt::time::uptime())
         .with_target(
             env::var("LOG_MODULE_PATH")
-                .map(|s| s.parse().unwrap_or(false))
+                .ok()
+                .and_then(|s| s.parse().ok())
                 .unwrap_or(false),
         )
         .with_env_filter(format!(
