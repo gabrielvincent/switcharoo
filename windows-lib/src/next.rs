@@ -2,7 +2,7 @@ use core_lib::transfer::Direction;
 use core_lib::{
     Active, ClientData, ClientId, GetFirstOrLast, HyprlandData, RevIf, WorkspaceData, WorkspaceId,
 };
-use tracing::{Level, debug, span, trace};
+use tracing::{Level, debug, span, trace, warn};
 
 pub fn find_next(
     direction: &Direction,
@@ -22,12 +22,7 @@ pub fn find_next(
             workspaces_per_row,
         )
     } else if let Some(active_client) = active.client {
-        find_next_client(
-            direction,
-            &hypr_data.clients,
-            active_client,
-            workspaces_per_row,
-        )
+        find_next_client(direction, &hypr_data.clients, active_client)
     } else {
         find_first_client(direction, &hypr_data.clients, &hypr_data.workspaces, active)
     }
@@ -45,7 +40,7 @@ pub fn find_first_client(
     let get_last = matches!(direction, Direction::Left | Direction::Up);
     clients
         .iter()
-        .filter(|(_, c)| c.workspace == active.workspace)
+        .filter(|(_, c)| c.workspace == active.workspace && c.enabled)
         .get_first_or_last(get_last)
         .or_else(|| {
             trace!("No client found in current workspace, looking for next client in workspaces");
@@ -79,22 +74,32 @@ pub fn find_next_client(
     direction: &Direction,
     clients: &[(ClientId, ClientData)],
     active: ClientId,
-    clients_per_row: usize,
 ) -> Option<Active> {
     if clients.is_empty() {
         debug!("No clients available, returning None");
         return None;
     }
 
-    // TODO still buggy when clients get filtered
-
-    let offset = match direction {
+    let offset = (match direction {
         Direction::Right => 1,
         Direction::Left => -1,
-        Direction::Up => -(clients_per_row as isize),
-        Direction::Down => clients_per_row as isize,
-    }
-    .rem_euclid(clients.len() as isize) as usize;
+        Direction::Up => {
+            warn!(
+                "Direction {:?} is not supported for clients, using Left instead",
+                direction
+            );
+            -1
+        }
+        Direction::Down => {
+            warn!(
+                "Direction {:?} is not supported for clients, using Right instead",
+                direction
+            );
+            1
+        }
+    } as isize)
+        .rem_euclid(clients.iter().filter(|(_, c)| c.enabled).count() as isize)
+        as usize;
 
     clients
         .iter()

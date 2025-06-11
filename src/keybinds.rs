@@ -59,7 +59,7 @@ pub fn create_binds_and_submaps<'a>(config: &Config) -> anyhow::Result<Vec<(&'a 
 fn generate_exit() -> anyhow::Result<String> {
     let config = TransferType::Exit;
     let config_str = serde_json::to_string(&config).context("Failed to serialize config")?;
-    Ok(generate_socat_and_activate_submap(&config_str, "reset"))
+    Ok(generate_socat(&config_str))
 }
 
 fn generate_return(config: CloseConfig) -> anyhow::Result<String> {
