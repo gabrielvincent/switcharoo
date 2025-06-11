@@ -4,6 +4,7 @@ use crate::icon::set_icon;
 use anyhow::Context;
 use core_lib::transfer::{CloseConfig, OpenOverview, TransferType, WindowsOverride};
 use core_lib::{ClientData, ClientId, Warn, WorkspaceId, send_to_socket};
+use exec_lib::set_remain_focused;
 use gtk::gdk::Cursor;
 use gtk::prelude::*;
 use gtk::{Button, Fixed, Frame, Image, Label, Overflow, Overlay, pango};
@@ -16,6 +17,8 @@ fn scale(value: i16, scale: f64) -> i32 {
 
 pub fn open_overview(global: &WindowsGlobal, config: OpenOverview) -> anyhow::Result<()> {
     let _span = span!(Level::TRACE, "open_overview").entered();
+    set_remain_focused().warn("Failed to set no follow mouse");
+
     let (clients_data, active) = collect_data(&SortConfig {
         filter_current_monitor: config.filter_current_monitor,
         filter_current_workspace: config.filter_current_workspace,
@@ -23,7 +26,6 @@ pub fn open_overview(global: &WindowsGlobal, config: OpenOverview) -> anyhow::Re
         sort_recent: false,
     })
     .context("Failed to collect data")?;
-
     let regex = regex::Regex::new(r"<[^>]*>").context("Invalid regex")?;
 
     let mut data = global.data.borrow_mut();

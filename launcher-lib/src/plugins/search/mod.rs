@@ -50,7 +50,7 @@ pub fn launch_option(iden: &Option<Box<str>>, text: &str) -> bool {
             format!("{} '{}'", browser.exec, url)
         };
         debug!("Launching browser: {}", cmdline);
-        run_program(&cmdline, None, false, &None);
+        run_program(&cmdline, None, false, &None).warn("Failed to run program");
 
         // try to focus browser
         if let Some(class) = &browser.startup_wm_class {

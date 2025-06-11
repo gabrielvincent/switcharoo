@@ -7,7 +7,7 @@ use core_lib::{
     hyprshell_css_listener, send_to_socket,
 };
 use exec_lib::listener::{hyprland_config_listener, monitor_listener};
-use exec_lib::{apply_keybinds, reload_config, reset_submap, toast};
+use exec_lib::{apply_keybinds, reload_config, reset_remain_focused, reset_submap, toast};
 use gtk::gdk::Display;
 use gtk::glib::ControlFlow;
 use gtk::prelude::*;
@@ -39,6 +39,7 @@ pub fn start(config_path: PathBuf, css_path: PathBuf, data_dir: PathBuf) -> anyh
     glib::unix_signal_add(SIGTERM, || {
         info!("Received SIGTERM, exiting gracefully");
         reset_submap().warn("Failed to reset submap on SIGTERM");
+        reset_remain_focused().warn("Failed to reset follow mouse on SIGTERM");
         // Continue with the default SIGTERM handler after cleanup
         unsafe {
             libc::signal(SIGTERM, libc::SIG_DFL);
@@ -94,7 +95,7 @@ pub fn start(config_path: PathBuf, css_path: PathBuf, data_dir: PathBuf) -> anyh
 fn activate(app: &Application, config_path: &Path, css_path: &Path, data_dir: &Path) {
     let _span = span!(Level::TRACE, "activate").entered();
     // reloading the config is needed to delete the old submaps
-    reload_config();
+    reload_config().warn("Failed to reload config");
 
     let desktop_files = collect_desktop_files();
     windows_lib::reload_desktop_map(&desktop_files);

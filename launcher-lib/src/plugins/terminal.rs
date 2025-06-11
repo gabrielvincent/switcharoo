@@ -1,4 +1,5 @@
 use crate::plugins::{Identifier, PluginNames, StaticLaunchOption};
+use core_lib::Warn;
 use exec_lib::run::run_program;
 use std::path::PathBuf;
 
@@ -38,7 +39,8 @@ pub fn launch_option(text: &str, default_terminal: &Option<Box<str>>) -> bool {
         None,
         true,
         default_terminal,
-    );
+    )
+    .warn("Failed to run program");
     true
 }
 

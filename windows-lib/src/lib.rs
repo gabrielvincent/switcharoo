@@ -12,7 +12,7 @@ mod sort;
 mod stop;
 mod update;
 
-pub use close::close_overview;
+pub use close::close_windows;
 pub use create::create_windows_window;
 pub use css::get_css;
 pub use desktop_map::{get_icon_name_by_name_from_desktop_files, reload_desktop_map};

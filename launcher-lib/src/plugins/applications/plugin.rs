@@ -224,7 +224,8 @@ pub fn launch_option(
                 entry.exec_path.clone(),
                 entry.terminal,
                 default_terminal,
-            );
+            )
+            .warn("Failed to run program");
             trace!("Saving run: {:?}", entry.source);
             save_run(&entry.source, data_dir).warn("Failed to cache run");
             return true;

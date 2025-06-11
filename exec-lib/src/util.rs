@@ -6,7 +6,7 @@ use hyprland::dispatch::{Dispatch, DispatchType};
 use hyprland::keyword::Keyword;
 use hyprland::prelude::*;
 use std::sync::{Mutex, OnceLock};
-use tracing::{Level, debug, span, trace, warn};
+use tracing::{debug, trace, warn};
 
 pub fn get_clients() -> Vec<Client> {
     Clients::get().map_or(vec![], |clients| clients.to_vec())
@@ -20,9 +20,9 @@ pub fn get_current_monitor() -> Option<Monitor> {
     Monitor::get_active().ok()
 }
 
-pub fn reload_config() {
+pub fn reload_config() -> anyhow::Result<()> {
     debug!("Reloading hyprland config");
-    reload::call().warn("Failed to reload hyprland config");
+    reload::call().context("Failed to reload hyprland config")
 }
 
 pub fn toast(body: &str) {
@@ -53,40 +53,79 @@ pub fn to_client_address(id: ClientId) -> hyprland::shared::Address {
     hyprland::shared::Address::new(format!("{:x}", id))
 }
 
-fn get_prev_follow_mouse() -> &'static Mutex<String> {
-    static PREV_FOLLOW_MOUSE: OnceLock<Mutex<String>> = OnceLock::new();
-    PREV_FOLLOW_MOUSE.get_or_init(|| Mutex::new("".to_string()))
+fn get_prev_follow_mouse() -> &'static Mutex<Option<String>> {
+    static PREV_FOLLOW_MOUSE: OnceLock<Mutex<Option<String>>> = OnceLock::new();
+    PREV_FOLLOW_MOUSE.get_or_init(|| Mutex::new(None))
+}
+
+fn get_gestures_enabled() -> &'static Mutex<Option<bool>> {
+    static GESTURES_ENABLED: OnceLock<Mutex<Option<bool>>> = OnceLock::new();
+    GESTURES_ENABLED.get_or_init(|| Mutex::new(None))
+}
+
+pub fn set_remain_focused() -> anyhow::Result<()> {
+    let follow = Keyword::get("input:follow_mouse").context("keyword failed")?;
+    let mut lock = get_prev_follow_mouse()
+        .lock()
+        .map_err(|e| anyhow::anyhow!("unable to lock get_prev_follow_mouse mutex: {}", e))?;
+    if follow.set && follow.value.to_string() != "3" {
+        trace!("Storing previous follow_mouse value: {}", follow.value);
+        *lock = Some(follow.value.to_string());
+    }
+    Keyword::set("input:follow_mouse", "3").context("keyword failed")?;
+    trace!("Set follow_mouse to 3");
+
+    let gestures_enabled = Keyword::get("gestures:workspace_swipe").context("keyword failed")?;
+    let mut lock = get_gestures_enabled()
+        .lock()
+        .map_err(|e| anyhow::anyhow!("unable to lock get_gestures_enabled mutex: {}", e))?;
+    if gestures_enabled.set {
+        trace!(
+            "Storing previous gestures_enabled value: {}",
+            gestures_enabled.value
+        );
+        *lock = Some(gestures_enabled.value.to_string() == "1");
+    }
+    Keyword::set("gestures:workspace_swipe", "0").context("keyword failed")?;
+    trace!("Set gestures:workspace_swipe to 0");
+    Ok(())
+}
+
+pub fn reset_remain_focused() -> anyhow::Result<()> {
+    let follow = get_prev_follow_mouse()
+        .lock()
+        .map_err(|e| anyhow::anyhow!("unable to lock get_prev_follow_mouse mutex: {}", e))?;
+    if let Some(follow) = follow.as_ref() {
+        Keyword::set("input:follow_mouse", follow.to_string()).context("keyword failed")?;
+        trace!("Restored previous follow_mouse value: {}", follow);
+    } else {
+        trace!("No previous follow_mouse value stored, skipping reset");
+    }
+
+    let gestures_enabled = get_gestures_enabled()
+        .lock()
+        .map_err(|e| anyhow::anyhow!("unable to lock get_gestures_enabled mutex: {}", e))?;
+    if let Some(enabled) = gestures_enabled.as_ref() {
+        Keyword::set("gestures:workspace_swipe", if *enabled { "1" } else { "0" })
+            .context("keyword failed")?;
+        trace!(
+            "Restored previous gestures:workspace_swipe value: {}",
+            enabled
+        );
+    } else {
+        trace!("No previous gestures:workspace_swipe value stored, skipping reset");
+    }
+    Ok(())
 }
 
 pub fn activate_submap(submap_name: &str) -> anyhow::Result<()> {
-    let _span = span!(Level::TRACE, "submap").entered();
-    if let Ok(follow) = Keyword::get("input:follow_mouse") {
-        // TODO doesnt work as separate process
-        // get_prev_follow_mouse()
-        //     .lock()
-        //     .map(|mut lock| {
-        //         if follow.value.to_string() != "3" {
-        //             trace!("Storing previous follow_mouse value: {}", follow.value);
-        //             *lock = follow.value.to_string();
-        //         }
-        //     })
-        //     .warn("Failed to store previous follow_mouse value");
-        // Keyword::set("input:follow_mouse", "3").warn("Failed to set follow_mouse to 3");
-        // trace!("Set follow_mouse to 3");
-    };
-    Dispatch::call(DispatchType::Custom("submap", submap_name)).warn("unable to activate submap");
+    Dispatch::call(DispatchType::Custom("submap", submap_name)).context("dispatch failed")?;
     debug!("Activated submap: {}", submap_name);
     Ok(())
 }
 
 pub fn reset_submap() -> anyhow::Result<()> {
-    let _span = span!(Level::TRACE, "submap").entered();
-    Dispatch::call(DispatchType::Custom("submap", "reset")).warn("unable to activate submap");
-    if let Ok(follow) = get_prev_follow_mouse().lock() {
-        // Keyword::set("input:follow_mouse", follow.to_string())
-        //     .warn("Failed to restore previous follow_mouse value");
-        // trace!("Restored previous follow_mouse value: {}", follow);
-    }
+    Dispatch::call(DispatchType::Custom("submap", "reset")).context("dispatch failed")?;
     debug!("reset submap");
     Ok(())
 }
