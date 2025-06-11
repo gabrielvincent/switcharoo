@@ -3,7 +3,7 @@ use crate::data::{SortConfig, collect_data};
 use crate::icon::set_icon;
 use anyhow::Context;
 use core_lib::transfer::{CloseConfig, OpenOverview, TransferType, WindowsOverride};
-use core_lib::{ClientData, ClientId, FindByFirst, Warn, WorkspaceId, send_to_socket};
+use core_lib::{ClientData, ClientId, Warn, WorkspaceId, send_to_socket};
 use gtk::gdk::Cursor;
 use gtk::prelude::*;
 use gtk::{Button, Fixed, Frame, Image, Label, Overflow, Overlay, pango};
@@ -28,15 +28,6 @@ pub fn open_overview(global: &WindowsGlobal, config: OpenOverview) -> anyhow::Re
 
     let mut data = global.data.borrow_mut();
     for (window, monitor_data) in data.monitor_list.iter_mut() {
-        if config.hide_filtered
-            && clients_data
-                .monitors
-                .find_by_first(&monitor_data.id)
-                .map(|m| !m.enabled)
-                .unwrap_or(false)
-        {
-            continue;
-        }
         trace!("Showing window {:?}", window.id());
         window.set_visible(true);
 

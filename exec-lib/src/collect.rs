@@ -56,7 +56,6 @@ pub fn collect_hypr_data() -> anyhow::Result<(
                     width: (monitor.width as f32 / monitor.scale) as u16,
                     height: (monitor.height as f32 / monitor.scale) as u16,
                     connector: monitor.name.clone(),
-                    enabled: false, // gets updated later
                 },
             ));
         });
@@ -82,7 +81,6 @@ pub fn collect_hypr_data() -> anyhow::Result<(
                             monitor: *monitor_id,
                             height: monitor_data.height,
                             width: monitor_data.width,
-                            enabled: false, // gets updated later
                         },
                     ));
                     x_offset += monitor_data.width as i32;

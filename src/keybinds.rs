@@ -157,14 +157,14 @@ fn generate_overview(
         ),
     ));
     keyword_list.push((
-        "binden",
+        "binde",
         format!(
             ", down, exec, {}",
             generate_switch_press(Direction::Down, true)?
         ),
     ));
     keyword_list.push((
-        "binden",
+        "binde",
         format!(
             ", up, exec, {}",
             generate_switch_press(Direction::Up, true)?

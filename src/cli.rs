@@ -68,7 +68,7 @@ pub enum Command {
     Socat {
         /// activate the submap (roll back to reset submap if send fails)
         #[arg(long)]
-        submap: String,
+        submap: Option<String>,
 
         /// JSON to send to the socket
         json: String,

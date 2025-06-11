@@ -266,3 +266,35 @@ impl<I: Iterator> GetFirstOrLast for I {
         if last { self.last() } else { self.next() }
     }
 }
+
+pub trait GetNextOrPrev: Iterator + Sized {
+    fn get_next_or_prev(self, last: bool, len: usize) -> Option<Self::Item>;
+}
+impl<I: Iterator> GetNextOrPrev for I {
+    fn get_next_or_prev(mut self, last: bool, len: usize) -> Option<Self::Item> {
+        if last {
+            if len == 0 {
+                None
+            } else {
+                // skip to the last element
+                self.nth(len - 1)
+            }
+        } else {
+            self.next()
+        }
+    }
+}
+
+pub trait RevIf<'a>: Iterator + Sized + 'a {
+    fn rev_if(self, cond: bool) -> Box<dyn Iterator<Item = Self::Item> + 'a>;
+}
+
+impl<'a, I: DoubleEndedIterator + 'a> RevIf<'a> for I {
+    fn rev_if(self, cond: bool) -> Box<dyn Iterator<Item = Self::Item> + 'a> {
+        if cond {
+            Box::new(self.rev())
+        } else {
+            Box::new(self)
+        }
+    }
+}

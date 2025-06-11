@@ -17,14 +17,8 @@ pub struct SortConfig {
 pub fn collect_data(config: &SortConfig) -> anyhow::Result<(HyprlandData, Active)> {
     let _span = span!(Level::TRACE, "collect_data").entered();
 
-    let (
-        mut client_data,
-        mut workspace_data,
-        mut monitor_data,
-        active_client,
-        active_ws,
-        active_monitor,
-    ) = collect_hypr_data()?;
+    let (mut client_data, workspace_data, monitor_data, active_client, active_ws, active_monitor) =
+        collect_hypr_data()?;
     client_data = update_client_position(client_data, &workspace_data, &monitor_data);
     if config.sort_recent {
         sort_clients_by_recent(&mut client_data);
@@ -44,20 +38,6 @@ pub fn collect_data(config: &SortConfig) -> anyhow::Result<(HyprlandData, Active
                 .is_none_or(|active| client.class == *active.0))
             && (!config.filter_current_workspace || client.workspace == active_ws)
             && (!config.filter_current_monitor || client.monitor == active_monitor);
-    }
-
-    // iterate over all workspaces and set active to false if no client is on the workspace is active
-    for (wid, workspace) in workspace_data.iter_mut() {
-        workspace.enabled = client_data
-            .iter()
-            .any(|(_, c)| c.enabled && c.workspace == *wid);
-    }
-
-    // iterate over all monitors and set active to false if no client is on the monitor is active
-    for (id, monitor) in monitor_data.iter_mut() {
-        monitor.enabled = client_data
-            .iter()
-            .any(|(_, c)| c.enabled && c.monitor == *id);
     }
 
     trace!("client_data: {:?}", client_data);

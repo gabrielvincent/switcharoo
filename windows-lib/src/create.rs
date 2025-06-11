@@ -6,7 +6,7 @@ use exec_lib::get_monitors;
 use gtk::gdk::{Display, Monitor};
 use gtk::prelude::*;
 use gtk::{Application, ApplicationWindow, FlowBox, Orientation, Overlay, SelectionMode};
-use gtk4_layer_shell::{KeyboardMode, Layer, LayerShell};
+use gtk4_layer_shell::{Edge, KeyboardMode, Layer, LayerShell};
 use tracing::{Level, debug, span};
 
 pub fn create_windows_window(app: &Application, global: &WindowsGlobal) -> anyhow::Result<()> {
@@ -19,52 +19,50 @@ pub fn create_windows_window(app: &Application, global: &WindowsGlobal) -> anyho
             .filter_map(|m| m.ok())
             .collect::<Vec<Monitor>>();
 
-        for monitor in gtk_monitors {
-            let monitor_name = monitor.connector().unwrap_or_default();
-            let monitor_id = monitors
-                .iter()
-                .find(|m| m.name == monitor_name)
-                .map(|m| m.id)
-                .unwrap_or_default();
+        for gtk_monitor in gtk_monitors {
+            let monitor_name = gtk_monitor.connector().unwrap_or_default();
+            if let Some(monitor) = monitors.iter().find(|m| m.name == monitor_name) {
+                let workspaces_flow = FlowBox::builder()
+                    .selection_mode(SelectionMode::None)
+                    .orientation(Orientation::Horizontal)
+                    .max_children_per_line(global.workspaces_per_row as u32)
+                    .min_children_per_line(global.workspaces_per_row as u32)
+                    .build();
 
-            let workspaces_flow = FlowBox::builder()
-                .selection_mode(SelectionMode::None)
-                .orientation(Orientation::Horizontal)
-                .max_children_per_line(global.workspaces_per_row as u32)
-                .min_children_per_line(global.workspaces_per_row as u32)
-                .build();
+                let workspaces_flow_overlay = Overlay::builder()
+                    .child(&workspaces_flow)
+                    .css_classes(["monitor"])
+                    .build();
 
-            let workspaces_flow_overlay = Overlay::builder()
-                .child(&workspaces_flow)
-                .css_classes(["monitor"])
-                .build();
+                let window = ApplicationWindow::builder()
+                    .css_classes(["window"])
+                    .application(app)
+                    .child(&workspaces_flow_overlay)
+                    .default_height(10)
+                    .default_width(10)
+                    .build();
 
-            let window = ApplicationWindow::builder()
-                .css_classes(["window"])
-                .application(app)
-                .child(&workspaces_flow_overlay)
-                .default_height(10)
-                .default_width(10)
-                .build();
+                window.init_layer_shell();
+                window.set_namespace(Some(OVERVIEW_NAMESPACE));
+                window.set_layer(Layer::Top);
+                window.set_anchor(Edge::Top, true);
+                window.set_margin(Edge::Top, (monitor.height as f32 / 2.6) as i32);
+                window.set_keyboard_mode(KeyboardMode::OnDemand);
+                window.set_can_focus(false);
+                window.set_monitor(Some(&gtk_monitor));
+                window.present();
+                window.set_visible(false);
 
-            window.init_layer_shell();
-            window.set_namespace(Some(OVERVIEW_NAMESPACE));
-            window.set_layer(Layer::Top);
-            window.set_keyboard_mode(KeyboardMode::OnDemand);
-            window.set_can_focus(false);
-            window.set_monitor(Some(&monitor));
-            window.present();
-            window.set_visible(false);
-
-            debug!(
-                "Created window window ({}) for monitor {:?}",
-                window.id(),
-                monitor_name
-            );
-            global.data.borrow_mut().monitor_list.insert(
-                window,
-                OverviewGlobalMonitorData::new(monitor_id, workspaces_flow),
-            );
+                debug!(
+                    "Created window window ({}) for monitor {:?}",
+                    window.id(),
+                    monitor_name
+                );
+                global.data.borrow_mut().monitor_list.insert(
+                    window,
+                    OverviewGlobalMonitorData::new(monitor.id, workspaces_flow),
+                );
+            }
         }
     }
 
