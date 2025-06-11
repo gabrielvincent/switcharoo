@@ -75,16 +75,15 @@ fn run_command(run: &str, path: &Option<Box<Path>>) -> anyhow::Result<()> {
 
     debug!("Running command: {:?}", cmd);
     let out = cmd.stdout(Stdio::piped()).stderr(Stdio::piped()).spawn()?;
-
-    if env::var_os("HYPRSHELL_SHOW_OUTPUT").is_some() {
-        thread::spawn(move || {
+    thread::spawn(move || {
+        if env::var_os("HYPRSHELL_SHOW_OUTPUT").is_some() {
             let output = out.wait_with_output();
             if let Ok(output) = output {
                 if !output.stdout.is_empty() || !output.stderr.is_empty() {
                     trace!("Output from [{cmd:?}]: {output:?}");
                 }
             }
-        });
-    }
+        }
+    });
     Ok(())
 }
