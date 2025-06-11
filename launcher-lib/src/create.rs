@@ -39,9 +39,10 @@ pub fn create_launcher_window(
     entry.add_controller(key_controller);
     main_vbox.append(&entry);
 
-    let results = ListBox::builder()
-        .selection_mode(SelectionMode::None)
+    let results = gtk::Box::builder()
+        .orientation(Orientation::Vertical)
         .css_classes(["launcher-results"])
+        .spacing(3)
         .build();
     main_vbox.append(&results);
 
@@ -49,8 +50,6 @@ pub fn create_launcher_window(
         .orientation(Orientation::Horizontal)
         .css_classes(["launcher-plugins"])
         .spacing(5)
-        .hexpand(false)
-        .vexpand(false)
         .build();
     main_vbox.append(&plugin_box);
 

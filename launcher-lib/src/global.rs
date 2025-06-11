@@ -1,6 +1,6 @@
 use core_lib::config::{Launcher, Plugins};
 use core_lib::transfer::Identifier;
-use gtk::{ApplicationWindow, Entry, ListBox};
+use gtk::{ApplicationWindow, Entry};
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::path::Path;
@@ -37,7 +37,7 @@ impl LauncherGlobal {
 pub struct LauncherGlobalData {
     pub window: ApplicationWindow,
     pub entry: Entry,
-    pub results: ListBox,
+    pub results: gtk::Box,
     pub plugin_box: gtk::Box,
     pub sorted_matches: Vec<Identifier>,
     pub static_matches: HashMap<char, Identifier>,

@@ -67,7 +67,7 @@ fn main() -> anyhow::Result<()> {
         cli::Command::Config { command } => match command {
             cli::ConfigCommand::Generate { force, no_systemd } => {
                 use core_lib::Warn;
-                let config_path = config_path.unwrap_or(get_default_css_path());
+                let config_path = config_path.unwrap_or(get_default_config_path());
                 let css_path = css_file.unwrap_or(get_default_css_path());
 
                 let (override_config, override_css) =
@@ -98,7 +98,7 @@ fn main() -> anyhow::Result<()> {
             cli::ConfigCommand::Check {} => {
                 use core_lib::Warn;
                 core_lib::config::explain::check_config(
-                    &config_path.unwrap_or(get_default_css_path()),
+                    &config_path.unwrap_or(get_default_config_path()),
                 )
                 .warn("check");
             }
@@ -120,7 +120,7 @@ fn main() -> anyhow::Result<()> {
                     debug::search(
                         &text,
                         all,
-                        &config_path.unwrap_or(get_default_data_dir()),
+                        &config_path.unwrap_or(get_default_config_path()),
                         &data_dir.unwrap_or(get_default_data_dir()),
                     );
                 }
@@ -130,7 +130,7 @@ fn main() -> anyhow::Result<()> {
             cli::DataCommand::LaunchHistory { run_cache_weeks } => {
                 data::launch_history(
                     run_cache_weeks,
-                    &config_path.unwrap_or(get_default_data_dir()),
+                    &config_path.unwrap_or(get_default_config_path()),
                     &data_dir.unwrap_or(get_default_data_dir()),
                     opts.verbose,
                 );

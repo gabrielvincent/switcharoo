@@ -133,9 +133,11 @@ fn create_entry(
     details: Box<str>,
     details_long: Option<Box<str>>,
     details_menu: Vec<DetailsMenuItem>,
-) -> ListBoxRow {
+) -> gtk::Box {
     let hbox = gtk::Box::builder()
+        .css_classes(["launcher-item"])
         .orientation(Orientation::Horizontal)
+        .height_request(45)
         .spacing(8)
         .hexpand(true)
         .vexpand(true)
@@ -234,17 +236,10 @@ fn create_entry(
         .build();
     hbox.append(&index_label);
 
-    let row = ListBoxRow::builder()
-        .css_classes(["launcher-item"])
-        .height_request(45)
-        .hexpand(true)
-        .vexpand(true)
-        .child(&hbox)
-        .build();
-    row.set_cursor(Cursor::from_name("pointer", None).as_ref());
-    row.set_iden_data(iden_to_str(iden));
-    click_entry(&row, iden.clone());
-    row
+    hbox.set_cursor(Cursor::from_name("pointer", None).as_ref());
+    hbox.set_iden_data(iden_to_str(iden));
+    click_entry(&hbox, iden.clone());
+    hbox
 }
 
 fn click_plugin(button: &Button, iden: Identifier) {
@@ -257,7 +252,7 @@ fn click_plugin(button: &Button, iden: Identifier) {
     });
 }
 
-fn click_entry(button: &ListBoxRow, iden: Identifier) {
+fn click_entry(button: &gtk::Box, iden: Identifier) {
     let gesture = gtk::GestureClick::new();
     button.add_controller(gesture.clone());
     gesture.connect_released(move |_, _, _, _| {

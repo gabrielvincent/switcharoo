@@ -125,7 +125,7 @@ fn close(entry: &gtk::Entry, window: &gtk::ApplicationWindow) {
     entry.set_text("");
 }
 
-fn show_launch(results: &gtk::ListBox, plugin_box: &gtk::Box, iden: &Identifier) {
+fn show_launch(results: &gtk::Box, plugin_box: &gtk::Box, iden: &Identifier) {
     for child in results.observe_children().into_iter().flatten() {
         if let Some(child) = child.dynamic_cast_ref::<Widget>() {
             // trace!("A Child: {:?}, {:?}", child.get_iden_data(), iden_to_str(iden));
@@ -150,7 +150,7 @@ fn show_launch(results: &gtk::ListBox, plugin_box: &gtk::Box, iden: &Identifier)
     }
 }
 
-fn hide_launch(results: &gtk::ListBox, plugin_box: &gtk::Box) {
+fn hide_launch(results: &gtk::Box, plugin_box: &gtk::Box) {
     for child in results.observe_children().into_iter().flatten() {
         if let Some(child) = child.dynamic_cast_ref::<Widget>() {
             child.remove_css_class("launch");

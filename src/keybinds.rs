@@ -41,6 +41,7 @@ pub fn create_binds_and_submaps<'a>(config: &Config) -> anyhow::Result<Vec<(&'a 
                 overview,
                 submap_name,
                 workspaces_per_row,
+                &config.kill_bind,
                 &config.launcher,
             )
             .context("Failed to generate overview")?;
@@ -48,8 +49,14 @@ pub fn create_binds_and_submaps<'a>(config: &Config) -> anyhow::Result<Vec<(&'a 
         if let Some(switch) = &windows.switch {
             let workspaces_per_row = windows.workspaces_per_row;
             let submap_name = "hyprshell-switch";
-            generate_switch(&mut keyword_list, switch, submap_name, workspaces_per_row)
-                .context("Failed to generate overview")?;
+            generate_switch(
+                &mut keyword_list,
+                switch,
+                submap_name,
+                workspaces_per_row,
+                &config.kill_bind,
+            )
+            .context("Failed to generate overview")?;
         }
     }
 
@@ -110,6 +117,7 @@ fn generate_overview(
     overview: &Overview,
     submap_name: &str,
     workspaces_per_row: u8,
+    kill_bind: &str,
     launcher: &Option<Launcher>,
 ) -> anyhow::Result<()> {
     keyword_list.push((
@@ -201,7 +209,11 @@ fn generate_overview(
 
     keyword_list.push((
         "bind",
-        "ctrl, k, exec, pkill hyprshell; hyprctl dispatch submap reset".to_string(),
+        format!(
+            "{}, exec, pkill hyprshell; {} dispatch submap reset",
+            kill_bind,
+            get_hyprctl_path()
+        ),
     ));
     keyword_list.push(("submap", "reset".to_string()));
     Ok(())
@@ -242,6 +254,7 @@ fn generate_switch(
     switch: &Switch,
     submap_name: &str,
     workspaces_per_row: u8,
+    kill_bind: &str,
 ) -> anyhow::Result<()> {
     keyword_list.push((
         "bind",
@@ -371,9 +384,12 @@ fn generate_switch(
 
     keyword_list.push((
         "bind",
-        "ctrl, k, exec, pkill hyprshell; hyprctl dispatch submap reset".to_string(),
+        format!(
+            "{}, exec, pkill hyprshell; {} dispatch submap reset",
+            kill_bind,
+            get_hyprctl_path()
+        ),
     ));
-
     keyword_list.push(("submap", "reset".to_string()));
     Ok(())
 }

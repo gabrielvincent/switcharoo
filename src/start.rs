@@ -9,7 +9,6 @@ use core_lib::{
 use exec_lib::listener::{hyprland_config_listener, monitor_listener};
 use exec_lib::{apply_keybinds, reload_config, reset_submap, toast};
 use gtk::gdk::Display;
-use gtk::glib::ControlFlow;
 use gtk::prelude::*;
 use gtk::{
     Application, CssProvider, IconTheme, STYLE_PROVIDER_PRIORITY_APPLICATION,
@@ -18,6 +17,7 @@ use gtk::{
 use launcher_lib::{LauncherGlobal, create_launcher_window};
 use std::env;
 use std::path::{Path, PathBuf};
+use std::process::exit;
 use std::rc::Rc;
 use std::time::{Duration, Instant};
 use tracing::{Level, debug, info, span, trace, warn};
@@ -39,7 +39,7 @@ pub fn start(config_path: PathBuf, css_path: PathBuf, data_dir: PathBuf) -> anyh
     glib::unix_signal_add(SIGTERM, || {
         info!("Received SIGTERM, exiting gracefully");
         reset_submap().warn("Failed to reset submap on SIGTERM");
-        ControlFlow::Break
+        exit(0);
     });
 
     let (restart_tx, restart_rx) = async_channel::bounded(1);
@@ -146,10 +146,12 @@ fn setup_restart_listener(
     let tx = restart_tx.clone();
     let _watcher = hyprshell_config_listener(config_path, move |mess| {
         let _ = tx.send_blocking(mess);
+        // TODO these dont work
     });
     let tx = restart_tx.clone();
     let _watcher = hyprshell_css_listener(css_path, move |mess| {
         let _ = tx.send_blocking(mess);
+        // TODO these dont work
     });
     let tx = restart_tx.clone();
     glib::spawn_future_local(async move {
