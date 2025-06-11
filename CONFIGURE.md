@@ -48,6 +48,7 @@ This option itself is optional, if not set, the launcher is not shown.
     - **run_cache_weeks:**_[u8]_ How many weeks to cache the run history. This is used to sort the applications by how often they are used.
     - **show_execs:**_[boolean]_ Show the exec line from the Desktop file. In the case of Flatpaks and PWAs these get shortened to the name of the app.
       The full exec can still be seen in the tooltip.
+    - **show_actions_submenu:**_[boolean]_ Show a dropdown menu with all the desktop actions specified in the `.desktop` files of the applications, like `new private window`, etc.
 - **Terminal:** Open a terminal and run the typed command in it. The terminal is defined in the `default_terminal` config option. This plugin doesn't accept any options.
 - **Shell:** Run the typed command in a shell (in the background). This plugin doesn't accept any options.
 - **WebSearch:** Allows searching for the typed query in a web browser.

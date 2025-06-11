@@ -61,6 +61,8 @@ pub struct ApplicationsPluginConfig {
     pub run_cache_weeks: u8,
     #[default = true]
     pub show_execs: bool,
+    #[default = false]
+    pub show_actions_submenu: bool,
 }
 
 #[derive(SmartDefault, Debug, Clone, Deserialize, Serialize)]

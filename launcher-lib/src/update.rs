@@ -206,7 +206,7 @@ fn create_entry(
         for item in details_menu {
             let menu_item_text = Label::builder()
                 .css_classes(["underline"])
-                .label(format!("{} [todo]", item.text))
+                .label(format!("{}", item.text))
                 .build();
             let menu_item_button = Button::builder()
                 .child(&menu_item_text)

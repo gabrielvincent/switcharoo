@@ -63,6 +63,7 @@ pub fn get_sortable_launch_options(
             text,
             config.run_cache_weeks,
             config.show_execs,
+            config.show_actions_submenu,
             data_dir,
         );
     }

@@ -23,6 +23,7 @@ impl SortableLaunchOption {
         r#match: MatchType,
         runs: &HashMap<Box<Path>, u64>,
         show_execs: bool,
+        show_actions_submenu: bool,
     ) -> Self {
         let (details, details_long) = if show_execs {
             match analyse_exec(&entry.exec) {
@@ -58,22 +59,26 @@ impl SortableLaunchOption {
                 identifier: Some(Box::from(entry.source.to_string_lossy())),
                 plugin: PluginNames::Applications,
             },
-            details_menu: entry
-                .other
-                .iter()
-                .map(|action| DetailsMenuItem {
-                    text: action.name.clone(),
-                    exec: action.exec.clone(),
-                    iden: Identifier {
-                        identifier: Some(Box::from(format!(
-                            "{}|{}",
-                            entry.source.to_string_lossy(),
-                            action.id
-                        ))),
-                        plugin: PluginNames::Applications,
-                    },
-                })
-                .collect(),
+            details_menu: if show_actions_submenu {
+                entry
+                    .other
+                    .iter()
+                    .map(|action| DetailsMenuItem {
+                        text: action.name.clone(),
+                        exec: action.exec.clone(),
+                        iden: Identifier {
+                            identifier: Some(Box::from(format!(
+                                "{}|{}",
+                                entry.source.to_string_lossy(),
+                                action.id
+                            ))),
+                            plugin: PluginNames::Applications,
+                        },
+                    })
+                    .collect()
+            } else {
+                vec![]
+            },
         }
     }
 }
@@ -83,6 +88,7 @@ pub fn get_sortable_options(
     text: &str,
     run_cache_weeks: u8,
     show_execs: bool,
+    show_actions_submenu: bool,
     data_dir: &Path,
 ) {
     let entries = get_all_desktop_files();
@@ -95,6 +101,7 @@ pub fn get_sortable_options(
                 MatchType::Exact,
                 &runs,
                 show_execs,
+                show_actions_submenu,
             ));
         }
         return;
@@ -109,6 +116,7 @@ pub fn get_sortable_options(
                     MatchType::Exact,
                     &runs,
                     show_execs,
+                    show_actions_submenu,
                 ))
             } else {
                 Some(SortableLaunchOption::from_desktop_entry(
@@ -116,6 +124,7 @@ pub fn get_sortable_options(
                     MatchType::Name,
                     &runs,
                     show_execs,
+                    show_actions_submenu,
                 ))
             }
         } else if entry.exec_search.to_ascii_lowercase().contains(&lower_text) {
@@ -129,6 +138,7 @@ pub fn get_sortable_options(
                     MatchType::ExecExact,
                     &runs,
                     show_execs,
+                    show_actions_submenu,
                 ))
             } else {
                 Some(SortableLaunchOption::from_desktop_entry(
@@ -136,6 +146,7 @@ pub fn get_sortable_options(
                     MatchType::ExecName,
                     &runs,
                     show_execs,
+                    show_actions_submenu,
                 ))
             }
         } else if entry
@@ -148,6 +159,7 @@ pub fn get_sortable_options(
                 MatchType::Keyword,
                 &runs,
                 show_execs,
+                show_actions_submenu,
             ))
         } else if entry.type_search.eq(&lower_text) {
             Some(SortableLaunchOption::from_desktop_entry(
@@ -155,6 +167,7 @@ pub fn get_sortable_options(
                 MatchType::AppType,
                 &runs,
                 show_execs,
+                show_actions_submenu,
             ))
         } else {
             None
