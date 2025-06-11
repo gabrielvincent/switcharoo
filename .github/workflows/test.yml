@@ -18,7 +18,7 @@ jobs:
       image: alpine:latest
     steps:
       - name: Install git and other dependencies
-        run: apk add --no-cache git pkgconf rust gtk4.0-dev gtk-layer-shell-dev
+        run: apk add --no-cache git bash pkgconf cargo gtk4.0-dev gtk4-layer-shell-dev
       - uses: actions/checkout@v4
       - name: Load Rust Cache
         uses: Swatinem/rust-cache@v2
@@ -32,9 +32,9 @@ jobs:
       image: alpine:latest
     steps:
       - name: Install git and other dependencies
-        run: apk add --no-cache git pkgconf rust gtk4.0-dev gtk-layer-shell-dev
+        run: apk add --no-cache git bash pkgconf cargo rust-clippy gtk4.0-dev gtk4-layer-shell-dev
       - uses: actions/checkout@v4
       - name: Load Rust Cache
         uses: Swatinem/rust-cache@v2
       - name: Run Clippy
-        run: cargo --color always clippy --all-targets
+        run: bash -c 'cargo --color always clippy --all-targets'
