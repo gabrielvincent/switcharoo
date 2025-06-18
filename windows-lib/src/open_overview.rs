@@ -2,8 +2,10 @@ use crate::WindowsGlobal;
 use crate::data::{SortConfig, collect_data};
 use crate::icon::set_icon;
 use anyhow::Context;
-use core_lib::transfer::{CloseConfig, OpenOverview, TransferType, WindowsOverride};
-use core_lib::{ClientData, ClientId, Warn, WorkspaceId, send_to_socket};
+use core_lib::transfer::{
+    CloseConfig, OpenOverview, TransferType, WindowsOverride, send_to_socket,
+};
+use core_lib::{ClientData, ClientId, Warn, WorkspaceId};
 use exec_lib::set_remain_focused;
 use gtk::gdk::Cursor;
 use gtk::prelude::*;

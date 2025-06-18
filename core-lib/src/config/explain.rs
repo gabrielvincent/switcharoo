@@ -35,34 +35,34 @@ pub fn explain(config: Config) -> String {
                     Reverse::Mod(m) => format!("{} + {}", m, overview.navigate.forward),
                 }
             ));
+            builder.push_str("After opening the Overview the launcher is available.\n");
+            if let Some(_applications) = overview.launcher.plugins.applications.as_ref() {
+                builder.push_str("Start typing to search through applications (sorted by how often they were opened).\n\
+                    Press \x1b[34mreturn\x1b[0m to launch the first app, use \x1b[34mCtrl + 1/2/3/...\x1b[0m to open the second, third, etc.\n");
+            }
+            if overview.launcher.plugins.terminal.is_some() {
+                builder.push_str(
+                    "Press \x1b[34mCtrl + t\x1b[0m to run the typed command in a terminal.\n",
+                );
+            }
+            if overview.launcher.plugins.shell.is_some() {
+                builder.push_str(
+                    "Press \x1b[34mCtrl + r\x1b[0m to run the typed command in the background.\n",
+                );
+            }
+            if let Some(engines) = &overview.launcher.plugins.websearch {
+                builder.push_str(&format!("Press \x1b[34mCtrl + \x1b[1m\x1b[34m<key>\x1b[0m to search the typed text in any of the configured SearchEngines: {}.\n",
+                                              engines.engines.iter().map(|e| e.name.as_str()).collect::<Vec<_>>().join(", ")));
+            }
+            if overview.launcher.plugins.calc.is_some() {
+                builder.push_str(
+                    "Typing a mathematical expression will calculate it and display the result in the launcher.\n",
+                );
+            }
         } else {
             builder.push_str("<Overview disabled>\n");
         };
     };
-
-    if let Some(launcher) = &config.launcher {
-        builder.push_str("After opening the Overview the launcher is available.\n");
-        if let Some(_applications) = launcher.plugins.applications.as_ref() {
-            builder.push_str("Start typing to search through applications (sorted by how often they were opened).\n\
-                    Press \x1b[34mreturn\x1b[0m to launch the first app, use \x1b[34mCtrl + 1/2/3/...\x1b[0m to open the second, third, etc.\n");
-        }
-        if launcher.plugins.terminal.is_some() {
-            builder.push_str(
-                "Press \x1b[34mCtrl + t\x1b[0m to run the typed command in a terminal.\n",
-            );
-        }
-        if launcher.plugins.shell.is_some() {
-            builder.push_str(
-                "Press \x1b[34mCtrl + r\x1b[0m to run the typed command in the background.\n",
-            );
-        }
-        if let Some(engines) = &launcher.plugins.websearch {
-            builder.push_str(&format!("Press \x1b[34mCtrl + \x1b[1m\x1b[34m<key>\x1b[0m to search the typed text in any of the configured SearchEngines: {}.\n",
-                                      engines.engines.iter().map(|e| e.name.as_str()).collect::<Vec<_>>().join(", ")));
-        }
-    } else {
-        builder.push_str("<Launcher disabled>\n");
-    }
 
     builder.push('\n');
 

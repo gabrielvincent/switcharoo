@@ -1,5 +1,5 @@
 use anyhow::Context;
-use core_lib::{Active, ClientId, Warn};
+use core_lib::{Active, ClientId};
 use hyprland::ctl::{Color, notify, reload};
 use hyprland::data::{Client, Clients, Monitor, Monitors, Workspace};
 use hyprland::dispatch::{Dispatch, DispatchType};
@@ -35,14 +35,6 @@ pub fn toast(body: &str) {
     );
 }
 
-pub fn apply_keybinds(list: Vec<(&str, String)>) {
-    trace!("Applying binds and submaps");
-    for (a, b) in list {
-        trace!("{}={}", a, b);
-        Keyword::set(a, b).warn("Failed to apply bind and submap");
-    }
-}
-
 /// trim 0x from hexadecimal (base-16) string and convert to id
 pub fn to_client_id(id: &hyprland::shared::Address) -> ClientId {
     u64::from_str_radix(id.to_string().trim_start_matches("0x"), 16)
@@ -68,10 +60,9 @@ pub fn set_remain_focused() -> anyhow::Result<()> {
     let mut lock = get_prev_follow_mouse()
         .lock()
         .map_err(|e| anyhow::anyhow!("unable to lock get_prev_follow_mouse mutex: {}", e))?;
-    if follow.value.to_string() != "3" {
-        trace!("Storing previous follow_mouse value: {}", follow.value);
-        *lock = Some(follow.value.to_string());
-    }
+    trace!("Storing previous follow_mouse value: {}", follow.value);
+    *lock = Some(follow.value.to_string());
+
     Keyword::set("input:follow_mouse", "3").context("keyword failed")?;
     trace!("Set follow_mouse to 3");
 
@@ -79,13 +70,13 @@ pub fn set_remain_focused() -> anyhow::Result<()> {
     let mut lock = get_gestures_enabled()
         .lock()
         .map_err(|e| anyhow::anyhow!("unable to lock get_gestures_enabled mutex: {}", e))?;
-    if gestures_enabled.set {
-        trace!(
-            "Storing previous gestures_enabled value: {}",
-            gestures_enabled.value
-        );
-        *lock = Some(gestures_enabled.value.to_string() == "1");
-    }
+
+    trace!(
+        "Storing previous gestures_enabled value: {}",
+        gestures_enabled.value
+    );
+    *lock = Some(gestures_enabled.value.to_string() == "1");
+
     Keyword::set("gestures:workspace_swipe", "0").context("keyword failed")?;
     trace!("Set gestures:workspace_swipe to 0");
     Ok(())

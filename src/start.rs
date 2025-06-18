@@ -1,13 +1,14 @@
-use crate::keybinds::create_binds_and_submaps;
+use crate::keybinds::create_binds;
 use crate::receive::{Globals, socket_handler};
+use async_channel::{Receiver, Sender};
 use core_lib::theme_icon_cache::init_icon_map;
 use core_lib::transfer::TransferType;
 use core_lib::{
     Warn, collect_desktop_files, config, hyprshell_config_block, hyprshell_config_listener,
-    hyprshell_css_listener, send_to_socket,
+    hyprshell_css_listener,
 };
 use exec_lib::listener::{hyprland_config_listener, monitor_listener};
-use exec_lib::{apply_keybinds, reload_config, reset_remain_focused, reset_submap, toast};
+use exec_lib::{reload_config, reset_remain_focused, reset_submap, toast};
 use gtk::gdk::Display;
 use gtk::glib::ControlFlow;
 use gtk::prelude::*;
@@ -35,20 +36,16 @@ pub fn start(config_path: PathBuf, css_path: PathBuf, data_dir: PathBuf) -> anyh
 
     fill_icon_map(true);
     check_themes();
+    gtk_handle_sigterm();
 
-    glib::unix_signal_add(SIGTERM, || {
-        info!("Received SIGTERM, exiting gracefully");
-        reset_submap().warn("Failed to reset submap on SIGTERM");
-        reset_remain_focused().warn("Failed to reset follow mouse on SIGTERM");
-        // Continue with the default SIGTERM handler after cleanup
-        unsafe {
-            libc::signal(SIGTERM, libc::SIG_DFL);
-            libc::raise(SIGTERM);
-        }
-        ControlFlow::Continue
-    });
+    let desktop_files = collect_desktop_files();
+    windows_lib::reload_desktop_map(&desktop_files);
+    launcher_lib::reload_applications_desktop_map(&desktop_files);
+    launcher_lib::reload_search_default_browser(&desktop_files);
 
-    let (restart_tx, restart_rx) = async_channel::bounded(1);
+    let (event_sender, event_receiver) = async_channel::unbounded();
+    let (restart_sender, restart_receiver) = async_channel::bounded(1);
+
     if env::var_os("HYPRSHELL_NO_LISTENERS").is_none() {
         // delay for 1 second to allow the config to be reloaded before listening for reload
         let config_path = config_path.clone();
@@ -58,19 +55,21 @@ pub fn start(config_path: PathBuf, css_path: PathBuf, data_dir: PathBuf) -> anyh
             .and_then(|s| s.parse().ok())
             .unwrap_or(1500);
         glib::timeout_add_local_once(Duration::from_millis(delay), move || {
-            setup_restart_listener(&config_path, &css_path, restart_tx);
+            setup_restart_listener(&config_path, &css_path, restart_sender);
         });
         glib::spawn_future_local(async move {
             let mut last_send = Instant::now();
             loop {
-                let cause = restart_rx.recv().await.unwrap_or_default();
+                let cause = restart_receiver.recv().await.unwrap_or_default();
                 let now = Instant::now();
                 if now.duration_since(last_send) < Duration::from_millis(delay) {
                     debug!("Ignoring restart request ({cause}) too soon after last send");
                     continue;
                 }
                 info!("Restarting gui ({cause})");
-                send_to_socket(&TransferType::Restart).warn("unable to send restart");
+                event_sender
+                    .send(&TransferType::Restart)
+                    .warn("unable to send restart");
                 last_send = now;
             }
         });
@@ -78,45 +77,52 @@ pub fn start(config_path: PathBuf, css_path: PathBuf, data_dir: PathBuf) -> anyh
 
     loop {
         let application = Application::builder()
-            .application_id(&if cfg!(debug_assertions) {
-                format!("{}-debug", APPLICATION_ID)
-            } else {
-                APPLICATION_ID.to_string()
-            })
+            .application_id(APPLICATION_ID.to_string())
             .build();
 
         let config_path = config_path.clone();
         let css_path = css_path.clone();
         let data_dir = data_dir.clone();
-        application.connect_activate(move |app| activate(app, &config_path, &css_path, &data_dir));
+        let event_sender = event_sender.clone();
+        let event_receiver = event_receiver.clone();
+        application.connect_activate(move |app| {
+            activate(
+                app,
+                &config_path,
+                &css_path,
+                &data_dir,
+                event_sender.clone(),
+                event_receiver.clone(),
+            )
+        });
         application.run_with_args::<String>(&[]);
     }
 }
-fn activate(app: &Application, config_path: &Path, css_path: &Path, data_dir: &Path) {
+fn activate(
+    app: &Application,
+    config_path: &Path,
+    css_path: &Path,
+    data_dir: &Path,
+    event_sender: Sender<TransferType>,
+    event_receiver: Receiver<TransferType>,
+) {
     let _span = span!(Level::TRACE, "activate").entered();
-    // reloading the config is needed to delete the old submaps
-    reload_config().warn("Failed to reload config");
-
-    let desktop_files = collect_desktop_files();
-    windows_lib::reload_desktop_map(&desktop_files);
-    launcher_lib::reload_applications_desktop_map(&desktop_files);
-    launcher_lib::reload_search_default_browser(&desktop_files);
 
     let config = match config::load_config(config_path) {
+        Ok(config) => config,
         Err(err) => {
             toast(&format!("Failed to load config: {:?}", err));
             hyprshell_config_block(config_path);
-            return;
+            return; // return needed to exit the application
         }
-        Ok(config) => config,
     };
 
-    if let Ok(keybinds) = create_binds_and_submaps(&config) {
-        apply_keybinds(keybinds);
-    } else {
-        warn!("Failed to apply keybinds");
-        toast("Failed to create keybinds");
+    if let Err(err) = create_binds(&config) {
+        warn!("Failed to create keybinds: {err}");
+        toast(&format!("Failed to create keybinds: {err}"));
+        return; // return needed to exit the application
     }
+
     apply_css(css_path);
 
     let windows_data: Option<WindowsGlobal> = config.windows.map(WindowsGlobal::new);
@@ -247,4 +253,18 @@ pub fn fill_icon_map(threads: bool) {
         .collect::<Vec<_>>();
     trace!("Icon theme search path: {search_path:?}");
     init_icon_map(gtk_icons, search_path, threads);
+}
+
+pub fn gtk_handle_sigterm() {
+    glib::unix_signal_add(SIGTERM, || {
+        info!("Received SIGTERM, exiting gracefully");
+        reset_submap().warn("Failed to reset submap on SIGTERM");
+        reset_remain_focused().warn("Failed to reset follow mouse on SIGTERM");
+        // Continue with the default SIGTERM handler after cleanup
+        unsafe {
+            libc::signal(SIGTERM, libc::SIG_DFL);
+            libc::raise(SIGTERM);
+        }
+        ControlFlow::Continue
+    });
 }

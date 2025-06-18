@@ -1,9 +1,11 @@
 use std::env;
+use std::fs::DirEntry;
 use std::path::PathBuf;
-use tracing::{trace, warn};
+use tracing::{debug, trace, warn};
 
 pub fn get_default_config_path() -> PathBuf {
-    let mut path = get_config_dir();
+    let mut path = get_config_home();
+    // use .ron as default (for generating)
     path.push("hyprshell/config.ron");
     if path.exists() {
         trace!("Found config file at {path:?}");
@@ -22,24 +24,22 @@ pub fn get_default_config_path() -> PathBuf {
             return path;
         }
     }
-
-    // use .ron as default (for generating)
     path
 }
 
 pub fn get_default_css_path() -> PathBuf {
-    let mut path = get_config_dir();
+    let mut path = get_config_home();
     path.push("hyprshell/styles.css");
     path
 }
 
 pub fn get_default_data_dir() -> PathBuf {
-    let mut path = get_data_dir();
+    let mut path = get_data_home();
     path.push("hyprshell");
     path
 }
 
-pub fn get_data_dir() -> PathBuf {
+pub fn get_data_home() -> PathBuf {
     env::var_os("XDG_DATA_HOME")
         .map(PathBuf::from)
         .or_else(|| {
@@ -49,7 +49,7 @@ pub fn get_data_dir() -> PathBuf {
         .expect("Failed to get config dir (XDG_DATA_HOME or HOME not set)")
 }
 
-pub fn get_config_dir() -> PathBuf {
+pub fn get_config_home() -> PathBuf {
     env::var_os("XDG_CONFIG_HOME")
         .map(PathBuf::from)
         .or_else(|| {
@@ -59,13 +59,13 @@ pub fn get_config_dir() -> PathBuf {
         .expect("Failed to get config dir (XDG_CONFIG_HOME or HOME not set)")
 }
 
-pub fn find_config_dirs() -> Vec<PathBuf> {
+pub fn get_config_dirs() -> Vec<PathBuf> {
     env::var_os("XDG_CONFIG_DIRS")
         .map(|val| env::split_paths(&val).collect())
         .unwrap_or_else(|| vec![PathBuf::from("/etc/xdg/")])
 }
 
-pub fn find_application_dirs() -> Vec<PathBuf> {
+pub fn get_data_dirs() -> Vec<PathBuf> {
     let mut dirs = env::var_os("XDG_DATA_DIRS")
         .map(|val| env::split_paths(&val).collect())
         .unwrap_or_else(|| {
@@ -92,4 +92,29 @@ pub fn find_application_dirs() -> Vec<PathBuf> {
     dirs.into_iter()
         .map(|dir| dir.join("applications"))
         .collect()
+}
+
+pub fn collect_desktop_files() -> Vec<DirEntry> {
+    let mut res = Vec::new();
+    for dir in get_data_dirs() {
+        if !dir.exists() {
+            continue;
+        }
+        match dir.read_dir() {
+            Ok(dir) => {
+                for entry in dir.flatten() {
+                    let path = entry.path();
+                    if path.is_file() && path.extension().is_some_and(|e| e == "desktop") {
+                        res.push(entry);
+                    }
+                }
+            }
+            Err(e) => {
+                warn!("Failed to read dir {dir:?}: {e}");
+                continue;
+            }
+        }
+    }
+    debug!("found {} desktop files", res.len());
+    res
 }

@@ -12,8 +12,13 @@ pub(crate) fn launch_history(
         core_lib::config::load_config(config_path)
             .ok()
             .and_then(|c| {
-                c.launcher
-                    .and_then(|l| l.plugins.applications.as_ref().map(|a| a.run_cache_weeks))
+                c.windows
+                    .map(|w| {
+                        w.overview.map(|o| o.launcher).and_then(|l| {
+                            l.plugins.applications.as_ref().map(|a| a.run_cache_weeks)
+                        })
+                    })
+                    .flatten()
             })
             .unwrap_or(4)
     });

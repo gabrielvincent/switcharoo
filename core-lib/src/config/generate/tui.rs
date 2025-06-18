@@ -95,57 +95,43 @@ pub fn prompt_config() -> anyhow::Result<(ConfigData, StyleData)> {
         }
     };
     let launcher = if open_overview.is_some() {
-        let enable_launcher = Confirm::new("Enable Application Launcher?")
-            .with_default(true)
-            .with_help_message("Used to start applications, opens with overview")
-            .prompt()?;
-
-        let (default_terminal, launcher_plugins, launcher_engines) = if enable_launcher {
-            let default_terminal = Text::new("Default Terminal")
+        // let (default_terminal, launcher_plugins, launcher_engines) = {
+        let default_terminal = Text::new("Default Terminal")
                 .with_autocomplete(StringAutoCompleter::from(Box::from(TERMINALS)))
                 .with_help_message("used to open terminal applications (htop), leave empty to chose from installed terminals]\n[Any valid binary name found in path can be typed in]\n[↑↓ to move, tab to autocomplete, enter to submit")
                 .prompt()
                 .map_or(None, |term| if term.trim().is_empty() { None } else { Some(term.into_boxed_str()) });
 
+        let formatter: MultiOptionFormatter<'_, &str> = &|a| format!("{} plugins active", a.len());
+        let plugins = MultiSelect::new(
+            "Plugins for launcher",
+            configurable_launcher_plugins::ALL.into(),
+        )
+        .with_all_selected_by_default()
+        .with_formatter(formatter)
+        .prompt()
+        .map_or(vec![], |selected| {
+            selected.into_iter().map(Box::from).collect()
+        });
+
+        let engines = if plugins.contains(&Box::from(configurable_launcher_plugins::WEB_SEARCH)) {
             let formatter: MultiOptionFormatter<'_, &str> =
-                &|a| format!("{} plugins active", a.len());
-            let plugins = MultiSelect::new(
-                "Plugins for launcher",
-                configurable_launcher_plugins::ALL.into(),
+                &|a| format!("{} engines active", a.len());
+            MultiSelect::new(
+                "SearchEngines for launcher",
+                WEB_SEARCH_ENGINES.iter().map(|(name, _)| *name).collect(),
             )
-            .with_all_selected_by_default()
             .with_formatter(formatter)
             .prompt()
             .map_or(vec![], |selected| {
                 selected.into_iter().map(Box::from).collect()
-            });
-
-            let engines = if plugins.contains(&Box::from(configurable_launcher_plugins::WEB_SEARCH))
-            {
-                let formatter: MultiOptionFormatter<'_, &str> =
-                    &|a| format!("{} engines active", a.len());
-                MultiSelect::new(
-                    "SearchEngines for launcher",
-                    WEB_SEARCH_ENGINES.iter().map(|(name, _)| *name).collect(),
-                )
-                .with_formatter(formatter)
-                .prompt()
-                .map_or(vec![], |selected| {
-                    selected.into_iter().map(Box::from).collect()
-                })
-            } else {
-                vec![]
-            };
-            (default_terminal, plugins, engines)
+            })
         } else {
-            (None, vec![], vec![])
+            vec![]
         };
-        Some((
-            enable_launcher,
-            default_terminal,
-            launcher_plugins,
-            launcher_engines,
-        ))
+        // (default_terminal, plugins, engines)
+        // };
+        Some((default_terminal, plugins, engines))
     } else {
         None
     };
@@ -179,12 +165,11 @@ pub fn prompt_config() -> anyhow::Result<(ConfigData, StyleData)> {
 
     Ok((
         ConfigData {
-            enable_launcher: launcher.as_ref().map(|l| l.0).unwrap_or(false),
-            default_terminal: launcher.as_ref().and_then(|l| l.1.clone()),
+            default_terminal: launcher.as_ref().and_then(|l| l.0.clone()),
             overview: open_overview.map(|o| (o.0, KeyMaybeMod::from(&*o.1))),
             switch: open_switch,
-            launcher_plugins: launcher.as_ref().map(|l| l.2.clone()).unwrap_or_default(),
-            launcher_engines: launcher.map(|l| l.3).unwrap_or_default(),
+            launcher_plugins: launcher.as_ref().map(|l| l.1.clone()).unwrap_or_default(),
+            launcher_engines: launcher.map(|l| l.2).unwrap_or_default(),
             grave_reverse,
         },
         StyleData { default_color },

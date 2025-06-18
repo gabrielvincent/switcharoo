@@ -11,7 +11,12 @@ pub fn check(config: &Config) -> anyhow::Result<()> {
         bail!("Scale factor must be less than 15 and greater than 0");
     }
 
-    if let Some(l) = &config.launcher {
+    if let Some(l) = &config
+        .windows
+        .as_ref()
+        .map(|w| w.overview.as_ref().map(|o| &o.launcher))
+        .flatten()
+    {
         let mut used: Vec<char> = vec![];
         for engine in l
             .plugins

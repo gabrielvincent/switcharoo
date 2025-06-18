@@ -1,4 +1,5 @@
 // https://github.com/H3rmt/hyprshell/discussions/137#discussioncomment-12078216
+
 use std::collections::BTreeSet;
 use std::env;
 use std::fs::read_dir;

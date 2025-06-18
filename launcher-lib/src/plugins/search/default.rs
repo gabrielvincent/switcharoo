@@ -1,4 +1,4 @@
-use core_lib::{IniFile, find_config_dirs, get_config_dir};
+use core_lib::{IniFile, get_config_dirs, get_config_home};
 use std::fs::{DirEntry, read_to_string};
 use std::path::Path;
 use std::sync::{Mutex, MutexGuard, OnceLock};
@@ -88,8 +88,8 @@ fn get_default_browser_desktop_file() -> Option<Box<str>> {
 
 fn get_mimeapps() -> Vec<DirEntry> {
     let mut res = Vec::new();
-    let mut dirs = find_config_dirs();
-    dirs.push(get_config_dir());
+    let mut dirs = get_config_dirs();
+    dirs.push(get_config_home());
     for dir in dirs {
         if !dir.exists() {
             continue;

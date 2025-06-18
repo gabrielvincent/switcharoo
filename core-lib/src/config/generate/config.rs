@@ -46,7 +46,6 @@ pub fn check_file_exist(
 
 #[derive(Debug)]
 pub struct ConfigData {
-    pub enable_launcher: bool,
     pub default_terminal: Option<Box<str>>,
     pub overview: Option<(Mod, KeyMaybeMod)>,
     pub switch: Option<Mod>,
@@ -57,52 +56,6 @@ pub struct ConfigData {
 
 pub fn generate_config(data: ConfigData) -> Config {
     Config {
-        launcher: if data.enable_launcher {
-            Some(Launcher {
-                default_terminal: data.default_terminal,
-                plugins: Plugins {
-                    applications: data
-                        .launcher_plugins
-                        .iter()
-                        .find(|pl| pl.as_ref().eq(configurable_launcher_plugins::APPLICATIONS))
-                        .map(|_| Default::default()),
-                    terminal: data
-                        .launcher_plugins
-                        .iter()
-                        .find(|pl| pl.as_ref().eq(configurable_launcher_plugins::TERMINAL))
-                        .map(|_| Default::default()),
-                    shell: data
-                        .launcher_plugins
-                        .iter()
-                        .find(|pl| pl.as_ref().eq(configurable_launcher_plugins::SHELL))
-                        .map(|_| Default::default()),
-                    websearch: data
-                        .launcher_plugins
-                        .iter()
-                        .find(|pl| pl.as_ref().eq(configurable_launcher_plugins::WEB_SEARCH))
-                        .map(|_| WebSearchConfig {
-                            engines: data
-                                .launcher_engines
-                                .iter()
-                                .filter_map(|engine| {
-                                    WEB_SEARCH_ENGINES
-                                        .iter()
-                                        .find(|(name, _)| *name == engine.as_ref())
-                                        .map(|(_, constructor)| constructor())
-                                })
-                                .collect(),
-                        }),
-                    calc: data
-                        .launcher_plugins
-                        .iter()
-                        .find(|pl| pl.as_ref().eq(configurable_launcher_plugins::CALC))
-                        .map(|_| Default::default()),
-                },
-                ..Default::default()
-            })
-        } else {
-            None
-        },
         windows: Some(Windows {
             overview: if let Some(overview) = data.overview {
                 Some(Overview {
@@ -115,6 +68,52 @@ pub fn generate_config(data: ConfigData) -> Config {
                             Reverse::Key("grave".to_string())
                         } else {
                             Reverse::Mod(Mod::Shift)
+                        },
+                        ..Default::default()
+                    },
+                    launcher: Launcher {
+                        default_terminal: data.default_terminal,
+                        plugins: Plugins {
+                            applications: data
+                                .launcher_plugins
+                                .iter()
+                                .find(|pl| {
+                                    pl.as_ref().eq(configurable_launcher_plugins::APPLICATIONS)
+                                })
+                                .map(|_| Default::default()),
+                            terminal: data
+                                .launcher_plugins
+                                .iter()
+                                .find(|pl| pl.as_ref().eq(configurable_launcher_plugins::TERMINAL))
+                                .map(|_| Default::default()),
+                            shell: data
+                                .launcher_plugins
+                                .iter()
+                                .find(|pl| pl.as_ref().eq(configurable_launcher_plugins::SHELL))
+                                .map(|_| Default::default()),
+                            websearch: data
+                                .launcher_plugins
+                                .iter()
+                                .find(|pl| {
+                                    pl.as_ref().eq(configurable_launcher_plugins::WEB_SEARCH)
+                                })
+                                .map(|_| WebSearchConfig {
+                                    engines: data
+                                        .launcher_engines
+                                        .iter()
+                                        .filter_map(|engine| {
+                                            WEB_SEARCH_ENGINES
+                                                .iter()
+                                                .find(|(name, _)| *name == engine.as_ref())
+                                                .map(|(_, constructor)| constructor())
+                                        })
+                                        .collect(),
+                                }),
+                            calc: data
+                                .launcher_plugins
+                                .iter()
+                                .find(|pl| pl.as_ref().eq(configurable_launcher_plugins::CALC))
+                                .map(|_| Default::default()),
                         },
                         ..Default::default()
                     },

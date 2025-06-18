@@ -1,7 +1,7 @@
 use crate::global::LauncherGlobalData;
 use crate::{LauncherGlobal, update_launcher};
-use core_lib::transfer::TransferType;
-use core_lib::{LAUNCHER_NAMESPACE, Warn, send_to_socket};
+use core_lib::transfer::{TransferType, send_to_socket};
+use core_lib::{LAUNCHER_NAMESPACE, Warn};
 use gtk::Orientation;
 use gtk::gdk::Key;
 use gtk::glib::Propagation;
@@ -10,7 +10,7 @@ use gtk::{Application, ApplicationWindow, Entry, EventControllerKey, ListBox, Se
 use gtk4_layer_shell::{Edge, Layer, LayerShell};
 use std::cell::RefCell;
 use std::collections::HashMap;
-use tracing::{Level, debug, span};
+use tracing::{Level, debug, span, warn};
 
 pub fn create_launcher_window(
     app: &Application,
@@ -53,6 +53,17 @@ pub fn create_launcher_window(
         .build();
     main_vbox.append(&plugin_box);
 
+    let event_controller = EventControllerKey::new();
+    event_controller.connect_key_pressed(|_, key, _, _| {
+        match key {
+            Key::Escape => {
+                warn!("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+            }
+            _ => (),
+        }
+        Propagation::Stop
+    });
+
     let window = ApplicationWindow::builder()
         .css_classes(["window"])
         .application(app)
@@ -67,6 +78,7 @@ pub fn create_launcher_window(
     window.set_margin(Edge::Top, 15);
     window.present();
     window.set_visible(false);
+    window.add_controller(event_controller);
 
     debug!("Created launcher window ({})", window.id());
     global.data = Some(RefCell::new(LauncherGlobalData {

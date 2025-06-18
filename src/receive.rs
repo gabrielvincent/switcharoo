@@ -1,7 +1,7 @@
 use crate::recive_handle::{close, exit, open_overview, open_switch, restart, switch, r#type};
 use anyhow::Context;
-use core_lib::get_daemon_socket_path_buff;
 use core_lib::transfer::TransferType;
+use core_lib::{get_daemon_socket_path_buff, transfer};
 use exec_lib::toast;
 use gtk::gio::{Cancellable, InputStream, SocketListener, UnixSocketAddress};
 use gtk::prelude::*;
@@ -73,22 +73,14 @@ fn handle_client(stream: InputStream, size: isize, global: &Globals) -> anyhow::
         .read(&mut buffer, None::<&Cancellable>)
         .context("Failed to read data from buffer")?;
 
-    // client checked if socket is OK
-    if buffer.is_empty() {
-        trace!("Received empty buffer");
-        return Ok(false);
-    }
-
-    let exit = handle_client_transfer(&String::from_utf8_lossy(&buffer), global)?;
+    let transfer = transfer::receive_from_buffer(&buffer)?;
+    let exit = handle_client_transfer(transfer, global)?;
 
     trace!("Handled client in {:?}", now.elapsed());
     Ok(exit)
 }
 
-fn handle_client_transfer(str: &str, global: &Globals) -> anyhow::Result<bool> {
-    let transfer: TransferType =
-        serde_json::from_str(str).with_context(|| format!("Failed to deserialize str: {str:?}"))?;
-    debug!("Received command: {transfer:?}");
+fn handle_client_transfer(transfer: TransferType, global: &Globals) -> anyhow::Result<bool> {
     let close_socket = matches!(transfer, TransferType::Restart);
     match transfer {
         TransferType::OpenOverview(config) => open_overview(global, config),

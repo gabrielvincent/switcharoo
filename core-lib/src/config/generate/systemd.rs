@@ -1,4 +1,4 @@
-use crate::get_data_dir;
+use crate::get_data_home;
 use anyhow::Context;
 use std::env;
 use std::fs::create_dir_all;
@@ -55,7 +55,7 @@ pub fn write_systemd_unit(
 }
 
 fn get_path() -> PathBuf {
-    let mut data_dir = get_data_dir();
+    let mut data_dir = get_data_home();
     data_dir.push("systemd/user/hyprshell.service");
     data_dir
 }

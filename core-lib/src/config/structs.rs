@@ -9,10 +9,30 @@ pub struct Config {
     pub layerrules: bool,
     #[default = "ctrl+shift+alt, h"]
     pub kill_bind: String,
-    #[default(None)]
-    pub launcher: Option<Launcher>,
     #[default(Some(Windows::default()))]
     pub windows: Option<Windows>,
+}
+
+#[derive(SmartDefault, Debug, Clone, Deserialize, Serialize)]
+#[serde(default, deny_unknown_fields)]
+pub struct Windows {
+    #[default = 8.5]
+    pub scale: f64,
+    #[default = 5]
+    pub workspaces_per_row: u8,
+    #[default = true]
+    pub strip_html_from_workspace_title: bool,
+    pub overview: Option<Overview>,
+    pub switch: Option<Switch>,
+}
+
+#[derive(SmartDefault, Debug, Clone, Deserialize, Serialize)]
+#[serde(default, deny_unknown_fields)]
+pub struct Overview {
+    pub launcher: Launcher,
+    pub open: OpenOverview,
+    pub navigate: Navigate,
+    pub other: OtherOverview,
 }
 
 #[derive(SmartDefault, Debug, Clone, Deserialize, Serialize)]
@@ -34,7 +54,7 @@ pub struct Launcher {
         shell: None,
         websearch: Some(WebSearchConfig::default()),
         calc: Some(EmptyConfig::default()),
-    })]
+        })]
     pub plugins: Plugins,
 }
 
@@ -82,27 +102,6 @@ pub struct SearchEngine {
     pub url: String,
     pub name: String,
     pub key: char,
-}
-
-#[derive(SmartDefault, Debug, Clone, Deserialize, Serialize)]
-#[serde(default, deny_unknown_fields)]
-pub struct Windows {
-    #[default = 8.5]
-    pub scale: f64,
-    #[default = 5]
-    pub workspaces_per_row: u8,
-    #[default = true]
-    pub strip_html_from_workspace_title: bool,
-    pub overview: Option<Overview>,
-    pub switch: Option<Switch>,
-}
-
-#[derive(SmartDefault, Debug, Clone, Deserialize, Serialize)]
-#[serde(default, deny_unknown_fields)]
-pub struct Overview {
-    pub open: OpenOverview,
-    pub navigate: Navigate,
-    pub other: OtherOverview,
 }
 
 #[derive(SmartDefault, Debug, Clone, Deserialize, Serialize)]

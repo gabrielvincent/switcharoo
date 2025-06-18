@@ -3,9 +3,9 @@ use crate::plugins::{
     DetailsMenuItem, get_sortable_launch_options, get_static_launch_options, iden_to_str,
 };
 use crate::util::DataInWidget;
+use core_lib::Warn;
 use core_lib::theme_icon_cache::theme_has_icon_name;
-use core_lib::transfer::{CloseConfig, Identifier, TransferType};
-use core_lib::{Warn, send_to_socket};
+use core_lib::transfer::{CloseConfig, Identifier, TransferType, send_to_socket};
 use gtk::gdk::Cursor;
 use gtk::pango::EllipsizeMode;
 use gtk::prelude::*;
