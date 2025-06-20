@@ -16,7 +16,7 @@ jobs:
         id: check_commit
         run: |
           commit_msg=$(git log -1 --pretty=%B)
-          if [[ $commit_msg =~ ^chore\(hyprshell\):\ release ]]; then
+          if [[ $commit_msg =~ ^chore\(hyprshell.*\):\ release ]]; then
             echo "should_publish=true" >> $GITHUB_OUTPUT
           else
             echo "Error: Commit message must start with 'chore(hyprshell): release'"
