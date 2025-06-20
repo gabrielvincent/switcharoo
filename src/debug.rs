@@ -1,4 +1,4 @@
-use crate::{start, util};
+use crate::util;
 use core_lib::theme_icon_cache::get_all_icons;
 use std::path::Path;
 use tracing::{debug, info};

@@ -1,16 +1,13 @@
-use crate::start::Globals;
 use anyhow::Context;
-use async_channel::{Receiver, Sender};
+use async_channel::Sender;
 use core_lib::transfer::TransferType;
 use core_lib::{get_daemon_socket_path_buff, transfer};
 use exec_lib::toast;
 use gtk::gio::{Cancellable, InputStream, SocketListener, UnixSocketAddress};
 use gtk::prelude::*;
 use gtk::{gio, glib};
-use rand::Rng;
 use std::fs::remove_file;
-use std::time::Instant;
-use tracing::{Level, debug, error, info, span, trace};
+use tracing::{error, info};
 
 pub async fn socket_handler(event_sender: Sender<TransferType>) {
     let buf = get_daemon_socket_path_buff();
@@ -64,7 +61,7 @@ fn handle_client(
         .read(&mut buffer, None::<&Cancellable>)
         .context("Failed to read data from buffer")?;
     let transfer =
-        transfer::receive_from_buffer(&buffer).context("Failed to receive from buffer")?;
+        transfer::receive_from_buffer(buffer).context("Failed to receive from buffer")?;
     event_sender
         .send_blocking(transfer)
         .context("Failed to send transfer")?;

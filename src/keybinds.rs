@@ -1,8 +1,7 @@
 use anyhow::Context;
+use core_lib::Warn;
 use core_lib::binds::generate_bind_kill;
-use core_lib::config::{Config, FilterBy, Overview, Reverse, Switch};
-use core_lib::transfer::{CloseOverviewConfig, Direction, OpenOverview, OpenSwitch, TransferType};
-use core_lib::{LAUNCHER_NAMESPACE, OVERVIEW_NAMESPACE, Warn};
+use core_lib::config::Config;
 use exec_lib::binds::{apply_exec_bind, apply_layerrules};
 use tracing::{Level, span};
 

@@ -36,7 +36,7 @@ impl old_structs::Overview {
         config::Overview {
             open: value.open,
             other: value.other,
-            navigate: value.navigate.into(),
+            navigate: value.navigate,
             launcher: launcher.unwrap_or_default(),
             strip_html_from_workspace_title,
         }

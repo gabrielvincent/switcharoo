@@ -131,6 +131,7 @@ fn create_static_plugin_box(
     button
 }
 
+#[allow(clippy::too_many_arguments)]
 fn create_entry(
     iden: &Identifier,
     key: impl Into<glib::GString>,

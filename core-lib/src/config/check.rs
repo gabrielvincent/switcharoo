@@ -14,8 +14,7 @@ pub fn check(config: &Config) -> anyhow::Result<()> {
     if let Some(l) = &config
         .windows
         .as_ref()
-        .map(|w| w.overview.as_ref().map(|o| &o.launcher))
-        .flatten()
+        .and_then(|w| w.overview.as_ref().map(|o| &o.launcher))
     {
         let mut used: Vec<char> = vec![];
         for engine in l

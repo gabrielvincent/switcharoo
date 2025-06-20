@@ -7,17 +7,16 @@ use async_channel::{Receiver, Sender};
 use core_lib::config::Config;
 use core_lib::transfer::TransferType;
 use core_lib::{
-    APPLICATION_ID, Warn, collect_desktop_files, config, hyprshell_config_block,
-    hyprshell_config_listener, hyprshell_css_listener,
+    APPLICATION_ID, Warn, config, hyprshell_config_block, hyprshell_config_listener,
+    hyprshell_css_listener,
 };
 use exec_lib::listener::{hyprland_config_listener, monitor_listener};
-use exec_lib::{reload_config, reset_remain_focused, toast};
+use exec_lib::toast;
 use gtk::gdk::Display;
-use gtk::glib::ControlFlow;
 use gtk::prelude::*;
 use gtk::{
-    Application, CssProvider, IconTheme, STYLE_PROVIDER_PRIORITY_APPLICATION,
-    STYLE_PROVIDER_PRIORITY_USER, Settings, glib, style_context_add_provider_for_display,
+    Application, CssProvider, STYLE_PROVIDER_PRIORITY_APPLICATION, STYLE_PROVIDER_PRIORITY_USER,
+    glib, style_context_add_provider_for_display,
 };
 use launcher_lib::create_windows_overview_launcher_window;
 use std::any::Any;
@@ -26,7 +25,7 @@ use std::path::{Path, PathBuf};
 use std::rc::Rc;
 use std::sync::{Mutex, OnceLock};
 use std::time::{Duration, Instant};
-use tracing::{Level, debug, info, span, trace, warn};
+use tracing::{Level, debug, info, span, warn};
 use windows_lib::{WindowsGlobal, create_windows_overview_window, create_windows_switch_window};
 
 pub fn start(config_path: PathBuf, css_path: PathBuf, data_dir: PathBuf) -> anyhow::Result<()> {
