@@ -57,8 +57,9 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           
           git fetch --tags origin hyprshell-release
-          git checkout ${{ github.ref }} -b hyprshell-release
+          git checkout ${{ github.ref }}
           git log -1 --pretty=%B
+          git push origin HEAD:hyprshell-release
           
           echo "removing old tag"
           git tag --delete ${{ github.ref_name }}
