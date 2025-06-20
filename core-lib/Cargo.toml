@@ -22,7 +22,6 @@ smart-default = { version = "0.7.1" }
 ron = { version = "0.10.1" }
 semver = { version = "1.0.26" }
 toml = { version = "0.8.22", optional = true }
-ashpd = { version = "0.11.0", default-features = false, features = ["gtk4_wayland", "tracing"] }
 
 [features]
 toml_config = ["dep:toml"]

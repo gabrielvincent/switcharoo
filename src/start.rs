@@ -7,11 +7,11 @@ use async_channel::{Receiver, Sender};
 use core_lib::config::Config;
 use core_lib::transfer::TransferType;
 use core_lib::{
-    Warn, collect_desktop_files, config, hyprshell_config_block, hyprshell_config_listener,
-    hyprshell_css_listener,
+    APPLICATION_ID, Warn, collect_desktop_files, config, hyprshell_config_block,
+    hyprshell_config_listener, hyprshell_css_listener,
 };
 use exec_lib::listener::{hyprland_config_listener, monitor_listener};
-use exec_lib::{reload_config, reset_remain_focused, reset_submap, toast};
+use exec_lib::{reload_config, reset_remain_focused, toast};
 use gtk::gdk::Display;
 use gtk::glib::ControlFlow;
 use gtk::prelude::*;
@@ -29,9 +29,6 @@ use std::time::{Duration, Instant};
 use tracing::{Level, debug, info, span, trace, warn};
 use windows_lib::{WindowsGlobal, create_windows_overview_window, create_windows_switch_window};
 
-const APPLICATION_ID: &str = "com.github.h3rmt.hyprshell";
-const SIGTERM: i32 = 15; // Signal number for SIGTERM
-
 pub fn start(config_path: PathBuf, css_path: PathBuf, data_dir: PathBuf) -> anyhow::Result<()> {
     let _span = span!(Level::TRACE, "start").entered();
     let config_path = Rc::new(config_path);
@@ -42,11 +39,12 @@ pub fn start(config_path: PathBuf, css_path: PathBuf, data_dir: PathBuf) -> anyh
     let (event_sender, event_receiver) = async_channel::unbounded();
 
     if env::var_os("HYPRSHELL_NO_LISTENERS").is_none() {
-        register_event_restarter(&config_path, &css_path, event_sender.clone());
+        register_event_restarter(config_path.clone(), css_path.clone(), event_sender.clone());
     }
 
+    let event_sender_2 = event_sender.clone();
     glib::spawn_future_local(async move {
-        socket_handler(event_sender.clone()).await;
+        socket_handler(event_sender_2.clone()).await;
     });
 
     check_themes();
@@ -78,7 +76,6 @@ pub fn start(config_path: PathBuf, css_path: PathBuf, data_dir: PathBuf) -> anyh
 }
 
 pub struct Globals {
-    pub data_dir: Box<Path>,
     pub windows: Option<WindowsGlobal>,
 }
 
@@ -110,7 +107,7 @@ fn activate(
         return; // return needed to exit the application
     }
 
-    let globals = match create_windows(app, &config, data_dir, event_sender) {
+    let globals = match create_windows(app, &config, data_dir, event_sender.clone()) {
         Ok(data) => data,
         Err(err) => {
             warn!("Failed to create windows: {err:?}");
@@ -121,7 +118,7 @@ fn activate(
     };
 
     glib::spawn_future_local(async move {
-        event_handler(globals, event_receiver).await;
+        event_handler(globals, event_receiver, event_sender).await;
     });
 
     debug!("Application initialized");
@@ -133,16 +130,14 @@ fn create_windows(
     data_dir: &Path,
     event_sender: Sender<TransferType>,
 ) -> anyhow::Result<Globals> {
-    let mut global = Globals {
-        windows: None,
-        data_dir: PathBuf::from(data_dir).into_boxed_path(),
-    };
+    let mut global = Globals { windows: None };
     if let Some(windows) = &config.windows {
         let mut windows_data = WindowsGlobal::default();
         if let Some(overview) = &windows.overview {
             let launcher_data = create_windows_overview_launcher_window(
                 app,
                 &overview.launcher,
+                data_dir,
                 event_sender.clone(),
             )
             .context("failed to create launcher window")?;
@@ -154,9 +149,8 @@ fn create_windows(
             debug!("Windows overview disabled");
         }
         if let Some(switch) = &windows.switch {
-            let switch_data =
-                create_windows_switch_window(app, &switch, &windows, event_sender.clone())
-                    .context("failed to create overview window")?;
+            let switch_data = create_windows_switch_window(app, &switch, &windows, event_sender)
+                .context("failed to create overview window")?;
             windows_data.switch = Some(switch_data);
         }
         global.windows = Some(windows_data);
@@ -195,8 +189,8 @@ fn apply_css(custom_css: &Path) {
 }
 
 pub fn register_event_restarter(
-    config_path: &Path,
-    css_path: &Path,
+    config_path: Rc<PathBuf>,
+    css_path: Rc<PathBuf>,
     event_sender: Sender<TransferType>,
 ) {
     // delay for 1.5 seconds to allow the config to be reloaded before listening for reload
@@ -206,7 +200,7 @@ pub fn register_event_restarter(
         .unwrap_or(1500);
     let (restart_sender, restart_receiver) = async_channel::bounded(1);
     glib::timeout_add_local_once(Duration::from_millis(delay), move || {
-        setup_restart_listener(config_path, css_path, restart_sender);
+        setup_restart_listener(&config_path, &css_path, restart_sender);
     });
     glib::spawn_future_local(async move {
         let mut last_send = Instant::now();

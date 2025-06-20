@@ -9,7 +9,7 @@ mod stop;
 mod update;
 mod util;
 
-pub use close::{close_launcher_click, close_launcher_press};
+pub use close::{close_launcher_by_char, close_launcher_by_iden};
 pub use create::create_windows_overview_launcher_window;
 pub use css::get_css;
 pub use global::LauncherData;

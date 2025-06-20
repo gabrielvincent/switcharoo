@@ -8,11 +8,13 @@ pub enum TransferType {
     /// send from the keybind to open the switch
     OpenSwitch(OpenSwitch),
     /// send from the keybinds like arrow keys or tab on overview
-    SwitchOverview(OverviewSwitchConfig),
+    SwitchOverview(SwitchOverviewConfig),
     /// send from the keybinds like arrow keys or tab on switch
     SwitchSwitch(SwitchSwitchConfig),
     /// send by pressing enter / ctrl + <n> / or from the gui itself to close the overview / switch
-    Close(CloseConfig),
+    CloseOverview(CloseOverviewConfig),
+    /// send by pressing enter / ctrl + <n> / or from the gui itself to close the overview / switch
+    CloseSwitch(CloseSwitchConfig),
     /// send from the gui itself when typing the launcher
     Type(String),
     /// send from pressing ESC
@@ -42,10 +44,9 @@ pub struct OpenOverview {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct OverviewSwitchConfig {
+pub struct SwitchOverviewConfig {
     pub direction: Direction,
     pub workspace: bool,
-    pub items_per_row: u8,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -54,10 +55,16 @@ pub struct SwitchSwitchConfig {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub enum CloseConfig {
+pub enum CloseOverviewConfig {
     LauncherClick(Identifier),
     LauncherPress(char),
     Windows(WindowsOverride),
+    None,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub enum CloseSwitchConfig {
+    Windows(ClientId),
     None,
 }
 

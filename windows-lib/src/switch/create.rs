@@ -20,13 +20,13 @@ use tracing::{Level, debug, span};
 
 pub fn create_windows_switch_window(
     app: &Application,
-    switch: &Switch,
+    _switch: &Switch,
     windows: &Windows,
     event_sender: Sender<TransferType>,
 ) -> anyhow::Result<WindowsSwitchData> {
     let _span = span!(Level::TRACE, "create_windows_switch_window").entered();
 
-    let workspaces_flow = FlowBox::builder()
+    let clients_flow = FlowBox::builder()
         .selection_mode(SelectionMode::None)
         .orientation(Orientation::Horizontal)
         .max_children_per_line(windows.items_per_row as u32)
@@ -34,7 +34,7 @@ pub fn create_windows_switch_window(
         .build();
 
     let workspaces_flow_overlay = Overlay::builder()
-        .child(&workspaces_flow)
+        .child(&clients_flow)
         .css_classes(["monitor"])
         .build();
 
@@ -47,7 +47,8 @@ pub fn create_windows_switch_window(
         .build();
 
     let key_controller = EventControllerKey::new();
-    key_controller.connect_key_pressed(|_, key, _, _| handle_key(key, event_sender));
+    let event_sender_2 = event_sender.clone();
+    key_controller.connect_key_pressed(move |_, key, _, _| handle_key(key, event_sender_2.clone()));
     window.add_controller(key_controller);
 
     window.init_layer_shell();
@@ -61,6 +62,7 @@ pub fn create_windows_switch_window(
 
     Ok(WindowsSwitchData {
         window,
+        clients_flow: Default::default(),
         clients: HashMap::default(),
         active: get_initial_active()?,
         hypr_data: HyprlandData::default(),
@@ -75,5 +77,6 @@ fn handle_key(key: Key, event_sender: Sender<TransferType>) -> Propagation {
                 .warn("unable to send");
             Propagation::Stop
         }
+        _ => Propagation::Proceed,
     }
 }

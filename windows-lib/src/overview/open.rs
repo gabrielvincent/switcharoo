@@ -3,7 +3,8 @@ use crate::data::{SortConfig, collect_data};
 use crate::global::WindowsOverviewData;
 use crate::icon::set_icon;
 use anyhow::Context;
-use core_lib::transfer::{CloseConfig, OpenOverview, TransferType, WindowsOverride};
+use async_channel::Sender;
+use core_lib::transfer::{CloseOverviewConfig, OpenOverview, TransferType, WindowsOverride};
 use core_lib::{ClientData, ClientId, Warn, WorkspaceId};
 use exec_lib::set_remain_focused;
 use gtk::gdk::Cursor;
@@ -16,7 +17,11 @@ fn scale(value: i16, scale: f64) -> i32 {
     (value as f64 / (15f64 - scale)) as i32
 }
 
-pub fn open_overview(data: &mut WindowsOverviewData, config: OpenOverview) -> anyhow::Result<()> {
+pub fn open_overview(
+    data: &mut WindowsOverviewData,
+    config: OpenOverview,
+    event_sender: Sender<TransferType>,
+) -> anyhow::Result<()> {
     let _span = span!(Level::TRACE, "open_overview").entered();
     set_remain_focused().warn("Failed to set no follow mouse");
 
@@ -51,13 +56,13 @@ pub fn open_overview(data: &mut WindowsOverviewData, config: OpenOverview) -> an
                 scale(workspace.height as i16, config.scale)
             );
             let workspace_fixed = Fixed::builder()
-                .width_request(scale(workspace.width as i16, data.scale))
-                .height_request(scale(workspace.height as i16, data.scale))
+                .width_request(scale(workspace.width as i16, data.config.scale))
+                .height_request(scale(workspace.height as i16, data.config.scale))
                 .build();
 
             let id_string = wid.to_string();
             let title = if !workspace.name.trim().is_empty() {
-                if data.strip_html_from_workspace_title {
+                if data.config.strip_html_from_workspace_title {
                     regex.replace_all(&workspace.name, "")
                 } else {
                     Cow::from(&workspace.name)
@@ -79,7 +84,7 @@ pub fn open_overview(data: &mut WindowsOverviewData, config: OpenOverview) -> an
                     .css_classes(["workspace"])
                     .build();
                 button.set_cursor(Cursor::from_name("pointer", None).as_ref());
-                click_workspace(&button, *wid);
+                click_workspace(&button, *wid, event_sender.clone());
                 monitor_data.workspaces_flow.insert(&button, -1);
                 button
             };
@@ -124,8 +129,8 @@ pub fn open_overview(data: &mut WindowsOverviewData, config: OpenOverview) -> an
                         .build();
 
                     // hide picture if client so small
-                    let client_h_w =
-                        scale(client.height, data.scale).min(scale(client.width, data.scale));
+                    let client_h_w = scale(client.height, data.config.scale)
+                        .min(scale(client.width, data.config.scale));
                     if client_h_w > 70 {
                         let image = Image::builder()
                             .css_classes(["client-image"])
@@ -145,8 +150,8 @@ pub fn open_overview(data: &mut WindowsOverviewData, config: OpenOverview) -> an
                     let button = Button::builder()
                         .child(&client_overlay)
                         .css_classes(["client"])
-                        .width_request(scale(client.width, data.scale))
-                        .height_request(scale(client.height, data.scale))
+                        .width_request(scale(client.width, data.config.scale))
+                        .height_request(scale(client.height, data.config.scale))
                         .build();
                     button.set_cursor(Cursor::from_name("pointer", None).as_ref());
 
@@ -155,21 +160,21 @@ pub fn open_overview(data: &mut WindowsOverviewData, config: OpenOverview) -> an
                         button.add_css_class("active");
                     }
 
-                    click_client(&button, *address);
+                    click_client(&button, *address, event_sender.clone());
                     button
                 };
                 trace!(
                     "Creating Client {:?} with ({}x{}) at ({}x{})",
                     address,
-                    scale(client.width, data.scale),
-                    scale(client.height, data.scale),
-                    scale(client.x - workspace.x as i16, data.scale) as f64,
-                    scale(client.y - workspace.y as i16, data.scale) as f64
+                    scale(client.width, data.config.scale),
+                    scale(client.height, data.config.scale),
+                    scale(client.x - workspace.x as i16, data.config.scale) as f64,
+                    scale(client.y - workspace.y as i16, data.config.scale) as f64
                 );
                 workspace_fixed.put(
                     &client_button,
-                    scale(client.x - workspace.x as i16, data.scale) as f64,
-                    scale(client.y - workspace.y as i16, data.scale) as f64,
+                    scale(client.x - workspace.x as i16, data.config.scale) as f64,
+                    scale(client.y - workspace.y as i16, data.config.scale) as f64,
                 );
                 monitor_data.client_refs.insert(*address, client_button);
             }
@@ -178,27 +183,27 @@ pub fn open_overview(data: &mut WindowsOverviewData, config: OpenOverview) -> an
 
     data.active = active;
     data.hypr_data = clients_data;
-
-    drop(data);
     Ok(())
 }
 
-fn click_client(button: &Button, client_id: ClientId) {
+fn click_client(button: &Button, client_id: ClientId, event_sender: Sender<TransferType>) {
     button.connect_clicked(move |_| {
-        debug!("Exiting on click of client box");
-        send_to_socket(&TransferType::Close(CloseConfig::Windows(
-            WindowsOverride::ClientId(client_id),
-        )))
-        .warn("unable send return to socket");
+        debug!("Exiting on click of launcher details entry");
+        event_sender
+            .send_blocking(TransferType::CloseOverview(CloseOverviewConfig::Windows(
+                WindowsOverride::ClientId(client_id),
+            )))
+            .warn("unable to send");
     });
 }
 
-fn click_workspace(button: &Button, workspace_id: WorkspaceId) {
+fn click_workspace(button: &Button, workspace_id: WorkspaceId, event_sender: Sender<TransferType>) {
     button.connect_clicked(move |_| {
-        debug!("Exiting on click of workspace box");
-        send_to_socket(&TransferType::Close(CloseConfig::Windows(
-            WindowsOverride::WorkspaceID(workspace_id),
-        )))
-        .warn("unable send return to socket");
+        debug!("Exiting on click of launcher details entry");
+        event_sender
+            .send_blocking(TransferType::CloseOverview(CloseOverviewConfig::Windows(
+                WindowsOverride::WorkspaceID(workspace_id),
+            )))
+            .warn("unable to send");
     });
 }

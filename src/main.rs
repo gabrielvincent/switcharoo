@@ -1,6 +1,7 @@
+use anyhow::Context;
 use clap::Parser;
 use core_lib::{
-    Warn, check_version, daemon_running, get_default_config_path, get_default_css_path,
+    check_version, daemon_running, get_default_config_path, get_default_css_path,
     get_default_data_dir,
 };
 use std::env;
@@ -12,10 +13,10 @@ mod keybinds;
 mod recive_handle;
 mod socket;
 mod start;
+mod util;
 
 #[cfg(feature = "debug_command")]
 mod debug;
-mod util;
 
 fn main() -> anyhow::Result<()> {
     let cli = cli::App::parse();
@@ -138,17 +139,8 @@ fn main() -> anyhow::Result<()> {
                 );
             }
         },
-        cli::Command::Socat { json, submap } => {
-            if let Some(submap) = &submap {
-                exec_lib::activate_submap(submap).warn("activate submap");
-            }
-            if let Err(err) = core_lib::send_raw_to_socket(&json) {
-                warn!("Failed to send JSON to socket: {err}, is hyprshell running?");
-                if submap.is_some() {
-                    exec_lib::reset_submap().warn("activate submap");
-                }
-            };
-        }
+        cli::Command::Socat { json } => core_lib::transfer::send_raw_to_socket(&json)
+            .context("Failed to send JSON to socket: is hyprshell running?")?,
     }
     Ok(())
 }

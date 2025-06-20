@@ -1,13 +1,14 @@
 use crate::WindowsGlobal;
 use crate::global::WindowsOverviewData;
-use core_lib::{FindByFirst, IdOverride, Warn};
+use core_lib::transfer::WindowsOverride;
+use core_lib::{FindByFirst, Warn};
 use exec_lib::switch::{switch_client, switch_workspace};
 use exec_lib::{reset_remain_focused, to_client_address};
 use gtk::glib;
 use gtk::prelude::*;
 use tracing::{Level, debug, span, trace};
 
-pub fn close_overview(data: &mut WindowsOverviewData, ids: Option<Option<IdOverride>>) {
+pub fn close_overview(data: &mut WindowsOverviewData, ids: Option<Option<WindowsOverride>>) {
     let _span = span!(Level::TRACE, "close_overview").entered();
     reset_remain_focused().warn("Failed to reset follow mouse");
 
@@ -24,13 +25,15 @@ pub fn close_overview(data: &mut WindowsOverviewData, ids: Option<Option<IdOverr
             None => data
                 .active
                 .client
-                .map(IdOverride::ClientId)
-                .unwrap_or_else(|| IdOverride::WorkspaceID(data.active.workspace)),
-            Some(IdOverride::ClientId(client_id)) => IdOverride::ClientId(client_id),
-            Some(IdOverride::WorkspaceID(workspace_id)) => IdOverride::WorkspaceID(workspace_id),
+                .map(WindowsOverride::ClientId)
+                .unwrap_or_else(|| WindowsOverride::WorkspaceID(data.active.workspace)),
+            Some(WindowsOverride::ClientId(client_id)) => WindowsOverride::ClientId(client_id),
+            Some(WindowsOverride::WorkspaceID(workspace_id)) => {
+                WindowsOverride::WorkspaceID(workspace_id)
+            }
         };
         match ids {
-            IdOverride::ClientId(client_id) => {
+            WindowsOverride::ClientId(client_id) => {
                 debug!(
                     "Switching to client {}",
                     data.hypr_data
@@ -46,7 +49,7 @@ pub fn close_overview(data: &mut WindowsOverviewData, ids: Option<Option<IdOverr
                     glib::ControlFlow::Break
                 });
             }
-            IdOverride::WorkspaceID(workspace_id) => {
+            WindowsOverride::WorkspaceID(workspace_id) => {
                 debug!(
                     "Switching to workspace {}",
                     data.hypr_data

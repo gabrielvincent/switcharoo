@@ -1,8 +1,7 @@
-use crate::global::LauncherData;
-use crate::{LauncherData, update_launcher};
+use crate::global::{LauncherConfig, LauncherData};
 use async_channel::Sender;
 use core_lib::config::Launcher;
-use core_lib::transfer::{CloseConfig, Direction, SwitchConfig, TransferType};
+use core_lib::transfer::{CloseOverviewConfig, Direction, SwitchOverviewConfig, TransferType};
 use core_lib::{LAUNCHER_NAMESPACE, Warn};
 use gtk::Orientation;
 use gtk::gdk::Key;
@@ -10,13 +9,14 @@ use gtk::glib::Propagation;
 use gtk::prelude::*;
 use gtk::{Application, ApplicationWindow, Entry, EventControllerKey, ListBox, SelectionMode};
 use gtk4_layer_shell::{Edge, Layer, LayerShell};
-use std::cell::RefCell;
 use std::collections::HashMap;
-use tracing::{Level, debug, span, warn};
+use std::path::{Path, PathBuf};
+use tracing::{Level, debug, span};
 
 pub fn create_windows_overview_launcher_window(
     app: &Application,
     launcher: &Launcher,
+    data_dir: &Path,
     event_sender: Sender<TransferType>,
 ) -> anyhow::Result<LauncherData> {
     let _span = span!(Level::TRACE, "create_windows_overview_launcher_window").entered();
@@ -28,19 +28,10 @@ pub fn create_windows_overview_launcher_window(
         .build();
 
     let entry = Entry::builder().css_classes(["launcher-input"]).build();
-    entry.connect_changed(|e| {
-        // trace!("Launcher entry changed: {}", e.text());
-        event_sender
-            .send_blocking(TransferType::Type(e.text().to_string()))
-            .warn("unable to send");
+    let event_sender_2 = event_sender.clone();
+    entry.connect_changed(move |e| {
+        launcher_entry_text_change(e.text().to_string(), event_sender_2.clone());
     });
-    let key_controller = EventControllerKey::new();
-    key_controller.connect_key_pressed(move |_, k, _, _| match k {
-        Key::Tab => Propagation::Stop,
-        Key::ISO_Left_Tab => Propagation::Stop,
-        _ => Propagation::Proceed,
-    });
-    entry.add_controller(key_controller);
     main_vbox.append(&entry);
 
     let results = gtk::Box::builder()
@@ -58,11 +49,12 @@ pub fn create_windows_overview_launcher_window(
     main_vbox.append(&plugin_box);
 
     let event_controller = EventControllerKey::new();
-    event_controller.connect_key_pressed(|_, key, _, _| handle_key(key, event_sender));
+    let event_sender_3 = event_sender.clone();
+    event_controller
+        .connect_key_pressed(move |_, key, _, _| handle_key(key, event_sender_3.clone()));
 
     let window = ApplicationWindow::builder()
         .css_classes(["window"])
-        .startup_id("hyprshell") // TODO
         .application(app)
         .child(&main_vbox)
         .default_height(10)
@@ -79,10 +71,18 @@ pub fn create_windows_overview_launcher_window(
 
     debug!("Created launcher window ({})", window.id());
 
-    // initial update TODO
-    // update_launcher(global, "".to_string());
+    launcher_entry_text_change("".to_string(), event_sender);
 
     Ok(LauncherData {
+        config: LauncherConfig {
+            default_terminal: launcher.default_terminal.clone(),
+            max_items: launcher.max_items,
+            show_when_empty: launcher.show_when_empty,
+            animate_launch_ms: launcher.animate_launch_ms,
+            width: launcher.width,
+            data_dir: PathBuf::from(data_dir).into_boxed_path(),
+            plugins: launcher.plugins.clone(),
+        },
         window,
         entry,
         results,
@@ -90,6 +90,12 @@ pub fn create_windows_overview_launcher_window(
         sorted_matches: vec![],
         static_matches: HashMap::new(),
     })
+}
+
+fn launcher_entry_text_change(text: String, event_sender: Sender<TransferType>) {
+    event_sender
+        .send_blocking(TransferType::Type(text))
+        .warn("unable to send");
 }
 
 fn handle_key(key: Key, event_sender: Sender<TransferType>) -> Propagation {
@@ -102,7 +108,7 @@ fn handle_key(key: Key, event_sender: Sender<TransferType>) -> Propagation {
         }
         Key::Tab => {
             event_sender
-                .send_blocking(TransferType::Switch(SwitchConfig {
+                .send_blocking(TransferType::SwitchOverview(SwitchOverviewConfig {
                     workspace: false,
                     direction: Direction::Right,
                 }))
@@ -111,7 +117,7 @@ fn handle_key(key: Key, event_sender: Sender<TransferType>) -> Propagation {
         }
         Key::ISO_Left_Tab => {
             event_sender
-                .send_blocking(TransferType::Switch(SwitchConfig {
+                .send_blocking(TransferType::SwitchOverview(SwitchOverviewConfig {
                     workspace: false,
                     direction: Direction::Left,
                 }))
@@ -120,7 +126,7 @@ fn handle_key(key: Key, event_sender: Sender<TransferType>) -> Propagation {
         }
         Key::Up => {
             event_sender
-                .send_blocking(TransferType::Switch(SwitchConfig {
+                .send_blocking(TransferType::SwitchOverview(SwitchOverviewConfig {
                     workspace: true,
                     direction: Direction::Up,
                 }))
@@ -129,7 +135,7 @@ fn handle_key(key: Key, event_sender: Sender<TransferType>) -> Propagation {
         }
         Key::Down => {
             event_sender
-                .send_blocking(TransferType::Switch(SwitchConfig {
+                .send_blocking(TransferType::SwitchOverview(SwitchOverviewConfig {
                     workspace: true,
                     direction: Direction::Down,
                 }))
@@ -138,7 +144,7 @@ fn handle_key(key: Key, event_sender: Sender<TransferType>) -> Propagation {
         }
         Key::Left => {
             event_sender
-                .send_blocking(TransferType::Switch(SwitchConfig {
+                .send_blocking(TransferType::SwitchOverview(SwitchOverviewConfig {
                     workspace: true,
                     direction: Direction::Left,
                 }))
@@ -147,7 +153,7 @@ fn handle_key(key: Key, event_sender: Sender<TransferType>) -> Propagation {
         }
         Key::Right => {
             event_sender
-                .send_blocking(TransferType::Switch(SwitchConfig {
+                .send_blocking(TransferType::SwitchOverview(SwitchOverviewConfig {
                     workspace: true,
                     direction: Direction::Right,
                 }))
@@ -156,7 +162,7 @@ fn handle_key(key: Key, event_sender: Sender<TransferType>) -> Propagation {
         }
         Key::Return => {
             event_sender
-                .send_blocking(TransferType::Close(CloseConfig::None))
+                .send_blocking(TransferType::CloseOverview(CloseOverviewConfig::None))
                 .warn("unable to send");
             Propagation::Stop
         }

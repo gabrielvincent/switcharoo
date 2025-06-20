@@ -1,5 +1,5 @@
 use crate::WindowsGlobal;
-use crate::global::{WindowsOverviewData, WindowsOverviewMonitorData};
+use crate::global::{WindowsOverviewConfig, WindowsOverviewData, WindowsOverviewMonitorData};
 use anyhow::Context;
 use async_channel::Sender;
 use core_lib::config::{Overview, Windows};
@@ -79,6 +79,11 @@ pub fn create_windows_overview_window(
         }
     }
     Ok(WindowsOverviewData {
+        config: WindowsOverviewConfig {
+            items_per_row: windows.items_per_row,
+            scale: windows.scale,
+            strip_html_from_workspace_title: overview.strip_html_from_workspace_title,
+        },
         window_list,
         active: get_initial_active()?,
         hypr_data: HyprlandData::default(),

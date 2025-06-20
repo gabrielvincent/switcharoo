@@ -4,7 +4,8 @@ use crate::global::WindowsSwitchData;
 use crate::icon::set_icon;
 use crate::next::find_next;
 use anyhow::{Context, bail};
-use core_lib::transfer::{CloseConfig, OpenSwitch, TransferType, WindowsOverride};
+use async_channel::Sender;
+use core_lib::transfer::{CloseOverviewConfig, OpenSwitch, TransferType, WindowsOverride};
 use core_lib::{ClientData, ClientId, FindByFirst, Warn};
 use exec_lib::{get_current_monitor, set_remain_focused};
 use gtk::gdk::Cursor;
@@ -16,7 +17,11 @@ fn scale(value: i16, scale: f64) -> i32 {
     (value as f64 / (15f64 - scale)) as i32
 }
 
-pub fn open_switch(data: &mut WindowsSwitchData, config: OpenSwitch) -> anyhow::Result<()> {
+pub fn open_switch(
+    data: &mut WindowsSwitchData,
+    config: OpenSwitch,
+    event_sender: Sender<TransferType>,
+) -> anyhow::Result<()> {
     let _span = span!(Level::TRACE, "open_switch").entered();
     set_remain_focused().warn("Failed to set no follow mouse");
 
@@ -94,7 +99,7 @@ pub fn open_switch(data: &mut WindowsSwitchData, config: OpenSwitch) -> anyhow::
                 button.add_css_class("active");
             }
 
-            click_client(&button, *address);
+            click_client(&button, *address, event_sender.clone());
             button
         };
         data.clients_flow.insert(&client_button, -1);
@@ -106,8 +111,13 @@ pub fn open_switch(data: &mut WindowsSwitchData, config: OpenSwitch) -> anyhow::
     Ok(())
 }
 
-fn click_client(button: &Button, client_id: ClientId) {
+fn click_client(button: &Button, client_id: ClientId, event_sender: Sender<TransferType>) {
     button.connect_clicked(move |_| {
-        debug!("Exiting on click of client box");
+        debug!("Exiting on click of launcher details entry");
+        event_sender
+            .send_blocking(TransferType::CloseOverview(CloseOverviewConfig::Windows(
+                WindowsOverride::ClientId(client_id),
+            )))
+            .warn("unable to send");
     });
 }

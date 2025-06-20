@@ -8,118 +8,75 @@ use gtk4_layer_shell::{KeyboardMode, LayerShell};
 use std::time::{Duration, Instant};
 use tracing::{Level, span, trace, warn};
 
-pub fn close_launcher_press(global: &LauncherData, char: Option<char>) {
-    let _span = span!(Level::TRACE, "close_launcher_key").entered();
-    if let Some(data) = &global.data {
-        if let Some(char) = char {
-            trace!("Closing launcher with char: {}", char);
-            let instant = Instant::now();
-
-            let data1 = data.borrow();
-            data1.window.set_keyboard_mode(KeyboardMode::None);
-            if let Some(iden) = match char {
-                '0'..='9' => data1
-                    .sorted_matches
-                    .get(char.to_digit(10).expect("unable to convert char") as usize),
-                _ => data1.static_matches.get(&char),
-            } {
-                let animate = plugins::launch(
-                    iden,
-                    &data1.entry.text(),
-                    &global.default_terminal,
-                    &global.data_dir,
-                );
-                // copy pointer for later close
-                let window = data1.window.clone();
-                let entry = data1.entry.clone();
-                let results = data1.results.clone();
-                let plugin_box = data1.plugin_box.clone();
-                let iden = iden.clone();
-                drop(data1);
-
-                if animate {
-                    trace!(
-                        "starting timeout({}ms) animation after {:?} time",
-                        global.animate_launch_ms,
-                        instant.elapsed()
-                    );
-                    show_launch(&results, &plugin_box, &iden);
-                    entry.set_editable(false);
-                    glib::timeout_add_local_once(
-                        Duration::from_millis(global.animate_launch_ms),
-                        move || {
-                            let _span = _span.clone();
-                            // close launcher
-                            close(&entry, &window);
-                            hide_launch(&results, &plugin_box);
-                            trace!("closed launcher after {:?} time", instant.elapsed());
-                        },
-                    );
-                    return;
-                }
-            } else {
-                warn!("No match found for char: {}", char);
-            }
+pub fn close_launcher_by_char(data: &mut LauncherData, char: Option<char>) {
+    let _span = span!(Level::TRACE, "close_launcher_by_char").entered();
+    if let Some(char) = char {
+        data.window.set_keyboard_mode(KeyboardMode::None);
+        trace!("Closing launcher with char: {}", char);
+        if let Some(iden) = match char {
+            '0'..='9' => data
+                .sorted_matches
+                .get(char.to_digit(10).expect("unable to convert char") as usize),
+            _ => data.static_matches.get(&char),
         }
-        // close launcher
-        let data1 = data.borrow();
-        close(&data1.entry, &data1.window);
+        .cloned()
+        {
+            close_launcher(data, &iden)
+        } else {
+            warn!("No match found for char: {}", char);
+        }
     }
+    close_window(&data.entry, &data.window);
 }
 
-// None means just close the launcher
-// Some(None) means close the launcher and launch first from sortable
-// Some(Some(iden)) means close the launcher and launch with iden
-pub fn close_launcher_click(global: &LauncherData, iden: Identifier) {
-    let _span = span!(Level::TRACE, "close_launcher_press").entered();
+pub fn close_launcher_by_iden(data: &mut LauncherData, iden: &Identifier) {
+    let _span = span!(Level::TRACE, "close_launcher_by_iden").entered();
+    data.window.set_keyboard_mode(KeyboardMode::None);
+    trace!("Closing launcher with iden: {:?}", iden);
 
-    if let Some(data) = &global.data {
-        trace!("Closing launcher with iden: {:?}", iden);
-        let instant = Instant::now();
+    close_launcher(data, iden);
+    close_window(&data.entry, &data.window);
+}
 
-        let data1 = data.borrow();
-        data1.window.set_keyboard_mode(KeyboardMode::None);
-        let animate = plugins::launch(
-            &iden,
-            &data1.entry.text(),
-            &global.default_terminal,
-            &global.data_dir,
+fn close_launcher(data: &mut LauncherData, iden: &Identifier) {
+    let _span = span!(Level::TRACE, "close_launcher").entered();
+    let instant = Instant::now();
+
+    let animate = plugins::launch(
+        iden,
+        &data.entry.text(),
+        &data.config.default_terminal,
+        &data.config.data_dir,
+    );
+    // copy pointer for later close
+    let window = data.window.clone();
+    let entry = data.entry.clone();
+    let results = data.results.clone();
+    let plugin_box = data.plugin_box.clone();
+    let iden = iden.clone();
+
+    if animate {
+        trace!(
+            "starting timeout({}ms) animation after {:?} time",
+            data.config.animate_launch_ms,
+            instant.elapsed()
         );
-        // copy pointer for later close
-        let window = data1.window.clone();
-        let entry = data1.entry.clone();
-        let results = data1.results.clone();
-        let plugin_box = data1.plugin_box.clone();
-        let iden = iden.clone();
-        drop(data1);
-
-        if animate {
-            trace!(
-                "starting timeout({}ms) animation after {:?} time",
-                global.animate_launch_ms,
-                instant.elapsed()
-            );
-            show_launch(&results, &plugin_box, &iden);
-            entry.set_editable(false);
-            glib::timeout_add_local_once(
-                Duration::from_millis(global.animate_launch_ms),
-                move || {
-                    let _span = _span.clone();
-                    // close launcher
-                    close(&entry, &window);
-                    hide_launch(&results, &plugin_box);
-                    trace!("closed launcher after {:?} time", instant.elapsed());
-                },
-            );
-            return;
-        }
-        // close launcher
-        let data1 = data.borrow();
-        close(&data1.entry, &data1.window);
+        show_launch(&results, &plugin_box, &iden);
+        entry.set_editable(false);
+        glib::timeout_add_local_once(
+            Duration::from_millis(data.config.animate_launch_ms),
+            move || {
+                let _span = _span.clone();
+                // close launcher
+                close_window(&entry, &window);
+                hide_launch(&results, &plugin_box);
+                trace!("closed launcher after {:?} time", instant.elapsed());
+            },
+        );
     }
 }
 
-fn close(entry: &gtk::Entry, window: &gtk::ApplicationWindow) {
+fn close_window(entry: &gtk::Entry, window: &gtk::ApplicationWindow) {
     trace!("Hiding window (launcher) {:?}", window.id());
     window.set_visible(false);
     entry.set_text("");

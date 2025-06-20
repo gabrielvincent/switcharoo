@@ -11,10 +11,18 @@ pub struct WindowsGlobal {
 
 #[derive(Debug)]
 pub struct WindowsOverviewData {
+    pub config: WindowsOverviewConfig,
     pub window_list: HashMap<ApplicationWindow, WindowsOverviewMonitorData>,
     pub active: Active,
     pub hypr_data: HyprlandData,
     pub launcher: LauncherData,
+}
+
+#[derive(Debug)]
+pub struct WindowsOverviewConfig {
+    pub items_per_row: u8,
+    pub scale: f64,
+    pub strip_html_from_workspace_title: bool,
 }
 
 #[derive(Debug)]

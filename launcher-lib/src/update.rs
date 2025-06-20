@@ -3,9 +3,10 @@ use crate::plugins::{
     DetailsMenuItem, get_sortable_launch_options, get_static_launch_options, iden_to_str,
 };
 use crate::util::DataInWidget;
+use async_channel::Sender;
 use core_lib::Warn;
 use core_lib::theme_icon_cache::theme_has_icon_name;
-use core_lib::transfer::{CloseConfig, Identifier, TransferType};
+use core_lib::transfer::{CloseOverviewConfig, Identifier, TransferType};
 use gtk::gdk::Cursor;
 use gtk::pango::EllipsizeMode;
 use gtk::prelude::*;
@@ -16,56 +17,60 @@ use gtk::{
 use std::path::Path;
 use tracing::{Level, debug, span, warn};
 
-pub fn update_launcher(global: &LauncherData, text: String) {
+pub fn update_launcher(data: &mut LauncherData, text: String, event_sender: Sender<TransferType>) {
     let _span = span!(Level::TRACE, "update_launcher").entered();
 
-    if let Some(data) = &global.data {
-        let mut data1 = data.borrow_mut();
-        while let Some(child) = data1.results.first_child() {
-            data1.results.remove(&child);
-        }
-        while let Some(child) = data1.plugin_box.first_child() {
-            data1.plugin_box.remove(&child);
-        }
-        data1.sorted_matches.clear();
-        data1.static_matches.clear();
-        if !global.show_when_empty && text.is_empty() {
-            return;
-        }
+    while let Some(child) = data.results.first_child() {
+        data.results.remove(&child);
+    }
+    while let Some(child) = data.plugin_box.first_child() {
+        data.plugin_box.remove(&child);
+    }
+    data.sorted_matches.clear();
+    data.static_matches.clear();
+    if !data.config.show_when_empty && text.is_empty() {
+        return;
+    }
 
-        let sortable_launch_options =
-            get_sortable_launch_options(&global.plugins, &text, &global.data_dir);
-        let mut items = global.max_items.min(9);
-        for (index, opt) in sortable_launch_options.into_iter().enumerate() {
-            if items == 0 {
-                break;
-            }
-            items -= 1;
-            let row = create_entry(
-                &opt.iden,
-                match index {
-                    0 => "Return".to_string(),
-                    i if i <= 9 => format!("Ctrl+{}", i),
-                    _ => "".to_string(),
-                },
-                opt.icon,
-                &opt.name,
-                opt.details,
-                opt.details_long,
-                opt.details_menu,
-            );
-            data1.results.append(&row);
-            data1.sorted_matches.push(opt.iden);
+    let sortable_launch_options =
+        get_sortable_launch_options(&data.config.plugins, &text, &data.config.data_dir);
+    let mut items = data.config.max_items.min(9);
+    for (index, opt) in sortable_launch_options.into_iter().enumerate() {
+        if items == 0 {
+            break;
         }
+        items -= 1;
+        let row = create_entry(
+            &opt.iden,
+            match index {
+                0 => "Return".to_string(),
+                i if i <= 9 => format!("Ctrl+{}", i),
+                _ => "".to_string(),
+            },
+            opt.icon,
+            &opt.name,
+            opt.details,
+            opt.details_long,
+            opt.details_menu,
+            event_sender.clone(),
+        );
+        data.results.append(&row);
+        data.sorted_matches.push(opt.iden);
+    }
 
-        let static_launch_options =
-            get_static_launch_options(&global.plugins, &global.default_terminal);
-        for opt in static_launch_options.into_iter() {
-            let button =
-                create_static_plugin_box(&opt.iden, opt.icon, &opt.text, &opt.details, opt.key);
-            data1.plugin_box.append(&button);
-            data1.static_matches.insert(opt.key, opt.iden);
-        }
+    let static_launch_options =
+        get_static_launch_options(&data.config.plugins, &data.config.default_terminal);
+    for opt in static_launch_options.into_iter() {
+        let button = create_static_plugin_box(
+            &opt.iden,
+            opt.icon,
+            &opt.text,
+            &opt.details,
+            opt.key,
+            event_sender.clone(),
+        );
+        data.plugin_box.append(&button);
+        data.static_matches.insert(opt.key, opt.iden);
     }
 }
 
@@ -75,6 +80,7 @@ fn create_static_plugin_box(
     text: &str,
     details: &str,
     key: char,
+    event_sender: Sender<TransferType>,
 ) -> Button {
     let hbox = gtk::Box::builder()
         .orientation(Orientation::Horizontal)
@@ -121,7 +127,7 @@ fn create_static_plugin_box(
         .build();
     button.set_cursor(Cursor::from_name("pointer", None).as_ref());
     button.set_iden_data(iden_to_str(iden));
-    click_plugin(&button, iden.clone());
+    click_plugin(&button, iden.clone(), event_sender);
     button
 }
 
@@ -133,6 +139,7 @@ fn create_entry(
     details: Box<str>,
     details_long: Option<Box<str>>,
     details_menu: Vec<DetailsMenuItem>,
+    event_sender: Sender<TransferType>,
 ) -> gtk::Box {
     let hbox = gtk::Box::builder()
         .css_classes(["launcher-item"])
@@ -217,7 +224,7 @@ fn create_entry(
                 .child(&menu_item_button)
                 .build();
             menu_item.set_cursor(Cursor::from_name("pointer", None).as_ref());
-            click_details_entry(&menu_item_button, item.iden);
+            click_details_entry(&menu_item_button, item.iden, event_sender.clone());
             menu_list_box.append(&menu_item);
         }
         menu.set_parent(&button);
@@ -238,38 +245,41 @@ fn create_entry(
 
     hbox.set_cursor(Cursor::from_name("pointer", None).as_ref());
     hbox.set_iden_data(iden_to_str(iden));
-    click_entry(&hbox, iden.clone());
+    click_entry(&hbox, iden.clone(), event_sender);
     hbox
 }
 
-fn click_plugin(button: &Button, iden: Identifier) {
+fn click_plugin(button: &Button, iden: Identifier, event_sender: Sender<TransferType>) {
     button.connect_clicked(move |_| {
         debug!("Exiting on click of launcher entry");
-        send_to_socket(&TransferType::Close(CloseConfig::LauncherClick(
-            iden.clone(),
-        )))
-        .warn("unable send return to socket");
+        event_sender
+            .send_blocking(TransferType::CloseOverview(
+                CloseOverviewConfig::LauncherClick(iden.clone()),
+            ))
+            .warn("unable to send");
     });
 }
 
-fn click_entry(button: &gtk::Box, iden: Identifier) {
+fn click_entry(button: &gtk::Box, iden: Identifier, event_sender: Sender<TransferType>) {
     let gesture = gtk::GestureClick::new();
     button.add_controller(gesture.clone());
     gesture.connect_released(move |_, _, _, _| {
         debug!("Exiting on click of launcher entry");
-        send_to_socket(&TransferType::Close(CloseConfig::LauncherClick(
-            iden.clone(),
-        )))
-        .warn("unable send return to socket");
+        event_sender
+            .send_blocking(TransferType::CloseOverview(
+                CloseOverviewConfig::LauncherClick(iden.clone()),
+            ))
+            .warn("unable to send");
     });
 }
 
-fn click_details_entry(button: &Button, iden: Identifier) {
+fn click_details_entry(button: &Button, iden: Identifier, event_sender: Sender<TransferType>) {
     button.connect_clicked(move |_| {
         debug!("Exiting on click of launcher details entry");
-        send_to_socket(&TransferType::Close(CloseConfig::LauncherClick(
-            iden.clone(),
-        )))
-        .warn("unable send return to socket");
+        event_sender
+            .send_blocking(TransferType::CloseOverview(
+                CloseOverviewConfig::LauncherClick(iden.clone()),
+            ))
+            .warn("unable to send");
     });
 }
