@@ -1,4 +1,3 @@
-use crate::WindowsGlobal;
 use crate::global::WindowsOverviewData;
 use crate::next::find_next;
 use core_lib::transfer::SwitchOverviewConfig;

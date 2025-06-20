@@ -1,18 +1,13 @@
-use crate::WindowsGlobal;
 use crate::global::{WindowsOverviewConfig, WindowsOverviewData, WindowsOverviewMonitorData};
 use anyhow::Context;
-use async_channel::Sender;
 use core_lib::config::{Overview, Windows};
-use core_lib::transfer::TransferType;
-use core_lib::{HyprlandData, OVERVIEW_NAMESPACE, Warn};
+use core_lib::{HyprlandData, OVERVIEW_NAMESPACE};
 use exec_lib::{get_initial_active, get_monitors};
-use gtk::gdk::{Display, Key, Monitor};
-use gtk::glib::Propagation;
+use gtk::gdk::{Display, Monitor};
 use gtk::prelude::*;
 use gtk::{Application, ApplicationWindow, FlowBox, Orientation, Overlay, SelectionMode};
 use gtk4_layer_shell::{Edge, KeyboardMode, Layer, LayerShell};
 use launcher_lib::LauncherData;
-use std::cell::RefCell;
 use std::collections::HashMap;
 use tracing::{Level, debug, span};
 

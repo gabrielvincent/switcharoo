@@ -1,12 +1,11 @@
-use crate::WindowsGlobal;
 use crate::data::{SortConfig, collect_data};
 use crate::global::WindowsSwitchData;
 use crate::icon::set_icon;
 use crate::next::find_next;
-use anyhow::{Context, bail};
+use anyhow::Context;
 use async_channel::Sender;
 use core_lib::transfer::{CloseOverviewConfig, OpenSwitch, TransferType, WindowsOverride};
-use core_lib::{ClientData, ClientId, FindByFirst, Warn};
+use core_lib::{ClientData, ClientId, Warn};
 use exec_lib::{get_current_monitor, set_remain_focused};
 use gtk::gdk::Cursor;
 use gtk::prelude::*;

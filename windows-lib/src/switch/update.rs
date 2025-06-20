@@ -1,5 +1,4 @@
-use crate::WindowsGlobal;
-use crate::global::{WindowsOverviewData, WindowsSwitchData};
+use crate::global::WindowsSwitchData;
 use crate::next::find_next;
 use core_lib::transfer::{Direction, SwitchSwitchConfig};
 use gtk::prelude::*;

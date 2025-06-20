@@ -1,4 +1,3 @@
-use crate::WindowsGlobal;
 use crate::global::WindowsOverviewData;
 use core_lib::transfer::WindowsOverride;
 use core_lib::{FindByFirst, Warn};

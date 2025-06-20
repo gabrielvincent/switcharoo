@@ -1,4 +1,3 @@
-use crate::WindowsGlobal;
 use crate::data::{SortConfig, collect_data};
 use crate::global::WindowsOverviewData;
 use crate::icon::set_icon;

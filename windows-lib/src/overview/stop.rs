@@ -1,4 +1,3 @@
-use crate::WindowsGlobal;
 use crate::global::WindowsOverviewData;
 use core_lib::Warn;
 use exec_lib::reset_remain_focused;
