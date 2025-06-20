@@ -13,7 +13,7 @@ fn get_icon_map() -> &'static Mutex<BTreeSet<Box<str>>> {
     MAP_LOCK.get_or_init(|| Mutex::new(BTreeSet::new()))
 }
 
-pub fn init_icon_map(icon_names: Vec<String>, search_path: Vec<PathBuf>, threads: bool) {
+pub fn init_icon_map(icon_names: Vec<String>, search_path: Vec<PathBuf>, in_background: bool) {
     let _span = span!(Level::TRACE, "init_icon_map").entered();
     let mut map = get_icon_map().lock().expect("Failed to lock icon map");
     let instant = Instant::now();
@@ -28,11 +28,11 @@ pub fn init_icon_map(icon_names: Vec<String>, search_path: Vec<PathBuf>, threads
     if env::var_os("HYPRSHELL_NO_ALL_ICONS").is_none() {
         for path in search_path {
             if path.exists() {
-                if threads {
+                if in_background {
                     std::thread::spawn(move || {
                         let paths = collect_unique_files_recursive(&path);
                         debug!(
-                            "found {} icons from filesystem in {path:?} paths (using threads)",
+                            "found {} icons from filesystem in {path:?} paths (in background)",
                             paths.len()
                         );
                         let mut map2 = get_icon_map().lock().expect("Failed to lock icon map");

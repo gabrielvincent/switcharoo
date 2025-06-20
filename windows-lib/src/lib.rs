@@ -1,5 +1,3 @@
-mod close;
-mod create;
 mod css;
 mod data;
 mod desktop_map;
@@ -7,19 +5,17 @@ mod global;
 mod icon;
 mod keybinds;
 mod next;
-mod open_overview;
-mod open_switch;
+mod overview;
 mod sort;
-mod stop;
-mod update;
+mod switch;
 
-pub use close::close_windows;
-pub use create::create_windows_window;
 pub use css::get_css;
 pub use desktop_map::{get_icon_name_by_name_from_desktop_files, reload_desktop_map};
 pub use global::WindowsGlobal;
 pub use keybinds::generate_open_keybinds;
-pub use open_overview::open_overview;
-pub use open_switch::open_switch;
-pub use stop::stop_overview;
-pub use update::update_overview;
+pub use overview::{
+    close_overview, create_windows_overview_window, open_overview, stop_overview, update_overview,
+};
+pub use switch::{
+    close_switch, create_windows_switch_window, open_switch, stop_switch, update_switch,
+};

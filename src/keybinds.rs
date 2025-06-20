@@ -5,7 +5,7 @@ use core_lib::config::{Config, FilterBy, Overview, Reverse, Switch};
 use core_lib::transfer::{
     CloseConfig, Direction, OpenOverview, OpenSwitch, SwitchConfig, TransferType,
 };
-use core_lib::{LAUNCHER_NAMESPACE, OVERVIEW_NAMESPACE, Warn, get_hyprctl_path};
+use core_lib::{LAUNCHER_NAMESPACE, OVERVIEW_NAMESPACE, Warn};
 use exec_lib::binds::{apply_exec_bind, apply_layerrules};
 use tracing::{Level, span};
 

@@ -19,13 +19,11 @@ exclude = [
 anyhow.workspace = true
 tracing.workspace = true
 gtk.workspace = true
-serde_json.workspace = true
+async-channel.workspace = true
 clap = { version = "4.5.23", features = ["derive"] }
 tracing-subscriber = { version = "0.3.19", features = ["fmt", "env-filter", "ansi"], default-features = false }
-
 libc = { version = "0.2.172", default-features = false }
 rand = { version = "0.9.0" }
-async-channel = { version = "2.3.1", default-features = true }
 
 core-lib.workspace = true
 exec-lib.workspace = true
@@ -41,7 +39,7 @@ debug_command = []
 bar = []
 
 [workspace]
-members = ["exec-lib", "core-lib", "windows-lib", "launcher-lib"]
+members = ["exec-lib", "core-lib", "windows-lib", "launcher-lib", "test-global"]
 resolver = "2"
 
 
@@ -59,6 +57,7 @@ edition = "2024"
 anyhow = { version = "1.0.98" }
 tracing = { version = "0.1.41" }
 serde_json = { version = "1.0.140" }
+async-channel = { version = "2.3.1", default-features = true }
 
 gtk = { version = "0.9.6", package = "gtk4", default-features = false, features = ["v4_14"] }
 gtk4-layer-shell = { version = "0.5.0" }

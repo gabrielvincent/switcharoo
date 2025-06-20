@@ -1,5 +1,7 @@
 use crate::recive_handle::{close, exit, open_overview, open_switch, restart, switch, r#type};
+use crate::start::Globals;
 use anyhow::Context;
+use async_channel::{Receiver, Sender};
 use core_lib::transfer::TransferType;
 use core_lib::{get_daemon_socket_path_buff, transfer};
 use exec_lib::toast;
@@ -11,12 +13,7 @@ use std::fs::remove_file;
 use std::time::Instant;
 use tracing::{Level, debug, error, info, span, trace};
 
-pub struct Globals {
-    pub window: Option<windows_lib::WindowsGlobal>,
-    pub launcher: Option<launcher_lib::LauncherGlobal>,
-}
-
-pub async fn socket_handler(global: Globals) {
+pub async fn socket_handler(event_sender: Sender<TransferType>) {
     let buf = get_daemon_socket_path_buff();
     let path = buf.as_path();
     let listener = {
@@ -41,20 +38,15 @@ pub async fn socket_handler(global: Globals) {
         let path = listener.accept_future().await;
         match path {
             Ok((conn, _)) => {
-                let exit = handle_client(
+                handle_client(
                     conn.input_stream(),
                     conn.socket().available_bytes(),
-                    &global,
+                    &event_sender,
                 )
                 .context("Failed to handle client")
                 .unwrap_or_else(|e| {
                     toast(&format!("Failed to handle connection {:?}", e));
-                    false
                 });
-                if exit {
-                    debug!("Exiting socket handler");
-                    break;
-                }
             }
             Err(e) => {
                 error!("Failed to accept connection: {e}");
@@ -63,33 +55,19 @@ pub async fn socket_handler(global: Globals) {
     }
 }
 
-fn handle_client(stream: InputStream, size: isize, global: &Globals) -> anyhow::Result<bool> {
-    let now = Instant::now();
-    let rand_id = rand::rng().random_range(100..=255);
-    let _span = span!(Level::TRACE, "handle_client", id = rand_id).entered();
-
+fn handle_client(
+    stream: InputStream,
+    size: isize,
+    event_sender: &Sender<TransferType>,
+) -> anyhow::Result<()> {
     let mut buffer = vec![0; size as usize];
     stream
         .read(&mut buffer, None::<&Cancellable>)
         .context("Failed to read data from buffer")?;
-
-    let transfer = transfer::receive_from_buffer(&buffer)?;
-    let exit = handle_client_transfer(transfer, global)?;
-
-    trace!("Handled client in {:?}", now.elapsed());
-    Ok(exit)
-}
-
-fn handle_client_transfer(transfer: TransferType, global: &Globals) -> anyhow::Result<bool> {
-    let close_socket = matches!(transfer, TransferType::Restart);
-    match transfer {
-        TransferType::OpenOverview(config) => open_overview(global, config),
-        TransferType::OpenSwitch(config) => open_switch(global, config),
-        TransferType::Switch(config) => switch(global, config),
-        TransferType::Exit => exit(global),
-        TransferType::Type(text) => r#type(global, text),
-        TransferType::Close(config) => close(global, config),
-        TransferType::Restart => restart(global),
-    }
-    Ok(close_socket)
+    let transfer =
+        transfer::receive_from_buffer(&buffer).context("Failed to receive from buffer")?;
+    event_sender
+        .send_blocking(transfer)
+        .context("Failed to send transfer")?;
+    Ok(())
 }

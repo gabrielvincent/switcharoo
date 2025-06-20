@@ -1,16 +1,30 @@
 use crate::WindowsGlobal;
-use crate::global::OverviewGlobalMonitorData;
+use crate::global::{WindowsOverviewData, WindowsOverviewMonitorData};
 use anyhow::Context;
-use core_lib::OVERVIEW_NAMESPACE;
-use exec_lib::get_monitors;
-use gtk::gdk::{Display, Monitor};
+use async_channel::Sender;
+use core_lib::config::{Overview, Windows};
+use core_lib::transfer::TransferType;
+use core_lib::{HyprlandData, OVERVIEW_NAMESPACE, Warn};
+use exec_lib::{get_initial_active, get_monitors};
+use gtk::gdk::{Display, Key, Monitor};
+use gtk::glib::Propagation;
 use gtk::prelude::*;
 use gtk::{Application, ApplicationWindow, FlowBox, Orientation, Overlay, SelectionMode};
 use gtk4_layer_shell::{Edge, KeyboardMode, Layer, LayerShell};
+use launcher_lib::LauncherData;
+use std::cell::RefCell;
+use std::collections::HashMap;
 use tracing::{Level, debug, span};
 
-pub fn create_windows_window(app: &Application, global: &WindowsGlobal) -> anyhow::Result<()> {
-    let _span = span!(Level::TRACE, "create_windows_window").entered();
+pub fn create_windows_overview_window(
+    app: &Application,
+    overview: &Overview,
+    windows: &Windows,
+    launcher_data: LauncherData,
+) -> anyhow::Result<WindowsOverviewData> {
+    let _span = span!(Level::TRACE, "create_windows_overview_window").entered();
+    let mut window_list = HashMap::new();
+
     let monitors = get_monitors();
     if let Ok(display) = Display::default().context("Could not connect to a display") {
         let gtk_monitors = display
@@ -25,8 +39,8 @@ pub fn create_windows_window(app: &Application, global: &WindowsGlobal) -> anyho
                 let workspaces_flow = FlowBox::builder()
                     .selection_mode(SelectionMode::None)
                     .orientation(Orientation::Horizontal)
-                    .max_children_per_line(global.workspaces_per_row as u32)
-                    .min_children_per_line(global.workspaces_per_row as u32)
+                    .max_children_per_line(windows.items_per_row as u32)
+                    .min_children_per_line(windows.items_per_row as u32)
                     .build();
 
                 let workspaces_flow_overlay = Overlay::builder()
@@ -45,26 +59,29 @@ pub fn create_windows_window(app: &Application, global: &WindowsGlobal) -> anyho
                 window.init_layer_shell();
                 window.set_namespace(Some(OVERVIEW_NAMESPACE));
                 window.set_layer(Layer::Top);
-                window.set_anchor(Edge::Top, true);
-                window.set_margin(Edge::Top, (monitor.height as f32 / 2.6) as i32);
+                window.set_anchor(Edge::Bottom, true);
+                window.set_margin(Edge::Bottom, (monitor.height as f32 / 2.6) as i32);
                 window.set_keyboard_mode(KeyboardMode::OnDemand);
-                window.set_can_focus(false);
                 window.set_monitor(Some(&gtk_monitor));
                 window.present();
                 window.set_visible(false);
 
                 debug!(
-                    "Created window window ({}) for monitor {:?}",
+                    "Created overview window ({}) for monitor {:?}",
                     window.id(),
                     monitor_name
                 );
-                global.data.borrow_mut().monitor_list.insert(
+                window_list.insert(
                     window,
-                    OverviewGlobalMonitorData::new(monitor.id, workspaces_flow),
+                    WindowsOverviewMonitorData::new(monitor.id, workspaces_flow),
                 );
             }
         }
     }
-
-    Ok(())
+    Ok(WindowsOverviewData {
+        window_list,
+        active: get_initial_active()?,
+        hypr_data: HyprlandData::default(),
+        launcher: launcher_data,
+    })
 }

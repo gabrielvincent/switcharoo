@@ -1,6 +1,6 @@
 use crate::plugins::iden_to_str;
 use crate::util::DataInWidget;
-use crate::{LauncherGlobal, plugins};
+use crate::{LauncherData, plugins};
 use core_lib::transfer::Identifier;
 use gtk::prelude::*;
 use gtk::{Widget, glib};
@@ -8,7 +8,7 @@ use gtk4_layer_shell::{KeyboardMode, LayerShell};
 use std::time::{Duration, Instant};
 use tracing::{Level, span, trace, warn};
 
-pub fn close_launcher_press(global: &LauncherGlobal, char: Option<char>) {
+pub fn close_launcher_press(global: &LauncherData, char: Option<char>) {
     let _span = span!(Level::TRACE, "close_launcher_key").entered();
     if let Some(data) = &global.data {
         if let Some(char) = char {
@@ -70,7 +70,7 @@ pub fn close_launcher_press(global: &LauncherGlobal, char: Option<char>) {
 // None means just close the launcher
 // Some(None) means close the launcher and launch first from sortable
 // Some(Some(iden)) means close the launcher and launch with iden
-pub fn close_launcher_click(global: &LauncherGlobal, iden: Identifier) {
+pub fn close_launcher_click(global: &LauncherData, iden: Identifier) {
     let _span = span!(Level::TRACE, "close_launcher_press").entered();
 
     if let Some(data) = &global.data {

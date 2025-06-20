@@ -1,8 +1,8 @@
-use crate::LauncherGlobal;
+use crate::LauncherData;
 use gtk::prelude::*;
 use tracing::{Level, span, trace};
 
-pub fn stop_launcher(global: &LauncherGlobal) {
+pub fn stop_launcher(global: &LauncherData) {
     let _span = span!(Level::TRACE, "stop_launcher").entered();
 
     if let Some(data) = &global.data {

@@ -18,23 +18,27 @@ impl old_structs::Windows {
     fn into(value: old_structs::Windows, launcher: Option<Launcher>) -> config::Windows {
         config::Windows {
             scale: value.scale,
-            workspaces_per_row: value.workspaces_per_row,
-            strip_html_from_workspace_title: value.strip_html_from_workspace_title,
+            items_per_row: value.workspaces_per_row,
             switch: value.switch,
-            overview: value
-                .overview
-                .map(|o| old_structs::Overview::into(o, launcher)),
+            overview: value.overview.map(|o| {
+                old_structs::Overview::into(o, launcher, value.strip_html_from_workspace_title)
+            }),
         }
     }
 }
 
 impl old_structs::Overview {
-    fn into(value: old_structs::Overview, launcher: Option<Launcher>) -> config::Overview {
+    fn into(
+        value: old_structs::Overview,
+        launcher: Option<Launcher>,
+        strip_html_from_workspace_title: bool,
+    ) -> config::Overview {
         config::Overview {
             open: value.open,
             other: value.other,
             navigate: value.navigate.into(),
             launcher: launcher.unwrap_or_default(),
+            strip_html_from_workspace_title,
         }
     }
 }

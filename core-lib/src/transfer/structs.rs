@@ -7,8 +7,10 @@ pub enum TransferType {
     OpenOverview(OpenOverview),
     /// send from the keybind to open the switch
     OpenSwitch(OpenSwitch),
-    /// send from the keybinds like arrow keys or tab on overview or switch
-    Switch(SwitchConfig),
+    /// send from the keybinds like arrow keys or tab on overview
+    SwitchOverview(OverviewSwitchConfig),
+    /// send from the keybinds like arrow keys or tab on switch
+    SwitchSwitch(SwitchSwitchConfig),
     /// send by pressing enter / ctrl + <n> / or from the gui itself to close the overview / switch
     Close(CloseConfig),
     /// send from the gui itself when typing the launcher
@@ -21,26 +23,34 @@ pub enum TransferType {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct OpenSwitch {
     pub hide_filtered: bool,
+    pub scale: f64,
+    pub items_per_row: u8,
     pub filter_current_workspace: bool,
     pub filter_current_monitor: bool,
     pub filter_same_class: bool,
-    pub workspaces_per_row: u8,
     pub direction: Direction,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct OpenOverview {
     pub hide_filtered: bool,
+    pub scale: f64,
+    pub items_per_row: u8,
     pub filter_current_workspace: bool,
     pub filter_current_monitor: bool,
     pub filter_same_class: bool,
-    pub workspaces_per_row: u8,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct SwitchConfig {
+pub struct OverviewSwitchConfig {
     pub direction: Direction,
     pub workspace: bool,
+    pub items_per_row: u8,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct SwitchSwitchConfig {
+    pub reverse: bool,
 }
 
 #[derive(Debug, Serialize, Deserialize)]

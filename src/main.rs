@@ -9,12 +9,13 @@ use tracing::{debug, info, warn};
 mod cli;
 mod data;
 mod keybinds;
-mod receive;
 mod recive_handle;
+mod socket;
 mod start;
 
 #[cfg(feature = "debug_command")]
 mod debug;
+mod util;
 
 fn main() -> anyhow::Result<()> {
     let cli = cli::App::parse();

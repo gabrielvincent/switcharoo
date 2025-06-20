@@ -1,13 +1,10 @@
-use core_lib::binds::ExecBind;
+use core_lib::binds::{ExecBind, generate_transfer_socat};
 use core_lib::config::{FilterBy, Windows};
-use core_lib::generate_transfer_socat;
 use core_lib::transfer::{OpenOverview, TransferType};
 
 pub fn generate_open_keybinds(windows: &Windows) -> Vec<ExecBind> {
     let mut binds = Vec::new();
     if let Some(overview) = &windows.overview {
-        let workspaces_per_row = windows.workspaces_per_row;
-
         let config = TransferType::OpenOverview(OpenOverview {
             hide_filtered: overview.other.hide_filtered,
             filter_current_workspace: overview
@@ -25,7 +22,8 @@ pub fn generate_open_keybinds(windows: &Windows) -> Vec<ExecBind> {
                 .filter_by
                 .iter()
                 .any(|f| f == &FilterBy::SameClass),
-            workspaces_per_row,
+            items_per_row: windows.items_per_row,
+            scale: windows.scale,
         });
 
         binds.push(ExecBind {
@@ -35,6 +33,7 @@ pub fn generate_open_keybinds(windows: &Windows) -> Vec<ExecBind> {
             exec: generate_transfer_socat(&config).into_boxed_str(),
         });
     }
+    if let Some(switch) = &windows.switch {}
 
     binds
 }

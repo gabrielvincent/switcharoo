@@ -26,7 +26,7 @@ pub fn reload_config() -> anyhow::Result<()> {
 }
 
 pub fn toast(body: &str) {
-    warn!("toast: {}", body);
+    // TODO check warn call before calling this
     let _ = notify::call(
         notify::Icon::Warning,
         std::time::Duration::from_secs(10),
@@ -109,17 +109,17 @@ pub fn reset_remain_focused() -> anyhow::Result<()> {
     Ok(())
 }
 
-pub fn activate_submap(submap_name: &str) -> anyhow::Result<()> {
-    Dispatch::call(DispatchType::Custom("submap", submap_name)).context("dispatch failed")?;
-    debug!("Activated submap: {}", submap_name);
-    Ok(())
-}
-
-pub fn reset_submap() -> anyhow::Result<()> {
-    Dispatch::call(DispatchType::Custom("submap", "reset")).context("dispatch failed")?;
-    debug!("reset submap");
-    Ok(())
-}
+// pub fn activate_submap(submap_name: &str) -> anyhow::Result<()> {
+//     Dispatch::call(DispatchType::Custom("submap", submap_name)).context("dispatch failed")?;
+//     debug!("Activated submap: {}", submap_name);
+//     Ok(())
+// }
+//
+// pub fn reset_submap() -> anyhow::Result<()> {
+//     Dispatch::call(DispatchType::Custom("submap", "reset")).context("dispatch failed")?;
+//     debug!("reset submap");
+//     Ok(())
+// }
 
 pub fn get_initial_active() -> anyhow::Result<Active> {
     let active_client = Client::get_active()?.map(|c| to_client_id(&c.address));

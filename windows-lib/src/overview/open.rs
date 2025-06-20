@@ -1,10 +1,9 @@
 use crate::WindowsGlobal;
 use crate::data::{SortConfig, collect_data};
+use crate::global::WindowsOverviewData;
 use crate::icon::set_icon;
 use anyhow::Context;
-use core_lib::transfer::{
-    CloseConfig, OpenOverview, TransferType, WindowsOverride, send_to_socket,
-};
+use core_lib::transfer::{CloseConfig, OpenOverview, TransferType, WindowsOverride};
 use core_lib::{ClientData, ClientId, Warn, WorkspaceId};
 use exec_lib::set_remain_focused;
 use gtk::gdk::Cursor;
@@ -17,7 +16,7 @@ fn scale(value: i16, scale: f64) -> i32 {
     (value as f64 / (15f64 - scale)) as i32
 }
 
-pub fn open_overview(global: &WindowsGlobal, config: OpenOverview) -> anyhow::Result<()> {
+pub fn open_overview(data: &mut WindowsOverviewData, config: OpenOverview) -> anyhow::Result<()> {
     let _span = span!(Level::TRACE, "open_overview").entered();
     set_remain_focused().warn("Failed to set no follow mouse");
 
@@ -30,8 +29,7 @@ pub fn open_overview(global: &WindowsGlobal, config: OpenOverview) -> anyhow::Re
     .context("Failed to collect data")?;
     let regex = regex::Regex::new(r"<[^>]*>").context("Invalid regex")?;
 
-    let mut data = global.data.borrow_mut();
-    for (window, monitor_data) in data.monitor_list.iter_mut() {
+    for (window, monitor_data) in data.window_list.iter_mut() {
         trace!("Showing window {:?}", window.id());
         window.set_visible(true);
 
@@ -49,17 +47,17 @@ pub fn open_overview(global: &WindowsGlobal, config: OpenOverview) -> anyhow::Re
             trace!(
                 "Creating workspace {:?} with ({}x{})",
                 wid,
-                scale(workspace.width as i16, global.scale),
-                scale(workspace.height as i16, global.scale)
+                scale(workspace.width as i16, config.scale),
+                scale(workspace.height as i16, config.scale)
             );
             let workspace_fixed = Fixed::builder()
-                .width_request(scale(workspace.width as i16, global.scale))
-                .height_request(scale(workspace.height as i16, global.scale))
+                .width_request(scale(workspace.width as i16, data.scale))
+                .height_request(scale(workspace.height as i16, data.scale))
                 .build();
 
             let id_string = wid.to_string();
             let title = if !workspace.name.trim().is_empty() {
-                if global.strip_html_from_workspace_title {
+                if data.strip_html_from_workspace_title {
                     regex.replace_all(&workspace.name, "")
                 } else {
                     Cow::from(&workspace.name)
@@ -127,7 +125,7 @@ pub fn open_overview(global: &WindowsGlobal, config: OpenOverview) -> anyhow::Re
 
                     // hide picture if client so small
                     let client_h_w =
-                        scale(client.height, global.scale).min(scale(client.width, global.scale));
+                        scale(client.height, data.scale).min(scale(client.width, data.scale));
                     if client_h_w > 70 {
                         let image = Image::builder()
                             .css_classes(["client-image"])
@@ -147,8 +145,8 @@ pub fn open_overview(global: &WindowsGlobal, config: OpenOverview) -> anyhow::Re
                     let button = Button::builder()
                         .child(&client_overlay)
                         .css_classes(["client"])
-                        .width_request(scale(client.width, global.scale))
-                        .height_request(scale(client.height, global.scale))
+                        .width_request(scale(client.width, data.scale))
+                        .height_request(scale(client.height, data.scale))
                         .build();
                     button.set_cursor(Cursor::from_name("pointer", None).as_ref());
 
@@ -163,15 +161,15 @@ pub fn open_overview(global: &WindowsGlobal, config: OpenOverview) -> anyhow::Re
                 trace!(
                     "Creating Client {:?} with ({}x{}) at ({}x{})",
                     address,
-                    scale(client.width, global.scale),
-                    scale(client.height, global.scale),
-                    scale(client.x - workspace.x as i16, global.scale) as f64,
-                    scale(client.y - workspace.y as i16, global.scale) as f64
+                    scale(client.width, data.scale),
+                    scale(client.height, data.scale),
+                    scale(client.x - workspace.x as i16, data.scale) as f64,
+                    scale(client.y - workspace.y as i16, data.scale) as f64
                 );
                 workspace_fixed.put(
                     &client_button,
-                    scale(client.x - workspace.x as i16, global.scale) as f64,
-                    scale(client.y - workspace.y as i16, global.scale) as f64,
+                    scale(client.x - workspace.x as i16, data.scale) as f64,
+                    scale(client.y - workspace.y as i16, data.scale) as f64,
                 );
                 monitor_data.client_refs.insert(*address, client_button);
             }

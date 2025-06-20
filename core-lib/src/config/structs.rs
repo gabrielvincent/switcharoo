@@ -19,9 +19,7 @@ pub struct Windows {
     #[default = 8.5]
     pub scale: f64,
     #[default = 5]
-    pub workspaces_per_row: u8,
-    #[default = true]
-    pub strip_html_from_workspace_title: bool,
+    pub items_per_row: u8,
     pub overview: Option<Overview>,
     pub switch: Option<Switch>,
 }
@@ -29,6 +27,8 @@ pub struct Windows {
 #[derive(SmartDefault, Debug, Clone, Deserialize, Serialize)]
 #[serde(default, deny_unknown_fields)]
 pub struct Overview {
+    #[default = true]
+    pub strip_html_from_workspace_title: bool,
     pub launcher: Launcher,
     pub open: OpenOverview,
     pub navigate: Navigate,
@@ -54,7 +54,7 @@ pub struct Launcher {
         shell: None,
         websearch: Some(WebSearchConfig::default()),
         calc: Some(EmptyConfig::default()),
-        })]
+    })]
     pub plugins: Plugins,
 }
 

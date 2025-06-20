@@ -8,6 +8,7 @@
       <sourceFolder url="file://$MODULE_DIR$/launcher-lib/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/windows-lib/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/test-global/src" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/config" />
       <excludeFolder url="file://$MODULE_DIR$/core-lib/target" />
       <excludeFolder url="file://$MODULE_DIR$/exec-lib/target" />

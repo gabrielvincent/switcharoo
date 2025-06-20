@@ -1,18 +1,17 @@
 use crate::WindowsGlobal;
+use crate::global::WindowsOverviewData;
 use core_lib::{FindByFirst, IdOverride, Warn};
 use exec_lib::switch::{switch_client, switch_workspace};
-use exec_lib::{reset_remain_focused, reset_submap, to_client_address};
+use exec_lib::{reset_remain_focused, to_client_address};
 use gtk::glib;
 use gtk::prelude::*;
 use tracing::{Level, debug, span, trace};
 
-pub fn close_windows(global: &WindowsGlobal, ids: Option<Option<IdOverride>>) {
+pub fn close_overview(data: &mut WindowsOverviewData, ids: Option<Option<IdOverride>>) {
     let _span = span!(Level::TRACE, "close_overview").entered();
-
-    reset_submap().warn("Failed to reset submap");
     reset_remain_focused().warn("Failed to reset follow mouse");
-    let mut data1 = global.data.borrow_mut();
-    for (window, monitor_data) in &mut data1.monitor_list.iter_mut() {
+
+    for (window, monitor_data) in &mut data.window_list.iter_mut() {
         while let Some(child) = monitor_data.workspaces_flow.first_child() {
             monitor_data.workspaces_flow.remove(&child);
         }
@@ -22,11 +21,11 @@ pub fn close_windows(global: &WindowsGlobal, ids: Option<Option<IdOverride>>) {
 
     if let Some(ids) = ids {
         let ids = match ids {
-            None => data1
+            None => data
                 .active
                 .client
                 .map(IdOverride::ClientId)
-                .unwrap_or_else(|| IdOverride::WorkspaceID(data1.active.workspace)),
+                .unwrap_or_else(|| IdOverride::WorkspaceID(data.active.workspace)),
             Some(IdOverride::ClientId(client_id)) => IdOverride::ClientId(client_id),
             Some(IdOverride::WorkspaceID(workspace_id)) => IdOverride::WorkspaceID(workspace_id),
         };
@@ -34,8 +33,7 @@ pub fn close_windows(global: &WindowsGlobal, ids: Option<Option<IdOverride>>) {
             IdOverride::ClientId(client_id) => {
                 debug!(
                     "Switching to client {}",
-                    data1
-                        .hypr_data
+                    data.hypr_data
                         .clients
                         .find_by_first(&client_id)
                         .map(|c| c.title.clone())
@@ -51,8 +49,7 @@ pub fn close_windows(global: &WindowsGlobal, ids: Option<Option<IdOverride>>) {
             IdOverride::WorkspaceID(workspace_id) => {
                 debug!(
                     "Switching to workspace {}",
-                    data1
-                        .hypr_data
+                    data.hypr_data
                         .workspaces
                         .find_by_first(&workspace_id)
                         .map(|c| c.name.clone())
