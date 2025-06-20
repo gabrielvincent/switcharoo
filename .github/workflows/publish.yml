@@ -57,7 +57,7 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           
           git fetch --tags origin hyprshell-release
-          git checkout ${{ github.ref }}
+          git checkout ${{ github.ref }} -b hyprshell-release
           git log -1 --pretty=%B
           git push origin HEAD:hyprshell-release --force
           
