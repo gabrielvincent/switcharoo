@@ -130,16 +130,16 @@ pub fn find_next_workspace(
         Direction::Left => -1,
         Direction::Up => -(workspaces_per_row as isize),
         Direction::Down => workspaces_per_row as isize,
-    }
-    .rem_euclid(workspaces.len() as isize) as usize;
+    };
     trace!("Finding next workspace with offset: {}", offset);
 
+    let current = workspaces.iter().position(|w| w.0 == active).unwrap_or(0);
     workspaces
-        .iter()
-        .cycle()
-        .skip_while(|(id, _)| *id != active) // skip until current element
-        // .inspect(|w| trace!("Inspecting workspace {w:?}"))
-        .nth(offset)
+        .get(
+            (current as isize + offset)
+                .max(0)
+                .min((workspaces.len() - 1) as isize) as usize,
+        )
         .map(|(id, data)| Active {
             client: None,
             workspace: *id,

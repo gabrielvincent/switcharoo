@@ -3,15 +3,18 @@ use async_channel::Sender;
 use core_lib::config::Launcher;
 use core_lib::transfer::{CloseOverviewConfig, Direction, SwitchOverviewConfig, TransferType};
 use core_lib::{LAUNCHER_NAMESPACE, Warn};
-use gtk::Orientation;
 use gtk::gdk::Key;
 use gtk::glib::Propagation;
 use gtk::prelude::*;
-use gtk::{Application, ApplicationWindow, Entry, EventControllerKey, ListBox, SelectionMode};
+use gtk::{
+    Application, ApplicationWindow, Entry, EventControllerKey, ListBox, PropagationPhase,
+    SearchEntry, SelectionMode,
+};
+use gtk::{Orientation, SearchBar};
 use gtk4_layer_shell::{Edge, Layer, LayerShell};
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
-use tracing::{Level, debug, span};
+use tracing::{Level, debug, info, span, trace};
 
 pub fn create_windows_overview_launcher_window(
     app: &Application,
@@ -32,6 +35,12 @@ pub fn create_windows_overview_launcher_window(
     entry.connect_changed(move |e| {
         launcher_entry_text_change(e.text().to_string(), event_sender_2.clone());
     });
+    let event_controller = EventControllerKey::new();
+    let event_sender_3 = event_sender.clone();
+    event_controller
+        .connect_key_pressed(move |_, key, _, _| handle_key(key, event_sender_3.clone()));
+    event_controller.set_propagation_phase(PropagationPhase::Capture);
+    entry.add_controller(event_controller);
     main_vbox.append(&entry);
 
     let results = gtk::Box::builder()
@@ -48,11 +57,6 @@ pub fn create_windows_overview_launcher_window(
         .build();
     main_vbox.append(&plugin_box);
 
-    let event_controller = EventControllerKey::new();
-    let event_sender_3 = event_sender.clone();
-    event_controller
-        .connect_key_pressed(move |_, key, _, _| handle_key(key, event_sender_3.clone()));
-
     let window = ApplicationWindow::builder()
         .css_classes(["window"])
         .application(app)
@@ -67,7 +71,6 @@ pub fn create_windows_overview_launcher_window(
     window.set_margin(Edge::Top, 15);
     window.present();
     window.set_visible(false);
-    window.add_controller(event_controller);
 
     debug!("Created launcher window ({})", window.id());
 
@@ -100,6 +103,18 @@ fn launcher_entry_text_change(text: String, event_sender: Sender<TransferType>) 
 
 fn handle_key(key: Key, event_sender: Sender<TransferType>) -> Propagation {
     match key {
+        Key::Super_L => {
+            event_sender
+                .send_blocking(TransferType::Exit)
+                .warn("unable to send");
+            Propagation::Stop
+        }
+        Key::Super_R => {
+            event_sender
+                .send_blocking(TransferType::Exit)
+                .warn("unable to send");
+            Propagation::Stop
+        }
         Key::Escape => {
             event_sender
                 .send_blocking(TransferType::Exit)
@@ -121,6 +136,21 @@ fn handle_key(key: Key, event_sender: Sender<TransferType>) -> Propagation {
                     workspace: false,
                     direction: Direction::Left,
                 }))
+                .warn("unable to send");
+            Propagation::Stop
+        }
+        Key::grave => {
+            event_sender
+                .send_blocking(TransferType::SwitchOverview(SwitchOverviewConfig {
+                    workspace: false,
+                    direction: Direction::Left,
+                }))
+                .warn("unable to send");
+            Propagation::Stop
+        }
+        Key::Return => {
+            event_sender
+                .send_blocking(TransferType::CloseOverview(CloseOverviewConfig::None))
                 .warn("unable to send");
             Propagation::Stop
         }

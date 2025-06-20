@@ -119,19 +119,19 @@ fn close_overview(global: &mut Globals, config: CloseOverviewConfig) {
             match config {
                 // return (focus active)
                 CloseOverviewConfig::None => {
-                    let launcher_empty = overview.launcher.entry.text_length() > 0;
-                    let launcher_has_items = overview.launcher.sorted_matches.is_empty();
+                    let launcher_empty = overview.launcher.entry.text_length() == 0;
+                    let launcher_no_items = overview.launcher.sorted_matches.is_empty();
                     if launcher_empty {
                         // close overview, kill launcher
                         windows_lib::close_overview(overview, Some(None));
                         launcher_lib::close_launcher_by_char(&mut overview.launcher, None);
                     } else {
-                        if launcher_has_items {
+                        if launcher_no_items {
+                            debug!("Launcher is empty, not closing");
+                        } else {
                             // kill overview, close launcher
                             windows_lib::close_overview(overview, None);
                             launcher_lib::close_launcher_by_char(&mut overview.launcher, Some('0'));
-                        } else {
-                            debug!("Launcher is empty, not closing");
                         }
                     };
                 }

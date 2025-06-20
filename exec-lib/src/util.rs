@@ -19,7 +19,7 @@ pub fn get_current_monitor() -> Option<Monitor> {
     Monitor::get_active().ok()
 }
 
-pub fn reload_config() -> anyhow::Result<()> {
+pub fn reload_hyprland_config() -> anyhow::Result<()> {
     debug!("Reloading hyprland config");
     reload::call().context("Failed to reload hyprland config")
 }

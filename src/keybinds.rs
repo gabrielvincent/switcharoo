@@ -6,8 +6,7 @@ use exec_lib::binds::{apply_exec_bind, apply_layerrules};
 use tracing::{Level, span};
 
 pub fn create_binds<'a>(config: &Config) -> anyhow::Result<()> {
-    let _span = span!(Level::DEBUG, "create_binds_and_submaps").entered();
-
+    let _span = span!(Level::DEBUG, "create_binds").entered();
     if config.layerrules {
         apply_layerrules().warn("Failed to apply layerrules");
     }

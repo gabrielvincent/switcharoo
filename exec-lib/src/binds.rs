@@ -6,6 +6,7 @@ use hyprland::config::binds;
 use hyprland::config::binds::{Binder, Binding};
 use hyprland::dispatch::DispatchType;
 use hyprland::keyword::Keyword;
+use tracing::trace;
 
 pub fn apply_layerrules() -> anyhow::Result<()> {
     Keyword::set("layerrule", format!("noanim, {LAUNCHER_NAMESPACE}"))?;
@@ -19,6 +20,7 @@ pub fn apply_layerrules() -> anyhow::Result<()> {
 // ctrl+shift+alt, h
 // hyprland::bind!(d e | SUPER, Key, "a" => Exec, "pkill hyprshell");
 pub fn apply_exec_bind(bind: &ExecBind) -> anyhow::Result<()> {
+    trace!("binding exec: {bind:?}");
     Binder::bind(Binding {
         mods: bind
             .mods

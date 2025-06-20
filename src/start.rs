@@ -11,7 +11,7 @@ use core_lib::{
     hyprshell_css_listener,
 };
 use exec_lib::listener::{hyprland_config_listener, monitor_listener};
-use exec_lib::toast;
+use exec_lib::{reload_hyprland_config, toast};
 use gtk::gdk::Display;
 use gtk::prelude::*;
 use gtk::{
@@ -46,9 +46,9 @@ pub fn start(config_path: PathBuf, css_path: PathBuf, data_dir: PathBuf) -> anyh
         socket_handler(event_sender_2.clone()).await;
     });
 
+    fill_icon_map(true);
     check_themes();
     reload_desktop_data();
-    fill_icon_map(true);
 
     loop {
         let application = Application::builder()
@@ -88,6 +88,13 @@ fn activate(
 ) {
     let _span = span!(Level::TRACE, "activate").entered();
     apply_css(css_path);
+
+    if let Err(err) = reload_hyprland_config() {
+        warn!("Failed to reload hyprland config: {err:?}");
+        toast(&format!("Failed to reload hyprland config: {err}"));
+        hyprshell_config_block(config_path);
+        return; // return needed to exit the application
+    }
 
     let config = match config::load_config(config_path) {
         Ok(config) => config,

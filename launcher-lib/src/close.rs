@@ -3,7 +3,7 @@ use crate::util::DataInWidget;
 use crate::{LauncherData, plugins};
 use core_lib::transfer::Identifier;
 use gtk::prelude::*;
-use gtk::{Widget, glib};
+use gtk::{ApplicationWindow, Entry, SearchEntry, Widget, glib};
 use gtk4_layer_shell::{KeyboardMode, LayerShell};
 use std::time::{Duration, Instant};
 use tracing::{Level, span, trace, warn};
@@ -25,8 +25,9 @@ pub fn close_launcher_by_char(data: &mut LauncherData, char: Option<char>) {
         } else {
             warn!("No match found for char: {}", char);
         }
+    } else {
+        close_window(&data.entry, &data.window);
     }
-    close_window(&data.entry, &data.window);
 }
 
 pub fn close_launcher_by_iden(data: &mut LauncherData, iden: &Identifier) {
@@ -35,7 +36,6 @@ pub fn close_launcher_by_iden(data: &mut LauncherData, iden: &Identifier) {
     trace!("Closing launcher with iden: {:?}", iden);
 
     close_launcher(data, iden);
-    close_window(&data.entry, &data.window);
 }
 
 fn close_launcher(data: &mut LauncherData, iden: &Identifier) {
@@ -73,10 +73,12 @@ fn close_launcher(data: &mut LauncherData, iden: &Identifier) {
                 trace!("closed launcher after {:?} time", instant.elapsed());
             },
         );
+    } else {
+        close_window(&entry, &window);
     }
 }
 
-fn close_window(entry: &gtk::Entry, window: &gtk::ApplicationWindow) {
+fn close_window(entry: &Entry, window: &ApplicationWindow) {
     trace!("Hiding window (launcher) {:?}", window.id());
     window.set_visible(false);
     entry.set_text("");

@@ -2,6 +2,7 @@ use crate::plugins::{Identifier, PluginNames, StaticLaunchOption};
 use core_lib::Warn;
 use exec_lib::run::run_program;
 use std::path::PathBuf;
+use tracing::debug;
 
 pub fn get_static_options(
     matches: &mut Vec<StaticLaunchOption>,
@@ -32,6 +33,10 @@ pub fn get_static_options(
 }
 
 pub fn launch_option(text: &str, default_terminal: &Option<Box<str>>) -> bool {
+    if text.is_empty() {
+        debug!("No text to run in terminal");
+        return false;
+    }
     run_program(
         // exec shell to prevent needing 2 exits
         // echo to make the shell look better and show the executed command
