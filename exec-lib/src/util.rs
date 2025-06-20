@@ -55,27 +55,30 @@ fn get_gestures_enabled() -> &'static Mutex<Option<bool>> {
 }
 
 pub fn set_remain_focused() -> anyhow::Result<()> {
-    let follow = Keyword::get("input:follow_mouse").context("keyword failed")?;
     let mut lock = get_prev_follow_mouse()
         .lock()
         .map_err(|e| anyhow::anyhow!("unable to lock get_prev_follow_mouse mutex: {}", e))?;
-    trace!("Storing previous follow_mouse value: {}", follow.value);
-    *lock = Some(follow.value.to_string());
-
+    // only set once
+    if lock.is_none() {
+        let follow = Keyword::get("input:follow_mouse").context("keyword failed")?;
+        trace!("Storing previous follow_mouse value: {}", follow.value);
+        *lock = Some(follow.value.to_string());
+    }
     Keyword::set("input:follow_mouse", "3").context("keyword failed")?;
     trace!("Set follow_mouse to 3");
 
-    let gestures_enabled = Keyword::get("gestures:workspace_swipe").context("keyword failed")?;
     let mut lock = get_gestures_enabled()
         .lock()
         .map_err(|e| anyhow::anyhow!("unable to lock get_gestures_enabled mutex: {}", e))?;
-
-    trace!(
-        "Storing previous gestures_enabled value: {}",
-        gestures_enabled.value
-    );
-    *lock = Some(gestures_enabled.value.to_string() == "1");
-
+    if lock.is_none() {
+        let gestures_enabled =
+            Keyword::get("gestures:workspace_swipe").context("keyword failed")?;
+        trace!(
+            "Storing previous gestures_enabled value: {}",
+            gestures_enabled.value
+        );
+        *lock = Some(gestures_enabled.value.to_string() == "1");
+    }
     Keyword::set("gestures:workspace_swipe", "0").context("keyword failed")?;
     trace!("Set gestures:workspace_swipe to 0");
     Ok(())

@@ -24,13 +24,12 @@ pub enum TransferType {
 }
 #[derive(Debug, Serialize, Deserialize)]
 pub struct OpenSwitch {
-    pub hide_filtered: bool,
     pub scale: f64,
     pub items_per_row: u8,
     pub filter_current_workspace: bool,
     pub filter_current_monitor: bool,
     pub filter_same_class: bool,
-    pub direction: Direction,
+    pub reverse: bool,
 }
 
 #[derive(Debug, Serialize, Deserialize)]

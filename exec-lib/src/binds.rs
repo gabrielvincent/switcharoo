@@ -3,7 +3,7 @@ use core_lib::binds::ExecBind;
 use core_lib::config::Mod;
 use core_lib::{LAUNCHER_NAMESPACE, OVERVIEW_NAMESPACE};
 use hyprland::config::binds;
-use hyprland::config::binds::{Binder, Binding};
+use hyprland::config::binds::{Binder, Binding, Flag};
 use hyprland::dispatch::DispatchType;
 use hyprland::keyword::Keyword;
 use tracing::trace;
@@ -20,8 +20,7 @@ pub fn apply_layerrules() -> anyhow::Result<()> {
 // ctrl+shift+alt, h
 // hyprland::bind!(d e | SUPER, Key, "a" => Exec, "pkill hyprshell");
 pub fn apply_exec_bind(bind: &ExecBind) -> anyhow::Result<()> {
-    trace!("binding exec: {bind:?}");
-    Binder::bind(Binding {
+    let binding = Binding {
         mods: bind
             .mods
             .iter()
@@ -32,10 +31,15 @@ pub fn apply_exec_bind(bind: &ExecBind) -> anyhow::Result<()> {
                 Mod::Shift => binds::Mod::SHIFT,
             })
             .collect(),
-        key: binds::Key::Key(&bind.key.to_key()),
-        flags: vec![],
+        key: binds::Key::Key(&bind.key),
+        flags: if bind.on_release {
+            vec![Flag::r, Flag::t]
+        } else {
+            vec![]
+        },
         dispatcher: DispatchType::Exec(&bind.exec),
-    })
-    .with_context(|| format!("binding exec failed: {bind:?}"))?;
+    };
+    trace!("binding exec: {binding:?}");
+    Binder::bind(binding).with_context(|| format!("binding exec failed: {bind:?}"))?;
     Ok(())
 }

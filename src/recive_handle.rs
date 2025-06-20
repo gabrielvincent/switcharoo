@@ -161,10 +161,10 @@ fn close_switch(global: &mut Globals, config: CloseSwitchConfig) {
         if let Some(switch) = &mut windows.switch {
             match config {
                 CloseSwitchConfig::Windows(iden) => {
-                    windows_lib::close_switch(switch, Some(iden));
+                    windows_lib::close_switch(switch, Some(Some(iden)));
                 }
                 CloseSwitchConfig::None => {
-                    windows_lib::close_switch(switch, None);
+                    windows_lib::close_switch(switch, Some(None));
                 }
             }
         }

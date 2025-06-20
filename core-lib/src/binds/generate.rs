@@ -1,5 +1,5 @@
 use crate::binds::structs::ExecBind;
-use crate::config::{KeyMaybeMod, Mod};
+use crate::config::Mod;
 use anyhow::bail;
 
 pub fn generate_bind_kill(kill_bind: &str) -> anyhow::Result<ExecBind> {
@@ -26,14 +26,14 @@ pub fn generate_bind_kill(kill_bind: &str) -> anyhow::Result<ExecBind> {
         None => bail!("No mods specified"),
     };
     let key = match a.get(1) {
-        Some(s) => KeyMaybeMod::from(*s),
+        Some(s) => Box::from(*s),
         None => bail!("No key provided in bind: {}", kill_bind),
     };
 
     let bind = ExecBind {
         key,
         mods,
-        flags: vec![],
+        on_release: true,
         exec: "pkill hyprshell".into(),
     };
     Ok(bind)

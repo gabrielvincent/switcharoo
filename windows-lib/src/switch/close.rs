@@ -6,7 +6,7 @@ use gtk::glib;
 use gtk::prelude::*;
 use tracing::{Level, debug, span, trace};
 
-pub fn close_switch(data: &mut WindowsSwitchData, ids: Option<ClientId>) {
+pub fn close_switch(data: &mut WindowsSwitchData, ids: Option<Option<ClientId>>) {
     let _span = span!(Level::TRACE, "close_switch").entered();
 
     reset_remain_focused().warn("Failed to reset follow mouse");
@@ -17,19 +17,21 @@ pub fn close_switch(data: &mut WindowsSwitchData, ids: Option<ClientId>) {
     data.window.set_visible(false);
 
     if let Some(client_id) = ids {
-        debug!(
-            "Switching to client {}",
-            data.hypr_data
-                .clients
-                .find_by_first(&client_id)
-                .map(|c| c.title.clone())
-                .unwrap_or_else(|| "<Unknown>".to_string())
-        );
-        // we need to do this because the window might still be visible and have KeyboardMode::Exclusive
-        glib::idle_add_local(move || {
-            switch_client(to_client_address(client_id))
-                .warn(&format!("Failed to execute with id {client_id:?}"));
-            glib::ControlFlow::Break
-        });
+        if let Some(client_id) = client_id.or(data.active.client) {
+            debug!(
+                "Switching to client {}",
+                data.hypr_data
+                    .clients
+                    .find_by_first(&client_id)
+                    .map(|c| c.title.clone())
+                    .unwrap_or_else(|| "<Unknown>".to_string())
+            );
+            // we need to do this because the window might still be visible and have KeyboardMode::Exclusive
+            glib::idle_add_local(move || {
+                switch_client(to_client_address(client_id))
+                    .warn(&format!("Failed to execute with id {client_id:?}"));
+                glib::ControlFlow::Break
+            });
+        }
     }
 }

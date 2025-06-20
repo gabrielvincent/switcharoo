@@ -4,13 +4,15 @@ use crate::icon::set_icon;
 use crate::next::find_next;
 use anyhow::Context;
 use async_channel::Sender;
-use core_lib::transfer::{CloseOverviewConfig, OpenSwitch, TransferType, WindowsOverride};
+use core_lib::transfer::{
+    CloseOverviewConfig, Direction, OpenSwitch, TransferType, WindowsOverride,
+};
 use core_lib::{ClientData, ClientId, Warn};
 use exec_lib::{get_current_monitor, set_remain_focused};
 use gtk::gdk::Cursor;
 use gtk::prelude::*;
 use gtk::{Button, Frame, Image, Label, Overflow, Overlay, pango};
-use tracing::{Level, debug, span, trace};
+use tracing::{Level, debug, info, span, trace};
 
 fn scale(value: i16, scale: f64) -> i32 {
     (value as f64 / (15f64 - scale)) as i32
@@ -32,7 +34,11 @@ pub fn open_switch(
     })
     .context("Failed to collect data")?;
     let active = find_next(
-        &config.direction,
+        &if config.reverse {
+            Direction::Left
+        } else {
+            Direction::Right
+        },
         false,
         &clients_data,
         active_prev,
@@ -46,7 +52,7 @@ pub fn open_switch(
 
     let clients: &Vec<(ClientId, ClientData)> = &clients_data.clients;
     for (address, client) in clients {
-        if config.hide_filtered && !client.enabled {
+        if !client.enabled {
             continue;
         }
         let client_button = {
