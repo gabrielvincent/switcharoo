@@ -1,6 +1,7 @@
 use crate::plugins::{Identifier, PluginNames, StaticLaunchOption};
 use core_lib::Warn;
 use exec_lib::run::run_program;
+use gtk::gdk::Key;
 use std::path::PathBuf;
 use tracing::debug;
 
@@ -26,6 +27,6 @@ pub fn launch_option(text: &str, default_terminal: &Option<Box<str>>) -> bool {
     true
 }
 
-pub(crate) fn get_chars() -> Vec<char> {
-    vec!['r']
+pub(crate) fn get_chars() -> Vec<Key> {
+    vec![Key::r]
 }

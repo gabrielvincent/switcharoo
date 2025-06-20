@@ -1,4 +1,5 @@
 use core_lib::config::Plugins;
+use gtk::gdk::Key;
 use std::path::Path;
 use tracing::{Level, span};
 
@@ -124,7 +125,7 @@ pub fn launch(
     }
 }
 
-pub fn get_static_options_chars(plugins: &Plugins) -> Vec<char> {
+pub fn get_static_options_chars(plugins: &Plugins) -> Vec<Key> {
     let mut chars = Vec::new();
 
     if plugins.shell.is_some() {

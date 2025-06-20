@@ -1,4 +1,5 @@
 use crate::global::{LauncherConfig, LauncherData};
+use crate::plugins::get_static_options_chars;
 use async_channel::Sender;
 use core_lib::config::Launcher;
 use core_lib::transfer::{CloseOverviewConfig, Direction, SwitchOverviewConfig, TransferType};
@@ -14,6 +15,7 @@ use gtk::{Orientation, SearchBar};
 use gtk4_layer_shell::{Edge, Layer, LayerShell};
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
+use std::sync::{Arc, Mutex};
 use tracing::{Level, debug, info, span, trace};
 
 pub fn create_windows_overview_launcher_window(
@@ -36,9 +38,21 @@ pub fn create_windows_overview_launcher_window(
         launcher_entry_text_change(e.text().to_string(), event_sender_2.clone());
     });
     let event_controller = EventControllerKey::new();
+    let plugin_keys = get_static_options_chars(&launcher.plugins);
     let event_sender_3 = event_sender.clone();
-    event_controller
-        .connect_key_pressed(move |_, key, _, _| handle_key(key, event_sender_3.clone()));
+    let modifiers = Arc::new(Mutex::new(0u16));
+    let modifiers_2 = modifiers.clone();
+    event_controller.connect_key_pressed(move |_, key, _, _| {
+        handle_key(
+            key,
+            &plugin_keys,
+            modifiers_2.clone(),
+            event_sender_3.clone(),
+        )
+    });
+    event_controller.connect_key_released(move |_, key, _, _| {
+        handle_release(key, modifiers.clone());
+    });
     event_controller.set_propagation_phase(PropagationPhase::Capture);
     entry.add_controller(event_controller);
     main_vbox.append(&entry);
@@ -101,7 +115,50 @@ fn launcher_entry_text_change(text: String, event_sender: Sender<TransferType>) 
         .warn("unable to send");
 }
 
-fn handle_key(key: Key, event_sender: Sender<TransferType>) -> Propagation {
+fn handle_release(key: Key, mods: Arc<Mutex<u16>>) {
+    let mut mods = mods.lock().unwrap();
+    match key {
+        Key::Shift_L | Key::Shift_R => *mods &= !1,
+        Key::Control_L | Key::Control_R => *mods &= !2,
+        Key::Alt_L | Key::Alt_R => *mods &= !4,
+        Key::Super_L | Key::Super_R => *mods &= !8,
+        _ => (),
+    };
+    trace!("key: {}, mods: {}", key, mods);
+}
+
+fn handle_key(
+    key: Key,
+    plugin_keys: &[Key],
+    mods: Arc<Mutex<u16>>,
+    event_sender: Sender<TransferType>,
+) -> Propagation {
+    let mut mods = mods.lock().unwrap();
+    match key {
+        Key::Shift_L | Key::Shift_R => *mods |= 1,
+        Key::Control_L | Key::Control_R => *mods |= 2,
+        Key::Alt_L | Key::Alt_R => *mods |= 4,
+        Key::Super_L | Key::Super_R => *mods |= 8,
+        _ => (),
+    };
+
+    trace!("key: {}({:?}), mods: {}", key, key, mods);
+    if *mods == 2 && plugin_keys.contains(&key) {
+        let ch = key
+            .name()
+            .unwrap_or_default()
+            .to_string()
+            .pop()
+            .unwrap_or('a');
+        trace!("plugin key: {}", ch);
+        event_sender
+            .send_blocking(TransferType::CloseOverview(
+                CloseOverviewConfig::LauncherPress(ch),
+            ))
+            .warn("unable to send");
+        return Propagation::Stop;
+    }
+
     match key {
         Key::Super_L => {
             event_sender
@@ -187,12 +244,6 @@ fn handle_key(key: Key, event_sender: Sender<TransferType>) -> Propagation {
                     workspace: true,
                     direction: Direction::Right,
                 }))
-                .warn("unable to send");
-            Propagation::Stop
-        }
-        Key::Return => {
-            event_sender
-                .send_blocking(TransferType::CloseOverview(CloseOverviewConfig::None))
                 .warn("unable to send");
             Propagation::Stop
         }

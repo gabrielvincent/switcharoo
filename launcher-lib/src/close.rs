@@ -24,6 +24,7 @@ pub fn close_launcher_by_char(data: &mut LauncherData, char: Option<char>) {
             close_launcher(data, &iden)
         } else {
             warn!("No match found for char: {}", char);
+            close_window(&data.entry, &data.window);
         }
     } else {
         close_window(&data.entry, &data.window);

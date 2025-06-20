@@ -2,12 +2,14 @@ mod default;
 
 use crate::plugins::search::default::get_browser_info;
 use crate::plugins::{Identifier, PluginNames, StaticLaunchOption};
+use crate::util::convert_to_key;
 use core_lib::Warn;
 use core_lib::config::SearchEngine;
 pub use default::reload_default_browser;
 use exec_lib::run::run_program;
 use exec_lib::switch::switch_client_by_initial_class;
 use exec_lib::toast;
+use gtk::gdk::Key;
 use tracing::{debug, trace};
 
 pub fn get_static_options(matches: &mut Vec<StaticLaunchOption>, config: &[SearchEngine]) {
@@ -63,6 +65,9 @@ pub fn launch_option(iden: &Option<Box<str>>, text: &str) -> bool {
     true
 }
 
-pub(crate) fn get_chars(config: &[SearchEngine]) -> Vec<char> {
-    config.iter().map(|engine| engine.key).collect()
+pub(crate) fn get_chars(config: &[SearchEngine]) -> Vec<Key> {
+    config
+        .iter()
+        .flat_map(|engine| convert_to_key(engine.key))
+        .collect()
 }
