@@ -51,12 +51,14 @@ jobs:
           curl --location --silent --show-error --fail "https://github.com/cargo-bins/cargo-quickinstall/releases/download/cargo-workspaces-0.3.6/cargo-workspaces-0.3.6-x86_64-unknown-linux-gnu.tar.gz" | tar -xzvvf - -C $HOME/.cargo/bin
       - name: Publish to crates.io
         run: |
+          set -euxo pipefail
+          
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           
           git fetch --tags origin hyprshell-release
           git checkout ${{ github.ref }} -b hyprshell-release
-          git push origin HEAD:hyprshell-release
+          git log -1 --pretty=%B
           
           echo "removing old tag"
           git tag --delete ${{ github.ref_name }}
