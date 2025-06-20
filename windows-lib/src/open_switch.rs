@@ -5,7 +5,7 @@ use crate::next::find_next;
 use anyhow::Context;
 use core_lib::transfer::{CloseConfig, OpenSwitch, TransferType, WindowsOverride};
 use core_lib::{ClientData, ClientId, FindByFirst, Warn, send_to_socket};
-use exec_lib::set_remain_focused;
+use exec_lib::{set_remain_focused, toast};
 use gtk::gdk::Cursor;
 use gtk::prelude::*;
 use gtk::{Button, Frame, Image, Label, Overflow, Overlay, pango};
@@ -18,6 +18,7 @@ fn scale(value: i16, scale: f64) -> i32 {
 pub fn open_switch(global: &WindowsGlobal, config: OpenSwitch) -> anyhow::Result<()> {
     let _span = span!(Level::TRACE, "open_switch").entered();
     set_remain_focused().warn("Failed to set no follow mouse");
+    toast("Switch mode is currently broken");
 
     let (clients_data, active_prev) = collect_data(&SortConfig {
         filter_current_monitor: config.filter_current_monitor,
