@@ -16,7 +16,7 @@ jobs:
         id: check_commit
         run: |
           commit_msg=$(git log -1 --pretty=%B)
-          if [[ $commit_msg =~ ^chore\(hyprshell\):\ release ]]; then
+          if [[ $commit_msg =~ ^chore\(hyprshell.*\):\ release ]]; then
             echo "should_publish=true" >> $GITHUB_OUTPUT
           else
             echo "Error: Commit message must start with 'chore(hyprshell): release'"
@@ -51,19 +51,27 @@ jobs:
           curl --location --silent --show-error --fail "https://github.com/cargo-bins/cargo-quickinstall/releases/download/cargo-workspaces-0.3.6/cargo-workspaces-0.3.6-x86_64-unknown-linux-gnu.tar.gz" | tar -xzvvf - -C $HOME/.cargo/bin
       - name: Publish to crates.io
         run: |
+          set -euxo pipefail
+          
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           
-          git fetch --tags origin hyprshell
-          git checkout ${{ github.ref }} -b hyprshell
-          git push origin HEAD:hyprshell-release
+          git fetch --tags origin hyprshell-release
+          git checkout ${{ github.ref }} -b hyprshell-release
+          git log -1 --pretty=%B
+          git push origin HEAD:hyprshell-release --force
           
-          echo "removing old tag"
           git tag --delete ${{ github.ref_name }}
           git push --delete origin ${{ github.ref_name }}
           
           version=$(echo ${{ github.ref_name }} | sed 's/v//')
-          cargo ws publish custom $version -m "chore(release): bump rust versions to $version" --no-individual-tags --allow-branch hyprshell --exact --yes --force "hyprshell*" --token ${{ secrets.CRATES_TOKEN }}
+          cargo ws publish custom $version -m "chore(release): bump rust versions to $version" --no-individual-tags --allow-branch hyprshell-release --exact --yes --force "hyprshell*" --token ${{ secrets.CRATES_TOKEN }}
+          
+          current_sha=$(git rev-parse HEAD)
+          jq --arg sha "$current_sha" '.["last-release-sha"]=$sha' release-please-config.json > tmp.json && mv tmp.json release-please-config.json
+          git add release-please-config.json
+          git commit -m "chore: update last-release-sha"
+          git push origin hyprshell-release
           
           gh release edit ${{ github.ref_name }} --latest --draft=false --title "hyprshell ${{ github.ref_name }}"
         env:
