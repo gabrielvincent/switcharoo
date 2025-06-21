@@ -30,7 +30,7 @@ pub async fn event_handler(
                 TransferType::Type(text) => r#type(&mut globals, text, event_sender.clone()),
                 TransferType::CloseOverview(config) => close_overview(&mut globals, config),
                 TransferType::CloseSwitch(config) => close_switch(&mut globals, config),
-                TransferType::Restart => restart(&mut globals),
+                TransferType::Restart => restart(&globals),
             }
             if close_socket {
                 return;
@@ -52,7 +52,7 @@ fn open_overview(global: &mut Globals, config: OpenOverview, event_sender: Sende
         if let Some(overview) = &mut windows.overview {
             windows_lib::open_overview(overview, config, event_sender)
                 .warn("Failed to open overview window");
-            launcher_lib::open_launcher(&mut overview.launcher)
+            launcher_lib::open_launcher(&overview.launcher)
         } else {
             warn!("Window overview not active");
         }
@@ -125,14 +125,12 @@ fn close_overview(global: &mut Globals, config: CloseOverviewConfig) {
                         // close overview, kill launcher
                         windows_lib::close_overview(overview, Some(None));
                         launcher_lib::close_launcher_by_char(&mut overview.launcher, None);
+                    } else if launcher_no_items {
+                        debug!("Launcher is empty, not closing");
                     } else {
-                        if launcher_no_items {
-                            debug!("Launcher is empty, not closing");
-                        } else {
-                            // kill overview, close launcher
-                            windows_lib::close_overview(overview, None);
-                            launcher_lib::close_launcher_by_char(&mut overview.launcher, Some('0'));
-                        }
+                        // kill overview, close launcher
+                        windows_lib::close_overview(overview, None);
+                        launcher_lib::close_launcher_by_char(&mut overview.launcher, Some('0'));
                     };
                 }
                 // clicked on launcher item

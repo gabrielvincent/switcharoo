@@ -18,7 +18,7 @@ impl old_structs::Windows {
         config::Windows {
             scale: value.scale,
             items_per_row: value.workspaces_per_row,
-            switch: value.switch.map(|s| old_structs::Switch::into(s)),
+            switch: value.switch.map(old_structs::Switch::into),
             overview: value.overview.map(|o| {
                 old_structs::Overview::into(o, launcher, value.strip_html_from_workspace_title)
             }),

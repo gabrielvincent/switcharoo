@@ -3,7 +3,7 @@ use crate::util::DataInWidget;
 use crate::{LauncherData, plugins};
 use core_lib::transfer::Identifier;
 use gtk::prelude::*;
-use gtk::{ApplicationWindow, Entry, SearchEntry, Widget, glib};
+use gtk::{ApplicationWindow, Entry, Widget, glib};
 use gtk4_layer_shell::{KeyboardMode, LayerShell};
 use std::time::{Duration, Instant};
 use tracing::{Level, span, trace, warn};

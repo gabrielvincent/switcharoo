@@ -4,19 +4,19 @@ use async_channel::Sender;
 use core_lib::config::Launcher;
 use core_lib::transfer::{CloseOverviewConfig, Direction, SwitchOverviewConfig, TransferType};
 use core_lib::{LAUNCHER_NAMESPACE, Warn};
+use gtk::Orientation;
 use gtk::gdk::Key;
 use gtk::glib::Propagation;
 use gtk::prelude::*;
 use gtk::{
     Application, ApplicationWindow, Entry, EventControllerKey, ListBox, PropagationPhase,
-    SearchEntry, SelectionMode,
+    SelectionMode,
 };
-use gtk::{Orientation, SearchBar};
 use gtk4_layer_shell::{Edge, Layer, LayerShell};
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use std::sync::{Arc, Mutex};
-use tracing::{Level, debug, info, span, trace};
+use tracing::{Level, debug, span, trace};
 
 pub fn create_windows_overview_launcher_window(
     app: &Application,

@@ -1,7 +1,7 @@
 use crate::global::WindowsSwitchData;
 use async_channel::Sender;
 use core_lib::config::{Switch, Windows};
-use core_lib::transfer::{CloseSwitchConfig, Direction, SwitchSwitchConfig, TransferType};
+use core_lib::transfer::{CloseSwitchConfig, SwitchSwitchConfig, TransferType};
 use core_lib::{HyprlandData, OVERVIEW_NAMESPACE, Warn};
 use exec_lib::get_initial_active;
 use gtk::gdk::Key;

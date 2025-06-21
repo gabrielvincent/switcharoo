@@ -1,6 +1,5 @@
 use crate::config;
 use serde::{Deserialize, Serialize};
-use std::fmt::Display;
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
@@ -45,7 +44,7 @@ pub(super) struct OpenOverview {
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
-struct Navigate {
+pub(super) struct Navigate {
     forward: String,
     reverse: Reverse,
 }

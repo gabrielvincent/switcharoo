@@ -12,7 +12,7 @@ use exec_lib::{get_current_monitor, set_remain_focused};
 use gtk::gdk::Cursor;
 use gtk::prelude::*;
 use gtk::{Button, Frame, Image, Label, Overflow, Overlay, pango};
-use tracing::{Level, debug, info, span, trace};
+use tracing::{Level, debug, span, trace};
 
 fn scale(value: i16, scale: f64) -> i32 {
     (value as f64 / (15f64 - scale)) as i32

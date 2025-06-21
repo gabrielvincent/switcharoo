@@ -107,14 +107,10 @@ pub fn generate_config(data: ConfigData) -> Config {
             } else {
                 None
             },
-            switch: if let Some(switch_mod) = data.switch {
-                Some(Switch {
-                    modifier: switch_mod,
-                    ..Default::default()
-                })
-            } else {
-                None
-            },
+            switch: data.switch.map(|switch_mod| Switch {
+                modifier: switch_mod,
+                ..Default::default()
+            }),
             ..Default::default()
         }),
         ..Default::default()
