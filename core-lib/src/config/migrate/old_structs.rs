@@ -1,37 +1,101 @@
 use crate::config;
 use serde::{Deserialize, Serialize};
-use smart_default::SmartDefault;
+use std::fmt::Display;
 
-#[derive(SmartDefault, Debug, Clone, Deserialize, Serialize)]
-#[serde(default)]
-pub struct Config {
-    #[default = true]
-    pub layerrules: bool,
-    #[default = "ctrl+shift+alt, h"]
-    pub kill_bind: String,
-    #[default(None)]
-    pub launcher: Option<config::Launcher>,
-    #[default(Some(Windows::default()))]
-    pub windows: Option<Windows>,
+#[derive(Debug, Clone, Deserialize, Serialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct Config {
+    pub(super) layerrules: bool,
+    pub(super) kill_bind: String,
+    pub(super) launcher: Option<config::Launcher>,
+    pub(super) windows: Option<Windows>,
 }
 
-#[derive(SmartDefault, Debug, Clone, Deserialize, Serialize)]
-#[serde(default)]
-pub struct Windows {
-    #[default = 8.5]
-    pub scale: f64,
-    #[default = 5]
-    pub workspaces_per_row: u8,
-    #[default = true]
-    pub strip_html_from_workspace_title: bool,
-    pub overview: Option<Overview>,
-    pub switch: Option<config::Switch>,
+#[derive(Debug, Clone, Deserialize, Serialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct Windows {
+    pub(super) scale: f64,
+    pub(super) workspaces_per_row: u8,
+    pub(super) strip_html_from_workspace_title: bool,
+    pub(super) overview: Option<Overview>,
+    pub(super) switch: Option<Switch>,
 }
 
-#[derive(SmartDefault, Debug, Clone, Deserialize, Serialize)]
-#[serde(default, deny_unknown_fields)]
-pub struct Overview {
-    pub open: config::OpenOverview,
-    pub navigate: config::Navigate,
-    pub other: config::OtherOverview,
+#[derive(Debug, Clone, Deserialize, Serialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct Overview {
+    pub(super) open: OpenOverview,
+    pub(super) navigate: Navigate,
+    pub(super) other: OtherOverview,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct OtherOverview {
+    pub(super) filter_by: Vec<config::FilterBy>,
+    pub(super) hide_filtered: bool,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct OpenOverview {
+    pub(super) key: KeyMaybeMod,
+    pub(super) modifier: config::Mod,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
+#[serde(deny_unknown_fields)]
+struct Navigate {
+    forward: String,
+    reverse: Reverse,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct Switch {
+    pub(super) open: OpenSwitch,
+    pub(super) navigate: Navigate,
+    pub(super) other: OtherSwitch,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct OpenSwitch {
+    pub(super) modifier: config::Mod,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct OtherSwitch {
+    pub(super) filter_by: Vec<config::FilterBy>,
+    pub(super) hide_filtered: bool,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "snake_case")]
+enum Reverse {
+    Key(String),
+    Mod(config::Mod),
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub(super) struct KeyMaybeMod(String);
+impl From<&str> for KeyMaybeMod {
+    fn from(s: &str) -> Self {
+        Self(s.to_string())
+    }
+}
+
+// https://wiki.hyprland.org/Configuring/Variables/#variable-types
+// SHIFT CAPS CTRL/CONTROL ALT MOD2 MOD3 SUPER/WIN/LOGO/MOD4 MOD5
+impl KeyMaybeMod {
+    pub(super) fn to_key(&self) -> String {
+        match &*self.0.to_ascii_lowercase() {
+            "alt" => "alt_l".to_string(),
+            "ctrl" => "ctrl_l".to_string(),
+            "super" => "super_l".to_string(),
+            "shift" => "shift_l".to_string(),
+            a => a.to_string(),
+        }
+    }
 }

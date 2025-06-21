@@ -88,127 +88,92 @@ in
     settings = {
       layerrules = mkOpt "Enable layer rules" bool true;
       kill_bind = mkOpt "Key to kill hyprshell if it is stuck" str "ctrl+shift+alt, h";
-      launcher = {
-        enable = mkOpt "Enable app launcher" bool true;
-        width = mkOpt "Launcher width" int 650;
-        max_items = mkOpt "Max shown items" int 5;
-        animate_launch_ms = mkOpt "Launcher close duration" int 250;
-        default_terminal = mkOpt "Default terminal" (nullOr (str)) null;
-        show_when_empty = mkOpt "Show entries when no text is entered" bool true;
-
-        plugins = {
-          applications = {
-            enable = mkOpt "Open applications" bool true;
-            run_cache_weeks = mkOpt "Run Cache weeks" int 4;
-            show_execs = mkOpt "Show execs" bool true;
-            show_actions_submenu = mkOpt "Show actions submenu" bool false;
-          };
-          calc = {
-            enable = mkOpt "Enable calculator" bool true;
-          };
-          shell = {
-            enable = mkOpt "Run in Shell" bool false;
-          };
-          terminal = {
-            enable = mkOpt "Run in Terminal" bool true;
-          };
-          websearch = {
-            enable = mkOpt "Web search" bool true;
-            engines =
-              mkOpt "Search engines"
-                (listOf (submodule {
-                  options = {
-                    url = mkOpt "Search engine URL" str null;
-                    name = mkOpt "Search engine name" str null;
-                    key = mkOpt "Key to use for search engine" str null // {
-                      apply = key: if (builtins.stringLength key) != 1 then throw "Key must be single character" else key;
-                    };
-                  };
-                }))
-                [
-                  {
-                    url = "https://www.google.com/search?q={}";
-                    name = "Google";
-                    key = "g";
-                  }
-                ];
-          };
-        };
-      };
 
       windows = {
         enable = mkOpt "Enable windows (overview, switch)" bool true;
         scale = mkOpt "Scale" float 8.5 // {
           apply = num: if (num >= 0 && num <= 15) then num else throw "Value must be between 0 and 15";
         };
-        workspaces_per_row = mkOpt "Workspaces per row" int 5;
+        items_per_row = mkOpt "Workspaces per row" int 5;
         strip_html_from_workspace_title = mkOpt "Strip HTML from workspace title" bool true;
         overview = {
           enable = mkOpt "Enable overview" bool true;
-          open = {
-            key = mkOpt "Key to open overview" str "super";
-            modifier = mkOpt "Modifier key" (enum [
-              "alt"
-              "ctrl"
-              "super"
-              "shift"
-            ]) "super";
-          };
-          navigate = {
-            forward = mkOpt "Key to navigate forwards" str "tab";
-            reverse = {
-              key = mkOpt "Key to navigate backwards (mutually exclusive with mod)" (nullOr (str)) null // {
-                example = "tab";
+          launcher = {
+            enable = mkOpt "Enable app launcher" bool true;
+            width = mkOpt "Launcher width" int 650;
+            max_items = mkOpt "Max shown items" int 5;
+            animate_launch_ms = mkOpt "Launcher close duration" int 250;
+            default_terminal = mkOpt "Default terminal" (nullOr (str)) null;
+            show_when_empty = mkOpt "Show entries when no text is entered" bool true;
+
+            plugins = {
+              applications = {
+                enable = mkOpt "Open applications" bool true;
+                run_cache_weeks = mkOpt "Run Cache weeks" int 4;
+                show_execs = mkOpt "Show execs" bool true;
+                show_actions_submenu = mkOpt "Show actions submenu" bool false;
               };
-              mod = mkOpt "Modifier to navigate backwards (mutually exclusive with key)" (nullOr (enum [
-                "alt"
-                "ctrl"
-                "super"
-                "shift"
-              ])) "shift";
+              calc = {
+                enable = mkOpt "Enable calculator" bool true;
+              };
+              shell = {
+                enable = mkOpt "Run in Shell" bool false;
+              };
+              terminal = {
+                enable = mkOpt "Run in Terminal" bool true;
+              };
+              websearch = {
+                enable = mkOpt "Web search" bool true;
+                engines =
+                  mkOpt "Search engines"
+                    (listOf (submodule {
+                      options = {
+                        url = mkOpt "Search engine URL" str null;
+                        name = mkOpt "Search engine name" str null;
+                        key = mkOpt "Key to use for search engine" str null // {
+                          apply = key: if (builtins.stringLength key) != 1 then throw "Key must be single character" else key;
+                        };
+                      };
+                    }))
+                    [
+                      {
+                        url = "https://www.google.com/search?q={}";
+                        name = "Google";
+                        key = "g";
+                      }
+                    ];
+              };
             };
           };
-          other = {
-            filter_by = mkOpt "Filter by" (listOf (enum [
-              "same_class"
-              "current_monitor"
-              "current_workspace"
-            ])) [ ];
-            hide_filtered = mkOpt "Hide filtered windows" bool false;
-          };
+          key = mkOpt "Key to open overview" str "super_l";
+          modifier = mkOpt "Modifier key" (enum [
+            "alt"
+            "ctrl"
+            "super"
+            "shift"
+          ]) "super";
+
+          filter_by = mkOpt "Filter by" (listOf (enum [
+            "same_class"
+            "current_monitor"
+            "current_workspace"
+          ])) [ ];
+          hide_filtered = mkOpt "Hide filtered windows" bool false;
         };
         switch = {
           enable = mkOpt "Enable recent window switcher" bool true;
-          open = {
-            modifier = mkOpt "Modifier key" (enum [
-              "alt"
-              "ctrl"
-              "super"
-              "shift"
-            ]) "alt";
-          };
-          navigate = {
-            forward = mkOpt "Key to navigate forwards" str "tab";
-            reverse = {
-              key = mkOpt "Key to navigate backwards (mutually exclusive with mod)" (nullOr (str)) null // {
-                example = "tab";
-              };
-              mod = mkOpt "Modifier to navigate backwards (mutually exclusive with key)" (nullOr (enum [
-                "alt"
-                "ctrl"
-                "super"
-                "shift"
-              ])) "shift";
-            };
-          };
-          other = {
-            filter_by = mkOpt "Filter by" (listOf (enum [
-              "same_class"
-              "current_monitor"
-              "current_workspace"
-            ])) [ ];
-            hide_filtered = mkOpt "Hide filtered windows" bool true;
-          };
+          modifier = mkOpt "Modifier key" (enum [
+            "alt"
+            "ctrl"
+            "super"
+            "shift"
+          ]) "alt";
+          filter_by = mkOpt "Filter by" (listOf (enum [
+            "same_class"
+            "current_monitor"
+            "current_workspace"
+          ])) [ ];
+
         };
       };
     };

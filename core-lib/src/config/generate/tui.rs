@@ -2,11 +2,11 @@ use crate::config::SearchEngine;
 use crate::config::generate::autocomplete::StringAutoCompleter;
 use crate::config::generate::config::ConfigData;
 use crate::config::generate::css::StyleData;
-use crate::config::structs::{KeyMaybeMod, Mod};
+use crate::config::structs::Mod;
 use crate::util::TERMINALS;
 use anyhow::bail;
 use inquire::formatter::MultiOptionFormatter;
-use inquire::{Confirm, MultiSelect, Select, Text};
+use inquire::{MultiSelect, Select, Text};
 
 pub mod configurable_launcher_plugins {
     pub const APPLICATIONS: &str = "Open Applications";
@@ -86,7 +86,7 @@ pub fn prompt_config() -> anyhow::Result<(ConfigData, StyleData)> {
                 "Alt",
                 "Alt + Tab",
             ]))
-            .with_help_message("Shows all apps in a miniature view, allows to switch using arrow keys or tab. Leave blank to disable]\n[Any valid modifier or modifier + key can be typed in]\n[↑↓ to move, tab to autocomplete, enter to submit")
+            .with_help_message("Shows all apps in a miniature view, allows to switch using arrow keys or tab. Leave blank to disable]\n[Any valid modifier or modifier + tab can be typed in]\n[↑↓ to move, tab to autocomplete, enter to submit")
             .prompt()?;
         if open_overview.trim().is_empty() {
             None
@@ -129,8 +129,6 @@ pub fn prompt_config() -> anyhow::Result<(ConfigData, StyleData)> {
         } else {
             vec![]
         };
-        // (default_terminal, plugins, engines)
-        // };
         Some((default_terminal, plugins, engines))
     } else {
         None
@@ -144,16 +142,9 @@ pub fn prompt_config() -> anyhow::Result<(ConfigData, StyleData)> {
         if open_switch.trim().is_empty() {
             None
         } else {
-            get_mod(&open_switch)
-                .ok()
-                .map(|(enable_switch, _)| enable_switch)
+            get_mod(&open_switch).ok()
         }
     };
-
-    let grave_reverse =
-        Confirm::new("Use Grave key (`) to select in reverse instead of Shift + Tab?")
-            .with_default(false)
-            .prompt()?;
 
     let default_color = Select::new(
         "Default Focused Color",
@@ -166,17 +157,16 @@ pub fn prompt_config() -> anyhow::Result<(ConfigData, StyleData)> {
     Ok((
         ConfigData {
             default_terminal: launcher.as_ref().and_then(|l| l.0.clone()),
-            overview: open_overview.map(|o| (o.0, KeyMaybeMod::from(&*o.1))),
+            overview: open_overview,
             switch: open_switch,
             launcher_plugins: launcher.as_ref().map(|l| l.1.clone()).unwrap_or_default(),
             launcher_engines: launcher.map(|l| l.2).unwrap_or_default(),
-            grave_reverse,
         },
         StyleData { default_color },
     ))
 }
 
-fn get_mod(modifier: &str) -> anyhow::Result<(Mod, String)> {
+fn get_mod(modifier: &str) -> anyhow::Result<Mod> {
     let split = modifier.split('+').collect::<Vec<_>>();
     let modd = match &*split[0].trim().to_ascii_lowercase() {
         "super" => Mod::Super,
@@ -185,10 +175,5 @@ fn get_mod(modifier: &str) -> anyhow::Result<(Mod, String)> {
         "shift" => Mod::Shift,
         _ => bail!("Unknown modifier: {}", split[0]),
     };
-    Ok((
-        modd,
-        split
-            .get(1)
-            .map_or_else(|| modd.to_string(), |s| s.trim().to_string()),
-    ))
+    Ok(modd)
 }

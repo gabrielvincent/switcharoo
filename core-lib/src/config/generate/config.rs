@@ -1,9 +1,6 @@
 use crate::config::generate::tui::{WEB_SEARCH_ENGINES, configurable_launcher_plugins};
-use crate::config::structs::{
-    Config, KeyMaybeMod, Launcher, Mod, Navigate, OpenOverview, OpenSwitch, Overview, Reverse,
-    Switch, Windows,
-};
-use crate::config::{Plugins, WebSearchConfig};
+use crate::config::structs::{Switch, Windows};
+use crate::config::{Config, Launcher, Mod, Overview, Plugins, WebSearchConfig};
 use std::path::Path;
 use tracing::warn;
 
@@ -47,11 +44,10 @@ pub fn check_file_exist(
 #[derive(Debug)]
 pub struct ConfigData {
     pub default_terminal: Option<Box<str>>,
-    pub overview: Option<(Mod, KeyMaybeMod)>,
+    pub overview: Option<Mod>,
     pub switch: Option<Mod>,
     pub launcher_plugins: Vec<Box<str>>,
     pub launcher_engines: Vec<Box<str>>,
-    pub grave_reverse: bool,
 }
 
 pub fn generate_config(data: ConfigData) -> Config {
@@ -59,18 +55,7 @@ pub fn generate_config(data: ConfigData) -> Config {
         windows: Some(Windows {
             overview: if let Some(overview) = data.overview {
                 Some(Overview {
-                    open: OpenOverview {
-                        modifier: overview.0,
-                        key: overview.1,
-                    },
-                    navigate: Navigate {
-                        reverse: if data.grave_reverse {
-                            Reverse::Key("grave".to_string())
-                        } else {
-                            Reverse::Mod(Mod::Shift)
-                        },
-                        ..Default::default()
-                    },
+                    modifier: overview,
                     launcher: Launcher {
                         default_terminal: data.default_terminal,
                         plugins: Plugins {
@@ -124,17 +109,7 @@ pub fn generate_config(data: ConfigData) -> Config {
             },
             switch: if let Some(switch_mod) = data.switch {
                 Some(Switch {
-                    open: OpenSwitch {
-                        modifier: switch_mod,
-                    },
-                    navigate: Navigate {
-                        reverse: if data.grave_reverse {
-                            Reverse::Key("grave".to_string())
-                        } else {
-                            Reverse::Mod(Mod::Shift)
-                        },
-                        ..Default::default()
-                    },
+                    modifier: switch_mod,
                     ..Default::default()
                 })
             } else {

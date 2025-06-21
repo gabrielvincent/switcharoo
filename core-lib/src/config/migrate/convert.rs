@@ -1,5 +1,4 @@
 use crate::config;
-use crate::config::Launcher;
 use crate::config::migrate::old_structs;
 
 impl From<old_structs::Config> for config::Config {
@@ -15,11 +14,11 @@ impl From<old_structs::Config> for config::Config {
 }
 
 impl old_structs::Windows {
-    fn into(value: old_structs::Windows, launcher: Option<Launcher>) -> config::Windows {
+    fn into(value: old_structs::Windows, launcher: Option<config::Launcher>) -> config::Windows {
         config::Windows {
             scale: value.scale,
             items_per_row: value.workspaces_per_row,
-            switch: value.switch,
+            switch: value.switch.map(|s| old_structs::Switch::into(s)),
             overview: value.overview.map(|o| {
                 old_structs::Overview::into(o, launcher, value.strip_html_from_workspace_title)
             }),
@@ -30,15 +29,25 @@ impl old_structs::Windows {
 impl old_structs::Overview {
     fn into(
         value: old_structs::Overview,
-        launcher: Option<Launcher>,
+        launcher: Option<config::Launcher>,
         strip_html_from_workspace_title: bool,
     ) -> config::Overview {
         config::Overview {
-            open: value.open,
-            other: value.other,
-            navigate: value.navigate,
+            key: value.open.key.to_key(),
+            modifier: value.open.modifier,
+            filter_by: value.other.filter_by,
             launcher: launcher.unwrap_or_default(),
+            hide_filtered: value.other.hide_filtered,
             strip_html_from_workspace_title,
+        }
+    }
+}
+
+impl old_structs::Switch {
+    fn into(value: old_structs::Switch) -> config::Switch {
+        config::Switch {
+            modifier: value.open.modifier,
+            filter_by: value.other.filter_by,
         }
     }
 }

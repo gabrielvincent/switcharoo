@@ -6,35 +6,23 @@ pub fn generate_open_keybinds(windows: &Windows) -> Vec<ExecBind> {
     let mut binds = Vec::new();
     if let Some(overview) = &windows.overview {
         let config = TransferType::OpenOverview(OpenOverview {
-            hide_filtered: overview.other.hide_filtered,
+            hide_filtered: overview.hide_filtered,
             filter_current_workspace: overview
-                .other
                 .filter_by
                 .iter()
                 .any(|f| f == &FilterBy::CurrentWorkspace),
             filter_current_monitor: overview
-                .other
                 .filter_by
                 .iter()
                 .any(|f| f == &FilterBy::CurrentMonitor),
-            filter_same_class: overview
-                .other
-                .filter_by
-                .iter()
-                .any(|f| f == &FilterBy::SameClass),
+            filter_same_class: overview.filter_by.iter().any(|f| f == &FilterBy::SameClass),
             items_per_row: windows.items_per_row,
             scale: windows.scale,
         });
 
         binds.push(ExecBind {
-            mods: vec![Mod::Super],
-            key: Box::from("super_r"),
-            on_release: false,
-            exec: generate_transfer_socat(&config).into_boxed_str(),
-        });
-        binds.push(ExecBind {
-            mods: vec![Mod::Super],
-            key: Box::from("super_l"),
+            mods: vec![overview.modifier],
+            key: overview.key.clone().into_boxed_str(),
             on_release: false,
             exec: generate_transfer_socat(&config).into_boxed_str(),
         });
@@ -42,26 +30,20 @@ pub fn generate_open_keybinds(windows: &Windows) -> Vec<ExecBind> {
     if let Some(switch) = &windows.switch {
         let config = TransferType::OpenSwitch(OpenSwitch {
             filter_current_workspace: switch
-                .other
                 .filter_by
                 .iter()
                 .any(|f| f == &FilterBy::CurrentWorkspace),
             filter_current_monitor: switch
-                .other
                 .filter_by
                 .iter()
                 .any(|f| f == &FilterBy::CurrentMonitor),
-            filter_same_class: switch
-                .other
-                .filter_by
-                .iter()
-                .any(|f| f == &FilterBy::SameClass),
+            filter_same_class: switch.filter_by.iter().any(|f| f == &FilterBy::SameClass),
             items_per_row: windows.items_per_row,
             scale: windows.scale,
             reverse: false,
         });
         binds.push(ExecBind {
-            mods: vec![Mod::Alt],
+            mods: vec![switch.modifier],
             key: Box::from("tab"),
             on_release: false,
             exec: generate_transfer_socat(&config).into_boxed_str(),
@@ -69,20 +51,14 @@ pub fn generate_open_keybinds(windows: &Windows) -> Vec<ExecBind> {
 
         let config_r = TransferType::OpenSwitch(OpenSwitch {
             filter_current_workspace: switch
-                .other
                 .filter_by
                 .iter()
                 .any(|f| f == &FilterBy::CurrentWorkspace),
             filter_current_monitor: switch
-                .other
                 .filter_by
                 .iter()
                 .any(|f| f == &FilterBy::CurrentMonitor),
-            filter_same_class: switch
-                .other
-                .filter_by
-                .iter()
-                .any(|f| f == &FilterBy::SameClass),
+            filter_same_class: switch.filter_by.iter().any(|f| f == &FilterBy::SameClass),
             items_per_row: windows.items_per_row,
             scale: windows.scale,
             reverse: true,

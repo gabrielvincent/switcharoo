@@ -30,9 +30,14 @@ pub struct Overview {
     #[default = true]
     pub strip_html_from_workspace_title: bool,
     pub launcher: Launcher,
-    pub open: OpenOverview,
-    pub navigate: Navigate,
-    pub other: OtherOverview,
+    #[default = "super_l"]
+    pub key: String,
+    #[default(Mod::Super)]
+    pub modifier: Mod,
+    #[default(Vec::new())]
+    pub filter_by: Vec<FilterBy>,
+    #[default = false]
+    pub hide_filtered: bool,
 }
 
 #[derive(SmartDefault, Debug, Clone, Deserialize, Serialize)]
@@ -106,53 +111,11 @@ pub struct SearchEngine {
 
 #[derive(SmartDefault, Debug, Clone, Deserialize, Serialize)]
 #[serde(default, deny_unknown_fields)]
-pub struct OtherOverview {
-    #[default(Vec::new())]
-    pub filter_by: Vec<FilterBy>,
-    #[default = false]
-    pub hide_filtered: bool,
-}
-
-#[derive(SmartDefault, Debug, Clone, Deserialize, Serialize)]
-#[serde(default, deny_unknown_fields)]
-pub struct OpenOverview {
-    #[default = "super"]
-    pub key: KeyMaybeMod,
-    #[default(Mod::Super)]
-    pub modifier: Mod,
-}
-
-#[derive(SmartDefault, Debug, Clone, Deserialize, Serialize)]
-#[serde(default, deny_unknown_fields)]
-pub struct Navigate {
-    #[default = "tab"]
-    pub forward: String,
-    #[default(Reverse::Mod(Mod::Shift))]
-    pub reverse: Reverse,
-}
-
-#[derive(SmartDefault, Debug, Clone, Deserialize, Serialize)]
-#[serde(default, deny_unknown_fields)]
 pub struct Switch {
-    pub open: OpenSwitch,
-    pub navigate: Navigate,
-    pub other: OtherSwitch,
-}
-
-#[derive(SmartDefault, Debug, Clone, Deserialize, Serialize)]
-#[serde(default, deny_unknown_fields)]
-pub struct OpenSwitch {
     #[default(Mod::Super)]
     pub modifier: Mod,
-}
-
-#[derive(SmartDefault, Debug, Clone, Deserialize, Serialize)]
-#[serde(default, deny_unknown_fields)]
-pub struct OtherSwitch {
     #[default(Vec::new())]
     pub filter_by: Vec<FilterBy>,
-    #[default = true]
-    pub hide_filtered: bool,
 }
 
 #[derive(Debug, Clone, Copy, Deserialize, Serialize, Eq, PartialEq)]
@@ -163,12 +126,6 @@ pub enum FilterBy {
     CurrentMonitor,
 }
 
-#[derive(Debug, Clone, Deserialize, Serialize)]
-#[serde(rename_all = "snake_case")]
-pub enum Reverse {
-    Key(String),
-    Mod(Mod),
-}
 #[derive(Debug, Clone, Copy, Deserialize, Serialize)]
 #[serde(rename_all = "snake_case")]
 pub enum Mod {
@@ -185,39 +142,6 @@ impl Display for Mod {
             Mod::Ctrl => write!(f, "ctrl"),
             Mod::Super => write!(f, "super"),
             Mod::Shift => write!(f, "shift"),
-        }
-    }
-}
-
-#[derive(Debug, Clone, Deserialize, Serialize)]
-pub struct KeyMaybeMod(String);
-impl From<&str> for KeyMaybeMod {
-    fn from(s: &str) -> Self {
-        Self(s.to_string())
-    }
-}
-
-// https://wiki.hyprland.org/Configuring/Variables/#variable-types
-// SHIFT CAPS CTRL/CONTROL ALT MOD2 MOD3 SUPER/WIN/LOGO/MOD4 MOD5
-impl KeyMaybeMod {
-    pub fn to_key(&self) -> String {
-        match &*self.0.to_ascii_lowercase() {
-            "alt" => "alt_l".to_string(),
-            "ctrl" => "ctrl_l".to_string(),
-            "super" => "super_l".to_string(),
-            "shift" => "shift_l".to_string(),
-            a => a.to_string(),
-        }
-    }
-}
-
-impl Mod {
-    pub fn mod_to_keys(&self) -> [&'static str; 2] {
-        match self {
-            Mod::Alt => ["alt_l", "alt_r"],
-            Mod::Ctrl => ["control_l", "control_r"], // WHY is this not ctrl_l and ctrl_r?
-            Mod::Super => ["super_l", "super_r"],
-            Mod::Shift => ["shift_l", "shift_r"],
         }
     }
 }
