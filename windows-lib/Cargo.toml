@@ -17,6 +17,5 @@ gtk.workspace = true
 gtk4-layer-shell.workspace = true
 core-lib.workspace = true
 exec-lib.workspace = true
-launcher-lib.workspace = true
 async-channel.workspace = true
 regex = { version = "1.11.1" }

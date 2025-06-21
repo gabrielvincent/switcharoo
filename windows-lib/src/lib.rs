@@ -11,7 +11,7 @@ mod switch;
 
 pub use css::get_css;
 pub use desktop_map::{get_icon_name_by_name_from_desktop_files, reload_desktop_map};
-pub use global::WindowsGlobal;
+pub use global::{WindowsOverviewData, WindowsSwitchData};
 pub use keybinds::generate_open_keybinds;
 pub use overview::{
     close_overview, create_windows_overview_window, open_overview, stop_overview, update_overview,

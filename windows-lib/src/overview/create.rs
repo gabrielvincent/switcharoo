@@ -7,7 +7,6 @@ use gtk::gdk::{Display, Monitor};
 use gtk::prelude::*;
 use gtk::{Application, ApplicationWindow, FlowBox, Orientation, Overlay, SelectionMode};
 use gtk4_layer_shell::{Edge, KeyboardMode, Layer, LayerShell};
-use launcher_lib::LauncherData;
 use std::collections::HashMap;
 use tracing::{Level, debug, span};
 
@@ -15,7 +14,6 @@ pub fn create_windows_overview_window(
     app: &Application,
     overview: &Overview,
     windows: &Windows,
-    launcher_data: LauncherData,
 ) -> anyhow::Result<WindowsOverviewData> {
     let _span = span!(Level::TRACE, "create_windows_overview_window").entered();
     let mut window_list = HashMap::new();
@@ -82,6 +80,5 @@ pub fn create_windows_overview_window(
         window_list,
         active: get_initial_active()?,
         hypr_data: HyprlandData::default(),
-        launcher: launcher_data,
     })
 }

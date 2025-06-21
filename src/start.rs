@@ -19,7 +19,7 @@ use gtk::{
     Application, CssProvider, STYLE_PROVIDER_PRIORITY_APPLICATION, STYLE_PROVIDER_PRIORITY_USER,
     glib, style_context_add_provider_for_display,
 };
-use launcher_lib::create_windows_overview_launcher_window;
+use launcher_lib::{LauncherData, create_windows_overview_launcher_window};
 use std::any::Any;
 use std::env;
 use std::path::{Path, PathBuf};
@@ -27,7 +27,10 @@ use std::rc::Rc;
 use std::sync::{Mutex, OnceLock};
 use std::time::{Duration, Instant};
 use tracing::{Level, debug, error, info, span};
-use windows_lib::{WindowsGlobal, create_windows_overview_window, create_windows_switch_window};
+use windows_lib::{
+    WindowsOverviewData, WindowsSwitchData, create_windows_overview_window,
+    create_windows_switch_window,
+};
 
 pub fn start(config_path: PathBuf, css_path: PathBuf, data_dir: PathBuf) -> anyhow::Result<()> {
     let _span = span!(Level::TRACE, "start").entered();
@@ -80,6 +83,12 @@ pub fn start(config_path: PathBuf, css_path: PathBuf, data_dir: PathBuf) -> anyh
 
 pub struct Globals {
     pub windows: Option<WindowsGlobal>,
+}
+
+#[derive(Debug, Default)]
+pub struct WindowsGlobal {
+    pub overview: Option<(WindowsOverviewData, LauncherData)>,
+    pub switch: Option<WindowsSwitchData>,
 }
 
 fn activate(
@@ -144,6 +153,8 @@ fn create_windows(
     if let Some(windows) = &config.windows {
         let mut windows_data = WindowsGlobal::default();
         if let Some(overview) = &windows.overview {
+            let overview_data = create_windows_overview_window(app, overview, windows)
+                .context("failed to create overview window")?;
             let launcher_data = create_windows_overview_launcher_window(
                 app,
                 &overview.launcher,
@@ -152,10 +163,7 @@ fn create_windows(
                 event_sender.clone(),
             )
             .context("failed to create launcher window")?;
-            let overview_data =
-                create_windows_overview_window(app, overview, windows, launcher_data)
-                    .context("failed to create overview window")?;
-            windows_data.overview = Some(overview_data);
+            windows_data.overview = Some((overview_data, launcher_data));
         } else {
             debug!("Windows overview disabled");
         }

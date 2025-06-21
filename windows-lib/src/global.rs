@@ -1,13 +1,6 @@
 use core_lib::{Active, ClientId, HyprlandData, MonitorId, WorkspaceId};
 use gtk::{ApplicationWindow, Button, FlowBox};
-use launcher_lib::LauncherData;
 use std::collections::HashMap;
-
-#[derive(Debug, Default)]
-pub struct WindowsGlobal {
-    pub overview: Option<WindowsOverviewData>,
-    pub switch: Option<WindowsSwitchData>,
-}
 
 #[derive(Debug)]
 pub struct WindowsOverviewData {
@@ -15,7 +8,6 @@ pub struct WindowsOverviewData {
     pub window_list: HashMap<ApplicationWindow, WindowsOverviewMonitorData>,
     pub active: Active,
     pub hypr_data: HyprlandData,
-    pub launcher: LauncherData,
 }
 
 #[derive(Debug)]

@@ -1191,7 +1191,6 @@ dependencies = [
  "hyprshell-launcher-lib",
  "hyprshell-windows-lib",
  "libc",
- "rand 0.9.1",
  "tracing",
  "tracing-subscriber",
 ]
@@ -1248,7 +1247,6 @@ dependencies = [
  "gtk4-layer-shell",
  "hyprshell-core-lib",
  "hyprshell-exec-lib",
- "hyprshell-launcher-lib",
  "regex",
  "tracing",
 ]
