@@ -263,7 +263,6 @@ fn click_plugin(button: &Button, iden: Identifier, event_sender: Sender<Transfer
 
 fn click_entry(button: &gtk::Box, iden: Identifier, event_sender: Sender<TransferType>) {
     let gesture = gtk::GestureClick::new();
-    button.add_controller(gesture.clone());
     gesture.connect_released(move |_, _, _, _| {
         debug!("Exiting on click of launcher entry");
         event_sender
@@ -272,6 +271,7 @@ fn click_entry(button: &gtk::Box, iden: Identifier, event_sender: Sender<Transfe
             ))
             .warn("unable to send");
     });
+    button.add_controller(gesture);
 }
 
 fn click_details_entry(button: &Button, iden: Identifier, event_sender: Sender<TransferType>) {

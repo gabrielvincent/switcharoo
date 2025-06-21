@@ -5,6 +5,10 @@ use tracing::{Level, span, trace};
 
 pub fn open_launcher(data: &LauncherData) {
     let _span = span!(Level::TRACE, "open_launcher").entered();
+    // check if already open
+    if data.window.get_visible() {
+        return;
+    }
 
     trace!("Showing window {:?}", data.window.id());
     data.window.set_monitor(None);

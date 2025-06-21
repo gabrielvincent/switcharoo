@@ -1,6 +1,6 @@
 use std::fs::read_to_string;
 use std::path::Path;
-use tracing::info;
+use tracing::{debug, info};
 
 pub(crate) fn launch_history(
     run_cache_weeks: Option<u8>,
@@ -20,25 +20,27 @@ pub(crate) fn launch_history(
             })
             .unwrap_or(4)
     });
+    debug!("showing history for the last {} weeks", run_cache_weeks);
 
     let runs = launcher_lib::get_applications_stored_runs(run_cache_weeks, data_dir);
-
-    for (path, run) in runs {
+    let mut sorted = runs.into_iter().collect::<Vec<_>>();
+    sorted.sort_by(|a, b| b.1.cmp(&a.1));
+    for (path, run) in sorted {
         // ignore the ini parser for this, just read the file and find, is faster
         if let Ok(content) = read_to_string(&path) {
             if let Some(name_line) = content.lines().find(|l| l.starts_with("Name=")) {
                 let name = name_line.trim_start_matches("Name=");
                 // check if verbosity is set, if so, print the name
                 if verbose > 0 {
-                    info!("{}: {name} ({run})", path.display());
+                    info!("{name}: ({run}) {}", path.display());
                 } else if verbose == 0 {
-                    info!("{}: {run}", name);
+                    info!("{name}: ({run})");
                 }
             } else {
-                info!("{}: {run}", path.display());
+                info!("{}: ({run})", path.display());
             }
         } else {
-            info!("{}: {run}", path.display());
+            info!("{}: ({run})", path.display());
         }
     }
 }

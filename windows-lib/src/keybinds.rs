@@ -1,6 +1,6 @@
 use core_lib::binds::{ExecBind, generate_transfer_socat};
 use core_lib::config::{FilterBy, Mod, Windows};
-use core_lib::transfer::{CloseSwitchConfig, OpenOverview, OpenSwitch, TransferType};
+use core_lib::transfer::{OpenOverview, OpenSwitch, TransferType};
 
 pub fn generate_open_keybinds(windows: &Windows) -> Vec<ExecBind> {
     let mut binds = Vec::new();
@@ -75,34 +75,6 @@ pub fn generate_open_keybinds(windows: &Windows) -> Vec<ExecBind> {
             on_release: false,
             exec: generate_transfer_socat(&config_r).into_boxed_str(),
         });
-
-        let config_close = TransferType::CloseSwitch(CloseSwitchConfig::None);
-
-        // release
-        binds.push(ExecBind {
-            mods: vec![Mod::Alt],
-            key: Box::from("alt_l"),
-            on_release: true,
-            exec: generate_transfer_socat(&config_close).into_boxed_str(),
-        });
-        // binds.push(ExecBind {
-        //     mods: vec![switch.open.modifier],
-        //     key: Box::from("grave"),
-        //     on_release: true,
-        //     exec: generate_transfer_socat(&config_close).into_boxed_str(),
-        // });
-        // binds.push(ExecBind {
-        //     mods: vec![switch.open.modifier],
-        //     key: Box::from("tab"),
-        //     on_release: true,
-        //     exec: generate_transfer_socat(&config_close).into_boxed_str(),
-        // });
-        // binds.push(ExecBind {
-        //     mods: vec![switch.open.modifier, Mod::Shift],
-        //     key: Box::from("tab"),
-        //     on_release: true,
-        //     exec: generate_transfer_socat(&config_close).into_boxed_str(),
-        // });
     }
 
     binds

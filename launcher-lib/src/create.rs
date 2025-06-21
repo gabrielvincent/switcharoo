@@ -4,19 +4,19 @@ use async_channel::Sender;
 use core_lib::config::{Launcher, Mod};
 use core_lib::transfer::{CloseOverviewConfig, Direction, SwitchOverviewConfig, TransferType};
 use core_lib::{LAUNCHER_NAMESPACE, WarnWithDetails};
-use gtk::Orientation;
 use gtk::gdk::Key;
-use gtk::glib::Propagation;
+use gtk::glib::{ControlFlow, Propagation};
 use gtk::prelude::*;
 use gtk::{
     Application, ApplicationWindow, Entry, EventControllerKey, ListBox, PropagationPhase,
     SelectionMode,
 };
+use gtk::{Orientation, glib};
 use gtk4_layer_shell::{Edge, Layer, LayerShell};
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use std::sync::{Arc, Mutex};
-use tracing::{Level, debug, span, trace};
+use tracing::{Level, debug, span};
 
 pub fn create_windows_overview_launcher_window(
     app: &Application,
@@ -57,6 +57,11 @@ pub fn create_windows_overview_launcher_window(
     });
     event_controller.set_propagation_phase(PropagationPhase::Capture);
     entry.add_controller(event_controller);
+    let entry_2 = entry.clone();
+    glib::timeout_add_local(std::time::Duration::from_millis(200), move || {
+        entry_2.grab_focus_without_selecting(); // ensure that the entry is always focused
+        ControlFlow::Continue
+    });
     main_vbox.append(&entry);
 
     let results = gtk::Box::builder()
@@ -85,6 +90,7 @@ pub fn create_windows_overview_launcher_window(
     window.set_layer(Layer::Overlay);
     window.set_anchor(Edge::Top, true);
     window.set_margin(Edge::Top, 15);
+    window.set_exclusive_zone(-1);
     window.present();
     window.set_visible(false);
 
@@ -126,7 +132,7 @@ fn handle_release(key: Key, mods: Arc<Mutex<u16>>) {
         Key::Super_L | Key::Super_R => *mods &= !8,
         _ => (),
     };
-    trace!("key: {}, mods: {}", key, mods);
+    // trace!("key: {}, mods: {}", key, mods);
 }
 
 fn handle_key(
@@ -160,9 +166,9 @@ fn handle_key(
         return Propagation::Stop;
     }
 
-    if (key == Key::Alt_L || key == Key::Alt_R && open_modifier == Mod::Alt)
-        || (key == Key::Control_L || key == Key::Control_R && open_modifier == Mod::Ctrl)
-        || (key == Key::Super_L || key == Key::Super_R && open_modifier == Mod::Super)
+    if ((key == Key::Alt_L || key == Key::Alt_R) && open_modifier == Mod::Alt)
+        || ((key == Key::Control_L || key == Key::Control_R) && open_modifier == Mod::Ctrl)
+        || ((key == Key::Super_L || key == Key::Super_R) && open_modifier == Mod::Super)
     {
         event_sender
             .send_blocking(TransferType::Exit)

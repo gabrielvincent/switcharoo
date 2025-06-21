@@ -24,6 +24,11 @@ pub fn open_switch(
     event_sender: Sender<TransferType>,
 ) -> anyhow::Result<()> {
     let _span = span!(Level::TRACE, "open_switch").entered();
+    // check if already open
+    if data.window.get_visible() {
+        return Ok(());
+    }
+
     set_remain_focused().warn("Failed to set no follow mouse");
 
     let (clients_data, active_prev) = collect_data(&SortConfig {

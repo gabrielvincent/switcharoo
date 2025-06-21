@@ -72,9 +72,9 @@ pub fn create_windows_switch_window(
 }
 
 fn handle_release(key: Key, modifier: Mod, event_sender: Sender<TransferType>) {
-    if (key == Key::Alt_L || key == Key::Alt_R && modifier == Mod::Alt)
-        || (key == Key::Control_L || key == Key::Control_R && modifier == Mod::Ctrl)
-        || (key == Key::Super_L || key == Key::Super_R && modifier == Mod::Super)
+    if ((key == Key::Alt_L || key == Key::Alt_R) && modifier == Mod::Alt)
+        || ((key == Key::Control_L || key == Key::Control_R) && modifier == Mod::Ctrl)
+        || ((key == Key::Super_L || key == Key::Super_R) && modifier == Mod::Super)
     {
         event_sender
             .send_blocking(TransferType::CloseSwitch(CloseSwitchConfig::None))

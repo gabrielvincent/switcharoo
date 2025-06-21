@@ -22,6 +22,11 @@ pub fn open_overview(
     event_sender: Sender<TransferType>,
 ) -> anyhow::Result<()> {
     let _span = span!(Level::TRACE, "open_overview").entered();
+    // check if already open
+    if data.window_list.iter().any(|w| w.0.get_visible()) {
+        return Ok(());
+    }
+
     set_remain_focused().warn("Failed to set no follow mouse");
 
     let (clients_data, active) = collect_data(&SortConfig {
