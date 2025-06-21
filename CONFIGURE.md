@@ -132,5 +132,7 @@ If you want to change colors borders, etc. you can edit the CSS variables in the
 These styles are automatically used everywhere in the application, so you don't have to set them for every class.
 The values in the `:root {}` are set as fallbacks everywhere in the application, so you can just not set the ones you don't want to change.
 
+Some examples can be found in the [CSS Examples folder](./css-examples).
+
 ![image.png](./imgs/css/swappy-20250510_222852.png)
 ![image.png](./imgs/css/swappy-20250510_224344.png)

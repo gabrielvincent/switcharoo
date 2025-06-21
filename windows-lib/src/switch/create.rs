@@ -30,7 +30,7 @@ pub fn create_windows_switch_window(
         .min_children_per_line(windows.items_per_row as u32)
         .build();
 
-    let workspaces_flow_overlay = Overlay::builder()
+    let clients_flow_overlay = Overlay::builder()
         .child(&clients_flow)
         .css_classes(["monitor"])
         .build();
@@ -38,7 +38,7 @@ pub fn create_windows_switch_window(
     let window = ApplicationWindow::builder()
         .css_classes(["window"])
         .application(app)
-        .child(&workspaces_flow_overlay)
+        .child(&clients_flow_overlay)
         .default_height(10)
         .default_width(10)
         .build();

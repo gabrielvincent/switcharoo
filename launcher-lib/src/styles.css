@@ -88,15 +88,15 @@
 
 @keyframes pulsing {
     0% {
-        background: rgba(21, 162, 211, 0);
+        box-shadow: inset 0 0 8px rgba(239, 9, 9, 0);
     }
     10% {
-        background: rgba(21, 162, 211, 1);
+        box-shadow: inset 0 0 16px var(--border-color-active, rgba(239, 9, 9, 0.9));
     }
     50% {
-        background: rgba(21, 162, 211, 1);
+        box-shadow: inset 0 0 16px var(--border-color-active, rgba(239, 9, 9, 0.9));
     }
     100% {
-        background: rgba(21, 162, 211, 0);
+        box-shadow: inset 0 0 8px rgba(239, 9, 9, 0);
     }
 }
