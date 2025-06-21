@@ -2,6 +2,8 @@ use serde::{Deserialize, Serialize};
 use smart_default::SmartDefault;
 use std::fmt::Display;
 
+pub(crate) const CURRENT_CONFIG_VERSION: u16 = 1;
+
 #[derive(SmartDefault, Debug, Clone, Deserialize, Serialize)]
 #[serde(default, deny_unknown_fields)]
 pub struct Config {
@@ -11,6 +13,8 @@ pub struct Config {
     pub kill_bind: String,
     #[default(Some(Windows::default()))]
     pub windows: Option<Windows>,
+    #[default(CURRENT_CONFIG_VERSION)]
+    pub version: u16,
 }
 
 #[derive(SmartDefault, Debug, Clone, Deserialize, Serialize)]
@@ -126,7 +130,7 @@ pub enum FilterBy {
     CurrentMonitor,
 }
 
-#[derive(Debug, Clone, Copy, Deserialize, Serialize)]
+#[derive(Debug, Clone, Copy, Eq, PartialEq, Deserialize, Serialize)]
 #[serde(rename_all = "snake_case")]
 pub enum Mod {
     Alt,

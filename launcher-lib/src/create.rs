@@ -1,9 +1,9 @@
 use crate::global::{LauncherConfig, LauncherData};
 use crate::plugins::get_static_options_chars;
 use async_channel::Sender;
-use core_lib::config::Launcher;
+use core_lib::config::{Launcher, Mod};
 use core_lib::transfer::{CloseOverviewConfig, Direction, SwitchOverviewConfig, TransferType};
-use core_lib::{LAUNCHER_NAMESPACE, Warn};
+use core_lib::{LAUNCHER_NAMESPACE, WarnWithDetails};
 use gtk::Orientation;
 use gtk::gdk::Key;
 use gtk::glib::Propagation;
@@ -21,6 +21,7 @@ use tracing::{Level, debug, span, trace};
 pub fn create_windows_overview_launcher_window(
     app: &Application,
     launcher: &Launcher,
+    open_modifier: Mod,
     data_dir: &Path,
     event_sender: Sender<TransferType>,
 ) -> anyhow::Result<LauncherData> {
@@ -46,6 +47,7 @@ pub fn create_windows_overview_launcher_window(
         handle_key(
             key,
             &plugin_keys,
+            open_modifier,
             modifiers_2.clone(),
             event_sender_3.clone(),
         )
@@ -130,6 +132,7 @@ fn handle_release(key: Key, mods: Arc<Mutex<u16>>) {
 fn handle_key(
     key: Key,
     plugin_keys: &[Key],
+    open_modifier: Mod,
     mods: Arc<Mutex<u16>>,
     event_sender: Sender<TransferType>,
 ) -> Propagation {
@@ -141,8 +144,7 @@ fn handle_key(
         Key::Super_L | Key::Super_R => *mods |= 8,
         _ => (),
     };
-
-    trace!("key: {}({:?}), mods: {}", key, key, mods);
+    // plugins always use ctrl modifier
     if *mods == 2 && plugin_keys.contains(&key) {
         let ch = key
             .name()
@@ -150,7 +152,6 @@ fn handle_key(
             .to_string()
             .pop()
             .unwrap_or('a');
-        trace!("plugin key: {}", ch);
         event_sender
             .send_blocking(TransferType::CloseOverview(
                 CloseOverviewConfig::LauncherPress(ch),
@@ -159,19 +160,17 @@ fn handle_key(
         return Propagation::Stop;
     }
 
+    if (key == Key::Alt_L || key == Key::Alt_R && open_modifier == Mod::Alt)
+        || (key == Key::Control_L || key == Key::Control_R && open_modifier == Mod::Ctrl)
+        || (key == Key::Super_L || key == Key::Super_R && open_modifier == Mod::Super)
+    {
+        event_sender
+            .send_blocking(TransferType::Exit)
+            .warn("unable to send");
+        return Propagation::Stop;
+    }
+
     match key {
-        Key::Super_L => {
-            event_sender
-                .send_blocking(TransferType::Exit)
-                .warn("unable to send");
-            Propagation::Stop
-        }
-        Key::Super_R => {
-            event_sender
-                .send_blocking(TransferType::Exit)
-                .warn("unable to send");
-            Propagation::Stop
-        }
         Key::Escape => {
             event_sender
                 .send_blocking(TransferType::Exit)

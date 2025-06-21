@@ -7,7 +7,7 @@ use std::ffi::OsStr;
 use std::path::Path;
 use tracing::{Level, debug, info, span, warn};
 
-pub fn load_config(config_path: &Path) -> anyhow::Result<Config> {
+pub fn load_and_migrate_config(config_path: &Path) -> anyhow::Result<Config> {
     let _span = span!(Level::TRACE, "load_config", path =? config_path).entered();
     if !config_path.exists() {
         bail!("Config file does not exist, create it using `hyprshell config generate`");

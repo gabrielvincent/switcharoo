@@ -5,12 +5,13 @@ use core_lib::{
     get_default_data_dir,
 };
 use std::env;
-use tracing::{debug, info, warn};
+use std::process::exit;
+use tracing::{debug, info, trace, warn};
 
 mod cli;
 mod data;
 mod keybinds;
-mod recive_handle;
+mod receive_handle;
 mod socket;
 mod start;
 mod util;
@@ -34,7 +35,7 @@ fn main() -> anyhow::Result<()> {
     let subscriber = tracing_subscriber::fmt()
         .with_timer(tracing_subscriber::fmt::time::uptime())
         .with_target(
-            env::var("LOG_MODULE_PATH")
+            env::var("HYPRSHELL_LOG_MODULE_PATH")
                 .ok()
                 .and_then(|s| s.parse().ok())
                 .unwrap_or(false),
@@ -47,6 +48,7 @@ fn main() -> anyhow::Result<()> {
         .unwrap_or_else(|e| warn!("Unable to initialize logging: {e}"));
 
     check_features();
+    check_env();
 
     let data_dir = cli.global_opts.data_dir;
     let css_file = cli.global_opts.css_file;
@@ -84,26 +86,32 @@ fn main() -> anyhow::Result<()> {
 
                 let (config_data, css_data) = core_lib::config::generate::prompt_config()?;
                 let config = core_lib::config::generate::generate_config(config_data);
-                core_lib::config::write_config(&config_path, &config, override_config)
-                    .warn("create");
-                core_lib::config::generate::write_css(&css_path, &css_data, override_css)
-                    .warn("create");
+                core_lib::config::write_config(&config_path, &config, override_config).warn();
+                core_lib::config::generate::write_css(&css_path, &css_data, override_css).warn();
                 if !no_systemd {
                     core_lib::config::generate::write_systemd_unit(
                         opts.config_file.as_ref(),
                         opts.css_file.as_ref(),
                         opts.data_dir.as_ref(),
                     )
-                    .warn("create");
+                    .warn();
                 }
-                core_lib::config::explain::check_config(&config_path).warn("check");
+                core_lib::config::explain::explain_config(&config_path).warn();
             }
-            cli::ConfigCommand::Check {} => {
+            cli::ConfigCommand::Explain {} => {
                 use core_lib::Warn;
-                core_lib::config::explain::check_config(
+                core_lib::config::explain::explain_config(
                     &config_path.unwrap_or(get_default_config_path()),
                 )
-                .warn("check");
+                .warn();
+            }
+            cli::ConfigCommand::Check {} => {
+                if let Err(err) = core_lib::config::load_and_migrate_config(
+                    &config_path.unwrap_or(get_default_config_path()),
+                ) {
+                    warn!("Failed to load config: {err}");
+                    exit(1);
+                }
             }
         },
         #[cfg(feature = "debug_command")]
@@ -154,4 +162,14 @@ fn check_features() {
         cfg!(feature = "debug_command"),
         cfg!(feature = "launcher_calc"),
     );
+}
+
+fn check_env() {
+    trace!(
+        "ENV: HYPRSHELL_NO_LISTENERS: {}, HYPRSHELL_NO_ALL_ICONS: {}, HYPRSHELL_RELOAD_TIMEOUT: {}, HYPRSHELL_LOG_MODULE_PATH: {}",
+        env::var("HYPRSHELL_NO_LISTENERS").unwrap_or_else(|_| "-None-".to_string()),
+        env::var("HYPRSHELL_NO_ALL_ICONS").unwrap_or_else(|_| "-None-".to_string()),
+        env::var("HYPRSHELL_RELOAD_TIMEOUT").unwrap_or_else(|_| "-None-".to_string()),
+        env::var("HYPRSHELL_LOG_MODULE_PATH").unwrap_or_else(|_| "-None-".to_string()),
+    )
 }

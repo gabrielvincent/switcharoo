@@ -1,4 +1,4 @@
-use crate::Warn;
+use crate::WarnWithDetails;
 use notify::event::{DataChange, ModifyKind};
 use notify::{Config, Event, EventKind, RecommendedWatcher, RecursiveMode, Watcher};
 use std::path::Path;

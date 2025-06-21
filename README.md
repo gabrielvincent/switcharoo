@@ -93,9 +93,9 @@ exec-once = hyprshell run &
 ### Env Variables
 
 - `HYPRSHELL_NO_LISTENERS`: Disable all config listeners (config file, css file, hyprland config, monitor count)
-- `HYPRSHELL_HIDE_OUTPUT`: Dont show the output of a command started by the launcher. (output is only visible if the program exists after 2 seconds)
 - `HYPRSHELL_NO_ALL_ICONS`: Don't check for all icons on fs and just use the ones provided by the `gtk4` icon theme.
-- `HYPRSHELL_RELOAD_TIMEOUT`: Set the timeout for reloading the config file in milliseconds (default: `1000`).
+- `HYPRSHELL_RELOAD_TIMEOUT`: Set the timeout for reloading the config file in milliseconds (default: `1500`).
+- `HYPRSHELL_LOG_MODULE_PATH`: Add the module path to each log message. (use with -vv)
 
 ### Feature Flags
 

@@ -1,13 +1,14 @@
 use crate::keybinds::create_binds;
-use crate::recive_handle::event_handler;
+use crate::receive_handle::event_handler;
 use crate::socket::socket_handler;
+use crate::util;
 use crate::util::{check_themes, fill_icon_map, gtk_handle_sigterm, reload_desktop_data};
 use anyhow::Context;
 use async_channel::{Receiver, Sender};
 use core_lib::config::Config;
 use core_lib::transfer::TransferType;
 use core_lib::{
-    APPLICATION_ID, Warn, config, hyprshell_config_block, hyprshell_config_listener,
+    APPLICATION_ID, WarnWithDetails, config, hyprshell_config_block, hyprshell_config_listener,
     hyprshell_css_listener,
 };
 use exec_lib::listener::{hyprland_config_listener, monitor_listener};
@@ -25,7 +26,7 @@ use std::path::{Path, PathBuf};
 use std::rc::Rc;
 use std::sync::{Mutex, OnceLock};
 use std::time::{Duration, Instant};
-use tracing::{Level, debug, info, span, warn};
+use tracing::{Level, debug, error, info, span};
 use windows_lib::{WindowsGlobal, create_windows_overview_window, create_windows_switch_window};
 
 pub fn start(config_path: PathBuf, css_path: PathBuf, data_dir: PathBuf) -> anyhow::Result<()> {
@@ -33,7 +34,12 @@ pub fn start(config_path: PathBuf, css_path: PathBuf, data_dir: PathBuf) -> anyh
     let config_path = Rc::new(config_path);
     let css_path = Rc::new(css_path);
     let data_dir = Rc::new(data_dir);
+    util::init_gtk();
+
+    check_themes();
     gtk_handle_sigterm();
+    reload_desktop_data();
+    fill_icon_map(true);
 
     let (event_sender, event_receiver) = async_channel::unbounded();
 
@@ -46,14 +52,12 @@ pub fn start(config_path: PathBuf, css_path: PathBuf, data_dir: PathBuf) -> anyh
         socket_handler(event_sender_2.clone()).await;
     });
 
-    fill_icon_map(true);
-    check_themes();
-    reload_desktop_data();
-
+    info!("Starting gui loop");
     loop {
         let application = Application::builder()
             .application_id(APPLICATION_ID.to_string())
             .build();
+        debug!("Application created");
 
         let config_path = config_path.clone();
         let css_path = css_path.clone();
@@ -90,16 +94,16 @@ fn activate(
     apply_css(css_path);
 
     if let Err(err) = reload_hyprland_config() {
-        warn!("Failed to reload hyprland config: {err:?}");
+        error!("Failed to reload hyprland config: {err:?}");
         toast(&format!("Failed to reload hyprland config: {err}"));
         hyprshell_config_block(config_path);
         return; // return needed to exit the application
     }
 
-    let config = match config::load_config(config_path) {
+    let config = match config::load_and_migrate_config(config_path) {
         Ok(config) => config,
         Err(err) => {
-            warn!("Failed to load config: {:?}", err);
+            error!("Failed to load config: {:?}", err);
             toast(&format!("Failed to load config: {:?}", err));
             hyprshell_config_block(config_path);
             return; // return needed to exit the application
@@ -107,7 +111,7 @@ fn activate(
     };
 
     if let Err(err) = create_binds(&config) {
-        warn!("Failed to create keybinds: {err:?}");
+        error!("Failed to create keybinds: {err:?}");
         toast(&format!("Failed to create keybinds: {err}"));
         hyprshell_config_block(config_path);
         return; // return needed to exit the application
@@ -116,10 +120,10 @@ fn activate(
     let globals = match create_windows(app, &config, data_dir, event_sender.clone()) {
         Ok(data) => data,
         Err(err) => {
-            warn!("Failed to create windows: {err:?}");
+            error!("Failed to create windows: {err:?}");
             toast(&format!("Failed to create windows: {err}"));
             hyprshell_config_block(config_path);
-            return;
+            return; // return needed to exit the application
         }
     };
 
@@ -127,7 +131,7 @@ fn activate(
         event_handler(globals, event_receiver, event_sender).await;
     });
 
-    debug!("Application initialized");
+    info!("Application initialized");
 }
 
 fn create_windows(
@@ -143,6 +147,7 @@ fn create_windows(
             let launcher_data = create_windows_overview_launcher_window(
                 app,
                 &overview.launcher,
+                overview.modifier,
                 data_dir,
                 event_sender.clone(),
             )
@@ -181,7 +186,7 @@ fn apply_css(custom_css: &Path) {
     launcher_lib::get_css();
 
     if !custom_css.exists() {
-        info!("Custom css file {custom_css:?} does not exist");
+        debug!("Custom css file {custom_css:?} does not exist");
     } else {
         debug!("Loading custom css file {custom_css:?}");
         let provider_user = CssProvider::new();

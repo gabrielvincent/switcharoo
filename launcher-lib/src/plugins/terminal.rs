@@ -1,5 +1,5 @@
 use crate::plugins::{Identifier, PluginNames, StaticLaunchOption};
-use core_lib::Warn;
+use core_lib::WarnWithDetails;
 use exec_lib::run::run_program;
 use gtk::gdk::Key;
 use std::path::PathBuf;

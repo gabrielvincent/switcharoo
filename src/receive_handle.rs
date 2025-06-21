@@ -1,7 +1,7 @@
 use crate::start::Globals;
 use crate::util::reload_desktop_data;
 use async_channel::{Receiver, Sender};
-use core_lib::Warn;
+use core_lib::WarnWithDetails;
 use core_lib::transfer::{
     CloseOverviewConfig, CloseSwitchConfig, OpenOverview, OpenSwitch, SwitchOverviewConfig,
     SwitchSwitchConfig, TransferType,

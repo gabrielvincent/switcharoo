@@ -42,11 +42,15 @@ impl<'a, I: DoubleEndedIterator + 'a> RevIf<'a> for I {
     }
 }
 
-pub trait Warn<A> {
+pub trait WarnWithDetails<A> {
     fn warn(self, msg: &str) -> Option<A>;
 }
 
-impl<A> Warn<A> for Option<A> {
+pub trait Warn<A> {
+    fn warn(self) -> Option<A>;
+}
+
+impl<A> WarnWithDetails<A> for Option<A> {
     fn warn(self, msg: &str) -> Option<A> {
         match self {
             Some(o) => Some(o),
@@ -58,12 +62,25 @@ impl<A> Warn<A> for Option<A> {
     }
 }
 
-impl<A, E: fmt::Debug + fmt::Display> Warn<A> for Result<A, E> {
+impl<A, E: fmt::Debug + fmt::Display> WarnWithDetails<A> for Result<A, E> {
     fn warn(self, msg: &str) -> Option<A> {
         match self {
             Ok(o) => Some(o),
             Err(e) => {
                 warn!("{}: {}", msg, e);
+                debug!("{e:?}");
+                None
+            }
+        }
+    }
+}
+
+impl<A, E: fmt::Debug + fmt::Display> Warn<A> for Result<A, E> {
+    fn warn(self) -> Option<A> {
+        match self {
+            Ok(o) => Some(o),
+            Err(e) => {
+                warn!("{}", e);
                 debug!("{e:?}");
                 None
             }

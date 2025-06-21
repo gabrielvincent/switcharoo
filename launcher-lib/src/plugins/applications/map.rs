@@ -1,4 +1,4 @@
-use core_lib::{ExecType, IniFile, Warn, analyse_exec};
+use core_lib::{ExecType, IniFile, WarnWithDetails, analyse_exec};
 use std::fs::{DirEntry, read_to_string};
 use std::path::Path;
 use std::sync::{Mutex, MutexGuard, OnceLock};

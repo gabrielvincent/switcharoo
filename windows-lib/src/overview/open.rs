@@ -4,7 +4,7 @@ use crate::icon::set_icon;
 use anyhow::Context;
 use async_channel::Sender;
 use core_lib::transfer::{CloseOverviewConfig, OpenOverview, TransferType, WindowsOverride};
-use core_lib::{ClientData, ClientId, Warn, WorkspaceId};
+use core_lib::{ClientData, ClientId, WarnWithDetails, WorkspaceId};
 use exec_lib::set_remain_focused;
 use gtk::gdk::Cursor;
 use gtk::prelude::*;

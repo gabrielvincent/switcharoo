@@ -1,5 +1,5 @@
 use core_lib::theme_icon_cache::init_icon_map;
-use core_lib::{Warn, collect_desktop_files};
+use core_lib::{WarnWithDetails, collect_desktop_files};
 use exec_lib::reset_remain_focused;
 use gtk::glib::ControlFlow;
 use gtk::{IconTheme, Settings, glib};
@@ -14,8 +14,11 @@ pub fn reload_desktop_data() {
     launcher_lib::reload_search_default_browser(&desktop_files);
 }
 
-pub fn fill_icon_map(in_background: bool) {
+pub fn init_gtk() {
     gtk::init().expect("Failed to initialize GTK");
+}
+
+pub fn fill_icon_map(in_background: bool) {
     let icon_theme = IconTheme::new();
     let gtk_icons = icon_theme
         .icon_names()

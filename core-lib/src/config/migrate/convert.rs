@@ -1,4 +1,5 @@
 use crate::config;
+use crate::config::CURRENT_CONFIG_VERSION;
 use crate::config::migrate::old_structs;
 
 impl From<old_structs::Config> for config::Config {
@@ -9,6 +10,7 @@ impl From<old_structs::Config> for config::Config {
             windows: value
                 .windows
                 .map(|a| old_structs::Windows::into(a, value.launcher)),
+            version: CURRENT_CONFIG_VERSION,
         }
     }
 }

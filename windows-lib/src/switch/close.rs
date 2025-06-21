@@ -1,5 +1,5 @@
 use crate::global::WindowsSwitchData;
-use core_lib::{ClientId, FindByFirst, Warn};
+use core_lib::{ClientId, FindByFirst, WarnWithDetails};
 use exec_lib::switch::switch_client;
 use exec_lib::{reset_remain_focused, to_client_address};
 use gtk::glib;

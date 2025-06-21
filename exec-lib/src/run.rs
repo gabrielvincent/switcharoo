@@ -5,7 +5,7 @@ use std::os::unix::prelude::CommandExt;
 use std::path::Path;
 use std::process::{Command, Stdio};
 use std::{env, thread};
-use tracing::{debug, info, trace};
+use tracing::{debug, trace};
 
 pub fn run_program(
     run: &str,
@@ -21,7 +21,7 @@ pub fn run_program(
         } else {
             let env_path = env::var_os("PATH")
                 .unwrap_or_else(|| OsString::from("/usr/bin:/bin:/usr/local/bin"));
-            info!(
+            debug!(
                 "No default terminal found, searching common terminals in PATH. (Set default_terminal in config to avoid this search)"
             );
             trace!("PATH: {}", env_path.to_string_lossy());
@@ -76,16 +76,14 @@ fn run_command(run: &str, path: &Option<Box<Path>>) -> anyhow::Result<()> {
     debug!("Running command: {:?}", cmd);
     let out = cmd.stdout(Stdio::piped()).stderr(Stdio::piped()).spawn()?;
     thread::spawn(move || {
-        if env::var_os("HYPRSHELL_HIDE_OUTPUT").is_none() {
-            let start = std::time::Instant::now();
-            let output = out.wait_with_output();
-            trace!("Command [{cmd:?}] finished");
-            if let Ok(output) = output {
-                if start.elapsed().as_secs() < 2 && !output.stdout.is_empty()
-                    || !output.stderr.is_empty()
-                {
-                    trace!("Output from [{cmd:?}]: {output:?}");
-                }
+        let start = std::time::Instant::now();
+        let output = out.wait_with_output();
+        trace!("Command [{cmd:?}] finished");
+        if let Ok(output) = output {
+            if start.elapsed().as_secs() < 2 && !output.stdout.is_empty()
+                || !output.stderr.is_empty()
+            {
+                trace!("Output from [{cmd:?}]: {output:?}");
             }
         }
     });

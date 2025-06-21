@@ -4,7 +4,7 @@ use crate::plugins::{
 };
 use crate::util::DataInWidget;
 use async_channel::Sender;
-use core_lib::Warn;
+use core_lib::WarnWithDetails;
 use core_lib::theme_icon_cache::theme_has_icon_name;
 use core_lib::transfer::{CloseOverviewConfig, Identifier, TransferType};
 use gtk::gdk::Cursor;

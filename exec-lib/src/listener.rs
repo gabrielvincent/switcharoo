@@ -1,4 +1,4 @@
-use core_lib::Warn;
+use core_lib::WarnWithDetails;
 use tracing::info;
 
 pub async fn monitor_listener<F>(callback: F)

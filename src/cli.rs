@@ -83,8 +83,10 @@ pub enum ConfigCommand {
         #[arg(long)]
         no_systemd: bool,
     },
-    /// Check the config file for errors and explain how to use the program based on the config
+    /// Check the config file for errors
     Check {},
+    /// Explain how to use the program based on the config
+    Explain {},
 }
 
 #[derive(Subcommand, Debug, Clone)]

@@ -25,7 +25,6 @@ pub fn reload_hyprland_config() -> anyhow::Result<()> {
 }
 
 pub fn toast(body: &str) {
-    // TODO check warn call before calling this
     let _ = notify::call(
         notify::Icon::Warning,
         std::time::Duration::from_secs(10),

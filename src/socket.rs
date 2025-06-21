@@ -2,12 +2,11 @@ use anyhow::Context;
 use async_channel::Sender;
 use core_lib::transfer::TransferType;
 use core_lib::{get_daemon_socket_path_buff, transfer};
-use exec_lib::toast;
 use gtk::gio::{Cancellable, InputStream, SocketListener, UnixSocketAddress};
 use gtk::prelude::*;
 use gtk::{gio, glib};
 use std::fs::remove_file;
-use tracing::{error, info};
+use tracing::{info, warn};
 
 pub async fn socket_handler(event_sender: Sender<TransferType>) {
     let buf = get_daemon_socket_path_buff();
@@ -41,11 +40,11 @@ pub async fn socket_handler(event_sender: Sender<TransferType>) {
                 )
                 .context("Failed to handle client")
                 .unwrap_or_else(|e| {
-                    toast(&format!("Failed to handle connection {:?}", e));
+                    warn!("Failed to handle connection {:?}", e);
                 });
             }
             Err(e) => {
-                error!("Failed to accept connection: {e}");
+                warn!("Failed to accept connection: {e:?}");
             }
         };
     }

@@ -1,4 +1,4 @@
-use core_lib::{IniFile, Warn};
+use core_lib::{IniFile, WarnWithDetails};
 use std::collections::HashMap;
 use std::fs::{DirEntry, read_to_string};
 use std::path::Path;

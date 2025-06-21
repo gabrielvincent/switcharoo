@@ -4,6 +4,7 @@ use std::path::Path;
 use tracing::{debug, info};
 
 pub fn check_class(class: Option<String>) {
+    util::init_gtk();
     util::fill_icon_map(false);
     let desktop_files = core_lib::collect_desktop_files();
     windows_lib::reload_desktop_map(&desktop_files);
@@ -36,6 +37,7 @@ fn check_icon(class: &str) {
 }
 
 pub fn list_icons() {
+    util::init_gtk();
     util::fill_icon_map(false);
     let icons = get_all_icons();
     for icon in icons.iter() {
@@ -51,7 +53,7 @@ pub fn list_desktop_files() {
 }
 
 pub fn search(text: &str, all: bool, config_path: &Path, data_dir: &Path) {
-    let (plugins, max_items) = core_lib::config::load_config(config_path)
+    let (plugins, max_items) = core_lib::config::load_and_migrate_config(config_path)
         .ok()
         .and_then(|c| c.windows)
         .and_then(|w| w.overview)

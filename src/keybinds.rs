@@ -1,5 +1,5 @@
 use anyhow::Context;
-use core_lib::Warn;
+use core_lib::WarnWithDetails;
 use core_lib::binds::generate_bind_kill;
 use core_lib::config::Config;
 use exec_lib::binds::{apply_exec_bind, apply_layerrules};

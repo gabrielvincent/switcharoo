@@ -1,7 +1,7 @@
 use anyhow::Context;
 use core_lib::binds::ExecBind;
 use core_lib::config::Mod;
-use core_lib::{LAUNCHER_NAMESPACE, OVERVIEW_NAMESPACE};
+use core_lib::{LAUNCHER_NAMESPACE, OVERVIEW_NAMESPACE, SWITCH_NAMESPACE};
 use hyprland::config::binds;
 use hyprland::config::binds::{Binder, Binding, Flag};
 use hyprland::dispatch::DispatchType;
@@ -10,10 +10,13 @@ use tracing::trace;
 
 pub fn apply_layerrules() -> anyhow::Result<()> {
     Keyword::set("layerrule", format!("noanim, {LAUNCHER_NAMESPACE}"))?;
+    Keyword::set("layerrule", format!("ignorezero, {LAUNCHER_NAMESPACE}"))?;
     Keyword::set("layerrule", format!("noanim, {OVERVIEW_NAMESPACE}"))?;
     Keyword::set("layerrule", format!("dimaround, {OVERVIEW_NAMESPACE}"))?;
     Keyword::set("layerrule", format!("ignorezero, {OVERVIEW_NAMESPACE}"))?;
-    Keyword::set("layerrule", format!("ignorezero, {LAUNCHER_NAMESPACE}"))?;
+    Keyword::set("layerrule", format!("noanim, {SWITCH_NAMESPACE}"))?;
+    Keyword::set("layerrule", format!("dimaround, {SWITCH_NAMESPACE}"))?;
+    Keyword::set("layerrule", format!("ignorezero, {SWITCH_NAMESPACE}"))?;
     Ok(())
 }
 

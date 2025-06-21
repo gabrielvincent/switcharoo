@@ -1,6 +1,6 @@
 use crate::global::WindowsOverviewData;
 use core_lib::transfer::WindowsOverride;
-use core_lib::{FindByFirst, Warn};
+use core_lib::{FindByFirst, WarnWithDetails};
 use exec_lib::switch::{switch_client, switch_workspace};
 use exec_lib::{reset_remain_focused, to_client_address};
 use gtk::glib;

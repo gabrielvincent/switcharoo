@@ -7,7 +7,7 @@ use async_channel::Sender;
 use core_lib::transfer::{
     CloseOverviewConfig, Direction, OpenSwitch, TransferType, WindowsOverride,
 };
-use core_lib::{ClientData, ClientId, Warn};
+use core_lib::{ClientData, ClientId, WarnWithDetails};
 use exec_lib::{get_current_monitor, set_remain_focused};
 use gtk::gdk::Cursor;
 use gtk::prelude::*;

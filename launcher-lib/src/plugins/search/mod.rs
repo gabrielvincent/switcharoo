@@ -3,14 +3,13 @@ mod default;
 use crate::plugins::search::default::get_browser_info;
 use crate::plugins::{Identifier, PluginNames, StaticLaunchOption};
 use crate::util::convert_to_key;
-use core_lib::Warn;
+use core_lib::WarnWithDetails;
 use core_lib::config::SearchEngine;
 pub use default::reload_default_browser;
 use exec_lib::run::run_program;
 use exec_lib::switch::switch_client_by_initial_class;
-use exec_lib::toast;
 use gtk::gdk::Key;
-use tracing::{debug, trace};
+use tracing::{debug, trace, warn};
 
 pub fn get_static_options(matches: &mut Vec<StaticLaunchOption>, config: &[SearchEngine]) {
     let browser = get_browser_info();
@@ -29,7 +28,7 @@ pub fn get_static_options(matches: &mut Vec<StaticLaunchOption>, config: &[Searc
                 },
             });
         } else {
-            toast(&format!("Plugin {} has no valid key set", engine.name));
+            warn!("Plugin {} has no valid key set", engine.name);
         }
     }
 }
