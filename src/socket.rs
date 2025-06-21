@@ -59,6 +59,9 @@ fn handle_client(
     stream
         .read(&mut buffer, None::<&Cancellable>)
         .context("Failed to read data from buffer")?;
+    if buffer.is_empty() {
+        return Ok(());
+    }
     let transfer =
         transfer::receive_from_buffer(buffer).context("Failed to receive from buffer")?;
     event_sender

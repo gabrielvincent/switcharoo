@@ -40,18 +40,18 @@ pub fn explain(config: Config) -> String {
             ));
             builder.push_str("After opening the Overview the launcher is available.\n");
             if let Some(_applications) = overview.launcher.plugins.applications.as_ref() {
-                builder.push_str("Start typing to search through applications (sorted by how often they were opened).\n\
-                    Press {BLUE}return{RESET} to launch the first app, use {BLUE}Ctrl + 1/2/3/...{RESET} to open the second, third, etc.\n");
+                builder.push_str(&format!("Start typing to search through applications (sorted by how often they were opened).\n\
+                    Press {BLUE}return{RESET} to launch the first app, use {BLUE}Ctrl + 1/2/3/...{RESET} to open the second, third, etc.\n"));
             }
             if overview.launcher.plugins.terminal.is_some() {
-                builder.push_str(
-                    "Press {BLUE}Ctrl + t{RESET} to run the typed command in a terminal.\n",
-                );
+                builder.push_str(&format!(
+                    "Press {BLUE}Ctrl + t{RESET} to run the typed command in a terminal.\n"
+                ));
             }
             if overview.launcher.plugins.shell.is_some() {
-                builder.push_str(
+                builder.push_str(&format!(
                     "Press {BLUE}Ctrl + r{RESET} to run the typed command in the background.\n",
-                );
+                ));
             }
             if let Some(engines) = &overview.launcher.plugins.websearch {
                 builder.push_str(&format!("Press {BLUE}Ctrl + {BOLD}{BLUE}<key>{RESET} to search the typed text in any of the configured SearchEngines: {}.\n",
