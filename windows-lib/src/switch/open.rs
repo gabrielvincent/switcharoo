@@ -53,7 +53,6 @@ pub fn open_switch(data: &mut WindowsSwitchData, config: OpenSwitch) -> anyhow::
     let current_monitor = get_current_monitor().context("Failed to get current monitor")?;
 
     if data.config.show_workspaces {
-        // TODO sort
         for (wid, workspace) in &clients_data.workspaces {
             let clients: Vec<&(ClientId, ClientData)> = {
                 let mut clients = clients_data
@@ -74,6 +73,7 @@ pub fn open_switch(data: &mut WindowsSwitchData, config: OpenSwitch) -> anyhow::
             if clients.is_empty() {
                 continue;
             }
+            // TODO add strip_html_from_workspace_title;
             let workspace_fixed = Fixed::builder()
                 .width_request(scale(workspace.width as i16, data.config.scale))
                 .height_request(scale(workspace.height as i16, data.config.scale))

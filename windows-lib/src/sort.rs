@@ -1,4 +1,4 @@
-use core_lib::{ClientData, ClientId, MonitorId, WorkspaceId};
+use core_lib::{ClientData, ClientId, MonitorId, WorkspaceData, WorkspaceId};
 use std::collections::{BTreeMap, HashMap, VecDeque};
 
 /// Sorts clients with complex sorting
@@ -120,4 +120,35 @@ pub fn sort_clients_by_recent(clients: &mut [(ClientId, ClientData)]) {
             (Some(a_id), Some(b_id)) => a_id.cmp(b_id),
         }
     });
+}
+
+pub fn sort_workspaces_by_recent(
+    workspaces: &mut [(WorkspaceId, WorkspaceData)],
+    clients: &[(ClientId, ClientData)],
+) {
+    let mut ordering = vec![];
+    clients.iter().for_each(|(_, client)| {
+        if !ordering.contains(&client.workspace) {
+            ordering.push(client.workspace);
+        }
+    });
+
+    workspaces.sort_by(|(a_id, _), (b_id, _)| {
+        let a_pos = ordering
+            .iter()
+            .position(|id| id == a_id)
+            .unwrap_or(usize::MAX);
+        let b_pos = ordering
+            .iter()
+            .position(|id| id == b_id)
+            .unwrap_or(usize::MAX);
+        a_pos.cmp(&b_pos)
+    });
+}
+
+pub fn sort_workspaces_by_position(
+    workspaces: Vec<(WorkspaceId, WorkspaceData)>,
+) -> Vec<(WorkspaceId, WorkspaceData)> {
+    // error!("TODO sort_workspaces_by_position: NOT IMPLEMENTED YET");
+    workspaces
 }
