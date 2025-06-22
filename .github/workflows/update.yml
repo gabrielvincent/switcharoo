@@ -3,7 +3,7 @@ name: "Flake.lock: update Nix dependencies"
 on:
   workflow_dispatch: # allows manual triggering
   schedule:
-    - cron: '0 4 * * 1' # runs weekly on Monday at 04:00
+    - cron: '0 2 */14 * 1' # runs every two weeks on Monday at 02:00
 
 jobs:
   nix-flake-update:
@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: DeterminateSystems/determinate-nix-action@v3
+      - uses: DeterminateSystems/nix-installer-action@v17
       - uses: DeterminateSystems/update-flake-lock@v25
         with:
           pr-title: "Update Nix flake inputs"
