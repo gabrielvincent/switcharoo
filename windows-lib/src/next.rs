@@ -7,6 +7,7 @@ use tracing::{Level, debug, span, trace, warn};
 pub fn find_next(
     direction: &Direction,
     workspace: bool,
+    wrap_workspaces: bool,
     hypr_data: &HyprlandData,
     active: Active,
     workspaces_per_row: usize,
@@ -14,15 +15,20 @@ pub fn find_next(
     let _span =
         span!(Level::TRACE, "find_next", direction = ?direction, workspace, active = ?active)
             .entered();
+    let reverse = matches!(direction, Direction::Left | Direction::Up);
     let next = if workspace {
-        find_next_workspace(
-            direction,
-            &hypr_data.workspaces,
-            active.workspace,
-            workspaces_per_row,
-        )
+        if wrap_workspaces {
+            find_next_workspace_wrap(reverse, &hypr_data.workspaces, active.workspace)
+        } else {
+            find_next_workspace(
+                direction,
+                &hypr_data.workspaces,
+                active.workspace,
+                workspaces_per_row,
+            )
+        }
     } else if let Some(active_client) = active.client {
-        find_next_client(direction, &hypr_data.clients, active_client)
+        find_next_client_wrap(reverse, &hypr_data.clients, active_client)
     } else {
         find_first_client(direction, &hypr_data.clients, &hypr_data.workspaces, active)
     }
@@ -70,8 +76,8 @@ pub fn find_first_client(
         })
 }
 
-pub fn find_next_client(
-    direction: &Direction,
+pub fn find_next_client_wrap(
+    reverse: bool,
     clients: &[(ClientId, ClientData)],
     active: ClientId,
 ) -> Option<Active> {
@@ -80,26 +86,10 @@ pub fn find_next_client(
         return None;
     }
 
-    let offset = (match direction {
-        Direction::Right => 1,
-        Direction::Left => -1,
-        Direction::Up => {
-            warn!(
-                "Direction {:?} is not supported for clients, using Left instead",
-                direction
-            );
-            -1
-        }
-        Direction::Down => {
-            warn!(
-                "Direction {:?} is not supported for clients, using Right instead",
-                direction
-            );
-            1
-        }
-    } as isize)
+    let offset = (if reverse { -1 } else { 1 } as isize)
         .rem_euclid(clients.iter().filter(|(_, c)| c.enabled).count() as isize)
         as usize;
+    trace!("Finding next client with offset: {}", offset);
 
     clients
         .iter()
@@ -140,6 +130,32 @@ pub fn find_next_workspace(
                 .max(0)
                 .min((workspaces.len() - 1) as isize) as usize,
         )
+        .map(|(id, data)| Active {
+            client: None,
+            workspace: *id,
+            monitor: data.monitor,
+        })
+}
+
+pub fn find_next_workspace_wrap(
+    reverse: bool,
+    workspaces: &[(WorkspaceId, WorkspaceData)],
+    active: WorkspaceId,
+) -> Option<Active> {
+    if workspaces.is_empty() {
+        debug!("No workspaces available, returning None");
+        return None;
+    }
+
+    let offset =
+        (if reverse { -1 } else { 1 } as isize).rem_euclid(workspaces.len() as isize) as usize;
+    trace!("Finding next workspace with offset: {}", offset);
+
+    workspaces
+        .iter()
+        .cycle()
+        .skip_while(|(id, _)| *id != active) // skip until current element
+        .nth(offset)
         .map(|(id, data)| Active {
             client: None,
             workspace: *id,

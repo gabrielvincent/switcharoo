@@ -1,15 +1,15 @@
-use crate::global::WindowsSwitchData;
+use crate::global::{WindowsSwitchConfig, WindowsSwitchData};
 use async_channel::Sender;
-use core_lib::config::{Mod, Switch, Windows};
-use core_lib::transfer::{CloseSwitchConfig, SwitchSwitchConfig, TransferType};
+use core_lib::config::{FilterBy, Mod, Switch, Windows};
+use core_lib::transfer::{SwitchSwitchConfig, TransferType};
 use core_lib::{HyprlandData, SWITCH_NAMESPACE, WarnWithDetails};
 use exec_lib::get_initial_active;
 use gtk::gdk::Key;
-use gtk::glib::Propagation;
+use gtk::glib::{ControlFlow, Propagation};
 use gtk::prelude::*;
 use gtk::{
     Application, ApplicationWindow, EventControllerKey, FlowBox, Orientation, Overlay,
-    SelectionMode,
+    SelectionMode, glib,
 };
 use gtk4_layer_shell::{KeyboardMode, Layer, LayerShell};
 use std::collections::HashMap;
@@ -32,7 +32,7 @@ pub fn create_windows_switch_window(
 
     let clients_flow_overlay = Overlay::builder()
         .child(&clients_flow)
-        .css_classes(["monitor"])
+        .css_classes(["monitor", "no-hover"])
         .build();
 
     let window = ApplicationWindow::builder()
@@ -56,6 +56,7 @@ pub fn create_windows_switch_window(
     window.init_layer_shell();
     window.set_namespace(Some(SWITCH_NAMESPACE));
     window.set_layer(Layer::Top);
+    window.set_can_focus(false);
     window.set_keyboard_mode(KeyboardMode::Exclusive);
     window.present();
     window.set_visible(false);
@@ -63,8 +64,17 @@ pub fn create_windows_switch_window(
     debug!("Created switch window ({})", window.id(),);
 
     Ok(WindowsSwitchData {
+        config: WindowsSwitchConfig {
+            items_per_row: windows.items_per_row,
+            scale: windows.scale,
+            filter_current_workspace: switch.filter_by.contains(&FilterBy::CurrentWorkspace),
+            filter_current_monitor: switch.filter_by.contains(&FilterBy::CurrentMonitor),
+            filter_same_class: switch.filter_by.contains(&FilterBy::SameClass),
+            show_workspaces: switch.show_workspaces,
+        },
         window,
-        clients_flow,
+        main_flow: clients_flow,
+        workspaces: HashMap::default(),
         clients: HashMap::default(),
         active: get_initial_active()?,
         hypr_data: HyprlandData::default(),
@@ -77,7 +87,7 @@ fn handle_release(key: Key, modifier: Mod, event_sender: Sender<TransferType>) {
         || ((key == Key::Super_L || key == Key::Super_R) && modifier == Mod::Super)
     {
         event_sender
-            .send_blocking(TransferType::CloseSwitch(CloseSwitchConfig::None))
+            .send_blocking(TransferType::CloseSwitch)
             .warn("unable to send");
     }
 }

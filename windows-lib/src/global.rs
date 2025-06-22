@@ -15,26 +15,39 @@ pub struct WindowsOverviewConfig {
     pub items_per_row: u8,
     pub scale: f64,
     pub strip_html_from_workspace_title: bool,
+    pub hide_filtered: bool,
+    pub filter_current_workspace: bool,
+    pub filter_current_monitor: bool,
+    pub filter_same_class: bool,
 }
 
 #[derive(Debug)]
 pub struct WindowsSwitchData {
+    pub config: WindowsSwitchConfig,
     pub window: ApplicationWindow,
-    pub clients_flow: FlowBox,
+    pub main_flow: FlowBox,
+    pub workspaces: HashMap<WorkspaceId, Button>,
     pub clients: HashMap<ClientId, Button>,
     pub active: Active,
     pub hypr_data: HyprlandData,
 }
 
 #[derive(Debug)]
+pub struct WindowsSwitchConfig {
+    pub items_per_row: u8,
+    pub scale: f64,
+    pub filter_current_workspace: bool,
+    pub filter_current_monitor: bool,
+    pub filter_same_class: bool,
+    pub show_workspaces: bool,
+}
+
+#[derive(Debug)]
 pub struct WindowsOverviewMonitorData {
     pub id: MonitorId,
-    // used to store a ref to the FlowBox containing the workspaces
     pub workspaces_flow: FlowBox,
-    // used to store refs to the Overlays over the workspace Frames
-    pub workspace_refs: HashMap<WorkspaceId, Button>,
-    // used to store refs to the Overlays containing the clients
-    pub client_refs: HashMap<ClientId, Button>,
+    pub workspaces: HashMap<WorkspaceId, Button>,
+    pub clients: HashMap<ClientId, Button>,
 }
 
 impl WindowsOverviewMonitorData {
@@ -42,8 +55,8 @@ impl WindowsOverviewMonitorData {
         Self {
             id,
             workspaces_flow,
-            workspace_refs: HashMap::new(),
-            client_refs: HashMap::new(),
+            workspaces: HashMap::new(),
+            clients: HashMap::new(),
         }
     }
 }

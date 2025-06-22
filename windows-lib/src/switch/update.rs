@@ -13,20 +13,33 @@ pub fn update_switch(data: &mut WindowsSwitchData, config: SwitchSwitchConfig) {
         } else {
             Direction::Right
         },
-        false,
+        data.config.show_workspaces,
+        true,
         &data.hypr_data,
         data.active,
         0,
     );
     data.active = active;
 
-    for (_, overlay) in data.clients.iter_mut() {
-        overlay.remove_css_class("active");
-    }
-    for (id, overlay) in data.clients.iter_mut() {
-        overlay.remove_css_class("active");
-        if active.client == Some(*id) {
-            overlay.add_css_class("active");
+    if data.config.show_workspaces {
+        for (_, button) in data.clients.iter_mut() {
+            button.remove_css_class("active");
+        }
+        for (id, button) in data.workspaces.iter_mut() {
+            button.remove_css_class("active");
+            if active.workspace == *id {
+                button.add_css_class("active");
+            }
+        }
+    } else {
+        for (_, button) in data.workspaces.iter_mut() {
+            button.remove_css_class("active");
+        }
+        for (id, button) in data.clients.iter_mut() {
+            button.remove_css_class("active");
+            if active.client == Some(*id) {
+                button.add_css_class("active");
+            }
         }
     }
 }

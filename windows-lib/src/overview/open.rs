@@ -3,7 +3,7 @@ use crate::global::WindowsOverviewData;
 use crate::icon::set_icon;
 use anyhow::Context;
 use async_channel::Sender;
-use core_lib::transfer::{CloseOverviewConfig, OpenOverview, TransferType, WindowsOverride};
+use core_lib::transfer::{CloseOverviewConfig, TransferType, WindowsOverride};
 use core_lib::{ClientData, ClientId, WarnWithDetails, WorkspaceId};
 use exec_lib::set_remain_focused;
 use gtk::gdk::Cursor;
@@ -18,7 +18,6 @@ fn scale(value: i16, scale: f64) -> i32 {
 
 pub fn open_overview(
     data: &mut WindowsOverviewData,
-    config: OpenOverview,
     event_sender: Sender<TransferType>,
 ) -> anyhow::Result<()> {
     let _span = span!(Level::TRACE, "open_overview").entered();
@@ -30,9 +29,9 @@ pub fn open_overview(
     set_remain_focused().warn("Failed to set no follow mouse");
 
     let (clients_data, active) = collect_data(&SortConfig {
-        filter_current_monitor: config.filter_current_monitor,
-        filter_current_workspace: config.filter_current_workspace,
-        filter_same_class: config.filter_same_class,
+        filter_current_monitor: data.config.filter_current_monitor,
+        filter_current_workspace: data.config.filter_current_workspace,
+        filter_same_class: data.config.filter_same_class,
         sort_recent: false,
     })
     .context("Failed to collect data")?;
@@ -56,8 +55,8 @@ pub fn open_overview(
             trace!(
                 "Creating workspace {:?} with ({}x{})",
                 wid,
-                scale(workspace.width as i16, config.scale),
-                scale(workspace.height as i16, config.scale)
+                scale(workspace.width as i16, data.config.scale),
+                scale(workspace.height as i16, data.config.scale)
             );
             let workspace_fixed = Fixed::builder()
                 .width_request(scale(workspace.width as i16, data.config.scale))
@@ -92,13 +91,15 @@ pub fn open_overview(
                 monitor_data.workspaces_flow.insert(&button, -1);
                 button
             };
-            monitor_data.workspace_refs.insert(*wid, workspace_button);
+            monitor_data.workspaces.insert(*wid, workspace_button);
 
             let clients: Vec<&(ClientId, ClientData)> = {
                 let mut clients = clients_data
                     .clients
                     .iter()
-                    .filter(|(_, client)| client.workspace == *wid)
+                    .filter(|(_, client)| {
+                        client.workspace == *wid && (!data.config.hide_filtered || client.enabled)
+                    })
                     .collect::<Vec<_>>();
                 clients.sort_by(|(_, a), (_, b)| {
                     // prefer smaller windows
@@ -111,10 +112,6 @@ pub fn open_overview(
                 clients
             };
             for (address, client) in clients {
-                if config.hide_filtered && !client.enabled {
-                    continue;
-                }
-
                 let client_button = {
                     let title = if !client.title.trim().is_empty() {
                         &client.title
@@ -180,7 +177,7 @@ pub fn open_overview(
                     scale(client.x - workspace.x as i16, data.config.scale) as f64,
                     scale(client.y - workspace.y as i16, data.config.scale) as f64,
                 );
-                monitor_data.client_refs.insert(*address, client_button);
+                monitor_data.clients.insert(*address, client_button);
             }
         }
     }

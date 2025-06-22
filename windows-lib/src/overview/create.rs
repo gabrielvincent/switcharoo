@@ -1,6 +1,6 @@
 use crate::global::{WindowsOverviewConfig, WindowsOverviewData, WindowsOverviewMonitorData};
 use anyhow::Context;
-use core_lib::config::{Overview, Windows};
+use core_lib::config::{FilterBy, Overview, Windows};
 use core_lib::{HyprlandData, OVERVIEW_NAMESPACE};
 use exec_lib::{get_initial_active, get_monitors};
 use gtk::gdk::{Display, Monitor};
@@ -76,6 +76,10 @@ pub fn create_windows_overview_window(
             items_per_row: windows.items_per_row,
             scale: windows.scale,
             strip_html_from_workspace_title: overview.strip_html_from_workspace_title,
+            hide_filtered: overview.hide_filtered,
+            filter_current_workspace: overview.filter_by.contains(&FilterBy::CurrentWorkspace),
+            filter_current_monitor: overview.filter_by.contains(&FilterBy::CurrentMonitor),
+            filter_same_class: overview.filter_by.contains(&FilterBy::SameClass),
         },
         window_list,
         active: get_initial_active()?,

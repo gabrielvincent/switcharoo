@@ -10,6 +10,7 @@ pub fn update_overview(data: &mut WindowsOverviewData, config: SwitchOverviewCon
     let active = find_next(
         &config.direction,
         config.workspace,
+        false,
         &data.hypr_data,
         data.active,
         data.config.items_per_row as usize,
@@ -18,23 +19,23 @@ pub fn update_overview(data: &mut WindowsOverviewData, config: SwitchOverviewCon
 
     for monitor_data in data.window_list.values_mut() {
         if config.workspace {
-            for (_, overlay) in monitor_data.client_refs.iter_mut() {
-                overlay.remove_css_class("active");
+            for (_, button) in monitor_data.clients.iter_mut() {
+                button.remove_css_class("active");
             }
-            for (id, overlay) in monitor_data.workspace_refs.iter_mut() {
-                overlay.remove_css_class("active");
+            for (id, button) in monitor_data.workspaces.iter_mut() {
+                button.remove_css_class("active");
                 if active.workspace == *id {
-                    overlay.add_css_class("active");
+                    button.add_css_class("active");
                 }
             }
         } else {
-            for (_, overlay) in monitor_data.workspace_refs.iter_mut() {
-                overlay.remove_css_class("active");
+            for (_, button) in monitor_data.workspaces.iter_mut() {
+                button.remove_css_class("active");
             }
-            for (id, overlay) in monitor_data.client_refs.iter_mut() {
-                overlay.remove_css_class("active");
+            for (id, button) in monitor_data.clients.iter_mut() {
+                button.remove_css_class("active");
                 if active.client == Some(*id) {
-                    overlay.add_css_class("active");
+                    button.add_css_class("active");
                 }
             }
         }

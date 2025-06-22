@@ -3,8 +3,7 @@ use crate::util::reload_desktop_data;
 use async_channel::{Receiver, Sender};
 use core_lib::WarnWithDetails;
 use core_lib::transfer::{
-    CloseOverviewConfig, CloseSwitchConfig, OpenOverview, OpenSwitch, SwitchOverviewConfig,
-    SwitchSwitchConfig, TransferType,
+    CloseOverviewConfig, OpenSwitch, SwitchOverviewConfig, SwitchSwitchConfig, TransferType,
 };
 use gtk::prelude::EntryExt;
 use tracing::{debug, warn};
@@ -18,18 +17,14 @@ pub async fn event_handler(
         if let Ok(transfer) = event_receiver.recv().await {
             let close_socket = matches!(transfer, TransferType::Restart);
             match transfer {
-                TransferType::OpenOverview(config) => {
-                    open_overview(&mut globals, config, event_sender.clone())
-                }
-                TransferType::OpenSwitch(config) => {
-                    open_switch(&mut globals, config, event_sender.clone())
-                }
+                TransferType::OpenOverview => open_overview(&mut globals, event_sender.clone()),
+                TransferType::OpenSwitch(config) => open_switch(&mut globals, config),
                 TransferType::SwitchOverview(config) => switch_overview(&mut globals, config),
                 TransferType::SwitchSwitch(config) => switch_switch(&mut globals, config),
                 TransferType::Exit => exit(&mut globals),
                 TransferType::Type(text) => r#type(&mut globals, text, event_sender.clone()),
                 TransferType::CloseOverview(config) => close_overview(&mut globals, config),
-                TransferType::CloseSwitch(config) => close_switch(&mut globals, config),
+                TransferType::CloseSwitch => close_switch(&mut globals),
                 TransferType::Restart => restart(&globals),
             }
             if close_socket {
@@ -47,10 +42,10 @@ fn r#type(global: &mut Globals, text: String, event_sender: Sender<TransferType>
     }
 }
 
-fn open_overview(global: &mut Globals, config: OpenOverview, event_sender: Sender<TransferType>) {
+fn open_overview(global: &mut Globals, event_sender: Sender<TransferType>) {
     if let Some(windows) = &mut global.windows {
         if let Some((overview, launcher)) = &mut windows.overview {
-            windows_lib::open_overview(overview, config, event_sender)
+            windows_lib::open_overview(overview, event_sender)
                 .warn("Failed to open overview window");
             launcher_lib::open_launcher(launcher)
         } else {
@@ -61,11 +56,10 @@ fn open_overview(global: &mut Globals, config: OpenOverview, event_sender: Sende
     };
 }
 
-fn open_switch(global: &mut Globals, config: OpenSwitch, event_sender: Sender<TransferType>) {
+fn open_switch(global: &mut Globals, config: OpenSwitch) {
     if let Some(windows) = &mut global.windows {
         if let Some(switch) = &mut windows.switch {
-            windows_lib::open_switch(switch, config, event_sender)
-                .warn("Failed to open switch window");
+            windows_lib::open_switch(switch, config).warn("Failed to open switch window");
         } else {
             warn!("Window switch not active");
         }
@@ -107,7 +101,7 @@ fn exit(global: &mut Globals) {
             launcher_lib::close_launcher_by_char(launcher, None); // this will never open a program and need the default terminal
         };
         if let Some(switch) = &mut windows.switch {
-            windows_lib::close_switch(switch, None);
+            windows_lib::close_switch(switch, false);
         };
     }
     reload_desktop_data();
@@ -154,17 +148,10 @@ fn close_overview(global: &mut Globals, config: CloseOverviewConfig) {
     reload_desktop_data()
 }
 
-fn close_switch(global: &mut Globals, config: CloseSwitchConfig) {
+fn close_switch(global: &mut Globals) {
     if let Some(windows) = &mut global.windows {
         if let Some(switch) = &mut windows.switch {
-            match config {
-                CloseSwitchConfig::Windows(iden) => {
-                    windows_lib::close_switch(switch, Some(Some(iden)));
-                }
-                CloseSwitchConfig::None => {
-                    windows_lib::close_switch(switch, Some(None));
-                }
-            }
+            windows_lib::close_switch(switch, true);
         }
     }
     reload_desktop_data()

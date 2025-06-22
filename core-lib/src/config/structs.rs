@@ -126,6 +126,8 @@ pub struct Switch {
     pub modifier: Mod,
     #[default(Vec::new())]
     pub filter_by: Vec<FilterBy>,
+    #[default = true] // TODO false
+    pub show_workspaces: bool,
 }
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Deserialize, Serialize)]

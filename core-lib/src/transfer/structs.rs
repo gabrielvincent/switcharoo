@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Serialize, Deserialize)]
 pub enum TransferType {
     /// send from the keybind to open the overview
-    OpenOverview(OpenOverview),
+    OpenOverview,
     /// send from the keybind to open the switch
     OpenSwitch(OpenSwitch),
     /// send from the keybinds like arrow keys or tab on overview
@@ -14,7 +14,7 @@ pub enum TransferType {
     /// send by pressing enter / ctrl + <n> / or from the gui itself to close the overview / switch
     CloseOverview(CloseOverviewConfig),
     /// send by pressing enter / ctrl + <n> / or from the gui itself to close the overview / switch
-    CloseSwitch(CloseSwitchConfig),
+    CloseSwitch,
     /// send from the gui itself when typing the launcher
     Type(String),
     /// send from pressing ESC
@@ -24,22 +24,7 @@ pub enum TransferType {
 }
 #[derive(Debug, Serialize, Deserialize)]
 pub struct OpenSwitch {
-    pub scale: f64,
-    pub items_per_row: u8,
-    pub filter_current_workspace: bool,
-    pub filter_current_monitor: bool,
-    pub filter_same_class: bool,
     pub reverse: bool,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct OpenOverview {
-    pub hide_filtered: bool,
-    pub scale: f64,
-    pub items_per_row: u8,
-    pub filter_current_workspace: bool,
-    pub filter_current_monitor: bool,
-    pub filter_same_class: bool,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -58,12 +43,6 @@ pub enum CloseOverviewConfig {
     LauncherClick(Identifier),
     LauncherPress(char),
     Windows(WindowsOverride),
-    None,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub enum CloseSwitchConfig {
-    Windows(ClientId),
     None,
 }
 

@@ -50,6 +50,7 @@ impl old_structs::Switch {
         config::Switch {
             modifier: value.open.modifier,
             filter_by: value.other.filter_by,
+            ..Default::default()
         }
     }
 }
