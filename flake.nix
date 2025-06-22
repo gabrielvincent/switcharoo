@@ -21,6 +21,7 @@
       formatter = forAllSystems (system: pkgsFor.${system}.nixfmt-tree);
       packages = forAllSystems (system: rec {
         hyprshell = pkgsFor.${system}.callPackage ./nix/default.nix { inherit self; };
+        hyprshell-with-test-command = pkgsFor.${system}.callPackage ./nix/default.nix { inherit self; features = ["config_check_is_default"]; };
         default = hyprshell;
       });
       devShells = forAllSystems (system: rec {
@@ -46,7 +47,7 @@
             )}
             EOF
             ${pkgsFor.${system}.jq}/bin/jq < "$TMP/test.json"
-            ${self.packages.${system}.hyprshell}/bin/hyprshell config check -c "$TMP/test.json" && (mkdir $out)
+            ${self.packages.${system}.hyprshell-with-test-command}/bin/hyprshell-with-test-command config check-if-default -c "$TMP/test.json" && (mkdir $out)
             rm -r "$TMP"
           '';
         in

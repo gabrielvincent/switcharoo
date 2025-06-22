@@ -52,7 +52,7 @@ fn open_overview(global: &mut Globals, config: OpenOverview, event_sender: Sende
         if let Some((overview, launcher)) = &mut windows.overview {
             windows_lib::open_overview(overview, config, event_sender)
                 .warn("Failed to open overview window");
-            launcher_lib::open_launcher(&launcher)
+            launcher_lib::open_launcher(launcher)
         } else {
             warn!("Window overview not active");
         }

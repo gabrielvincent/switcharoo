@@ -4,7 +4,7 @@ use std::fmt::Display;
 
 pub(crate) const CURRENT_CONFIG_VERSION: u16 = 1;
 
-#[derive(SmartDefault, Debug, Clone, Deserialize, Serialize)]
+#[derive(SmartDefault, Debug, Clone, PartialEq, Deserialize, Serialize)]
 #[serde(default, deny_unknown_fields)]
 pub struct Config {
     #[default = true]
@@ -17,18 +17,20 @@ pub struct Config {
     pub version: u16,
 }
 
-#[derive(SmartDefault, Debug, Clone, Deserialize, Serialize)]
+#[derive(SmartDefault, Debug, Clone, PartialEq, Deserialize, Serialize)]
 #[serde(default, deny_unknown_fields)]
 pub struct Windows {
     #[default = 8.5]
     pub scale: f64,
     #[default = 5]
     pub items_per_row: u8,
+    #[default(Some(Overview::default()))]
     pub overview: Option<Overview>,
+    #[default(Some(Switch::default()))]
     pub switch: Option<Switch>,
 }
 
-#[derive(SmartDefault, Debug, Clone, Deserialize, Serialize)]
+#[derive(SmartDefault, Debug, Clone, PartialEq, Deserialize, Serialize)]
 #[serde(default, deny_unknown_fields)]
 pub struct Overview {
     #[default = true]
@@ -44,7 +46,7 @@ pub struct Overview {
     pub hide_filtered: bool,
 }
 
-#[derive(SmartDefault, Debug, Clone, Deserialize, Serialize)]
+#[derive(SmartDefault, Debug, Clone, PartialEq, Deserialize, Serialize)]
 #[serde(default, deny_unknown_fields)]
 pub struct Launcher {
     #[default(None)]
@@ -69,7 +71,7 @@ pub struct Launcher {
 
 // no default for this, if some elements are missing, they should be None.
 // if no config for plugins is provided, use the default value from the launcher.
-#[derive(Debug, Clone, Deserialize, Serialize)]
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 pub struct Plugins {
     pub applications: Option<ApplicationsPluginConfig>,
@@ -79,11 +81,11 @@ pub struct Plugins {
     pub calc: Option<EmptyConfig>,
 }
 
-#[derive(SmartDefault, Debug, Clone, Deserialize, Serialize)]
+#[derive(SmartDefault, Debug, Clone, PartialEq, Deserialize, Serialize)]
 #[serde(default, deny_unknown_fields)]
 pub struct EmptyConfig {}
 
-#[derive(SmartDefault, Debug, Clone, Deserialize, Serialize)]
+#[derive(SmartDefault, Debug, Clone, PartialEq, Deserialize, Serialize)]
 #[serde(default, deny_unknown_fields)]
 pub struct ApplicationsPluginConfig {
     #[default = 4]
@@ -94,18 +96,22 @@ pub struct ApplicationsPluginConfig {
     pub show_actions_submenu: bool,
 }
 
-#[derive(SmartDefault, Debug, Clone, Deserialize, Serialize)]
+#[derive(SmartDefault, Debug, Clone, PartialEq, Deserialize, Serialize)]
 #[serde(default, deny_unknown_fields)]
 pub struct WebSearchConfig {
     #[default(vec![SearchEngine {
         url: "https://www.google.com/search?q={}".into(),
         name: "Google".into(),
         key: 'g',
+    }, SearchEngine {
+        url: "https://en.wikipedia.org/wiki/Special:Search?search={}".into(),
+        name: "Wikipedia".into(),
+        key: 'w',
     }])]
     pub engines: Vec<SearchEngine>,
 }
 
-#[derive(Debug, Clone, Deserialize, Serialize)]
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 pub struct SearchEngine {
     pub url: String,
@@ -113,16 +119,16 @@ pub struct SearchEngine {
     pub key: char,
 }
 
-#[derive(SmartDefault, Debug, Clone, Deserialize, Serialize)]
+#[derive(SmartDefault, Debug, Clone, PartialEq, Deserialize, Serialize)]
 #[serde(default, deny_unknown_fields)]
 pub struct Switch {
-    #[default(Mod::Super)]
+    #[default(Mod::Alt)]
     pub modifier: Mod,
     #[default(Vec::new())]
     pub filter_by: Vec<FilterBy>,
 }
 
-#[derive(Debug, Clone, Copy, Deserialize, Serialize, Eq, PartialEq)]
+#[derive(Debug, Clone, Copy, Eq, PartialEq, Deserialize, Serialize)]
 #[serde(rename_all = "snake_case")]
 pub enum FilterBy {
     SameClass,

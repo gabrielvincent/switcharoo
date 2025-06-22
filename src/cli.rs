@@ -87,6 +87,9 @@ pub enum ConfigCommand {
     Check {},
     /// Explain how to use the program based on the config
     Explain {},
+    #[cfg(feature = "config_check_is_default")]
+    /// Check if the provided config is equal to the default config
+    CheckIfDefault {},
 }
 
 #[derive(Subcommand, Debug, Clone)]

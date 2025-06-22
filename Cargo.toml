@@ -35,10 +35,11 @@ toml_config = ["core-lib/toml_config"]
 generate_config_command = ["core-lib/generate_config"]
 launcher_calc = ["launcher-lib/calc", "core-lib/calc"]
 debug_command = []
+config_check_is_default = []
 bar = []
 
 [workspace]
-members = ["exec-lib", "core-lib", "windows-lib", "launcher-lib", "test-global"]
+members = ["exec-lib", "core-lib", "windows-lib", "launcher-lib"]
 resolver = "2"
 
 

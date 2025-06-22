@@ -1,5 +1,6 @@
 {
   self,
+  features ? [],
   lib,
   rustPlatform,
   pkg-config,
@@ -20,6 +21,8 @@ in
 rustPlatform.buildRustPackage {
   inherit pname;
   version = (importTOML ../Cargo.toml).workspace.package.version + "_" + (self.shortRev or "dirty");
+
+  buildFeatures = features;
 
   cargoLock.lockFile = ../Cargo.lock;
   src = cleanSourceWith {

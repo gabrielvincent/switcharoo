@@ -113,6 +113,22 @@ fn main() -> anyhow::Result<()> {
                     exit(1);
                 }
             }
+            #[cfg(feature = "config_check_is_default")]
+            cli::ConfigCommand::CheckIfDefault {} => {
+                if let Ok(config) = core_lib::config::load_and_migrate_config(
+                    &config_path.unwrap_or(get_default_config_path()),
+                ) {
+                    let config_default = core_lib::config::Config::default();
+                    if config != config_default {
+                        warn!("Current config does not match the default configuration");
+                        info!("Default config: {:#?}", config_default);
+                        info!("Current config: {:#?}", config);
+                        exit(1);
+                    } else {
+                        info!("Current config matches the default configuration");
+                    }
+                }
+            }
         },
         #[cfg(feature = "debug_command")]
         cli::Command::Debug { command } => {
