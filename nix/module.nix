@@ -130,6 +130,11 @@ in
                         name = "Google";
                         key = "g";
                       }
+                      {
+                        url = "https://en.wikipedia.org/wiki/Special:Search?search={}";
+                        name = "Wikipedia";
+                        key = "w";
+                      }
                     ];
               };
             };

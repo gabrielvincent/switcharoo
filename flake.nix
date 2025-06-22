@@ -21,7 +21,10 @@
       formatter = forAllSystems (system: pkgsFor.${system}.nixfmt-tree);
       packages = forAllSystems (system: rec {
         hyprshell = pkgsFor.${system}.callPackage ./nix/default.nix { inherit self; };
-        hyprshell-with-test-command = pkgsFor.${system}.callPackage ./nix/default.nix { inherit self; features = ["config_check_is_default"]; };
+        hyprshell-with-test-command = pkgsFor.${system}.callPackage ./nix/default.nix {
+          inherit self;
+          features = [ "config_check_is_default" ];
+        };
         default = hyprshell;
       });
       devShells = forAllSystems (system: rec {
@@ -32,14 +35,18 @@
         hyprshell = import ./nix/module.nix { inherit self; };
         default = hyprshell;
       };
+      
       checks = forAllSystems (
         system:
         let
           filterDisabledAndDropEnable =
             (import ./nix/util.nix { lib = pkgsFor.${system}.lib; }).filterDisabledAndDropEnable;
-          command = ''
+        in
+        {
+          test = pkgsFor.${system}.runCommand "test" { } ''
             TMP=$(mktemp -d)
             touch "$TMP/test.json"
+            echo "test json created at $TMP"
             cat <<EOF> "$TMP/test.json"
             ${builtins.toJSON (
               filterDisabledAndDropEnable
@@ -47,15 +54,13 @@
             )}
             EOF
             ${pkgsFor.${system}.jq}/bin/jq < "$TMP/test.json"
-            ${self.packages.${system}.hyprshell-with-test-command}/bin/hyprshell-with-test-command config check-if-default -c "$TMP/test.json" && (mkdir $out)
+            ${
+              self.packages.${system}.hyprshell-with-test-command
+            }/bin/hyprshell config check-if-default -c "$TMP/test.json" && (mkdir "$out")
             rm -r "$TMP"
           '';
-        in
-        {
-          test = pkgsFor.${system}.runCommand "test" { } command;
         }
       );
-
       homeConfigurations.test = forAllSystems (
         system:
         home-manager.lib.homeManagerConfiguration rec {

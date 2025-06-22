@@ -51,5 +51,5 @@ jobs:
       - uses: DeterminateSystems/magic-nix-cache-action@v11
       - uses: DeterminateSystems/flake-checker-action@v10 
       - name: Run Nix Flake Check
-        run: nix flake check
+        run: nix flake check -L
     

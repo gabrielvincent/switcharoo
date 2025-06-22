@@ -1,6 +1,6 @@
 {
   self,
-  features ? [],
+  features ? [ ],
   lib,
   rustPlatform,
   pkg-config,
