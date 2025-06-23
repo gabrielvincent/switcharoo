@@ -84,7 +84,7 @@ in
         items_per_row = mkOpt "Workspaces per row" int 5;
         overview = {
           enable = mkOpt "Enable overview" bool true;
-          #          strip_html_from_workspace_title = mkOpt "Strip HTML from workspace title" bool true;
+          strip_html_from_workspace_title = mkOpt "Strip HTML from workspace title" bool true;
           key = mkOpt "Key to open overview" str "super_l";
           modifier = mkOpt "Modifier key" (enum [
             "alt"
@@ -165,7 +165,7 @@ in
             "current_monitor"
             "current_workspace"
           ])) [ ];
-
+          show_workspaces = mkOpt "Show workspaces" bool false;
         };
       };
     };

@@ -64,7 +64,6 @@
               ${hyprshell-default-check}/bin/hyprshell -vv config check-if-default -c "$TMP/test.json" && (mkdir "$out")
               rm -r "$TMP"
             '';
-
             check-all-feature-combinations = craneLib.buildPackage (
               clib.commonArgsCached
               // {
