@@ -22,6 +22,8 @@ jobs:
         with:
           name: hyprshell
           authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
+      - name: Increase nix download-buffer-size
+        run: echo "nix.settings.download-buffer-size = 524288000;" >> /home/runner/.config/nix/nix.conf && cat /home/runner/.config/nix/nix.conf
       - name: Run Nix Flake Check fmt
         run: nix build '.#checks.x86_64-linux.hyprshell-fmt' -L
       - name: Run Nix Flake Check build
@@ -30,5 +32,15 @@ jobs:
         run: nix build '.#checks.x86_64-linux.hyprshell-clippy' -L
       - name: Run Nix Flake Check check-nix-config
         run: nix build '.#checks.x86_64-linux.check-nix-config' -L
+
+  check-all-features:
+    name: Run Nix Flake all features Check
+    runs-on: "ubuntu-latest"
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: cachix/install-nix-action@v30
+        with:
+          github_access_token: ${{ secrets.GITHUB_TOKEN }}
+        # this messes up the cache so dont add one
       - name: Run Nix Flake Check check-all-feature-combinations
         run: nix build '.#checks.x86_64-linux.check-all-feature-combinations' -L
