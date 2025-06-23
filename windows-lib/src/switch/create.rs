@@ -5,11 +5,11 @@ use core_lib::transfer::{SwitchSwitchConfig, TransferType};
 use core_lib::{HyprlandData, SWITCH_NAMESPACE, WarnWithDetails};
 use exec_lib::get_initial_active;
 use gtk::gdk::Key;
-use gtk::glib::{ControlFlow, Propagation};
+use gtk::glib::Propagation;
 use gtk::prelude::*;
 use gtk::{
     Application, ApplicationWindow, EventControllerKey, FlowBox, Orientation, Overlay,
-    SelectionMode, glib,
+    SelectionMode,
 };
 use gtk4_layer_shell::{KeyboardMode, Layer, LayerShell};
 use std::collections::HashMap;

@@ -5,8 +5,6 @@ use core_lib::{
     get_default_data_dir,
 };
 use std::env;
-use std::process::exit;
-use tracing::{debug, info, trace, warn};
 
 mod cli;
 mod data;
@@ -45,7 +43,7 @@ fn main() -> anyhow::Result<()> {
         ))
         .finish();
     tracing::subscriber::set_global_default(subscriber)
-        .unwrap_or_else(|e| warn!("Unable to initialize logging: {e}"));
+        .unwrap_or_else(|e| tracing::warn!("Unable to initialize logging: {e}"));
 
     check_features();
     check_env();
@@ -60,7 +58,7 @@ fn main() -> anyhow::Result<()> {
                 anyhow::bail!("Daemon already running");
             }
             check_version(exec_lib::get_version()).unwrap_or_else(|e| {
-                warn!("Unable to check hyprland version, continuing anyway: {e}")
+                tracing::warn!("Unable to check hyprland version, continuing anyway: {e}")
             });
             start::start(
                 config_path.unwrap_or(get_default_config_path()),
@@ -109,8 +107,8 @@ fn main() -> anyhow::Result<()> {
                 if let Err(err) = core_lib::config::load_and_migrate_config(
                     &config_path.unwrap_or(get_default_config_path()),
                 ) {
-                    warn!("Failed to load config: {err}");
-                    exit(1);
+                    tracing::warn!("Failed to load config: {err}");
+                    std::process::exit(1);
                 }
             }
             #[cfg(feature = "config_check_is_default")]
@@ -120,19 +118,19 @@ fn main() -> anyhow::Result<()> {
                 ) {
                     let config_default = core_lib::config::Config::default();
                     if config != config_default {
-                        warn!("Current config does not match the default configuration");
-                        info!("Default config: {:#?}", config_default);
-                        info!("Current config: {:#?}", config);
-                        exit(1);
+                        tracing::warn!("Current config does not match the default configuration");
+                        tracing::info!("Default config: {:#?}", config_default);
+                        tracing::info!("Current config: {:#?}", config);
+                        std::process::exit(1);
                     } else {
-                        info!("Current config matches the default configuration");
+                        tracing::info!("Current config matches the default configuration");
                     }
                 }
             }
         },
         #[cfg(feature = "debug_command")]
         cli::Command::Debug { command } => {
-            info!("use with -vv ... to see full logs!");
+            tracing::info!("use with -vv ... to see full logs!");
             match command {
                 cli::DebugCommand::CheckClass { class } => {
                     debug::check_class(class);
@@ -170,7 +168,7 @@ fn main() -> anyhow::Result<()> {
 }
 
 fn check_features() {
-    debug!(
+    tracing::debug!(
         "FEATURES: TOML support: {}, Bar: {}, Config command: {}, Debug command: {}, Launcher calc: {}",
         cfg!(feature = "toml_config"),
         cfg!(feature = "bar"),
@@ -181,7 +179,7 @@ fn check_features() {
 }
 
 fn check_env() {
-    trace!(
+    tracing::trace!(
         "ENV: HYPRSHELL_NO_LISTENERS: {}, HYPRSHELL_NO_ALL_ICONS: {}, HYPRSHELL_RELOAD_TIMEOUT: {}, HYPRSHELL_LOG_MODULE_PATH: {}",
         env::var("HYPRSHELL_NO_LISTENERS").unwrap_or_else(|_| "-None-".to_string()),
         env::var("HYPRSHELL_NO_ALL_ICONS").unwrap_or_else(|_| "-None-".to_string()),

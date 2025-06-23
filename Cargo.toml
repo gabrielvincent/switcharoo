@@ -35,7 +35,7 @@ toml_config = ["core-lib/toml_config"]
 generate_config_command = ["core-lib/generate_config"]
 launcher_calc = ["launcher-lib/calc", "core-lib/calc"]
 debug_command = []
-config_check_is_default = []
+config_check_is_default = ["core-lib/no-default-config-values"]
 bar = []
 
 [workspace]

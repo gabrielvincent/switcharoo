@@ -8,6 +8,8 @@ use gtk4_layer_shell::{KeyboardMode, LayerShell};
 use std::time::{Duration, Instant};
 use tracing::{Level, span, trace, warn};
 
+const ANIMATE_LAUNCH_MS: u64 = 500;
+
 pub fn close_launcher_by_char(data: &mut LauncherData, char: Option<char>) {
     let _span = span!(Level::TRACE, "close_launcher_by_char").entered();
     if let Some(char) = char {
@@ -59,21 +61,18 @@ fn close_launcher(data: &mut LauncherData, iden: &Identifier) {
     if animate {
         trace!(
             "starting timeout({}ms) animation after {:?} time",
-            data.config.animate_launch_ms,
+            ANIMATE_LAUNCH_MS,
             instant.elapsed()
         );
         show_launch(&results, &plugin_box, &iden);
         entry.set_editable(false);
-        glib::timeout_add_local_once(
-            Duration::from_millis(data.config.animate_launch_ms),
-            move || {
-                let _span = _span.clone();
-                // close launcher
-                close_window(&entry, &window);
-                hide_launch(&results, &plugin_box);
-                trace!("closed launcher after {:?} time", instant.elapsed());
-            },
-        );
+        glib::timeout_add_local_once(Duration::from_millis(ANIMATE_LAUNCH_MS), move || {
+            let _span = _span.clone();
+            // close launcher
+            close_window(&entry, &window);
+            hide_launch(&results, &plugin_box);
+            trace!("closed launcher after {:?} time", instant.elapsed());
+        });
     } else {
         close_window(&entry, &window);
     }

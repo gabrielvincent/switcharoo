@@ -103,7 +103,7 @@ pub fn create_windows_overview_launcher_window(
             default_terminal: launcher.default_terminal.clone(),
             max_items: launcher.max_items,
             show_when_empty: launcher.show_when_empty,
-            animate_launch_ms: launcher.animate_launch_ms,
+            // animate_launch_ms: launcher.animate_launch_ms,
             width: launcher.width,
             data_dir: PathBuf::from(data_dir).into_boxed_path(),
             plugins: launcher.plugins.clone(),

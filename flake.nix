@@ -1,70 +1,134 @@
 {
   description = "hyprshell - A Rust-based GUI designed to enhance window management in hyprland";
-  inputs.nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
-  inputs.home-manager.inputs.nixpkgs.follows = "nixpkgs";
-  inputs.home-manager.url = "github:nix-community/home-manager";
+  inputs = {
+    nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
+    home-manager = {
+      url = "github:nix-community/home-manager";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    flake-parts = {
+      url = "github:hercules-ci/flake-parts";
+      inputs.nixpkgs-lib.follows = "nixpkgs";
+    };
+    crane.url = "github:ipetkov/crane";
+  };
   outputs =
-    {
+    inputs@{
       self,
       nixpkgs,
       home-manager,
+      flake-parts,
+      crane,
     }:
-    let
-      supportedSystems = [
-        "x86_64-linux"
+    flake-parts.lib.mkFlake { inherit inputs; } {
+      systems = [
         "aarch64-linux"
+        "x86_64-linux"
       ];
-      forAllSystems = nixpkgs.lib.genAttrs supportedSystems;
-      pkgsFor = nixpkgs.legacyPackages;
-    in
-    {
-      formatter = forAllSystems (system: pkgsFor.${system}.nixfmt-tree);
-      packages = forAllSystems (system: rec {
-        hyprshell = pkgsFor.${system}.callPackage ./nix/default.nix { inherit self; };
-        hyprshell-with-test-command = pkgsFor.${system}.callPackage ./nix/default.nix {
-          inherit self;
-          features = [ "config_check_is_default" ];
-        };
-        default = hyprshell;
-      });
-      devShells = forAllSystems (system: rec {
-        hyprshell = pkgsFor.${system}.callPackage ./nix/shell.nix { inherit self; };
-        default = hyprshell;
-      });
-      homeModules = rec {
-        hyprshell = import ./nix/module.nix { inherit self; };
-        default = hyprshell;
-      };
-      
-      checks = forAllSystems (
-        system:
+      perSystem =
+        { pkgs, self', ... }:
         let
-          filterDisabledAndDropEnable =
-            (import ./nix/util.nix { lib = pkgsFor.${system}.lib; }).filterDisabledAndDropEnable;
+          craneLib = crane.mkLib pkgs;
+          clib = (import ./nix/util.nix { inherit craneLib pkgs self; });
         in
         {
-          test = pkgsFor.${system}.runCommand "test" { } ''
-            TMP=$(mktemp -d)
-            touch "$TMP/test.json"
-            echo "test json created at $TMP"
-            cat <<EOF> "$TMP/test.json"
-            ${builtins.toJSON (
-              filterDisabledAndDropEnable
-                self.homeConfigurations.test.${system}.config.programs.hyprshell.settings
-            )}
-            EOF
-            ${pkgsFor.${system}.jq}/bin/jq < "$TMP/test.json"
-            ${
-              self.packages.${system}.hyprshell-with-test-command
-            }/bin/hyprshell config check-if-default -c "$TMP/test.json" && (mkdir "$out")
-            rm -r "$TMP"
-          '';
-        }
-      );
-      homeConfigurations.test = forAllSystems (
-        system:
-        home-manager.lib.homeManagerConfiguration rec {
-          pkgs = pkgsFor.${system};
+          formatter = pkgs.nixfmt-tree;
+          packages = rec {
+            hyprshell = craneLib.buildPackage clib.commonArgsCached;
+            default = hyprshell;
+          };
+          checks = rec {
+            hyprshell-default-check = craneLib.buildPackage (
+              clib.commonArgsCached
+              // {
+                cargoExtraArgs = "--locked --features config_check_is_default";
+              }
+            );
+            hyprshell-clippy = craneLib.cargoClippy (
+              clib.commonArgsCached
+              // {
+                cargoClippyExtraArgs = "--all-targets -- --deny warnings";
+              }
+            );
+            hyprshell-fmt = craneLib.cargoFmt clib.commonArgsCached;
+            check-nix-config = pkgs.runCommand "check-nix-config" { } ''
+              TMP=$(mktemp -d)
+              touch "$TMP/test.json"
+              echo "test json created at $TMP"
+              cat <<EOF> "$TMP/test.json"
+              ${builtins.toJSON (
+                clib.filterDisabledAndDropEnable self.homeConfigurations.test.config.programs.hyprshell.settings
+              )}
+              EOF
+              ${pkgs.jq}/bin/jq < "$TMP/test.json"
+              ${hyprshell-default-check}/bin/hyprshell -vv config check-if-default -c "$TMP/test.json" && (mkdir "$out")
+              rm -r "$TMP"
+            '';
+
+            check-all-feature-combinations = craneLib.buildPackage (
+              clib.commonArgsCached
+              // {
+                pname = "check-all-feature-combinations";
+                nativeBuildInputs = [ pkgs.bash ] ++ clib.commonArgs.nativeBuildInputs;
+                buildPhaseCargoCommand = ''
+                  cargoBuildLog=$(mktemp cargoBuildLogXXXX.json)
+
+                  # Define the features as an array
+                  # features=$(cargo metadata --format-version 1 --no-deps | ${pkgs.jq}/bin/jq -r '.packages[4].features | keys[]')
+                  declare -a features=("generate_config_command" "config_check_is_default" "launcher_calc" "debug_command")
+
+                  # Get the total number of features
+                  num_features=''${#features[@]}
+
+                  # Function to build with a specific combination of features
+                  build_with_features() {
+                    local feature_combination="$1"
+                    local iteration="$2"
+                    local start_time=$(date +%s.%N)
+
+                    if [[ -z "$feature_combination" ]]; then
+                      echo -n "[$iteration] Building without any features..."
+                      ${clib.commonArgs.cargoBuildCommand} --no-default-features --message-format json-render-diagnostics > "$cargoBuildLog"
+                    else
+                      echo -n "[$iteration] Building with features: $feature_combination"
+                      ${clib.commonArgs.cargoBuildCommand} --no-default-features --features "$feature_combination" --message-format json-render-diagnostics > "$cargoBuildLog"
+                    fi
+
+                    local duration=$(awk "BEGIN {print $(date +%s.%N) - $start_time}")
+                    printf " took %.2f seconds\n" "$duration"
+                  }
+
+                  echo "num_features: $num_features, iterations: $((1 << num_features))"
+                  for ((i = 0; i < (1 << num_features); i++)); do
+                    combination=()
+                    for ((j = num_features - 1; j >= 0; j--)); do
+                      if ((i & (1 << j))); then
+                        combination+=("''${features[j]}")
+                      fi
+                    done
+                    build_with_features "$(IFS=,; printf '%s' "''${combination[*]}")" "$i"
+                  done
+                  echo "all features tested"
+                '';
+              }
+            );
+          };
+
+          devShells.default = craneLib.devShell {
+            checks = self'.checks;
+            stdenv = clib.stdenv;
+            packages = [
+              pkgs.rust-analyzer
+            ];
+          };
+        };
+      flake = {
+        homeModules = rec {
+          hyprshell = import ./nix/module.nix self;
+          default = hyprshell;
+        };
+        homeConfigurations.test = home-manager.lib.homeManagerConfiguration {
+          pkgs = nixpkgs.legacyPackages."x86_64-linux";
           modules = [
             self.homeModules.hyprshell
             {
@@ -73,7 +137,7 @@
               home.homeDirectory = "/home/test";
             }
           ];
-        }
-      );
+        };
+      };
     };
 }

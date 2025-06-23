@@ -5,7 +5,8 @@ use std::fmt::Display;
 pub(crate) const CURRENT_CONFIG_VERSION: u16 = 1;
 
 #[derive(SmartDefault, Debug, Clone, PartialEq, Deserialize, Serialize)]
-#[serde(default, deny_unknown_fields)]
+#[cfg_attr(not(feature = "no-default-config-values"), serde(default))]
+#[serde(deny_unknown_fields)]
 pub struct Config {
     #[default = true]
     pub layerrules: bool,
@@ -18,7 +19,8 @@ pub struct Config {
 }
 
 #[derive(SmartDefault, Debug, Clone, PartialEq, Deserialize, Serialize)]
-#[serde(default, deny_unknown_fields)]
+#[cfg_attr(not(feature = "no-default-config-values"), serde(default))]
+#[serde(deny_unknown_fields)]
 pub struct Windows {
     #[default = 8.5]
     pub scale: f64,
@@ -31,7 +33,8 @@ pub struct Windows {
 }
 
 #[derive(SmartDefault, Debug, Clone, PartialEq, Deserialize, Serialize)]
-#[serde(default, deny_unknown_fields)]
+#[cfg_attr(not(feature = "no-default-config-values"), serde(default))]
+#[serde(deny_unknown_fields)]
 pub struct Overview {
     #[default = true]
     pub strip_html_from_workspace_title: bool,
@@ -47,7 +50,8 @@ pub struct Overview {
 }
 
 #[derive(SmartDefault, Debug, Clone, PartialEq, Deserialize, Serialize)]
-#[serde(default, deny_unknown_fields)]
+#[cfg_attr(not(feature = "no-default-config-values"), serde(default))]
+#[serde(deny_unknown_fields)]
 pub struct Launcher {
     #[default(None)]
     pub default_terminal: Option<Box<str>>,
@@ -82,11 +86,13 @@ pub struct Plugins {
 }
 
 #[derive(SmartDefault, Debug, Clone, PartialEq, Deserialize, Serialize)]
-#[serde(default, deny_unknown_fields)]
+#[cfg_attr(not(feature = "no-default-config-values"), serde(default))]
+#[serde(deny_unknown_fields)]
 pub struct EmptyConfig {}
 
 #[derive(SmartDefault, Debug, Clone, PartialEq, Deserialize, Serialize)]
-#[serde(default, deny_unknown_fields)]
+#[cfg_attr(not(feature = "no-default-config-values"), serde(default))]
+#[serde(deny_unknown_fields)]
 pub struct ApplicationsPluginConfig {
     #[default = 4]
     pub run_cache_weeks: u8,
@@ -97,7 +103,8 @@ pub struct ApplicationsPluginConfig {
 }
 
 #[derive(SmartDefault, Debug, Clone, PartialEq, Deserialize, Serialize)]
-#[serde(default, deny_unknown_fields)]
+#[cfg_attr(not(feature = "no-default-config-values"), serde(default))]
+#[serde(deny_unknown_fields)]
 pub struct WebSearchConfig {
     #[default(vec![SearchEngine {
         url: "https://www.google.com/search?q={}".into(),
@@ -120,7 +127,8 @@ pub struct SearchEngine {
 }
 
 #[derive(SmartDefault, Debug, Clone, PartialEq, Deserialize, Serialize)]
-#[serde(default, deny_unknown_fields)]
+#[cfg_attr(not(feature = "no-default-config-values"), serde(default))]
+#[serde(deny_unknown_fields)]
 pub struct Switch {
     #[default(Mod::Alt)]
     pub modifier: Mod,

@@ -1,6 +1,4 @@
-{
-  self,
-}:
+self:
 {
   pkgs,
   config,
@@ -36,7 +34,7 @@ in
     package = lib.mkOption {
       description = "The Hyprshell package";
       type = package;
-      default = self.packages.${pkgs.stdenv.hostPlatform.system}.hyprshell;
+      default = self.packages.${pkgs.stdenv.hostPlatform.system}.default;
     };
 
     systemd = {
@@ -86,7 +84,21 @@ in
         items_per_row = mkOpt "Workspaces per row" int 5;
         overview = {
           enable = mkOpt "Enable overview" bool true;
-          strip_html_from_workspace_title = mkOpt "Strip HTML from workspace title" bool true;
+          #          strip_html_from_workspace_title = mkOpt "Strip HTML from workspace title" bool true;
+          key = mkOpt "Key to open overview" str "super_l";
+          modifier = mkOpt "Modifier key" (enum [
+            "alt"
+            "ctrl"
+            "super"
+            "shift"
+          ]) "super";
+
+          filter_by = mkOpt "Filter by" (listOf (enum [
+            "same_class"
+            "current_monitor"
+            "current_workspace"
+          ])) [ ];
+          hide_filtered = mkOpt "Hide filtered windows" bool false;
           launcher = {
             enable = mkOpt "Enable app launcher" bool true;
             width = mkOpt "Launcher width" int 650;
@@ -139,20 +151,6 @@ in
               };
             };
           };
-          key = mkOpt "Key to open overview" str "super_l";
-          modifier = mkOpt "Modifier key" (enum [
-            "alt"
-            "ctrl"
-            "super"
-            "shift"
-          ]) "super";
-
-          filter_by = mkOpt "Filter by" (listOf (enum [
-            "same_class"
-            "current_monitor"
-            "current_workspace"
-          ])) [ ];
-          hide_filtered = mkOpt "Hide filtered windows" bool false;
         };
         switch = {
           enable = mkOpt "Enable recent window switcher" bool true;

@@ -2,7 +2,7 @@ use core_lib::transfer::Direction;
 use core_lib::{
     Active, ClientData, ClientId, GetFirstOrLast, HyprlandData, RevIf, WorkspaceData, WorkspaceId,
 };
-use tracing::{Level, debug, span, trace, warn};
+use tracing::{Level, debug, span, trace};
 
 pub fn find_next(
     direction: &Direction,

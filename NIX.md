@@ -23,7 +23,7 @@
 }
 ```
 
-## With Home-manager
+## With Flakes + Home-manager [recommend]
 
 `flake.nix`:
 
@@ -86,7 +86,7 @@
 }
 ```
 
-## Without Flakes
+## Without Flakes (flake-compat)
 
 `configuration.nix`:
 
@@ -98,5 +98,15 @@
   }).defaultNix;
 in {
    environment.systemPackages = [hyprshell.packages.${pkgs.system}.hyprshell];
+}
+```
+
+## Without Flakes (nixpkgs-unstable)
+
+`configuration.nix`:
+
+```nix
+{pkgs, ...}: {
+  environment.systemPackages = [pkgs.hyprshell];
 }
 ```

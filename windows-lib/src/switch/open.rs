@@ -3,16 +3,13 @@ use crate::global::WindowsSwitchData;
 use crate::icon::set_icon;
 use crate::next::find_next;
 use anyhow::Context;
-use async_channel::Sender;
-use core_lib::transfer::{
-    CloseOverviewConfig, Direction, OpenSwitch, TransferType, WindowsOverride,
-};
+use core_lib::transfer::{Direction, OpenSwitch};
 use core_lib::{ClientData, ClientId, WarnWithDetails};
 use exec_lib::{get_current_monitor, set_remain_focused};
 use gtk::gdk::Cursor;
 use gtk::prelude::*;
 use gtk::{Button, Fixed, Frame, Image, Label, Overflow, Overlay, pango};
-use tracing::{Level, debug, span, trace};
+use tracing::{Level, span, trace};
 
 fn scale(value: i16, scale: f64) -> i32 {
     (value as f64 / (15f64 - scale)) as i32
