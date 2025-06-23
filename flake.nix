@@ -47,6 +47,7 @@
             hyprshell-clippy = craneLib.cargoClippy (
               clib.commonArgsCached
               // {
+                buildPhaseCargoCommand = "cargo clippy";
                 cargoClippyExtraArgs = "--all-targets -- --deny warnings";
               }
             );
