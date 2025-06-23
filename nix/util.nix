@@ -50,6 +50,8 @@ rec {
     strictDeps = true;
     doCheck = false;
     cargoBuildCommand = "cargo build --profile dev";
+    cargoTestCommand = "";
+    cargoCheckCommand = "";
 
     nativeBuildInputs = [
       pkgs.pkg-config

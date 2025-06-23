@@ -41,6 +41,8 @@ jobs:
       - uses: cachix/install-nix-action@v30
         with:
           github_access_token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Increase nix download-buffer-size
+        run: echo "nix.settings.download-buffer-size = 524288000;" >> /home/runner/.config/nix/nix.conf && cat /home/runner/.config/nix/nix.conf
         # this messes up the cache so dont add one
       - name: Run Nix Flake Check check-all-feature-combinations
         run: nix build '.#checks.x86_64-linux.check-all-feature-combinations' -L
