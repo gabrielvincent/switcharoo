@@ -41,7 +41,7 @@
             hyprshell-default-check = craneLib.buildPackage (
               clib.commonArgsCached
               // {
-                cargoExtraArgs = "--locked --features config_check_is_default";
+                cargoExtraArgs = "--features config_check_is_default";
               }
             );
             hyprshell-clippy = craneLib.cargoClippy (
