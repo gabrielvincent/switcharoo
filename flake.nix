@@ -65,7 +65,7 @@
               rm -r "$TMP"
             '';
             check-all-feature-combinations = craneLib.buildPackage (
-              clib.commonArgsCached
+              clib.commonArgs
               // {
                 pname = "check-all-feature-combinations";
                 nativeBuildInputs = [ pkgs.bash ] ++ clib.commonArgs.nativeBuildInputs;
