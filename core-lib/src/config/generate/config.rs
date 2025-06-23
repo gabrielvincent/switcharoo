@@ -44,7 +44,7 @@ pub fn check_file_exist(
 #[derive(Debug)]
 pub struct ConfigData {
     pub default_terminal: Option<Box<str>>,
-    pub overview: Option<Mod>,
+    pub overview: Option<(Mod, Box<str>)>,
     pub switch: (Option<Mod>, bool),
     pub launcher_plugins: Vec<Box<str>>,
     pub launcher_engines: Vec<Box<str>>,
@@ -55,7 +55,8 @@ pub fn generate_config(data: ConfigData) -> Config {
         windows: Some(Windows {
             overview: if let Some(overview) = data.overview {
                 Some(Overview {
-                    modifier: overview,
+                    modifier: overview.0,
+                    key: overview.1,
                     launcher: Launcher {
                         default_terminal: data.default_terminal,
                         plugins: Plugins {

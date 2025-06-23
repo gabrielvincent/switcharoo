@@ -11,7 +11,7 @@ pub struct Config {
     #[default = true]
     pub layerrules: bool,
     #[default = "ctrl+shift+alt, h"]
-    pub kill_bind: String,
+    pub kill_bind: Box<str>,
     #[default(Some(Windows::default()))]
     pub windows: Option<Windows>,
     #[default(CURRENT_CONFIG_VERSION)]
@@ -40,7 +40,7 @@ pub struct Overview {
     pub strip_html_from_workspace_title: bool,
     pub launcher: Launcher,
     #[default = "super_l"]
-    pub key: String,
+    pub key: Box<str>,
     #[default(Mod::Super)]
     pub modifier: Mod,
     #[default(Vec::new())]
@@ -121,8 +121,8 @@ pub struct WebSearchConfig {
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 pub struct SearchEngine {
-    pub url: String,
-    pub name: String,
+    pub url: Box<str>,
+    pub name: Box<str>,
     pub key: char,
 }
 
@@ -162,6 +162,17 @@ impl Display for Mod {
             Mod::Ctrl => write!(f, "ctrl"),
             Mod::Super => write!(f, "super"),
             Mod::Shift => write!(f, "shift"),
+        }
+    }
+}
+
+impl Mod {
+    pub(crate) fn to_key(&self) -> &'static str {
+        match self {
+            Mod::Alt => "alt_l",
+            Mod::Ctrl => "control_l",
+            Mod::Super => "super_l",
+            Mod::Shift => "shift_l",
         }
     }
 }

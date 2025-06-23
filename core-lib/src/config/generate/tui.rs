@@ -1,3 +1,4 @@
+use crate::Warn;
 use crate::config::SearchEngine;
 use crate::config::generate::autocomplete::StringAutoCompleter;
 use crate::config::generate::config::ConfigData;
@@ -7,6 +8,7 @@ use crate::util::TERMINALS;
 use anyhow::bail;
 use inquire::formatter::MultiOptionFormatter;
 use inquire::{Confirm, MultiSelect, Select, Text};
+use tracing::{info, warn};
 
 pub mod configurable_launcher_plugins {
     pub const APPLICATIONS: &str = "Open Applications";
@@ -86,12 +88,12 @@ pub fn prompt_config() -> anyhow::Result<(ConfigData, StyleData)> {
                 "Alt",
                 "Alt + Tab",
             ]))
-            .with_help_message("Shows all apps in a miniature view, allows to switch using arrow keys or tab. Leave blank to disable]\n[Any valid modifier or modifier + tab can be typed in]\n[↑↓ to move, tab to autocomplete, enter to submit")
+            .with_help_message("Shows all apps in a miniature view, allows to switch using arrow keys or tab. Leave blank to disable]\n[Any valid modifier or modifier + key can be typed in]\n[↑↓ to move, tab to autocomplete, enter to submit")
             .prompt()?;
         if open_overview.trim().is_empty() {
             None
         } else {
-            get_mod(&open_overview).ok()
+            get_mod_and_key(open_overview).warn()
         }
     };
     let launcher = if open_overview.is_some() {
@@ -142,14 +144,18 @@ pub fn prompt_config() -> anyhow::Result<(ConfigData, StyleData)> {
         if open_switch.trim().is_empty() {
             (None, false)
         } else {
-            if let Ok(r#mod) = get_mod(&open_switch) {
-                let show_workspaces =
-                    Confirm::new("Switch between workspaces instead of windows in switch mode")
-                        .with_default(false)
-                        .prompt()?;
-                (Some(r#mod), show_workspaces)
-            } else {
-                (None, false)
+            match get_mod(&open_switch) {
+                Ok(r#mod) => {
+                    let show_workspaces =
+                        Confirm::new("Switch between workspaces instead of windows in switch mode")
+                            .with_default(false)
+                            .prompt()?;
+                    (Some(r#mod), show_workspaces)
+                }
+                Err(err) => {
+                    warn!("{err:?}");
+                    (None, false)
+                }
             }
         }
     };
@@ -175,13 +181,22 @@ pub fn prompt_config() -> anyhow::Result<(ConfigData, StyleData)> {
 }
 
 fn get_mod(modifier: &str) -> anyhow::Result<Mod> {
+    match &*modifier.trim().to_ascii_lowercase() {
+        "super" => Ok(Mod::Super),
+        "ctrl" => Ok(Mod::Ctrl),
+        "alt" => Ok(Mod::Alt),
+        "shift" => Ok(Mod::Shift),
+        _ => bail!("Unknown modifier: {}", modifier),
+    }
+}
+
+fn get_mod_and_key(modifier: String) -> anyhow::Result<(Mod, Box<str>)> {
     let split = modifier.split('+').collect::<Vec<_>>();
-    let modd = match &*split[0].trim().to_ascii_lowercase() {
-        "super" => Mod::Super,
-        "ctrl" => Mod::Ctrl,
-        "alt" => Mod::Alt,
-        "shift" => Mod::Shift,
-        _ => bail!("Unknown modifier: {}", split[0]),
-    };
-    Ok(modd)
+    info!("{split:?}");
+    let r#mod = get_mod(split.first().unwrap_or(&""))?;
+    if let Some(key) = split.get(1) {
+        Ok((r#mod, Box::from(key.trim())))
+    } else {
+        Ok((r#mod, Box::from(r#mod.to_key())))
+    }
 }

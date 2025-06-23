@@ -7,7 +7,7 @@ pub fn generate_open_keybinds(windows: &Windows) -> Vec<ExecBind> {
     if let Some(overview) = &windows.overview {
         binds.push(ExecBind {
             mods: vec![overview.modifier],
-            key: overview.key.clone().into_boxed_str(),
+            key: overview.key.clone(),
             on_release: false,
             exec: generate_transfer_socat(&TransferType::OpenOverview).into_boxed_str(),
         });

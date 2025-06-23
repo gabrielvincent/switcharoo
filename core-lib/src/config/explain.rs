@@ -55,7 +55,7 @@ pub fn explain(config: Config) -> String {
             }
             if let Some(engines) = &overview.launcher.plugins.websearch {
                 builder.push_str(&format!("Press {BLUE}Ctrl + {BOLD}{BLUE}<key>{RESET} to search the typed text in any of the configured SearchEngines: {}.\n",
-                                              engines.engines.iter().map(|e| e.name.as_str()).collect::<Vec<_>>().join(", ")));
+                                              engines.engines.iter().map(|e| e.name.to_string()).collect::<Vec<_>>().join(", ")));
             }
             if overview.launcher.plugins.calc.is_some() {
                 builder.push_str(

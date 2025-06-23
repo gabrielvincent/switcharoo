@@ -6,7 +6,7 @@ impl From<old_structs::Config> for config::Config {
     fn from(value: old_structs::Config) -> Self {
         Self {
             layerrules: value.layerrules,
-            kill_bind: value.kill_bind,
+            kill_bind: value.kill_bind.into(),
             windows: value
                 .windows
                 .map(|a| old_structs::Windows::into(a, value.launcher)),
@@ -35,7 +35,7 @@ impl old_structs::Overview {
         strip_html_from_workspace_title: bool,
     ) -> config::Overview {
         config::Overview {
-            key: value.open.key.to_key(),
+            key: value.open.key.to_key().into(),
             modifier: value.open.modifier,
             filter_by: value.other.filter_by,
             launcher: launcher.unwrap_or_default(),

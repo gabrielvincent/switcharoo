@@ -18,13 +18,13 @@ pub fn get_static_options(matches: &mut Vec<StaticLaunchOption>, config: &[Searc
     for engine in config.iter() {
         if !engine.key.is_whitespace() {
             matches.push(StaticLaunchOption {
-                text: engine.name.clone().into_boxed_str(),
+                text: engine.name.clone(),
                 details: format!("Search with {}", engine.name).into_boxed_str(),
                 icon: icon.clone(),
                 key: engine.key,
                 iden: Identifier {
                     plugin: PluginNames::WebSearch,
-                    identifier: Some(engine.url.clone().into_boxed_str()),
+                    identifier: Some(engine.url.clone()),
                 },
             });
         } else {
