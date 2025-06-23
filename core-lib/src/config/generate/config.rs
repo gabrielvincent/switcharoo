@@ -45,7 +45,7 @@ pub fn check_file_exist(
 pub struct ConfigData {
     pub default_terminal: Option<Box<str>>,
     pub overview: Option<Mod>,
-    pub switch: Option<Mod>,
+    pub switch: (Option<Mod>, bool),
     pub launcher_plugins: Vec<Box<str>>,
     pub launcher_engines: Vec<Box<str>>,
 }
@@ -107,8 +107,9 @@ pub fn generate_config(data: ConfigData) -> Config {
             } else {
                 None
             },
-            switch: data.switch.map(|switch_mod| Switch {
+            switch: data.switch.0.map(|switch_mod| Switch {
                 modifier: switch_mod,
+                show_workspaces: data.switch.1,
                 ..Default::default()
             }),
             ..Default::default()

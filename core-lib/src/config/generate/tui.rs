@@ -6,7 +6,7 @@ use crate::config::structs::Mod;
 use crate::util::TERMINALS;
 use anyhow::bail;
 use inquire::formatter::MultiOptionFormatter;
-use inquire::{MultiSelect, Select, Text};
+use inquire::{Confirm, MultiSelect, Select, Text};
 
 pub mod configurable_launcher_plugins {
     pub const APPLICATIONS: &str = "Open Applications";
@@ -134,15 +134,23 @@ pub fn prompt_config() -> anyhow::Result<(ConfigData, StyleData)> {
         None
     };
 
-    let open_switch = {
-        let open_switch = Text::new("Modifier to open the switch (<mod> + tab)")
+    let switch = {
+        let open_switch = Text::new("Modifier to open the switch mode (<mod> + tab)")
             .with_autocomplete(StringAutoCompleter::from(vec!["Alt", "Ctrl", "Super"]))
-            .with_help_message("Shows clients in a list sorted by recently accessed. Please use something different from the Overview modifier. Leave blank to disable]\n[Any valid modifier can be typed in]\n[↑↓ to move, tab to autocomplete, enter to submit")
+            .with_help_message("Shows windows in a list sorted by recently accessed. Please use something different from the Overview modifier. Leave blank to disable]\n[Any valid modifier can be typed in]\n[↑↓ to move, tab to autocomplete, enter to submit")
             .prompt()?;
         if open_switch.trim().is_empty() {
-            None
+            (None, false)
         } else {
-            get_mod(&open_switch).ok()
+            if let Ok(r#mod) = get_mod(&open_switch) {
+                let show_workspaces =
+                    Confirm::new("Switch between workspaces instead of windows in switch mode")
+                        .with_default(false)
+                        .prompt()?;
+                (Some(r#mod), show_workspaces)
+            } else {
+                (None, false)
+            }
         }
     };
 
@@ -158,7 +166,7 @@ pub fn prompt_config() -> anyhow::Result<(ConfigData, StyleData)> {
         ConfigData {
             default_terminal: launcher.as_ref().and_then(|l| l.0.clone()),
             overview: open_overview,
-            switch: open_switch,
+            switch,
             launcher_plugins: launcher.as_ref().map(|l| l.1.clone()).unwrap_or_default(),
             launcher_engines: launcher.map(|l| l.2).unwrap_or_default(),
         },

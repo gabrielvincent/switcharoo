@@ -84,6 +84,7 @@ fn main() -> anyhow::Result<()> {
 
                 let (config_data, css_data) = core_lib::config::generate::prompt_config()?;
                 let config = core_lib::config::generate::generate_config(config_data);
+                tracing::trace!("Generated config: {:#?}", config);
                 core_lib::config::write_config(&config_path, &config, override_config).warn();
                 core_lib::config::generate::write_css(&css_path, &css_data, override_css).warn();
                 if !no_systemd {
