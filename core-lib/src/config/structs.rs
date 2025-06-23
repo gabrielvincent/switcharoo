@@ -167,7 +167,7 @@ impl Display for Mod {
 }
 
 impl Mod {
-    pub(crate) fn to_key(&self) -> &'static str {
+    pub fn to_key(self) -> &'static str {
         match self {
             Mod::Alt => "alt_l",
             Mod::Ctrl => "control_l",
