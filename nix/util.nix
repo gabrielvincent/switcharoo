@@ -49,10 +49,11 @@ rec {
       ;
     strictDeps = true;
     doCheck = false;
-    cargoBuildCommand = "cargo build --profile dev --locked";
+    cargoBuildCommand = "cargo build --locked";
     cargoTestCommand = "";
     cargoCheckCommand = "";
     cargoExtraArgs = "";
+    CARGO_PROFILE = "dev";
 
     nativeBuildInputs = [
       pkgs.pkg-config

@@ -23,7 +23,7 @@ jobs:
           name: hyprshell
           authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
       - name: Increase nix download-buffer-size
-        run: echo "nix.settings.download-buffer-size = 524288000;" >> /etc/nix/nix.conf && cat /etc/nix/nix.conf
+        run: echo "download-buffer-size = 524288000" | sudo tee -a /etc/nix/nix.conf && cat /etc/nix/nix.conf
       - name: Run Nix Flake Check fmt
         run: nix build '.#checks.x86_64-linux.hyprshell-fmt' -L
       - name: Run Nix Flake Check build
@@ -46,6 +46,6 @@ jobs:
           name: hyprshell-check-features
           authToken: ${{ secrets.CACHIX_AUTH_TOKEN_2 }}
       - name: Increase nix download-buffer-size
-        run: echo "nix.settings.download-buffer-size = 524288000;" >> /etc/nix/nix.conf && cat /etc/nix/nix.conf
+        run: echo "download-buffer-size = 524288000" | sudo tee -a /etc/nix/nix.conf && cat /etc/nix/nix.conf
       - name: Run Nix Flake Check check-all-feature-combinations
         run: nix build '.#checks.x86_64-linux.check-all-feature-combinations' -L
