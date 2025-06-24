@@ -1,22 +1,26 @@
-name: "Flake.lock: update Nix dependencies"
+name: update flake.lock
 
 on:
   workflow_dispatch: # allows manual triggering
   schedule:
-    - cron: '0 2 */14 * 1' # runs every two weeks on Monday at 02:00
+     - cron: '30 2 */14 * 1' # runs every two weeks on Monday at 02:30
 
 jobs:
   nix-flake-update:
     permissions:
       contents: write
-      id-token: write
-      issues: write
-      pull-requests: write
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - uses: DeterminateSystems/nix-installer-action@v17
-      - uses: DeterminateSystems/update-flake-lock@v25
+      - uses: cachix/install-nix-action@v30
         with:
-          pr-title: "Update Nix flake inputs"
-          pr-assignees: H3rmt
+          github_access_token: ${{ secrets.GITHUB_TOKEN }}
+      - run: |
+          git fetch
+          git switch hyprshell
+          nix flake update
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add flake.lock
+          git commit -m "fix(nix-flake): update flake.lock"
+          git push origin hyprshell
