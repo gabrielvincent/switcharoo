@@ -20,17 +20,12 @@ rec {
       value;
 
   pname = "hyprshell";
-  markdownFilter = path: _type: builtins.match ".*(css|service)$" path != null;
-  markdownOrCargo = path: type: (markdownFilter path type) || (craneLib.filterCargoSources path type);
+  version = (pkgs.lib.trivial.importTOML ../Cargo.toml).workspace.package.version;
   src = pkgs.lib.cleanSourceWith {
     src = ../.;
-    filter = markdownOrCargo;
+    filter = path: type: (builtins.match ".*(css|service)$" path != null) || (craneLib.filterCargoSources path type);
     name = "source";
   };
-  version =
-    (pkgs.lib.trivial.importTOML ../Cargo.toml).workspace.package.version
-    + "_"
-    + (self.shortRev or "dirty");
   meta = {
     mainProgram = pname;
     description = "A modern GTK4-based window switcher and application launcher for Hyprland";
