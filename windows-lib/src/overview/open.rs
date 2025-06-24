@@ -86,6 +86,9 @@ pub fn open_overview(
                     .css_classes(["workspace"])
                     .build();
                 button.set_cursor(Cursor::from_name("pointer", None).as_ref());
+                if active.client.is_none() && active.workspace == *wid {
+                    button.add_css_class("active");
+                }
                 click_workspace(&button, *wid, event_sender.clone());
                 monitor_data.workspaces_flow.insert(&button, -1);
                 button

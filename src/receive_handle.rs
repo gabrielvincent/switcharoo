@@ -49,7 +49,7 @@ fn open_overview(global: &mut Globals, event_sender: Sender<TransferType>) {
                 && !&windows
                     .switch
                     .as_ref()
-                    .map(|s| windows_lib::switch_already_open(s))
+                    .map(windows_lib::switch_already_open)
                     .unwrap_or(false)
             {
                 windows_lib::open_overview(overview, event_sender)
