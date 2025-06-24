@@ -2,7 +2,7 @@
     padding: var(--window-padding, 2px);
 
     border-radius: var(--border-radius, 12px);
-    background-color: var(--bg-color, rgba(20, 20, 20, 0.9));
+    background: var(--bg-color, rgba(20, 20, 20, 0.9));
     border: var(--border-size, 3px) var(--border-style, solid) var(--border-color, rgba(90, 90, 120, 0.4));
 }
 
@@ -10,7 +10,7 @@
     font-size: 1.5rem;
     margin: 6px;
     padding: 4px 8px;
-    background-color: var(--bg-color, rgba(20, 20, 20, 0.9));
+    background: var(--bg-color, rgba(20, 20, 20, 0.9));
 }
 
 .launcher-results {
@@ -21,11 +21,11 @@
     font-size: 1.5rem;
     padding: 0 6px;
     border-radius: var(--border-radius, 12px);
-    background-color: var(--bg-color, rgba(20, 20, 20, 0.9));
+    background: var(--bg-color, rgba(20, 20, 20, 0.9));
 }
 
 .launcher-item:hover {
-    background-color: var(--bg-color-hover, rgba(40, 40, 50, 1));
+    background: var(--bg-color-hover, rgba(40, 40, 50, 1));
 }
 
 .launcher-exec {
@@ -36,18 +36,18 @@
 .launcher-other-menu-button > button {
     padding: 2px 4px;
     border-radius: var(--border-radius, 12px);
-    background-color: var(--bg-color, rgba(20, 20, 20, 0.9));
+    background: var(--bg-color, rgba(20, 20, 20, 0.9));
     border: 1px var(--border-style, solid) var(--border-color, rgba(90, 90, 120, 0.4));
 }
 
 .launcher-other-menu-button > button:hover {
-    background-color: var(--bg-color-hover, rgba(40, 40, 50, 1));
+    background: var(--bg-color-hover, rgba(40, 40, 50, 1));
 }
 
 .launcher-other-menu {
     padding: 6px;
     border-radius: var(--border-radius, 12px);
-    background-color: var(--bg-color, rgba(20, 20, 20, 0.9));
+    background: var(--bg-color, rgba(20, 20, 20, 0.9));
     border: 1px var(--border-style, solid) var(--border-color, rgba(90, 90, 120, 0.4));
 }
 
@@ -58,7 +58,7 @@
 }
 
 .launcher-other-menu-item:hover {
-    background-color: var(--bg-color-hover, rgba(40, 40, 50, 1));
+    background: var(--bg-color-hover, rgba(40, 40, 50, 1));
 }
 
 .launcher-key {
@@ -73,17 +73,21 @@
 .launcher-plugin {
     padding: 6px;
 
-    border-radius: var(--border-radius, 12px);
-    background-color: var(--bg-color, rgba(20, 20, 20, 0.9));
+    border-radius: calc(1.7 * var(--border-radius, 12px));
+    background: var(--bg-color, rgba(20, 20, 20, 0.9));
     border: var(--border-size, 3px) var(--border-style-secondary, dashed) var(--border-color, rgba(90, 90, 120, 0.4));
 }
 
+.launcher-plugin.launch {
+    border: unset;
+}
+
 .launcher-plugin:hover {
-    background-color: var(--bg-color-hover, rgba(40, 40, 50, 1));
+    background: var(--bg-color-hover, rgba(40, 40, 50, 1));
 }
 
 .launch {
-    animation: background-moving 250ms cubic-bezier(0.2, 0.9, 0.4, 1.0) normal;
+    animation: background-moving 300ms cubic-bezier(0.2, 0.9, 0.4, 1.0) normal;
 }
 
 @keyframes background-moving {

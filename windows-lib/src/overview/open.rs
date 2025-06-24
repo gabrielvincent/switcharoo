@@ -16,16 +16,15 @@ fn scale(value: i16, scale: f64) -> i32 {
     (value as f64 / (15f64 - scale)) as i32
 }
 
+pub fn overview_already_open(data: &WindowsOverviewData) -> bool {
+    data.window_list.iter().any(|w| w.0.get_visible())
+}
+
 pub fn open_overview(
     data: &mut WindowsOverviewData,
     event_sender: Sender<TransferType>,
 ) -> anyhow::Result<()> {
     let _span = span!(Level::TRACE, "open_overview").entered();
-    // check if already open
-    if data.window_list.iter().any(|w| w.0.get_visible()) {
-        return Ok(());
-    }
-
     set_remain_focused().warn("Failed to set no follow mouse");
 
     let (clients_data, active) = collect_data(&SortConfig {

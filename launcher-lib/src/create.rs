@@ -43,8 +43,10 @@ pub fn create_windows_overview_launcher_window(
     let event_sender_3 = event_sender.clone();
     let modifiers = Arc::new(Mutex::new(0u16));
     let modifiers_2 = modifiers.clone();
+    let entry_2 = entry.clone();
     event_controller.connect_key_pressed(move |_, key, _, _| {
         handle_key(
+            &entry_2,
             key,
             &plugin_keys,
             open_modifier,
@@ -57,11 +59,6 @@ pub fn create_windows_overview_launcher_window(
     });
     event_controller.set_propagation_phase(PropagationPhase::Capture);
     entry.add_controller(event_controller);
-    let entry_2 = entry.clone();
-    glib::timeout_add_local(std::time::Duration::from_millis(200), move || {
-        entry_2.grab_focus_without_selecting(); // ensure that the entry is always focused
-        ControlFlow::Continue
-    });
     main_vbox.append(&entry);
 
     let results = gtk::Box::builder()
@@ -74,7 +71,7 @@ pub fn create_windows_overview_launcher_window(
     let plugin_box = gtk::Box::builder()
         .orientation(Orientation::Horizontal)
         .css_classes(["launcher-plugins"])
-        .spacing(5)
+        .spacing(7)
         .build();
     main_vbox.append(&plugin_box);
 
@@ -93,6 +90,15 @@ pub fn create_windows_overview_launcher_window(
     window.set_exclusive_zone(-1);
     window.present();
     window.set_visible(false);
+
+    let entry_2 = entry.clone();
+    let window_2 = window.clone();
+    glib::timeout_add_local(std::time::Duration::from_millis(400), move || {
+        if window_2.is_visible() {
+            entry_2.grab_focus_without_selecting(); // ensure that the entry is always focused
+        }
+        ControlFlow::Continue
+    });
 
     debug!("Created launcher window ({})", window.id());
 
@@ -136,6 +142,7 @@ fn handle_release(key: Key, mods: Arc<Mutex<u16>>) {
 }
 
 fn handle_key(
+    entry: &Entry,
     key: Key,
     plugin_keys: &[Key],
     open_modifier: Mod,
@@ -176,14 +183,14 @@ fn handle_key(
         return Propagation::Stop;
     }
 
-    match key {
-        Key::Escape => {
+    match (*mods, key) {
+        (_, Key::Escape) => {
             event_sender
                 .send_blocking(TransferType::Exit)
                 .warn("unable to send");
             Propagation::Stop
         }
-        Key::Tab => {
+        (_, Key::Tab) => {
             event_sender
                 .send_blocking(TransferType::SwitchOverview(SwitchOverviewConfig {
                     workspace: false,
@@ -192,7 +199,7 @@ fn handle_key(
                 .warn("unable to send");
             Propagation::Stop
         }
-        Key::ISO_Left_Tab => {
+        (_, Key::ISO_Left_Tab) => {
             event_sender
                 .send_blocking(TransferType::SwitchOverview(SwitchOverviewConfig {
                     workspace: false,
@@ -201,7 +208,7 @@ fn handle_key(
                 .warn("unable to send");
             Propagation::Stop
         }
-        Key::grave => {
+        (_, Key::grave) => {
             event_sender
                 .send_blocking(TransferType::SwitchOverview(SwitchOverviewConfig {
                     workspace: false,
@@ -210,13 +217,13 @@ fn handle_key(
                 .warn("unable to send");
             Propagation::Stop
         }
-        Key::Return => {
+        (0, Key::Return) => {
             event_sender
                 .send_blocking(TransferType::CloseOverview(CloseOverviewConfig::None))
                 .warn("unable to send");
             Propagation::Stop
         }
-        Key::Up => {
+        (_, Key::Up) => {
             event_sender
                 .send_blocking(TransferType::SwitchOverview(SwitchOverviewConfig {
                     workspace: true,
@@ -225,7 +232,7 @@ fn handle_key(
                 .warn("unable to send");
             Propagation::Stop
         }
-        Key::Down => {
+        (_, Key::Down) => {
             event_sender
                 .send_blocking(TransferType::SwitchOverview(SwitchOverviewConfig {
                     workspace: true,
@@ -234,7 +241,11 @@ fn handle_key(
                 .warn("unable to send");
             Propagation::Stop
         }
-        Key::Left => {
+        (0, Key::Left) => {
+            if !entry.text().is_empty() {
+                // allow to use in text in launcher
+                return Propagation::Proceed;
+            }
             event_sender
                 .send_blocking(TransferType::SwitchOverview(SwitchOverviewConfig {
                     workspace: true,
@@ -243,7 +254,11 @@ fn handle_key(
                 .warn("unable to send");
             Propagation::Stop
         }
-        Key::Right => {
+        (0, Key::Right) => {
+            if !entry.text().is_empty() {
+                // allow to use in text in launcher
+                return Propagation::Proceed;
+            }
             event_sender
                 .send_blocking(TransferType::SwitchOverview(SwitchOverviewConfig {
                     workspace: true,
@@ -252,7 +267,7 @@ fn handle_key(
                 .warn("unable to send");
             Propagation::Stop
         }
-        Key::_1 => {
+        (2, Key::_1) => {
             event_sender
                 .send_blocking(TransferType::CloseOverview(
                     CloseOverviewConfig::LauncherPress('1'),
@@ -260,7 +275,7 @@ fn handle_key(
                 .warn("unable to send");
             Propagation::Stop
         }
-        Key::_2 => {
+        (2, Key::_2) => {
             event_sender
                 .send_blocking(TransferType::CloseOverview(
                     CloseOverviewConfig::LauncherPress('2'),
@@ -268,7 +283,7 @@ fn handle_key(
                 .warn("unable to send");
             Propagation::Stop
         }
-        Key::_3 => {
+        (2, Key::_3) => {
             event_sender
                 .send_blocking(TransferType::CloseOverview(
                     CloseOverviewConfig::LauncherPress('3'),
@@ -276,7 +291,7 @@ fn handle_key(
                 .warn("unable to send");
             Propagation::Stop
         }
-        Key::_4 => {
+        (2, Key::_4) => {
             event_sender
                 .send_blocking(TransferType::CloseOverview(
                     CloseOverviewConfig::LauncherPress('4'),
@@ -284,7 +299,7 @@ fn handle_key(
                 .warn("unable to send");
             Propagation::Stop
         }
-        Key::_5 => {
+        (2, Key::_5) => {
             event_sender
                 .send_blocking(TransferType::CloseOverview(
                     CloseOverviewConfig::LauncherPress('5'),
@@ -292,7 +307,7 @@ fn handle_key(
                 .warn("unable to send");
             Propagation::Stop
         }
-        Key::_6 => {
+        (2, Key::_6) => {
             event_sender
                 .send_blocking(TransferType::CloseOverview(
                     CloseOverviewConfig::LauncherPress('6'),
@@ -300,7 +315,7 @@ fn handle_key(
                 .warn("unable to send");
             Propagation::Stop
         }
-        Key::_7 => {
+        (2, Key::_7) => {
             event_sender
                 .send_blocking(TransferType::CloseOverview(
                     CloseOverviewConfig::LauncherPress('7'),
@@ -308,7 +323,7 @@ fn handle_key(
                 .warn("unable to send");
             Propagation::Stop
         }
-        Key::_8 => {
+        (2, Key::_8) => {
             event_sender
                 .send_blocking(TransferType::CloseOverview(
                     CloseOverviewConfig::LauncherPress('8'),
@@ -316,7 +331,7 @@ fn handle_key(
                 .warn("unable to send");
             Propagation::Stop
         }
-        Key::_9 => {
+        (2, Key::_9) => {
             event_sender
                 .send_blocking(TransferType::CloseOverview(
                     CloseOverviewConfig::LauncherPress('9'),
@@ -324,7 +339,6 @@ fn handle_key(
                 .warn("unable to send");
             Propagation::Stop
         }
-
         _ => Propagation::Proceed,
     }
 }

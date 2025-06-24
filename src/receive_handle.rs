@@ -45,9 +45,19 @@ fn r#type(global: &mut Globals, text: String, event_sender: Sender<TransferType>
 fn open_overview(global: &mut Globals, event_sender: Sender<TransferType>) {
     if let Some(windows) = &mut global.windows {
         if let Some((overview, launcher)) = &mut windows.overview {
-            windows_lib::open_overview(overview, event_sender)
-                .warn("Failed to open overview window");
-            launcher_lib::open_launcher(launcher)
+            if !windows_lib::overview_already_open(overview)
+                && !&windows
+                    .switch
+                    .as_ref()
+                    .map(|s| windows_lib::switch_already_open(s))
+                    .unwrap_or(false)
+            {
+                windows_lib::open_overview(overview, event_sender)
+                    .warn("Failed to open overview window");
+                launcher_lib::open_launcher(launcher)
+            } else {
+                warn!("Overview or Switch already open");
+            }
         } else {
             warn!("Window overview not active");
         }
@@ -59,7 +69,17 @@ fn open_overview(global: &mut Globals, event_sender: Sender<TransferType>) {
 fn open_switch(global: &mut Globals, config: OpenSwitch) {
     if let Some(windows) = &mut global.windows {
         if let Some(switch) = &mut windows.switch {
-            windows_lib::open_switch(switch, config).warn("Failed to open switch window");
+            if !windows_lib::switch_already_open(switch)
+                && !&windows
+                    .overview
+                    .as_ref()
+                    .map(|(o, _)| windows_lib::overview_already_open(o))
+                    .unwrap_or(false)
+            {
+                windows_lib::open_switch(switch, config).warn("Failed to open switch window");
+            } else {
+                warn!("Switch or Overview already open");
+            }
         } else {
             warn!("Window switch not active");
         }

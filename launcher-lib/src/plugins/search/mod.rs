@@ -34,6 +34,10 @@ pub fn get_static_options(matches: &mut Vec<StaticLaunchOption>, config: &[Searc
 }
 
 pub fn launch_option(iden: &Option<Box<str>>, text: &str) -> bool {
+    if text.is_empty() {
+        debug!("No text to search for");
+        return false;
+    }
     if let Some(iden) = iden {
         let url = iden.replace("{}", text);
         debug!("Launching URL: {}", url);

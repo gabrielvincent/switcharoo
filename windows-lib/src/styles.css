@@ -3,16 +3,16 @@
     padding: var(--window-padding, 2px);
 
     border-radius: var(--border-radius, 12px);
-    background-color: var(--bg-color, rgba(20, 20, 20, 0.9));
+    background: var(--bg-color, rgba(20, 20, 20, 0.9));
     border: var(--border-size, 3px) var(--border-style, solid) var(--border-color, rgba(90, 90, 120, 0.4));
 }
 
 .monitor.no-hover:hover {
-    background-color: var(--bg-color, rgba(20, 20, 20, 0.9));
+    background: var(--bg-color, rgba(20, 20, 20, 0.9));
 }
 
 .monitor:hover {
-    background-color: var(--bg-color-hover, rgba(40, 40, 50, 1));
+    background: var(--bg-color-hover, rgba(40, 40, 50, 1));
 }
 
 /* workspace, using css vars */
@@ -21,7 +21,7 @@
     font-weight: bolder;
 
     border-radius: var(--border-radius, 12px);
-    background-color: var(--bg-color, rgba(20, 20, 20, 0.9));
+    background: var(--bg-color, rgba(20, 20, 20, 0.9));
     border: var(--border-size, 3px) var(--border-style, solid) var(--border-color, rgba(90, 90, 120, 0.4));
 }
 
@@ -32,11 +32,11 @@
 
 
 .workspace.no-hover:hover {
-    background-color: var(--bg-color, rgba(20, 20, 20, 0.9));
+    background: var(--bg-color, rgba(20, 20, 20, 0.9));
 }
 
 .workspace:hover {
-    background-color: var(--bg-color-hover, rgba(40, 40, 50, 1));
+    background: var(--bg-color-hover, rgba(40, 40, 50, 1));
 }
 
 /* client, using css vars */
@@ -45,7 +45,7 @@
     font-weight: normal;
 
     border-radius: var(--border-radius, 12px);
-    background-color: var(--bg-color, rgba(20, 20, 20, 0.9));
+    background: var(--bg-color, rgba(20, 20, 20, 0.9));
     border: var(--border-size, 3px) var(--border-style, solid) var(--border-color, rgba(90, 90, 120, 0.4));
 }
 
@@ -55,11 +55,11 @@
 }
 
 .client.no-hover:hover {
-    background-color: var(--bg-color, rgba(20, 20, 20, 0.9));
+    background: var(--bg-color, rgba(20, 20, 20, 0.9));
 }
 
 .client:hover {
-    background-color: var(--bg-color-hover, rgba(40, 40, 50, 1));
+    background: var(--bg-color-hover, rgba(40, 40, 50, 1));
 }
 
 

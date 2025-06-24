@@ -15,13 +15,12 @@ fn scale(value: i16, scale: f64) -> i32 {
     (value as f64 / (15f64 - scale)) as i32
 }
 
+pub fn switch_already_open(data: &WindowsSwitchData) -> bool {
+    data.window.get_visible()
+}
+
 pub fn open_switch(data: &mut WindowsSwitchData, config: OpenSwitch) -> anyhow::Result<()> {
     let _span = span!(Level::TRACE, "open_switch").entered();
-    // check if already open
-    if data.window.get_visible() {
-        return Ok(());
-    }
-
     set_remain_focused().warn("Failed to set no follow mouse");
 
     let (clients_data, active_prev) = collect_data(&SortConfig {
