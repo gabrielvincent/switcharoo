@@ -20,12 +20,11 @@ let
     str
     submodule
     ;
-
+  customLib = import ./util.nix { inherit lib; };
   cfg = config.programs.hyprshell;
   mkOpt =
     description: type: default:
     lib.mkOption { inherit description type default; };
-  filterDisabledAndDropEnable = (import ./util.nix { inherit lib; }).filterDisabledAndDropEnable;
 in
 {
   options.programs.hyprshell = {
@@ -198,7 +197,7 @@ in
         }
       else
         {
-          text = builtins.toJSON (filterDisabledAndDropEnable cfg.settings);
+          text = builtins.toJSON (customLib.filterDisabledAndDropEnable cfg.settings);
         };
 
     xdg.configFile."hyprshell/styles.css" =

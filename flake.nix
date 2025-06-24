@@ -29,36 +29,37 @@
         { pkgs, self', ... }:
         let
           craneLib = crane.mkLib pkgs;
-          clib = (import ./nix/util.nix { inherit craneLib pkgs self; });
+          buildLib = import ./nix/build.nix { inherit craneLib pkgs self; };
+          customLib = import ./nix/util.nix { lib = pkgs.lib; };
         in
         {
           formatter = pkgs.nixfmt-tree;
           packages = rec {
-            hyprshell = craneLib.buildPackage clib.commonArgsCached;
+            hyprshell = craneLib.buildPackage buildLib.commonArgsCached;
             default = hyprshell;
           };
           checks = rec {
             hyprshell-default-check = craneLib.buildPackage (
-              clib.commonArgsCached
+              buildLib.commonArgsCached
               // {
                 cargoExtraArgs = "--features config_check_is_default";
               }
             );
             hyprshell-clippy = craneLib.cargoClippy (
-              clib.commonArgsCached
+              buildLib.commonArgsCached
               // {
                 buildPhaseCargoCommand = "cargo clippy";
                 cargoClippyExtraArgs = "--all-targets -- --deny warnings";
               }
             );
-            hyprshell-fmt = craneLib.cargoFmt clib.commonArgsCached;
+            hyprshell-fmt = craneLib.cargoFmt buildLib.commonArgsCached;
             check-nix-config = pkgs.runCommand "check-nix-config" { } ''
               TMP=$(mktemp -d)
               touch "$TMP/test.json"
               echo "test json created at $TMP"
               cat <<EOF> "$TMP/test.json"
               ${builtins.toJSON (
-                clib.filterDisabledAndDropEnable self.homeConfigurations.test.config.programs.hyprshell.settings
+                customLib.filterDisabledAndDropEnable self.homeConfigurations.test.config.programs.hyprshell.settings
               )}
               EOF
               ${pkgs.jq}/bin/jq < "$TMP/test.json"
@@ -66,10 +67,10 @@
               rm -r "$TMP"
             '';
             check-all-feature-combinations = craneLib.buildPackage (
-              clib.commonArgs
+              buildLib.commonArgsCached
               // {
                 pname = "check-all-feature-combinations";
-                nativeBuildInputs = [ pkgs.bash ] ++ clib.commonArgs.nativeBuildInputs;
+                nativeBuildInputs = [ pkgs.bash ] ++ buildLib.commonArgs.nativeBuildInputs;
                 buildPhaseCargoCommand = ''
                   cargoBuildLog=$(mktemp cargoBuildLogXXXX.json)
 
@@ -116,7 +117,7 @@
 
           devShells.default = craneLib.devShell {
             checks = self'.checks;
-            stdenv = clib.stdenv;
+            stdenv = buildLib.stdenv;
             packages = [
               pkgs.rust-analyzer
             ];

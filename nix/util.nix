@@ -1,79 +1,18 @@
 {
-  self,
-  craneLib,
-  pkgs,
-  ...
+  lib,
 }:
 rec {
   filterDisabledAndDropEnable =
     value:
-    if pkgs.lib.isAttrs value then
+    if lib.isAttrs value then
       if value ? enable && value.enable == false then
         null
       else
-        pkgs.lib.filterAttrs (k: v: v != null && k != "enable") (
-          pkgs.lib.mapAttrs (_: filterDisabledAndDropEnable) value
+        lib.filterAttrs (k: v: v != null && k != "enable") (
+          lib.mapAttrs (_: filterDisabledAndDropEnable) value
         )
-    else if pkgs.lib.isList value then
-      pkgs.lib.filter (v: v != null) (map filterDisabledAndDropEnable value)
+    else if lib.isList value then
+      lib.filter (v: v != null) (map filterDisabledAndDropEnable value)
     else
       value;
-
-  pname = "hyprshell";
-  version = (pkgs.lib.trivial.importTOML ../Cargo.toml).workspace.package.version;
-  src = pkgs.lib.cleanSourceWith {
-    src = ../.;
-    filter = path: type: (builtins.match ".*(css|service)$" path != null) || (craneLib.filterCargoSources path type);
-    name = "source";
-  };
-  meta = {
-    mainProgram = pname;
-    description = "A modern GTK4-based window switcher and application launcher for Hyprland";
-    homepage = "https://github.com/h3rmt/hyprshell";
-    license = pkgs.lib.licenses.mit;
-    platforms = pkgs.hyprland.meta.platforms;
-  };
-  stdenv = p: p.stdenv;
-  commonArgs = {
-    inherit
-      src
-      stdenv
-      meta
-      pname
-      version
-      ;
-    strictDeps = true;
-    doCheck = false;
-    cargoBuildCommand = "cargo build --profile release --locked";
-    cargoTestCommand = "";
-    cargoCheckCommand = "";
-    cargoExtraArgs = "";
-
-    nativeBuildInputs = [
-      pkgs.pkg-config
-      pkgs.wrapGAppsHook4
-    ];
-
-    buildInputs = [
-      pkgs.gtk4
-      pkgs.gtk4-layer-shell
-    ];
-  };
-
-  cargoArtifacts = craneLib.buildDepsOnly (
-    commonArgs
-    // {
-      mkDummySrc = craneLib.mkDummySrc {
-        inherit stdenv;
-        src = ../.;
-      };
-    }
-  );
-
-  commonArgsCached = (
-    commonArgs
-    // {
-      cargoArtifacts = cargoArtifacts;
-    }
-  );
 }
