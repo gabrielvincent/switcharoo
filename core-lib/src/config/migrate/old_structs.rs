@@ -39,7 +39,7 @@ pub(super) struct OtherOverview {
 #[serde(deny_unknown_fields)]
 pub(super) struct OpenOverview {
     pub(super) key: KeyMaybeMod,
-    pub(super) modifier: config::Mod,
+    pub(super) modifier: config::Modifier,
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -60,7 +60,7 @@ pub(super) struct Switch {
 #[derive(Debug, Clone, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct OpenSwitch {
-    pub(super) modifier: config::Mod,
+    pub(super) modifier: config::Modifier,
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -74,7 +74,7 @@ pub(super) struct OtherSwitch {
 #[serde(rename_all = "snake_case")]
 enum Reverse {
     Key(String),
-    Mod(config::Mod),
+    Mod(config::Modifier),
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]

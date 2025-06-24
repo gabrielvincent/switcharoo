@@ -1,7 +1,7 @@
 use crate::global::{LauncherConfig, LauncherData};
 use crate::plugins::get_static_options_chars;
 use async_channel::Sender;
-use core_lib::config::{Launcher, Mod};
+use core_lib::config::{Launcher, Modifier};
 use core_lib::transfer::{CloseOverviewConfig, Direction, SwitchOverviewConfig, TransferType};
 use core_lib::{LAUNCHER_NAMESPACE, WarnWithDetails};
 use gtk::gdk::Key;
@@ -21,7 +21,7 @@ use tracing::{Level, debug, span};
 pub fn create_windows_overview_launcher_window(
     app: &Application,
     launcher: &Launcher,
-    open_modifier: Mod,
+    open_modifier: Modifier,
     data_dir: &Path,
     event_sender: Sender<TransferType>,
 ) -> anyhow::Result<LauncherData> {
@@ -109,7 +109,6 @@ pub fn create_windows_overview_launcher_window(
             default_terminal: launcher.default_terminal.clone(),
             max_items: launcher.max_items,
             show_when_empty: launcher.show_when_empty,
-            // animate_launch_ms: launcher.animate_launch_ms,
             width: launcher.width,
             data_dir: PathBuf::from(data_dir).into_boxed_path(),
             plugins: launcher.plugins.clone(),
@@ -145,7 +144,7 @@ fn handle_key(
     entry: &Entry,
     key: Key,
     plugin_keys: &[Key],
-    open_modifier: Mod,
+    open_modifier: Modifier,
     mods: Arc<Mutex<u16>>,
     event_sender: Sender<TransferType>,
 ) -> Propagation {
@@ -173,9 +172,9 @@ fn handle_key(
         return Propagation::Stop;
     }
 
-    if ((key == Key::Alt_L || key == Key::Alt_R) && open_modifier == Mod::Alt)
-        || ((key == Key::Control_L || key == Key::Control_R) && open_modifier == Mod::Ctrl)
-        || ((key == Key::Super_L || key == Key::Super_R) && open_modifier == Mod::Super)
+    if ((key == Key::Alt_L || key == Key::Alt_R) && open_modifier == Modifier::Alt)
+        || ((key == Key::Control_L || key == Key::Control_R) && open_modifier == Modifier::Ctrl)
+        || ((key == Key::Super_L || key == Key::Super_R) && open_modifier == Modifier::Super)
     {
         event_sender
             .send_blocking(TransferType::Exit)

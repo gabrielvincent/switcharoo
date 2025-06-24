@@ -20,7 +20,6 @@ pub struct LauncherConfig {
     pub default_terminal: Option<Box<str>>,
     pub max_items: u8,
     pub show_when_empty: bool,
-    // pub animate_launch_ms: u64,
     pub width: u32,
     pub data_dir: Box<Path>,
     pub plugins: Plugins,

@@ -1,6 +1,6 @@
 use anyhow::Context;
 use core_lib::binds::ExecBind;
-use core_lib::config::Mod;
+use core_lib::config::Modifier;
 use core_lib::{LAUNCHER_NAMESPACE, OVERVIEW_NAMESPACE, SWITCH_NAMESPACE};
 use hyprland::config::binds;
 use hyprland::config::binds::{Binder, Binding, Flag};
@@ -28,10 +28,10 @@ pub fn apply_exec_bind(bind: &ExecBind) -> anyhow::Result<()> {
             .mods
             .iter()
             .map(|m| match m {
-                Mod::Alt => binds::Mod::ALT,
-                Mod::Ctrl => binds::Mod::CTRL,
-                Mod::Super => binds::Mod::SUPER,
-                Mod::Shift => binds::Mod::SHIFT,
+                Modifier::Alt => binds::Mod::ALT,
+                Modifier::Ctrl => binds::Mod::CTRL,
+                Modifier::Super => binds::Mod::SUPER,
+                Modifier::Shift => binds::Mod::SHIFT,
             })
             .collect(),
         key: binds::Key::Key(&bind.key),

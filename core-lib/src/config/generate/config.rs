@@ -1,6 +1,6 @@
 use crate::config::generate::tui::{WEB_SEARCH_ENGINES, configurable_launcher_plugins};
 use crate::config::structs::{Switch, Windows};
-use crate::config::{Config, Launcher, Mod, Overview, Plugins, WebSearchConfig};
+use crate::config::{Config, Launcher, Modifier, Overview, Plugins, WebSearchConfig};
 use std::path::Path;
 use tracing::warn;
 
@@ -44,8 +44,8 @@ pub fn check_file_exist(
 #[derive(Debug)]
 pub struct ConfigData {
     pub default_terminal: Option<Box<str>>,
-    pub overview: Option<(Mod, Box<str>)>,
-    pub switch: (Option<Mod>, bool),
+    pub overview: Option<(Modifier, Box<str>)>,
+    pub switch: (Option<Modifier>, bool),
     pub launcher_plugins: Vec<Box<str>>,
     pub launcher_engines: Vec<Box<str>>,
 }

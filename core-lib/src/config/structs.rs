@@ -42,7 +42,7 @@ pub struct Overview {
     #[default = "super_l"]
     pub key: Box<str>,
     #[default(Mod::Super)]
-    pub modifier: Mod,
+    pub modifier: Modifier,
     #[default(Vec::new())]
     pub filter_by: Vec<FilterBy>,
     #[default = false]
@@ -131,7 +131,7 @@ pub struct SearchEngine {
 #[serde(deny_unknown_fields)]
 pub struct Switch {
     #[default(Mod::Alt)]
-    pub modifier: Mod,
+    pub modifier: Modifier,
     #[default(Vec::new())]
     pub filter_by: Vec<FilterBy>,
     #[default = false]
@@ -148,31 +148,31 @@ pub enum FilterBy {
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Deserialize, Serialize)]
 #[serde(rename_all = "snake_case")]
-pub enum Mod {
+pub enum Modifier {
     Alt,
     Ctrl,
     Super,
     Shift,
 }
 
-impl Display for Mod {
+impl Display for Modifier {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Mod::Alt => write!(f, "alt"),
-            Mod::Ctrl => write!(f, "ctrl"),
-            Mod::Super => write!(f, "super"),
-            Mod::Shift => write!(f, "shift"),
+            Modifier::Alt => write!(f, "alt"),
+            Modifier::Ctrl => write!(f, "ctrl"),
+            Modifier::Super => write!(f, "super"),
+            Modifier::Shift => write!(f, "shift"),
         }
     }
 }
 
-impl Mod {
+impl Modifier {
     pub fn to_key(self) -> &'static str {
         match self {
-            Mod::Alt => "alt_l",
-            Mod::Ctrl => "control_l",
-            Mod::Super => "super_l",
-            Mod::Shift => "shift_l",
+            Modifier::Alt => "alt_l",
+            Modifier::Ctrl => "control_l",
+            Modifier::Super => "super_l",
+            Modifier::Shift => "shift_l",
         }
     }
 }

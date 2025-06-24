@@ -1,5 +1,5 @@
 use core_lib::binds::{ExecBind, generate_transfer_socat};
-use core_lib::config::{Mod, Windows};
+use core_lib::config::{Modifier, Windows};
 use core_lib::transfer::{OpenSwitch, TransferType};
 
 pub fn generate_open_keybinds(windows: &Windows) -> Vec<ExecBind> {
@@ -21,14 +21,14 @@ pub fn generate_open_keybinds(windows: &Windows) -> Vec<ExecBind> {
                 .into_boxed_str(),
         });
         binds.push(ExecBind {
-            mods: vec![Mod::Alt],
+            mods: vec![Modifier::Alt],
             key: Box::from("grave"),
             on_release: false,
             exec: generate_transfer_socat(&TransferType::OpenSwitch(OpenSwitch { reverse: true }))
                 .into_boxed_str(),
         });
         binds.push(ExecBind {
-            mods: vec![Mod::Alt, Mod::Shift],
+            mods: vec![Modifier::Alt, Modifier::Shift],
             key: Box::from("tab"),
             on_release: false,
             exec: generate_transfer_socat(&TransferType::OpenSwitch(OpenSwitch { reverse: true }))

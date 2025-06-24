@@ -3,7 +3,7 @@ use crate::config::SearchEngine;
 use crate::config::generate::autocomplete::StringAutoCompleter;
 use crate::config::generate::config::ConfigData;
 use crate::config::generate::css::StyleData;
-use crate::config::structs::Mod;
+use crate::config::structs::Modifier;
 use crate::util::TERMINALS;
 use anyhow::bail;
 use inquire::formatter::MultiOptionFormatter;
@@ -180,17 +180,17 @@ pub fn prompt_config() -> anyhow::Result<(ConfigData, StyleData)> {
     ))
 }
 
-fn get_mod(modifier: &str) -> anyhow::Result<Mod> {
+fn get_mod(modifier: &str) -> anyhow::Result<Modifier> {
     match &*modifier.trim().to_ascii_lowercase() {
-        "super" => Ok(Mod::Super),
-        "ctrl" => Ok(Mod::Ctrl),
-        "alt" => Ok(Mod::Alt),
-        "shift" => Ok(Mod::Shift),
+        "super" => Ok(Modifier::Super),
+        "ctrl" => Ok(Modifier::Ctrl),
+        "alt" => Ok(Modifier::Alt),
+        "shift" => Ok(Modifier::Shift),
         _ => bail!("Unknown modifier: {}", modifier),
     }
 }
 
-fn get_mod_and_key(modifier: String) -> anyhow::Result<(Mod, Box<str>)> {
+fn get_mod_and_key(modifier: String) -> anyhow::Result<(Modifier, Box<str>)> {
     let split = modifier.split('+').collect::<Vec<_>>();
     info!("{split:?}");
     let r#mod = get_mod(split.first().unwrap_or(&""))?;

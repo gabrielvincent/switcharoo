@@ -1,6 +1,6 @@
 use crate::global::{WindowsSwitchConfig, WindowsSwitchData};
 use async_channel::Sender;
-use core_lib::config::{FilterBy, Mod, Switch, Windows};
+use core_lib::config::{FilterBy, Modifier, Switch, Windows};
 use core_lib::transfer::{SwitchSwitchConfig, TransferType};
 use core_lib::{HyprlandData, SWITCH_NAMESPACE, WarnWithDetails};
 use exec_lib::get_initial_active;
@@ -81,10 +81,10 @@ pub fn create_windows_switch_window(
     })
 }
 
-fn handle_release(key: Key, modifier: Mod, event_sender: Sender<TransferType>) {
-    if ((key == Key::Alt_L || key == Key::Alt_R) && modifier == Mod::Alt)
-        || ((key == Key::Control_L || key == Key::Control_R) && modifier == Mod::Ctrl)
-        || ((key == Key::Super_L || key == Key::Super_R) && modifier == Mod::Super)
+fn handle_release(key: Key, modifier: Modifier, event_sender: Sender<TransferType>) {
+    if ((key == Key::Alt_L || key == Key::Alt_R) && modifier == Modifier::Alt)
+        || ((key == Key::Control_L || key == Key::Control_R) && modifier == Modifier::Ctrl)
+        || ((key == Key::Super_L || key == Key::Super_R) && modifier == Modifier::Super)
     {
         event_sender
             .send_blocking(TransferType::CloseSwitch)
