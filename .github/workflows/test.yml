@@ -24,12 +24,12 @@ jobs:
           authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
       - name: Increase nix download-buffer-size
         run: echo "download-buffer-size = 1048576000" | sudo tee -a /etc/nix/nix.conf && cat /etc/nix/nix.conf
-      - name: Run Nix Flake Check fmt
-        run: nix build '.#checks.x86_64-linux.hyprshell-fmt' -L
       - name: Run Nix Flake Check build
         run: nix build '.#checks.x86_64-linux.hyprshell-default-check' -L
       - name: Run Nix Flake Check clippy
         run: nix build '.#checks.x86_64-linux.hyprshell-clippy' -L
+      - name: Run Nix Flake Check fmt
+        run: nix build '.#checks.x86_64-linux.hyprshell-fmt' -L
       - name: Run Nix Flake Check check-nix-config
         run: nix build '.#checks.x86_64-linux.check-nix-config' -L
 
