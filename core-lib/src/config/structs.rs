@@ -41,7 +41,7 @@ pub struct Overview {
     pub launcher: Launcher,
     #[default = "super_l"]
     pub key: Box<str>,
-    #[default(Mod::Super)]
+    #[default(Modifier::Super)]
     pub modifier: Modifier,
     #[default(Vec::new())]
     pub filter_by: Vec<FilterBy>,
@@ -130,7 +130,7 @@ pub struct SearchEngine {
 #[cfg_attr(not(feature = "no-default-config-values"), serde(default))]
 #[serde(deny_unknown_fields)]
 pub struct Switch {
-    #[default(Mod::Alt)]
+    #[default(Modifier::Alt)]
     pub modifier: Modifier,
     #[default(Vec::new())]
     pub filter_by: Vec<FilterBy>,
