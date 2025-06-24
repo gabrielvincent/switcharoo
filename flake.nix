@@ -88,10 +88,10 @@
 
                     if [[ -z "$feature_combination" ]]; then
                       echo -n "[$iteration] Building without any features..."
-                      ${clib.commonArgs.cargoBuildCommand} --no-default-features --message-format json-render-diagnostics > "$cargoBuildLog"
+                      cargo build --locked --no-default-features --message-format json-render-diagnostics > "$cargoBuildLog"
                     else
                       echo -n "[$iteration] Building with features: $feature_combination"
-                      ${clib.commonArgs.cargoBuildCommand} --no-default-features --features "$feature_combination" --message-format json-render-diagnostics > "$cargoBuildLog"
+                      cargo build --locked --no-default-features --features "$feature_combination" --message-format json-render-diagnostics > "$cargoBuildLog"
                     fi
 
                     local duration=$(awk "BEGIN {print $(date +%s.%N) - $start_time}")
