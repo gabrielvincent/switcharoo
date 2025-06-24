@@ -1,6 +1,6 @@
 # NixOS
 
-- Supported Architectures: `x86_64-linux`, `aarch64-linux`
+**[Cachix Cache](https://app.cachix.org/cache/hyprshell#pull) can be added with `cachix use hyprshell`**
 
 ## With Flakes
 
@@ -60,6 +60,8 @@
 
 `./user.nix`:
 
+All the settings are optional and can be found in the [module.nix](./nix/module.nix)
+
 ```nix
 { inputs, ... } : {
   imports = [
@@ -69,18 +71,24 @@
     enable = true;
     systemd.args = "-v";
     settings = {
-      launcher = {
-        max_items = 6;
-        plugins.websearch = {
-            enable = true;
-            engines = [{
-                name = "DuckDuckGo";
-                url = "https://duckduckgo.com/?q=%s";
-                key = "d";
-            }];
+      windows = {
+        overview = {
+          key = "super_l";
+          mod = super;
+          launcher = {
+            max_items = 6;
+            plugins.websearch = {
+                enable = true;
+                engines = [{
+                    name = "DuckDuckGo";
+                    url = "https://duckduckgo.com/?q=%s";
+                    key = "d";
+                }];
+            };
+          };
         };
+        switcher.enable = false;
       };
-      window.switcher.enable = false;
     };
   };
 }
