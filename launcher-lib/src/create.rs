@@ -131,13 +131,13 @@ fn launcher_entry_text_change(text: String, event_sender: Sender<TransferType>) 
 fn handle_release(key: Key, mods: Arc<Mutex<u16>>) {
     let mut mods = mods.lock().unwrap();
     match key {
-        Key::Shift_L | Key::Shift_R => *mods &= !1,
+        // Key::Shift_L | Key::Shift_R => *mods &= !1,
         Key::Control_L | Key::Control_R => *mods &= !2,
-        Key::Alt_L | Key::Alt_R => *mods &= !4,
-        Key::Super_L | Key::Super_R => *mods &= !8,
+        // Key::Alt_L | Key::Alt_R => *mods &= !4,
+        // Key::Super_L | Key::Super_R => *mods &= !8,
         _ => (),
     };
-    // trace!("key: {}{:?}, mods: {}", key, key, mods);
+    // tracing::trace!("key: {}{:?}, mods: {}", key, key, mods);
 }
 
 fn handle_key(
@@ -150,12 +150,13 @@ fn handle_key(
 ) -> Propagation {
     let mut mods = mods.lock().unwrap();
     match key {
-        Key::Shift_L | Key::Shift_R => *mods |= 1,
+        // Key::Shift_L | Key::Shift_R => *mods |= 1,
         Key::Control_L | Key::Control_R => *mods |= 2,
-        Key::Alt_L | Key::Alt_R => *mods |= 4,
-        Key::Super_L | Key::Super_R => *mods |= 8,
+        // Key::Alt_L | Key::Alt_R => *mods |= 4,
+        // Key::Super_L | Key::Super_R => *mods |= 8,
         _ => (),
     };
+    // tracing::trace!("key: {}{:?}, mods: {}", key, key, mods);
     // plugins always use ctrl modifier
     if *mods == 2 && plugin_keys.contains(&key) {
         let ch = key
@@ -217,6 +218,7 @@ fn handle_key(
             Propagation::Stop
         }
         (0, Key::Return) => {
+            // TODO dont send if no results
             event_sender
                 .send_blocking(TransferType::CloseOverview(CloseOverviewConfig::None))
                 .warn("unable to send");
@@ -267,6 +269,7 @@ fn handle_key(
             Propagation::Stop
         }
         (2, Key::_1) => {
+            // TODO dont send if less than 2 results
             event_sender
                 .send_blocking(TransferType::CloseOverview(
                     CloseOverviewConfig::LauncherPress('1'),
@@ -275,6 +278,7 @@ fn handle_key(
             Propagation::Stop
         }
         (2, Key::_2) => {
+            // TODO dont send if less than 3 results
             event_sender
                 .send_blocking(TransferType::CloseOverview(
                     CloseOverviewConfig::LauncherPress('2'),

@@ -79,7 +79,7 @@ pub const DEFAULT_COLORS: [(&str, &str); 8] = [
 
 pub fn prompt_config() -> anyhow::Result<(ConfigData, StyleData)> {
     let open_overview = {
-        let open_overview = Text::new("Key combination to open the overview (and launcher)")
+        let open_overview = Text::new("Key combination to open the overview and launcher (optional) [similar to gnome's overview]")
             .with_autocomplete(StringAutoCompleter::from(vec![
                 "Super",
                 "Super + Tab",
@@ -137,7 +137,7 @@ pub fn prompt_config() -> anyhow::Result<(ConfigData, StyleData)> {
     };
 
     let switch = {
-        let open_switch = Text::new("Modifier to open the switch mode (<mod> + tab)")
+        let open_switch = Text::new("Modifier to open the switch mode (optional) [similar to windows alt + tab]")
             .with_autocomplete(StringAutoCompleter::from(vec!["Alt", "Ctrl", "Super"]))
             .with_help_message("Shows windows in a list sorted by recently accessed. Please use something different from the Overview modifier. Leave blank to disable]\n[Any valid modifier can be typed in]\n[↑↓ to move, tab to autocomplete, enter to submit")
             .prompt()?;
