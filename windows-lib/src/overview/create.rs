@@ -53,7 +53,7 @@ pub fn create_windows_overview_window(
                 window.set_namespace(Some(OVERVIEW_NAMESPACE));
                 window.set_layer(Layer::Top);
                 window.set_anchor(Edge::Top, true);
-                window.set_margin(Edge::Top, 420i32);
+                window.set_margin(Edge::Top, 425i32);
                 window.set_keyboard_mode(KeyboardMode::None);
                 window.set_monitor(Some(&gtk_monitor));
                 window.present();

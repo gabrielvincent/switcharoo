@@ -2,7 +2,7 @@
 
 [![crates.io](https://img.shields.io/crates/v/hyprshell.svg)](https://crates.io/crates/hyprshell) [![Docs](https://docs.rs/built/badge.svg)](https://docs.rs/hyprshell)
 
-![image.png](imgs/swappy-20250420_000613.png)
+![img.png](imgs/img-3.png)
 
 ## Overview
 
@@ -88,7 +88,7 @@ exec-once = hyprshell run &
 ```
 
 ![image.png](imgs/swappy-20250420_000818.png)
-![image.png](imgs/swappy-20250509_010715.png)
+![img.png](imgs/img-2.png)
 
 ### Env Variables
 
