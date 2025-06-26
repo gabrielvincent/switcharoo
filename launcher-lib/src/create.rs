@@ -77,7 +77,7 @@ pub fn create_windows_overview_launcher_window(
     let modifiers_2 = modifiers.clone();
     let entry_2 = entry.clone();
     let results_2 = results.clone();
-    let launch_modifier = launcher.launch_modifier.clone();
+    let launch_modifier = launcher.launch_modifier;
     event_controller.connect_key_pressed(move |_, key, _, _| {
         handle_key(
             &entry_2,
@@ -146,6 +146,7 @@ fn handle_release(key: Key, open_modifier: Modifier, mods: Arc<Mutex<u16>>) {
     tracing::trace!("key: {}{:?}, mods: {}", key, key, mods);
 }
 
+#[allow(clippy::too_many_arguments)]
 fn handle_key(
     entry: &Entry,
     key: Key,
