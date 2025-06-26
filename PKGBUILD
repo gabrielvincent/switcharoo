@@ -4,7 +4,7 @@ pkgver=4.4.2
 # x-release-please-end
 pkgrel=1
 pkgdesc="A modern GTK4-based window switcher and application launcher for Hyprland"
-arch=('any')
+arch=('x86_64' 'aarch64')
 url="https://github.com/h3rmt/hyprshell/"
 license=("MIT")
 makedepends=('cargo')
@@ -25,5 +25,6 @@ build() {
 }
 
 package() {
-    install -Dm0755 -t "$pkgdir/usr/bin/" "$pkgname-$pkgver/target/release/$pkgname"
+    install -Dm755 "$pkgname-$pkgver/target/release/$pkgname" "$pkgdir/usr/bin/$pkgname"
+    install -Dm644 "$pkgname-$pkgver/LICENSE" "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
 }
