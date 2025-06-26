@@ -21,14 +21,14 @@ pub fn generate_open_keybinds(windows: &Windows) -> Vec<ExecBind> {
                 .into_boxed_str(),
         });
         binds.push(ExecBind {
-            mods: vec![Modifier::Alt],
+            mods: vec![switch.modifier],
             key: Box::from("grave"),
             on_release: false,
             exec: generate_transfer_socat(&TransferType::OpenSwitch(OpenSwitch { reverse: true }))
                 .into_boxed_str(),
         });
         binds.push(ExecBind {
-            mods: vec![Modifier::Alt, Modifier::Shift],
+            mods: vec![switch.modifier, Modifier::Shift],
             key: Box::from("tab"),
             on_release: false,
             exec: generate_transfer_socat(&TransferType::OpenSwitch(OpenSwitch { reverse: true }))

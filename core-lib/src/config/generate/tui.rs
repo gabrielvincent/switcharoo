@@ -197,6 +197,6 @@ fn get_mod_and_key(modifier: String) -> anyhow::Result<(Modifier, Box<str>)> {
     if let Some(key) = split.get(1) {
         Ok((r#mod, Box::from(key.trim())))
     } else {
-        Ok((r#mod, Box::from(r#mod.to_lr_key())))
+        Ok((r#mod, Box::from(r#mod.to_l_key())))
     }
 }

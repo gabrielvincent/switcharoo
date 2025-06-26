@@ -11,9 +11,7 @@ pub enum TransferType {
     SwitchOverview(SwitchOverviewConfig),
     /// send from the keybinds like arrow keys or tab on switch
     SwitchSwitch(SwitchSwitchConfig),
-    /// send by pressing enter / ctrl + <n> / or from the gui itself to close the overview / switch
     CloseOverview(CloseOverviewConfig),
-    /// send by pressing enter / ctrl + <n> / or from the gui itself to close the overview / switch
     CloseSwitch,
     /// send from the gui itself when typing the launcher
     Type(String),

@@ -169,7 +169,7 @@ impl Display for Modifier {
 }
 
 impl Modifier {
-    pub fn to_lr_key(self) -> &'static str {
+    pub fn to_l_key(self) -> &'static str {
         match self {
             Modifier::Alt => "alt_l",
             Modifier::Ctrl => "control_l",
