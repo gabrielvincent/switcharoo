@@ -209,6 +209,7 @@ fn handle_key(
             event_sender
                 .send_blocking(TransferType::Exit)
                 .warn("unable to send");
+            *mods = 0b0000;
             Propagation::Stop
         }
         (_, Key::Tab) => {
@@ -287,6 +288,7 @@ fn handle_key(
                 event_sender
                     .send_blocking(TransferType::CloseOverview(CloseOverviewConfig::None))
                     .warn("unable to send");
+                *mods = 0b0000;
             }
             Propagation::Stop
         }
@@ -297,6 +299,7 @@ fn handle_key(
                         CloseOverviewConfig::LauncherPress('1'),
                     ))
                     .warn("unable to send");
+                *mods = 0b0000;
             }
             Propagation::Stop
         }
@@ -307,6 +310,7 @@ fn handle_key(
                         CloseOverviewConfig::LauncherPress('2'),
                     ))
                     .warn("unable to send");
+                *mods = 0b0000;
             }
             Propagation::Stop
         }
@@ -317,6 +321,7 @@ fn handle_key(
                         CloseOverviewConfig::LauncherPress('3'),
                     ))
                     .warn("unable to send");
+                *mods = 0b0000;
             }
             Propagation::Stop
         }
@@ -327,6 +332,7 @@ fn handle_key(
                         CloseOverviewConfig::LauncherPress('4'),
                     ))
                     .warn("unable to send");
+                *mods = 0b0000;
             }
             Propagation::Stop
         }
@@ -337,6 +343,7 @@ fn handle_key(
                         CloseOverviewConfig::LauncherPress('5'),
                     ))
                     .warn("unable to send");
+                *mods = 0b0000;
             }
             Propagation::Stop
         }
@@ -347,6 +354,7 @@ fn handle_key(
                         CloseOverviewConfig::LauncherPress('6'),
                     ))
                     .warn("unable to send");
+                *mods = 0b0000;
             }
             Propagation::Stop
         }
@@ -357,6 +365,7 @@ fn handle_key(
                         CloseOverviewConfig::LauncherPress('7'),
                     ))
                     .warn("unable to send");
+                *mods = 0b0000;
             }
             Propagation::Stop
         }
@@ -367,6 +376,7 @@ fn handle_key(
                         CloseOverviewConfig::LauncherPress('8'),
                     ))
                     .warn("unable to send");
+                *mods = 0b0000;
             }
             Propagation::Stop
         }
@@ -377,6 +387,7 @@ fn handle_key(
                         CloseOverviewConfig::LauncherPress('9'),
                     ))
                     .warn("unable to send");
+                *mods = 0b0000;
             }
             Propagation::Stop
         }
