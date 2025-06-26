@@ -1,4 +1,4 @@
-use core_lib::config::Plugins;
+use core_lib::config::{Modifier, Plugins};
 use core_lib::transfer::Identifier;
 use gtk::{ApplicationWindow, Entry};
 use std::collections::HashMap;
@@ -19,6 +19,7 @@ pub struct LauncherData {
 pub struct LauncherConfig {
     pub default_terminal: Option<Box<str>>,
     pub max_items: u8,
+    pub launch_modifier: Modifier,
     pub show_when_empty: bool,
     pub width: u32,
     pub data_dir: Box<Path>,

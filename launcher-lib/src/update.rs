@@ -5,6 +5,7 @@ use crate::plugins::{
 use crate::util::DataInWidget;
 use async_channel::Sender;
 use core_lib::WarnWithDetails;
+use core_lib::config::Modifier;
 use core_lib::theme_icon_cache::theme_has_icon_name;
 use core_lib::transfer::{CloseOverviewConfig, Identifier, TransferType};
 use gtk::gdk::Cursor;
@@ -44,7 +45,7 @@ pub fn update_launcher(data: &mut LauncherData, text: String, event_sender: Send
             &opt.iden,
             match index {
                 0 => "Return".to_string(),
-                i if i <= 9 => format!("Ctrl+{}", i),
+                i if i <= 9 => format!("{}+{i}", data.config.launch_modifier),
                 _ => "".to_string(),
             },
             opt.icon,
@@ -67,6 +68,7 @@ pub fn update_launcher(data: &mut LauncherData, text: String, event_sender: Send
             &opt.text,
             &opt.details,
             opt.key,
+            data.config.launch_modifier,
             event_sender.clone(),
         );
         data.plugin_box.append(&button);
@@ -80,6 +82,7 @@ fn create_static_plugin_box(
     text: &str,
     details: &str,
     key: char,
+    launch_modifier: Modifier,
     event_sender: Sender<TransferType>,
 ) -> Button {
     let hbox = gtk::Box::builder()
@@ -115,7 +118,7 @@ fn create_static_plugin_box(
         .valign(Align::End)
         .ellipsize(EllipsizeMode::End)
         .css_classes(["launcher-key"])
-        .label(format!("Ctrl + {key}"))
+        .label(format!("{launch_modifier} + {key}"))
         .build();
     vbox.append(&exec);
 

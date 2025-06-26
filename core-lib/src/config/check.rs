@@ -11,6 +11,30 @@ pub fn check(config: &Config) -> anyhow::Result<()> {
         bail!("Scale factor must be less than 15 and greater than 0");
     }
 
+    if config
+        .windows
+        .as_ref()
+        .and_then(|w| w.overview.as_ref())
+        .map(|o| o.launcher.launch_modifier == o.modifier)
+        .unwrap_or(false)
+    {
+        bail!(
+            "Launcher modifier cannot be the same as overview open modifier. (pressing the modifier will just close the overview instead of launching an app)"
+        );
+    }
+
+    if config
+        .windows
+        .as_ref()
+        .and_then(|w| w.overview.as_ref())
+        .map(|o| matches!(&*o.key, "super" | "alt" | "shift" | "control" | "ctrl"))
+        .unwrap_or(false)
+    {
+        bail!(
+            "If a modifier key is used to open it must include _l or _r at the end. (e.g. super_l, alt_r, etc)\nctrl_l / _r is NOT a valid modifier key, only control_l / _r is"
+        );
+    }
+
     if let Some(l) = &config
         .windows
         .as_ref()

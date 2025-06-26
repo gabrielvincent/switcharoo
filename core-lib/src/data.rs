@@ -2,7 +2,7 @@ pub type WorkspaceId = i32;
 pub type MonitorId = i128;
 pub type ClientId = u64;
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, Eq, PartialEq)]
 pub struct Active {
     pub client: Option<ClientId>,
     pub workspace: WorkspaceId,

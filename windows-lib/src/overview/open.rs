@@ -185,6 +185,7 @@ pub fn open_overview(
     }
 
     data.active = active;
+    data.initial_active = active;
     data.hypr_data = clients_data;
     Ok(())
 }

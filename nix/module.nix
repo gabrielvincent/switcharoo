@@ -101,6 +101,12 @@ in
           launcher = {
             enable = mkOpt "Enable app launcher" bool true;
             width = mkOpt "Launcher width" int 650;
+            launch_modifier = mkOpt "Launch modifier" (enum [
+              "alt"
+              "ctrl"
+              "super"
+              "shift"
+            ]) "ctrl";
             max_items = mkOpt "Max shown items" int 5;
             animate_launch_ms = mkOpt "Launcher close duration" int 250;
             default_terminal = mkOpt "Default terminal" (nullOr (str)) null;

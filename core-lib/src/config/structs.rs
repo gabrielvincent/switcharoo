@@ -55,6 +55,8 @@ pub struct Overview {
 pub struct Launcher {
     #[default(None)]
     pub default_terminal: Option<Box<str>>,
+    #[default(Modifier::Ctrl)]
+    pub launch_modifier: Modifier,
     #[default = 650]
     pub width: u32,
     #[default = 5]
@@ -158,16 +160,16 @@ pub enum Modifier {
 impl Display for Modifier {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Modifier::Alt => write!(f, "alt"),
-            Modifier::Ctrl => write!(f, "ctrl"),
-            Modifier::Super => write!(f, "super"),
-            Modifier::Shift => write!(f, "shift"),
+            Modifier::Alt => write!(f, "Alt"),
+            Modifier::Ctrl => write!(f, "Ctrl"),
+            Modifier::Super => write!(f, "Super"),
+            Modifier::Shift => write!(f, "Shift"),
         }
     }
 }
 
 impl Modifier {
-    pub fn to_key(self) -> &'static str {
+    pub fn to_lr_key(self) -> &'static str {
         match self {
             Modifier::Alt => "alt_l",
             Modifier::Ctrl => "control_l",

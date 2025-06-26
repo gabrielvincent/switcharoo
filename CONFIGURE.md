@@ -36,7 +36,7 @@ This mode displays the windows in a downscaled view of the screen. It also shows
 
 - **strip_html_from_workspace_title:**_[boolean]_ Strips the HTML tags from the workspace title.
 - **launcher:**_[Launcher]_ Configuration for the launcher.
-- **key:**_[string]_ The key to use to open the Overview mode (like "tab" or "alt_r"). This is used to register the keybinding to open the Overview mode. If you want to only open using a modifier, set this to the modifier name like `super` or directly use `super_l`. This value is then turned into a modifier keybind like `super_l` as `super` cant be bound as a key.
+- **key:**_[string]_ The key to use to open the Overview mode (like "tab" or "alt_r"). This is used to register the keybinding to open the Overview mode. If you want to only open using a modifier, set this to the modifier name like `super_l`.
 - **modifier:**_[Modifier]_ The modifier that must be pressed together with the key to open the Overview mode (like ctrl). This MUST be one of these modifiers: `Alt, Ctrl, Super, Shift`. DON'T enclose the value in `""` as this is not a string but an enum variant.
 - **filter_by:**_[List<FilterBy>]_ Filter the windows by the provided filter. This is a list of the following objects.
     - **same_class**: Only includes windows of the same class / type. If you currently have alacritty open, only alacritty windows will be shown.
@@ -49,6 +49,7 @@ This mode displays the windows in a downscaled view of the screen. It also shows
 - **default_terminal:**_[string]_ Defined the name of the default terminal to use. This value is optional, if unset a list of [default terminals](./core-lib/src/util.rs) is used to find a default terminal.
   This is used to launch programs like micro from the launcher that need to be run in a terminal.
   This terminal is also used by the `terminal` plugin to run the typed command in a terminal.
+- **launch_modifier:**_[Modifier]_ Sets the modifier used to launch apps in the launcher by pressing `<Mod> + 1` to open second, `<Mod> + t` to run in terminal, etc.
 - **width:**_[number]_ The width of the launcher in pixels.
 - **max_items:**_[number]_ Sets the maximum number of items to show in the launcher.
   This does not include the plugin row and only limits the number of items retuned by for examples the application search.
@@ -78,10 +79,10 @@ This mode displays the windows sorted by their most recent access. This option i
 
 - **modifier:**_[Modifier]_ The modifier that must be helled down together with the `navigate>forward` key to open the Switch mode (like alt). Letting go of this key will close the Switch mode. This MUST be one of these modifiers: `Alt, Ctrl, Super, Shift`. DON'T enclose the value in `""` as this is not a string but an enum variant.
 - **filter_by**_[List<FilterBy>]_ Filter the windows by the provided filter. This is a list of `FilterBy` objects.
-    - **same_class**: Only includes windows of the same class / type. If you currently have alacritty open, only alacritty windows will be shown.
-    - **current_workspace**: Only includes windows of the current workspace.
-    - **current_monitor**: Only includes windows of the current monitor.
-- **show_workspaces**_[boolean]_ Show the workspaces in the Switch mode instead of the windows.
+    - **same_class:** Only includes windows of the same class / type. If you currently have alacritty open, only alacritty windows will be shown.
+    - **current_workspace:** Only includes windows of the current workspace.
+    - **current_monitor:** Only includes windows of the current monitor.
+- **show_workspaces:**_[boolean]_ Show the workspaces in the Switch mode instead of the windows.
 
 # CSS
 

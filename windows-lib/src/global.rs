@@ -7,6 +7,7 @@ pub struct WindowsOverviewData {
     pub config: WindowsOverviewConfig,
     pub window_list: HashMap<ApplicationWindow, WindowsOverviewMonitorData>,
     pub active: Active,
+    pub initial_active: Active,
     pub hypr_data: HyprlandData,
 }
 

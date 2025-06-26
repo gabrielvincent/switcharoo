@@ -6,7 +6,7 @@ use core_lib::transfer::{
     CloseOverviewConfig, OpenSwitch, SwitchOverviewConfig, SwitchSwitchConfig, TransferType,
 };
 use gtk::prelude::EntryExt;
-use tracing::{debug, warn};
+use tracing::{debug, trace, warn};
 
 pub async fn event_handler(
     mut globals: Globals,
@@ -16,6 +16,7 @@ pub async fn event_handler(
     loop {
         if let Ok(transfer) = event_receiver.recv().await {
             let close_socket = matches!(transfer, TransferType::Restart);
+            trace!("handling event: {transfer:?}");
             match transfer {
                 TransferType::OpenOverview => open_overview(&mut globals, event_sender.clone()),
                 TransferType::OpenSwitch(config) => open_switch(&mut globals, config),
@@ -134,8 +135,9 @@ fn close_overview(global: &mut Globals, config: CloseOverviewConfig) {
                 // return (focus active)
                 CloseOverviewConfig::None => {
                     let launcher_empty = launcher.entry.text_length() == 0;
+                    let other_active = overview.active != overview.initial_active;
                     let launcher_no_items = launcher.sorted_matches.is_empty();
-                    if launcher_empty {
+                    if launcher_empty && other_active {
                         // close overview, kill launcher
                         windows_lib::close_overview(overview, Some(None));
                         launcher_lib::close_launcher_by_char(launcher, None);

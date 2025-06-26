@@ -38,27 +38,6 @@ pub fn create_windows_overview_launcher_window(
     entry.connect_changed(move |e| {
         launcher_entry_text_change(e.text().to_string(), event_sender_2.clone());
     });
-    let event_controller = EventControllerKey::new();
-    let plugin_keys = get_static_options_chars(&launcher.plugins);
-    let event_sender_3 = event_sender.clone();
-    let modifiers = Arc::new(Mutex::new(0u16));
-    let modifiers_2 = modifiers.clone();
-    let entry_2 = entry.clone();
-    event_controller.connect_key_pressed(move |_, key, _, _| {
-        handle_key(
-            &entry_2,
-            key,
-            &plugin_keys,
-            open_modifier,
-            modifiers_2.clone(),
-            event_sender_3.clone(),
-        )
-    });
-    event_controller.connect_key_released(move |_, key, _, _| {
-        handle_release(key, modifiers.clone());
-    });
-    event_controller.set_propagation_phase(PropagationPhase::Capture);
-    entry.add_controller(event_controller);
     main_vbox.append(&entry);
 
     let results = gtk::Box::builder()
@@ -91,6 +70,32 @@ pub fn create_windows_overview_launcher_window(
     window.present();
     window.set_visible(false);
 
+    let event_controller = EventControllerKey::new();
+    let plugin_keys = get_static_options_chars(&launcher.plugins);
+    let event_sender_3 = event_sender.clone();
+    let modifiers = Arc::new(Mutex::new(0u16));
+    let modifiers_2 = modifiers.clone();
+    let entry_2 = entry.clone();
+    let results_2 = results.clone();
+    let launch_modifier = launcher.launch_modifier.clone();
+    event_controller.connect_key_pressed(move |_, key, _, _| {
+        handle_key(
+            &entry_2,
+            key,
+            &plugin_keys,
+            open_modifier,
+            launch_modifier,
+            results_2.clone(),
+            modifiers_2.clone(),
+            event_sender_3.clone(),
+        )
+    });
+    event_controller.connect_key_released(move |_, key, _, _| {
+        handle_release(key, open_modifier, modifiers.clone());
+    });
+    event_controller.set_propagation_phase(PropagationPhase::Capture);
+    entry.add_controller(event_controller);
+
     let entry_2 = entry.clone();
     let window_2 = window.clone();
     glib::timeout_add_local(std::time::Duration::from_millis(400), move || {
@@ -108,6 +113,7 @@ pub fn create_windows_overview_launcher_window(
         config: LauncherConfig {
             default_terminal: launcher.default_terminal.clone(),
             max_items: launcher.max_items,
+            launch_modifier: launcher.launch_modifier,
             show_when_empty: launcher.show_when_empty,
             width: launcher.width,
             data_dir: PathBuf::from(data_dir).into_boxed_path(),
@@ -128,16 +134,16 @@ fn launcher_entry_text_change(text: String, event_sender: Sender<TransferType>) 
         .warn("unable to send");
 }
 
-fn handle_release(key: Key, mods: Arc<Mutex<u16>>) {
+fn handle_release(key: Key, open_modifier: Modifier, mods: Arc<Mutex<u16>>) {
     let mut mods = mods.lock().unwrap();
     match key {
-        // Key::Shift_L | Key::Shift_R => *mods &= !1,
-        Key::Control_L | Key::Control_R => *mods &= !2,
-        // Key::Alt_L | Key::Alt_R => *mods &= !4,
-        // Key::Super_L | Key::Super_R => *mods &= !8,
+        Key::Shift_L | Key::Shift_R if open_modifier != Modifier::Shift => *mods &= !0b0001,
+        Key::Control_L | Key::Control_R if open_modifier != Modifier::Ctrl => *mods &= !0b0010,
+        Key::Alt_L | Key::Alt_R if open_modifier != Modifier::Alt => *mods &= !0b0100,
+        Key::Super_L | Key::Super_R if open_modifier != Modifier::Super => *mods &= !0b1000,
         _ => (),
     };
-    // tracing::trace!("key: {}{:?}, mods: {}", key, key, mods);
+    tracing::trace!("key: {}{:?}, mods: {}", key, key, mods);
 }
 
 fn handle_key(
@@ -145,20 +151,34 @@ fn handle_key(
     key: Key,
     plugin_keys: &[Key],
     open_modifier: Modifier,
+    launch_modifier: Modifier,
+    results: gtk::Box,
     mods: Arc<Mutex<u16>>,
     event_sender: Sender<TransferType>,
 ) -> Propagation {
     let mut mods = mods.lock().unwrap();
     match key {
-        // Key::Shift_L | Key::Shift_R => *mods |= 1,
-        Key::Control_L | Key::Control_R => *mods |= 2,
-        // Key::Alt_L | Key::Alt_R => *mods |= 4,
-        // Key::Super_L | Key::Super_R => *mods |= 8,
+        Key::Shift_L | Key::Shift_R if open_modifier != Modifier::Shift => *mods |= 0b0001,
+        Key::Control_L | Key::Control_R if open_modifier != Modifier::Ctrl => *mods |= 0b0010,
+        Key::Alt_L | Key::Alt_R if open_modifier != Modifier::Alt => *mods |= 0b0100,
+        Key::Super_L | Key::Super_R if open_modifier != Modifier::Super => *mods |= 0b1000,
         _ => (),
     };
-    // tracing::trace!("key: {}{:?}, mods: {}", key, key, mods);
-    // plugins always use ctrl modifier
-    if *mods == 2 && plugin_keys.contains(&key) {
+    let launch_mod = match launch_modifier {
+        Modifier::Shift => (*mods & 0b0001) != 0,
+        Modifier::Ctrl => (*mods & 0b0010) != 0,
+        Modifier::Alt => (*mods & 0b0100) != 0,
+        Modifier::Super => (*mods & 0b1000) != 0,
+    };
+    tracing::trace!(
+        "key: {}{:?}, mods: {}, launch_mod: {}, launch_modifier: {}",
+        key,
+        key,
+        mods,
+        launch_mod,
+        launch_modifier
+    );
+    if launch_mod && plugin_keys.contains(&key) {
         let ch = key
             .name()
             .unwrap_or_default()
@@ -183,7 +203,7 @@ fn handle_key(
         return Propagation::Stop;
     }
 
-    match (*mods, key) {
+    match (launch_mod, key) {
         (_, Key::Escape) => {
             event_sender
                 .send_blocking(TransferType::Exit)
@@ -217,13 +237,6 @@ fn handle_key(
                 .warn("unable to send");
             Propagation::Stop
         }
-        (0, Key::Return) => {
-            // TODO dont send if no results
-            event_sender
-                .send_blocking(TransferType::CloseOverview(CloseOverviewConfig::None))
-                .warn("unable to send");
-            Propagation::Stop
-        }
         (_, Key::Up) => {
             event_sender
                 .send_blocking(TransferType::SwitchOverview(SwitchOverviewConfig {
@@ -242,7 +255,7 @@ fn handle_key(
                 .warn("unable to send");
             Propagation::Stop
         }
-        (0, Key::Left) => {
+        (_, Key::Left) => {
             if !entry.text().is_empty() {
                 // allow to use in text in launcher
                 return Propagation::Proceed;
@@ -255,7 +268,7 @@ fn handle_key(
                 .warn("unable to send");
             Propagation::Stop
         }
-        (0, Key::Right) => {
+        (_, Key::Right) => {
             if !entry.text().is_empty() {
                 // allow to use in text in launcher
                 return Propagation::Proceed;
@@ -268,78 +281,102 @@ fn handle_key(
                 .warn("unable to send");
             Propagation::Stop
         }
-        (2, Key::_1) => {
-            // TODO dont send if less than 2 results
-            event_sender
-                .send_blocking(TransferType::CloseOverview(
-                    CloseOverviewConfig::LauncherPress('1'),
-                ))
-                .warn("unable to send");
+        (_, Key::Return) => {
+            if results.first_child().is_some() {
+                event_sender
+                    .send_blocking(TransferType::CloseOverview(CloseOverviewConfig::None))
+                    .warn("unable to send");
+            }
             Propagation::Stop
         }
-        (2, Key::_2) => {
-            // TODO dont send if less than 3 results
-            event_sender
-                .send_blocking(TransferType::CloseOverview(
-                    CloseOverviewConfig::LauncherPress('2'),
-                ))
-                .warn("unable to send");
+        (true, Key::_1) => {
+            if results.observe_children().into_iter().len() > 1 {
+                event_sender
+                    .send_blocking(TransferType::CloseOverview(
+                        CloseOverviewConfig::LauncherPress('1'),
+                    ))
+                    .warn("unable to send");
+            }
             Propagation::Stop
         }
-        (2, Key::_3) => {
-            event_sender
-                .send_blocking(TransferType::CloseOverview(
-                    CloseOverviewConfig::LauncherPress('3'),
-                ))
-                .warn("unable to send");
+        (true, Key::_2) => {
+            if results.observe_children().into_iter().len() > 2 {
+                event_sender
+                    .send_blocking(TransferType::CloseOverview(
+                        CloseOverviewConfig::LauncherPress('2'),
+                    ))
+                    .warn("unable to send");
+            }
             Propagation::Stop
         }
-        (2, Key::_4) => {
-            event_sender
-                .send_blocking(TransferType::CloseOverview(
-                    CloseOverviewConfig::LauncherPress('4'),
-                ))
-                .warn("unable to send");
+        (true, Key::_3) => {
+            if results.observe_children().into_iter().len() > 3 {
+                event_sender
+                    .send_blocking(TransferType::CloseOverview(
+                        CloseOverviewConfig::LauncherPress('3'),
+                    ))
+                    .warn("unable to send");
+            }
             Propagation::Stop
         }
-        (2, Key::_5) => {
-            event_sender
-                .send_blocking(TransferType::CloseOverview(
-                    CloseOverviewConfig::LauncherPress('5'),
-                ))
-                .warn("unable to send");
+        (true, Key::_4) => {
+            if results.observe_children().into_iter().len() > 4 {
+                event_sender
+                    .send_blocking(TransferType::CloseOverview(
+                        CloseOverviewConfig::LauncherPress('4'),
+                    ))
+                    .warn("unable to send");
+            }
             Propagation::Stop
         }
-        (2, Key::_6) => {
-            event_sender
-                .send_blocking(TransferType::CloseOverview(
-                    CloseOverviewConfig::LauncherPress('6'),
-                ))
-                .warn("unable to send");
+        (true, Key::_5) => {
+            if results.observe_children().into_iter().len() > 5 {
+                event_sender
+                    .send_blocking(TransferType::CloseOverview(
+                        CloseOverviewConfig::LauncherPress('5'),
+                    ))
+                    .warn("unable to send");
+            }
             Propagation::Stop
         }
-        (2, Key::_7) => {
-            event_sender
-                .send_blocking(TransferType::CloseOverview(
-                    CloseOverviewConfig::LauncherPress('7'),
-                ))
-                .warn("unable to send");
+        (true, Key::_6) => {
+            if results.observe_children().into_iter().len() > 6 {
+                event_sender
+                    .send_blocking(TransferType::CloseOverview(
+                        CloseOverviewConfig::LauncherPress('6'),
+                    ))
+                    .warn("unable to send");
+            }
             Propagation::Stop
         }
-        (2, Key::_8) => {
-            event_sender
-                .send_blocking(TransferType::CloseOverview(
-                    CloseOverviewConfig::LauncherPress('8'),
-                ))
-                .warn("unable to send");
+        (true, Key::_7) => {
+            if results.observe_children().into_iter().len() > 7 {
+                event_sender
+                    .send_blocking(TransferType::CloseOverview(
+                        CloseOverviewConfig::LauncherPress('7'),
+                    ))
+                    .warn("unable to send");
+            }
             Propagation::Stop
         }
-        (2, Key::_9) => {
-            event_sender
-                .send_blocking(TransferType::CloseOverview(
-                    CloseOverviewConfig::LauncherPress('9'),
-                ))
-                .warn("unable to send");
+        (true, Key::_8) => {
+            if results.observe_children().into_iter().len() > 8 {
+                event_sender
+                    .send_blocking(TransferType::CloseOverview(
+                        CloseOverviewConfig::LauncherPress('8'),
+                    ))
+                    .warn("unable to send");
+            }
+            Propagation::Stop
+        }
+        (true, Key::_9) => {
+            if results.observe_children().into_iter().len() > 9 {
+                event_sender
+                    .send_blocking(TransferType::CloseOverview(
+                        CloseOverviewConfig::LauncherPress('9'),
+                    ))
+                    .warn("unable to send");
+            }
             Propagation::Stop
         }
         _ => Propagation::Proceed,
