@@ -1,16 +1,16 @@
-use core_lib::{IniFile, get_config_dirs, get_config_home};
+use core_lib::{IniFile, get_default_desktop_file};
 use std::fs::{DirEntry, read_to_string};
 use std::path::Path;
 use std::sync::{Mutex, MutexGuard, OnceLock};
-use tracing::{Level, debug, span, trace, warn};
+use tracing::{Level, span, trace, warn};
 
-pub struct DefaultPlugins {
+pub struct BrowserData {
     pub exec: Box<str>,
     pub startup_wm_class: Option<Box<str>>,
     pub icon: Option<Box<Path>>,
 }
 
-pub(super) fn get_browser_info<'a>() -> MutexGuard<'a, DefaultPlugins> {
+pub(super) fn get_browser_info<'a>() -> MutexGuard<'a, BrowserData> {
     BROWSER_EXEC
         .get()
         .expect("browser exec no initialized")
@@ -18,11 +18,11 @@ pub(super) fn get_browser_info<'a>() -> MutexGuard<'a, DefaultPlugins> {
         .expect("Failed to lock browser exec")
 }
 
-static BROWSER_EXEC: OnceLock<Mutex<DefaultPlugins>> = OnceLock::new();
+static BROWSER_EXEC: OnceLock<Mutex<BrowserData>> = OnceLock::new();
 
 pub fn reload_default_browser(files: &[DirEntry]) {
     let _span = span!(Level::TRACE, "reload_default_browser").entered();
-    let default_browser = get_default_browser_desktop_file();
+    let default_browser = get_default_desktop_file("x-scheme-handler/https");
 
     for entry in files {
         if entry.file_name() == default_browser.as_deref().unwrap_or_default() {
@@ -43,7 +43,7 @@ pub fn reload_default_browser(files: &[DirEntry]) {
                             exec,
                             startup_wm_class
                         );
-                        let _ = BROWSER_EXEC.set(Mutex::new(DefaultPlugins {
+                        let _ = BROWSER_EXEC.set(Mutex::new(BrowserData {
                             exec: Box::from(exec),
                             startup_wm_class: startup_wm_class.map(Box::from),
                             icon: icon.map(Path::new).map(Box::from),
@@ -62,57 +62,9 @@ pub fn reload_default_browser(files: &[DirEntry]) {
         }
     }
     warn!("No default browser found! (using firefox and gdbus to open)");
-    let _ = BROWSER_EXEC.set(Mutex::new(DefaultPlugins {
+    let _ = BROWSER_EXEC.set(Mutex::new(BrowserData {
         exec: Box::from(r#"gdbus call --session --dest="org.freedesktop.portal.Desktop" --object-path=/org/freedesktop/portal/desktop --method=org.freedesktop.portal.OpenURI.OpenURI '' '%u' '{}'"#),
         startup_wm_class: Some(Box::from("firefox")),
         icon: Some(Box::from(Path::new("firefox"))),
     }));
-}
-
-fn get_default_browser_desktop_file() -> Option<Box<str>> {
-    for entry in get_mimeapps() {
-        // parse the mimeapps.list file
-        if let Ok(str) = read_to_string(entry.path()) {
-            let ini = IniFile::parse(&str);
-            let browser = ini
-                .get_section("Default Applications")?
-                .get_boxed("x-scheme-handler/https")?;
-            debug!("Default browser from mimeapps.list: {}", browser);
-            return Some(browser);
-        } else {
-            warn!("Failed to read file: {:?}", entry.path());
-        }
-    }
-    None
-}
-
-fn get_mimeapps() -> Vec<DirEntry> {
-    let mut res = Vec::new();
-    let mut dirs = get_config_dirs();
-    dirs.push(get_config_home());
-    for dir in dirs {
-        if !dir.exists() {
-            continue;
-        }
-        match dir.read_dir() {
-            Ok(dir) => {
-                for entry in dir.flatten() {
-                    let path = entry.path();
-                    if path.is_file()
-                        && path
-                            .file_name()
-                            .is_some_and(|e| e.to_string_lossy().ends_with("mimeapps.list"))
-                    {
-                        res.push(entry);
-                    }
-                }
-            }
-            Err(e) => {
-                warn!("Failed to read dir {dir:?}: {e}");
-                continue;
-            }
-        }
-    }
-    debug!("found {} mimeapps lists", res.len());
-    res
 }

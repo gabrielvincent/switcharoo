@@ -10,10 +10,12 @@ mod terminal;
 
 #[cfg(feature = "calc")]
 mod calc;
+mod path;
 
 pub use applications::get_stored_runs as get_applications_stored_runs;
 pub use applications::reload_desktop_map as reload_applications_desktop_map;
 use core_lib::transfer::{Identifier, PluginNames};
+pub use path::reload_default_file_manager as reload_path_default_file_manager;
 pub use search::reload_default_browser as reload_search_default_browser;
 
 #[derive(Debug)]
@@ -74,6 +76,9 @@ pub fn get_sortable_launch_options(
         #[cfg(not(feature = "calc"))]
         tracing::warn!("calc plugin is not enabled");
     }
+    if plugins.path.is_some() {
+        path::get_path_options(&mut matches, text)
+    }
 
     // sort in reverse
     matches.sort_by(|a, b| b.score.cmp(&a.score));
@@ -115,6 +120,7 @@ pub fn launch(
         PluginNames::Shell => shell::launch_option(text, default_terminal),
         PluginNames::Terminal => terminal::launch_option(text, default_terminal),
         PluginNames::WebSearch => search::launch_option(&iden.identifier, text),
+        PluginNames::Path => path::launch_option(text),
         PluginNames::Calc => {
             #[cfg(feature = "calc")]
             calc::copy_result(&iden.identifier);

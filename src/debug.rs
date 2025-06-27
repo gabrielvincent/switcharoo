@@ -65,6 +65,7 @@ pub fn search(text: &str, all: bool, config_path: &Path, data_dir: &Path) {
                 terminal: None,
                 websearch: None,
                 calc: None,
+                path: None,
             },
             5,
         ));

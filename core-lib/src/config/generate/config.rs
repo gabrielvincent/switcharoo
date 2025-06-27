@@ -100,6 +100,7 @@ pub fn generate_config(data: ConfigData) -> Config {
                                 .iter()
                                 .find(|pl| pl.as_ref().eq(configurable_launcher_plugins::CALC))
                                 .map(|_| Default::default()),
+                            path: Some(Default::default()),
                         },
                         ..Default::default()
                     },

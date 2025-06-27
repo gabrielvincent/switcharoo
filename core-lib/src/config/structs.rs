@@ -71,6 +71,7 @@ pub struct Launcher {
         shell: None,
         websearch: Some(WebSearchConfig::default()),
         calc: Some(EmptyConfig::default()),
+        path: Some(EmptyConfig::default()),
     })]
     pub plugins: Plugins,
 }
@@ -85,6 +86,7 @@ pub struct Plugins {
     pub shell: Option<EmptyConfig>,
     pub websearch: Option<WebSearchConfig>,
     pub calc: Option<EmptyConfig>,
+    pub path: Option<EmptyConfig>,
 }
 
 #[derive(SmartDefault, Debug, Clone, PartialEq, Deserialize, Serialize)]

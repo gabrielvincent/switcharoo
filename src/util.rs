@@ -12,6 +12,7 @@ pub fn reload_desktop_data() {
     windows_lib::reload_desktop_map(&desktop_files);
     launcher_lib::reload_applications_desktop_map(&desktop_files);
     launcher_lib::reload_search_default_browser(&desktop_files);
+    launcher_lib::reload_path_default_file_manager(&desktop_files);
 }
 
 pub fn init_gtk() {

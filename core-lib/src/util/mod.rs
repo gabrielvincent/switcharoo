@@ -1,9 +1,11 @@
 mod r#const;
+mod defaults;
 mod exec;
 mod helpers;
 mod version;
 
 pub use r#const::*;
+pub use defaults::*;
 pub use exec::*;
 pub use helpers::*;
 pub use version::*;

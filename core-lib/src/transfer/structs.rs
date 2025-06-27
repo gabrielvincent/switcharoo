@@ -51,6 +51,7 @@ pub enum PluginNames {
     Terminal,
     WebSearch,
     Calc,
+    Path,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
