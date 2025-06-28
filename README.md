@@ -104,4 +104,4 @@ exec-once = hyprshell run &
 - toml_config: Adds support for a toml config file.
 - launcher_calc: Adds support for the calc plugin in the launcher.
 - debug_command: Adds the `hyprshell debug` command to debug icons in the window mode.
-- bar: Unused
+- config_check_is_default: Adds a command to check if the loaded config is equal to the default config. Also diables loading of configs without all values.

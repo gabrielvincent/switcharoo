@@ -36,12 +36,11 @@ generate_config_command = ["core-lib/generate_config"]
 launcher_calc = ["launcher-lib/calc", "core-lib/calc"]
 debug_command = []
 config_check_is_default = ["core-lib/no-default-config-values"]
-bar = []
+
 
 [workspace]
 members = ["exec-lib", "core-lib", "windows-lib", "launcher-lib"]
 resolver = "2"
-
 
 [workspace.package]
 version = "4.5.0"
@@ -66,6 +65,7 @@ core-lib = { path = "core-lib", package = "hyprshell-core-lib", version = "=4.5.
 exec-lib = { path = "exec-lib", package = "hyprshell-exec-lib", version = "=4.5.0" }
 windows-lib = { path = "windows-lib", package = "hyprshell-windows-lib", version = "=4.5.0" }
 launcher-lib = { path = "launcher-lib", package = "hyprshell-launcher-lib", version = "=4.5.0" }
+
 
 [profile.release]
 strip = "debuginfo"

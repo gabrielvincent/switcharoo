@@ -1,16 +1,16 @@
-/* ---------- gtk4 doesnt support backdrop-filter so I cant blur the background ----------  */
-
 :root {
-    --border-color: rgba(255, 255, 255, 0.6);
-    --border-color-active: rgba(120, 245, 255, 0.9);
+    --border-color: rgba(255, 255, 255, 0);
+    --border-color-active: rgba(120, 245, 255, 0.85);
 
-    --bg-color: rgba(255, 255, 255, 0.15);
-    --bg-color-hover: rgba(40, 40, 50, 1);
+    --box-shadow-color: rgba(255, 255, 255, 0.7);
+    --box-shadow-color-hover: rgba(255, 255, 255, 0.85);
 
-    --border-radius: 12px;
-    --border-size: 2px;
+    --bg-color: rgba(255, 255, 255, 0.01);
+    --bg-color-hover: rgba(255, 255, 255, 0.05);
+
+    --border-radius: 24px;
+    --border-size: 3px;
     --border-style: solid;
-    --border-style-secondary: dashed;
 
     --text-color: rgba(245, 245, 245, 1);
 
@@ -19,36 +19,32 @@
 
 
 .monitor {
-    background: rgba(255, 255, 255, 0.15);
-    box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.5);
+    border: unset;
+    box-shadow: inset 0 0 30px var(--box-shadow-color);
 }
 
 .workspace {
-    background: rgba(255, 255, 255, 0.05);
-    box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.5);
-}
-
-.workspace:hover {
-    box-shadow: inset 0 0 10px rgba(190, 245, 255, 0.7);
+    box-shadow: inset 0 0 25px var(--box-shadow-color);
 }
 
 .workspace.active {
-    box-shadow: inset 0 0 10px rgba(190, 245, 255, 0.7);
+    box-shadow: inset 0 0 30px var(--box-shadow-color-hover);
+}
+
+.workspace:hover {
+    box-shadow: inset 0 0 35px var(--box-shadow-color-hover);
 }
 
 .client {
-    background: unset;
-    box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.5);
+    box-shadow: inset 0 0 25px var(--box-shadow-color);
 }
 
 .client.active {
-    background: rgba(255, 255, 255, 0.15);
-    box-shadow: inset 0 0 10px rgba(190, 245, 255, 0.7);
+    box-shadow: inset 0 0 30px var(--box-shadow-color-hover);
 }
 
 .client:hover {
-    background: rgba(255, 255, 255, 0.20);
-    box-shadow: inset 0 0 10px rgba(190, 245, 255, 0.7);
+    box-shadow: inset 0 0 35px var(--box-shadow-color-hover);
 }
 
 .client-image {
@@ -56,34 +52,31 @@
 
 
 .launcher {
-    background: rgba(255, 255, 255, 0.15);
-    box-shadow: inset 0 0 25px rgba(255, 255, 255, 0.5);
+    border: unset;
+    box-shadow: inset 0 0 25px var(--box-shadow-color);
 }
 
 .launcher-input {
-    background: unset;
-    border-radius: 10px;
-    background: rgba(255, 255, 255, 0.05);
-    box-shadow: inset 0 0 8px rgba(255, 255, 255, 0.5);
+    border-radius: 12px;
+    box-shadow: inset 0 0 8px var(--box-shadow-color);
 }
 
 .launcher-input:focus-within {
-    box-shadow: inset 0 0 15px rgba(190, 245, 255, 0.7);
     outline: var(--border-size, 3px) var(--border-style, solid) var(--border-color-active);
+    box-shadow: inset 0 0 12px var(--box-shadow-color-hover);
 }
 
 .launcher-results {
 }
 
 .launcher-item {
-    background: unset;
-    box-shadow: inset 0 0 12px rgba(255, 255, 255, 0.5);
-    border: 1px var(--border-style, solid) rgba(255, 255, 255, 0.6);
+    padding: 0 10px;
+    border-radius: 16px;
+    box-shadow: inset 0 0 12px var(--box-shadow-color);
 }
 
 .launcher-item:hover {
-    background: rgba(255, 255, 255, 0.20);
-    box-shadow: inset 0 0 10px rgba(190, 245, 255, 0.7);
+    box-shadow: inset 0 0 14px var(--box-shadow-color-hover);
 }
 
 .launcher-exec {
@@ -96,12 +89,11 @@
 }
 
 .launcher-plugin {
-    background: unset;
-    box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.5);
-    border: var(--border-size, 3px) var(--border-style, solid) rgba(255, 255, 255, 0.6);
+    padding: 8px;
+    border-radius: 24px;
+    box-shadow: inset 0 0 20px var(--box-shadow-color);
 }
 
 .launcher-plugin:hover {
-    background: rgba(255, 255, 255, 0.20);
-    box-shadow: inset 0 0 20px rgba(190, 245, 255, 0.7);
+    box-shadow: inset 0 0 20px var(--box-shadow-color-hover);
 }

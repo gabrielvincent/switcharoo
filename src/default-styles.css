@@ -5,10 +5,18 @@
 
 /* buttons need to be transparent as they wrap everything clickable */
 button {
-    background: unset;
-    padding: unset;
-    margin: unset;
-    border: unset;
+    background: none;
+    padding: 0;
+    margin: 0;
+    border: none;
+}
+
+frame {
+    border: none;
+}
+
+image {
+    border: none;
 }
 
 /* no background and no hover effects by default */

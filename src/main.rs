@@ -170,9 +170,8 @@ fn main() -> anyhow::Result<()> {
 
 fn check_features() {
     tracing::debug!(
-        "FEATURES: TOML support: {}, Bar: {}, Config command: {}, Debug command: {}, Launcher calc: {}",
+        "FEATURES: TOML support: {}, Config command: {}, Debug command: {}, Launcher calc: {}",
         cfg!(feature = "toml_config"),
-        cfg!(feature = "bar"),
         cfg!(feature = "generate_config_command"),
         cfg!(feature = "debug_command"),
         cfg!(feature = "launcher_calc"),
