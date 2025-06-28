@@ -86,15 +86,15 @@ This mode displays the windows sorted by their most recent access. This option i
 
 # CSS
 
-The override CSS file is located at `~/.config/hyprshell/style.css` but can be configured using the `-s` argument. The config is loaded at startup but is reloaded when the file changes. (unsetting styles will sometimes not work)
+The CSS file is located at `~/.config/hyprshell/style.css` but can be configured using the `-s` argument. The config is loaded at startup but is reloaded when the file changes. (removing styles will not work, adding or overriding styles works)
 
-To generate a default override file with all possible classes and CSS variables, run the following command:
+**Some examples can be found in the [CSS Examples folder](./css-examples).**
+
+To generate a default file with all possible classes and CSS variables, run the following command:
 
 ```bash
 hyprshell config generate
 ```
-
-The default override file can also be found in [the code](./core-lib/src/config/generate/default.css).
 
 GTK only supports a subset of CSS, so not all CSS properties will work. The supported properties are listed in the [GTK documentation](https://docs.gtk.org/gtk4/css-overview.html).
 
@@ -104,8 +104,6 @@ These settings will take priority over the default values set by the application
 If you want to change colors borders, etc. you can edit the CSS variables in the `:root {}` section.
 These styles are automatically used everywhere in the application, so you don't have to set them for every class.
 The values in the `:root {}` are set as fallbacks everywhere in the application, so you can just not set the ones you don't want to change.
-
-Some examples can be found in the [CSS Examples folder](./css-examples).
 
 ![image.png](./imgs/css/swappy-20250510_222852.png)
 ![image.png](./imgs/css/swappy-20250510_224344.png)
