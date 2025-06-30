@@ -1,6 +1,6 @@
 use crate::plugins::get_sortable_launch_options;
 use crate::reload_applications_desktop_map;
-use core_lib::config::Plugins;
+use config_lib::Plugins;
 use std::path::Path;
 use tracing::field::debug;
 use tracing::{debug, info};

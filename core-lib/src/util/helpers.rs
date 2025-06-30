@@ -81,7 +81,7 @@ impl<A, E: fmt::Debug + fmt::Display> Warn<A> for Result<A, E> {
             Ok(o) => Some(o),
             Err(e) => {
                 warn!("{}", e);
-                debug!("{e:?}");
+                debug!("Error: {e:?}");
                 None
             }
         }

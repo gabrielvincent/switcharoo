@@ -1,4 +1,4 @@
-use core_lib::config::{Modifier, Plugins};
+use config_lib::{Modifier, Plugins};
 use core_lib::transfer::Identifier;
 use gtk::{ApplicationWindow, Entry};
 use std::collections::HashMap;

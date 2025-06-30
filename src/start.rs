@@ -5,10 +5,10 @@ use crate::util;
 use crate::util::{check_themes, fill_icon_map, gtk_handle_sigterm, reload_desktop_data};
 use anyhow::Context;
 use async_channel::{Receiver, Sender};
-use core_lib::config::Config;
+use config_lib::Config;
 use core_lib::transfer::TransferType;
 use core_lib::{
-    APPLICATION_ID, WarnWithDetails, config, hyprshell_config_block, hyprshell_config_listener,
+    APPLICATION_ID, WarnWithDetails, hyprshell_config_block, hyprshell_config_listener,
     hyprshell_css_listener,
 };
 use exec_lib::listener::{hyprland_config_listener, monitor_listener};
@@ -109,11 +109,11 @@ fn activate(
         return; // return needed to exit the application
     }
 
-    let config = match config::load_and_migrate_config(config_path) {
+    let config = match config_lib::load_and_migrate_config(config_path) {
         Ok(config) => config,
         Err(err) => {
             error!("Failed to load config: {:?}", err);
-            toast(&format!("Failed to load config: {:?}", err));
+            toast(&format!("Failed to load config: {err:?}"));
             hyprshell_config_block(config_path);
             return; // return needed to exit the application
         }
@@ -217,7 +217,7 @@ pub fn register_event_restarter(
         .ok()
         .and_then(|s| s.parse().ok())
         .unwrap_or(1500);
-    let (restart_sender, restart_receiver) = async_channel::bounded(1);
+    let (restart_sender, restart_receiver) = async_channel::unbounded();
     glib::timeout_add_local_once(Duration::from_millis(delay), move || {
         setup_restart_listener(&config_path, &css_path, restart_sender);
     });

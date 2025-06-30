@@ -16,9 +16,9 @@ pub fn get_default_config_path() -> PathBuf {
         trace!("Found config file at {path:?}");
         return path;
     }
-    #[cfg(feature = "toml_config")]
+    #[cfg(feature = "json5_config")]
     {
-        path.set_extension("toml");
+        path.set_extension("json5");
         if path.exists() {
             trace!("Found config file at {path:?}");
             return path;

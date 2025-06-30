@@ -1,13 +1,16 @@
 mod check;
-pub mod explain;
+mod explain;
 #[cfg(feature = "generate_config")]
 pub mod generate;
 mod load;
-pub mod migrate;
+mod migrate;
+mod modifier;
 mod save;
 mod structs;
 
 pub use check::check;
+pub use explain::explain;
 pub use load::load_and_migrate_config;
+pub use modifier::*;
 pub use save::write_config;
 pub use structs::*;

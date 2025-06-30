@@ -1,6 +1,6 @@
 use crate::binds::structs::ExecBind;
-use crate::config::Modifier;
 use anyhow::bail;
+use config_lib::Modifier;
 
 pub fn generate_bind_kill(kill_bind: &str) -> anyhow::Result<ExecBind> {
     let a = kill_bind
@@ -11,15 +11,8 @@ pub fn generate_bind_kill(kill_bind: &str) -> anyhow::Result<ExecBind> {
     let mods = match a.first() {
         Some(s) => {
             let mut parsed_mods = Vec::new();
-            for m in s.split('+') {
-                let mod_parsed: anyhow::Result<Modifier> = match m.to_ascii_lowercase().as_str() {
-                    "alt" => Ok(Modifier::Alt),
-                    "ctrl" | "control" => Ok(Modifier::Ctrl),
-                    "super" | "win" => Ok(Modifier::Super),
-                    "shift" => Ok(Modifier::Shift),
-                    _ => bail!("Unknown modifier: {}", m),
-                };
-                parsed_mods.push(mod_parsed?);
+            for str in s.split('+') {
+                parsed_mods.push(Modifier::try_from(str)?.to_str());
             }
             parsed_mods
         }
@@ -34,7 +27,7 @@ pub fn generate_bind_kill(kill_bind: &str) -> anyhow::Result<ExecBind> {
         key,
         mods,
         on_release: true,
-        exec: "pkill hyprshell".into(),
+        exec: format!("kill {}", std::process::id()).into_boxed_str(),
     };
     Ok(bind)
 }

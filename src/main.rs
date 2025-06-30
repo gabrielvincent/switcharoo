@@ -73,39 +73,35 @@ fn main() -> anyhow::Result<()> {
                 let config_path = config_path.unwrap_or(get_default_config_path());
                 let css_path = css_file.unwrap_or(get_default_css_path());
 
-                let (override_config, override_css) =
-                    core_lib::config::generate::get_overrides(&force);
-                core_lib::config::generate::check_file_exist(
+                let (override_config, override_css) = config_lib::generate::get_overrides(&force);
+                config_lib::generate::check_file_exist(
                     &config_path,
                     &css_path,
                     override_config,
                     override_css,
                 )?;
 
-                let (config_data, css_data) = core_lib::config::generate::prompt_config()?;
-                let config = core_lib::config::generate::generate_config(config_data);
+                let (config_data, css_data) = config_lib::generate::prompt_config()?;
+                let config = config_lib::generate::generate_config(config_data);
                 tracing::trace!("Generated config: {:#?}", config);
-                core_lib::config::write_config(&config_path, &config, override_config).warn();
-                core_lib::config::generate::write_css(&css_path, &css_data, override_css).warn();
+                config_lib::write_config(&config_path, &config, override_config).warn();
+                config_lib::generate::write_css(&css_path, &css_data, override_css).warn();
                 if !no_systemd {
-                    core_lib::config::generate::write_systemd_unit(
+                    config_lib::generate::write_systemd_unit(
                         opts.config_file.as_ref(),
                         opts.css_file.as_ref(),
                         opts.data_dir.as_ref(),
+                        &core_lib::get_data_home(),
                     )
                     .warn();
                 }
-                core_lib::config::explain::explain_config(&config_path).warn();
+                core_lib::explain_config(&config_path);
             }
             cli::ConfigCommand::Explain {} => {
-                use core_lib::Warn;
-                core_lib::config::explain::explain_config(
-                    &config_path.unwrap_or(get_default_config_path()),
-                )
-                .warn();
+                core_lib::explain_config(&config_path.unwrap_or(get_default_config_path()));
             }
             cli::ConfigCommand::Check {} => {
-                if let Err(err) = core_lib::config::load_and_migrate_config(
+                if let Err(err) = config_lib::load_and_migrate_config(
                     &config_path.unwrap_or(get_default_config_path()),
                 ) {
                     tracing::warn!("Failed to load config: {err}");
@@ -114,10 +110,10 @@ fn main() -> anyhow::Result<()> {
             }
             #[cfg(feature = "config_check_is_default")]
             cli::ConfigCommand::CheckIfDefault {} => {
-                if let Ok(config) = core_lib::config::load_and_migrate_config(
+                if let Ok(config) = config_lib::load_and_migrate_config(
                     &config_path.unwrap_or(get_default_config_path()),
                 ) {
-                    let config_default = core_lib::config::Config::default();
+                    let config_default = config_lib::Config::default();
                     if config != config_default {
                         tracing::warn!("Current config does not match the default configuration");
                         tracing::info!("Default config: {:#?}", config_default);
@@ -170,8 +166,8 @@ fn main() -> anyhow::Result<()> {
 
 fn check_features() {
     tracing::debug!(
-        "FEATURES: TOML support: {}, Config command: {}, Debug command: {}, Launcher calc: {}",
-        cfg!(feature = "toml_config"),
+        "FEATURES: JSON5 support: {}, Config command: {}, Debug command: {}, Launcher calc: {}",
+        cfg!(feature = "json5_config"),
         cfg!(feature = "generate_config_command"),
         cfg!(feature = "debug_command"),
         cfg!(feature = "launcher_calc"),

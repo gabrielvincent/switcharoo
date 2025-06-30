@@ -1,0 +1,29 @@
+[package]
+name = "hyprshell-config-lib"
+documentation = "https://docs.rs/hyprshell-config-lib"
+version = "4.5.0"
+edition.workspace = true
+description.workspace = true
+license.workspace = true
+authors.workspace = true
+keywords.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+anyhow.workspace = true
+tracing.workspace = true
+serde_json.workspace = true
+
+inquire = { version = "0.7.5", optional = true, default-features = false, features = ["termion"] }
+serde = { version = "1.0.219", features = ["derive"] }
+toml = { version = "0.8.22" }
+smart-default = { version = "0.7.1" }
+ron = { version = "0.10.1" }
+serde_json5 = { version = "0.2.1", optional = true }
+
+[features]
+json5_config = ["dep:serde_json5"]
+generate_config = ["dep:inquire"]
+no-default-config-values = []
+launcher_calc_plugin = []

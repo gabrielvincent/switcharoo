@@ -53,13 +53,13 @@ pub fn list_desktop_files() {
 }
 
 pub fn search(text: &str, all: bool, config_path: &Path, data_dir: &Path) {
-    let (plugins, max_items) = core_lib::config::load_and_migrate_config(config_path)
+    let (plugins, max_items) = config_lib::load_and_migrate_config(config_path)
         .ok()
         .and_then(|c| c.windows)
         .and_then(|w| w.overview)
         .map(|o| (o.launcher.plugins, o.launcher.max_items))
         .unwrap_or((
-            core_lib::config::Plugins {
+            config_lib::Plugins {
                 applications: Default::default(),
                 shell: None,
                 terminal: None,

@@ -1,7 +1,7 @@
 use anyhow::Context;
+use config_lib::Config;
 use core_lib::WarnWithDetails;
 use core_lib::binds::generate_bind_kill;
-use core_lib::config::Config;
 use exec_lib::binds::{apply_exec_bind, apply_layerrules};
 use tracing::{Level, span};
 

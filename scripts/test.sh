@@ -5,7 +5,7 @@ export RUSTFLAGS=-Awarnings
 
 # Define the features as an array
 #declare -a features=("generate_config_command" "toml_config" "debug_command" "bar" "launcher_calc")
-declare -a features=("generate_config_command" "config_check_is_default" "launcher_calc" "debug_command")
+declare -a features=("generate_config_command" "json5_config" "config_check_is_default" "launcher_calc" "debug_command")
 
 # Get the total number of features
 num_features=${#features[@]}
@@ -17,15 +17,15 @@ build_with_features() {
   local start_time=$(date +%s.%N)
 
   if [[ -z "$feature_combination" ]]; then
-    echo -n "[$iteration] Building without any features..."
-    cargo build --no-default-features --quiet
+    echo "[$iteration] Running clippy without any features..."
+    cargo clippy --no-default-features
   else
-    echo -n "[$iteration] Building with features: $feature_combination"
-    cargo build --no-default-features --features "$feature_combination" --quiet
+    echo "[$iteration] Running clippy with features: $feature_combination"
+    cargo clippy --no-default-features --features "$feature_combination"
   fi
   
   local duration=$(awk "BEGIN {print $(date +%s.%N) - $start_time}")
-  printf " took %.2f seconds\n" "$duration"
+  printf "  took %.2f seconds\n" "$duration"
 }
 
 # Generate all combinations of features

@@ -34,7 +34,7 @@
         {
           formatter = pkgs.nixfmt-tree;
           packages = rec {
-            hyprshell = craneLib.buildPackage buildLib.commonArgsCached;
+            hyprshell = craneLib.buildPackage buildLib.commonArgsCachedRelease;
             default = hyprshell;
           };
           checks = import ./nix/checks.nix {

@@ -1,8 +1,9 @@
+use crate::Modifier;
 use serde::{Deserialize, Serialize};
 use smart_default::SmartDefault;
-use std::fmt::Display;
 
-pub(crate) const CURRENT_CONFIG_VERSION: u16 = 1;
+pub(crate) const CURRENT_CONFIG_VERSION: u16 = 2;
+pub(crate) const PREV_CONFIG_VERSION: u16 = 1;
 
 #[derive(SmartDefault, Debug, Clone, PartialEq, Deserialize, Serialize)]
 #[cfg_attr(not(feature = "no-default-config-values"), serde(default))]
@@ -36,8 +37,6 @@ pub struct Windows {
 #[cfg_attr(not(feature = "no-default-config-values"), serde(default))]
 #[serde(deny_unknown_fields)]
 pub struct Overview {
-    #[default = true]
-    pub strip_html_from_workspace_title: bool,
     pub launcher: Launcher,
     #[default = "super_l"]
     pub key: Box<str>,
@@ -63,8 +62,6 @@ pub struct Launcher {
     pub max_items: u8,
     #[default = true]
     pub show_when_empty: bool,
-    #[default = 250]
-    pub animate_launch_ms: u64,
     #[default(Plugins{
         applications: Some(ApplicationsPluginConfig::default()),
         terminal: Some(EmptyConfig::default()),
@@ -148,35 +145,4 @@ pub enum FilterBy {
     SameClass,
     CurrentWorkspace,
     CurrentMonitor,
-}
-
-#[derive(Debug, Clone, Copy, Eq, PartialEq, Deserialize, Serialize)]
-#[serde(rename_all = "snake_case")]
-pub enum Modifier {
-    Alt,
-    Ctrl,
-    Super,
-    Shift,
-}
-
-impl Display for Modifier {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Modifier::Alt => write!(f, "Alt"),
-            Modifier::Ctrl => write!(f, "Ctrl"),
-            Modifier::Super => write!(f, "Super"),
-            Modifier::Shift => write!(f, "Shift"),
-        }
-    }
-}
-
-impl Modifier {
-    pub fn to_l_key(self) -> &'static str {
-        match self {
-            Modifier::Alt => "alt_l",
-            Modifier::Ctrl => "control_l",
-            Modifier::Super => "super_l",
-            Modifier::Shift => "shift_l",
-        }
-    }
 }

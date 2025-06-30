@@ -38,7 +38,7 @@ pub fn launch_option(text: &str) -> bool {
     {
         let mut exec = file_manager.exec.to_string();
         for repl in ["%u", "%U", "%f", "%F"] {
-            exec = exec.replace(repl, &format!("{text}"));
+            exec = exec.replace(repl, text);
         }
         exec
     } else {

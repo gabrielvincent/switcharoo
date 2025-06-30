@@ -29,7 +29,7 @@ pub fn toast(body: &str) {
         notify::Icon::Warning,
         std::time::Duration::from_secs(10),
         Color::new(255, 0, 0, 255),
-        format!("hyprshell Error: {}", body),
+        format!("hyprshell Error: {body}"),
     );
 }
 
@@ -40,7 +40,7 @@ pub fn to_client_id(id: &hyprland::shared::Address) -> ClientId {
 }
 /// convert id to hexadecimal (base-16) string
 pub fn to_client_address(id: ClientId) -> hyprland::shared::Address {
-    hyprland::shared::Address::new(format!("{:x}", id))
+    hyprland::shared::Address::new(format!("{id:x}"))
 }
 
 fn get_prev_follow_mouse() -> &'static Mutex<Option<String>> {

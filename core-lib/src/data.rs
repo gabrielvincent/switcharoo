@@ -16,7 +16,6 @@ pub struct MonitorData {
     pub width: u16,
     pub height: u16,
     pub connector: String,
-    // pub enabled: bool,
 }
 
 #[derive(Debug, Clone)]
@@ -27,7 +26,6 @@ pub struct WorkspaceData {
     pub width: u16,
     pub height: u16,
     pub monitor: MonitorId,
-    // pub enabled: bool,
 }
 
 #[derive(Debug, Clone)]

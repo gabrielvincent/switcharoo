@@ -146,9 +146,6 @@ pub fn sort_workspaces_by_recent(
     });
 }
 
-pub fn sort_workspaces_by_position(
-    workspaces: Vec<(WorkspaceId, WorkspaceData)>,
-) -> Vec<(WorkspaceId, WorkspaceData)> {
-    // error!("TODO sort_workspaces_by_position: NOT IMPLEMENTED YET");
-    workspaces
+pub fn sort_workspaces_by_position(workspaces: &mut [(WorkspaceId, WorkspaceData)]) {
+    workspaces.sort_by(|(_, a), (_, b)| a.x.cmp(&b.x));
 }

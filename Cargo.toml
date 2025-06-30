@@ -24,22 +24,23 @@ clap = { version = "4.5.23", features = ["derive"] }
 tracing-subscriber = { version = "0.3.19", features = ["fmt", "env-filter", "ansi"], default-features = false }
 libc = { version = "0.2.172", default-features = false }
 
+config-lib.workspace = true
 core-lib.workspace = true
 exec-lib.workspace = true
 windows-lib.workspace = true
 launcher-lib.workspace = true
 
 [features]
-default = ["toml_config", "generate_config_command", "launcher_calc", "debug_command"]
-toml_config = ["core-lib/toml_config"]
-generate_config_command = ["core-lib/generate_config"]
-launcher_calc = ["launcher-lib/calc", "core-lib/calc"]
+default = ["json5_config", "generate_config_command", "launcher_calc", "debug_command"]
+json5_config = ["config-lib/json5_config"]
+generate_config_command = ["config-lib/generate_config"]
+launcher_calc = ["launcher-lib/calc", "config-lib/launcher_calc_plugin"]
 debug_command = []
-config_check_is_default = ["core-lib/no-default-config-values"]
+config_check_is_default = ["config-lib/no-default-config-values"]
 
 
 [workspace]
-members = ["exec-lib", "core-lib", "windows-lib", "launcher-lib"]
+members = ["exec-lib", "core-lib", "windows-lib", "launcher-lib", "config-lib"]
 resolver = "2"
 
 [workspace.package]
@@ -61,6 +62,7 @@ async-channel = { version = "2.3.1", default-features = true }
 gtk = { version = "0.9.6", package = "gtk4", default-features = false, features = ["v4_14"] }
 gtk4-layer-shell = { version = "0.5.0" }
 
+config-lib = { path = "config-lib", package = "hyprshell-config-lib", version = "=4.5.0" }
 core-lib = { path = "core-lib", package = "hyprshell-core-lib", version = "=4.5.0" }
 exec-lib = { path = "exec-lib", package = "hyprshell-exec-lib", version = "=4.5.0" }
 windows-lib = { path = "windows-lib", package = "hyprshell-windows-lib", version = "=4.5.0" }

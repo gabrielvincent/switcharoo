@@ -34,7 +34,7 @@ pub fn open_overview(
         sort_recent: false,
     })
     .context("Failed to collect data")?;
-    let regex = regex::Regex::new(r"<[^>]*>").context("Invalid regex")?;
+    let remove_html = regex::Regex::new(r"<[^>]*>").context("Invalid regex")?;
 
     for (window, monitor_data) in data.window_list.iter_mut() {
         trace!("Showing window {:?}", window.id());
@@ -61,14 +61,9 @@ pub fn open_overview(
                 .width_request(scale(workspace.width as i16, data.config.scale))
                 .height_request(scale(workspace.height as i16, data.config.scale))
                 .build();
-
             let id_string = wid.to_string();
             let title = if !workspace.name.trim().is_empty() {
-                if data.config.strip_html_from_workspace_title {
-                    regex.replace_all(&workspace.name, "")
-                } else {
-                    Cow::from(&workspace.name)
-                }
+                remove_html.replace_all(&workspace.name, "")
             } else {
                 Cow::from(&id_string)
             };

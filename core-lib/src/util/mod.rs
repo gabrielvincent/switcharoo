@@ -33,3 +33,23 @@ pub fn daemon_running() -> bool {
         false
     }
 }
+
+pub fn explain_config(config_path: &std::path::Path) {
+    let config = match config_lib::load_and_migrate_config(config_path) {
+        Ok(config) => config,
+        Err(err) => {
+            eprintln!("\x1b[1m\x1b[31mConfig is invalid ({config_path:?}):\x1b[0m {err:?}\n");
+            return;
+        }
+    };
+    let info = config_lib::explain(config, config_path);
+    println!("{info}");
+
+    if daemon_running() {
+        println!("Daemon \x1b[32mrunning\x1b[0m")
+    } else {
+        eprintln!(
+            "Daemon \x1b[31mnot running\x1b[0m, start it with `hyprshell run` or `systemctl --user enable --now hyprshell`"
+        );
+    }
+}

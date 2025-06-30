@@ -22,19 +22,19 @@ let
 in
 rec {
   hyprshell-default-check = craneLib.buildPackage (
-    buildLib.commonArgsCached
+    buildLib.commonArgsCachedRelease
     // {
       cargoExtraArgs = "--features config_check_is_default";
     }
   );
   hyprshell-clippy = craneLib.cargoClippy (
-    buildLib.commonArgsCached
+    buildLib.commonArgsCachedRelease
     // {
       buildPhaseCargoCommand = "cargo clippy";
       cargoClippyExtraArgs = "--all-targets -- --deny warnings";
     }
   );
-  hyprshell-fmt = craneLib.cargoFmt buildLib.commonArgsCached;
+  hyprshell-fmt = craneLib.cargoFmt buildLib.commonArgs;
   check-nix-config = pkgs.runCommand "check-nix-config" { } ''
     TMP=$(mktemp -d)
     touch "$TMP/test.json"
@@ -48,10 +48,10 @@ rec {
     ${hyprshell-default-check}/bin/hyprshell -vv config check-if-default -c "$TMP/test.json" && (mkdir "$out")
     rm -r "$TMP"
   '';
-  check-all-feature-combinations = craneLib.buildPackage (
-    buildLib.commonArgsCached
+  check-all-feature-combinations = craneLib.cargoClippy (
+    buildLib.commonArgsCachedDebug
     // {
-      pname = "check-all-feature-combinations";
+      pnameSuffix = "-check-all-feature-combinations";
       nativeBuildInputs = [ pkgs.bash ] ++ buildLib.commonArgs.nativeBuildInputs;
       buildPhaseCargoCommand = ''
         cargoBuildLog=$(mktemp cargoBuildLogXXXX.json)
@@ -63,6 +63,8 @@ rec {
         # Get the total number of features
         num_features=''${#features[@]}
 
+        cargo --list
+
         # Function to build with a specific combination of features
         build_with_features() {
           local feature_combination="$1"
@@ -70,15 +72,15 @@ rec {
           local start_time=$(date +%s.%N)
 
           if [[ -z "$feature_combination" ]]; then
-            echo -n "[$iteration] Building without any features..."
-            cargo build --locked --no-default-features --message-format json-render-diagnostics > "$cargoBuildLog"
+            echo "[$iteration] Running clippy without any features..."
+            cargo clippy --locked --no-default-features --message-format json-render-diagnostics > "$cargoBuildLog"
           else
-            echo -n "[$iteration] Building with features: $feature_combination"
-            cargo build --locked --no-default-features --features "$feature_combination" --message-format json-render-diagnostics > "$cargoBuildLog"
+            echo "[$iteration] Building with features: $feature_combination"
+            cargo clippy --locked --no-default-features --features "$feature_combination" --message-format json-render-diagnostics > "$cargoBuildLog"
           fi
 
           local duration=$(awk "BEGIN {print $(date +%s.%N) - $start_time}")
-          printf " took %.2f seconds\n" "$duration"
+          printf "  took %.2f seconds\n" "$duration"
         }
 
         echo "num_features: $num_features, iterations: $((1 << num_features))"

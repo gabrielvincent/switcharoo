@@ -34,7 +34,7 @@ pub fn collect_data(config: &SortConfig) -> anyhow::Result<(HyprlandData, Active
         sort_workspaces_by_recent(&mut workspace_data, &client_data); // ! must be after sort_clients_by_recent
     } else {
         client_data = sort_clients_by_position(client_data);
-        workspace_data = sort_workspaces_by_position(workspace_data);
+        sort_workspaces_by_position(&mut workspace_data);
     }
 
     trace!(

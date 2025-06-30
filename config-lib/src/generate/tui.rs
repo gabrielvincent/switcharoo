@@ -1,14 +1,10 @@
-use crate::Warn;
-use crate::config::SearchEngine;
-use crate::config::generate::autocomplete::StringAutoCompleter;
-use crate::config::generate::config::ConfigData;
-use crate::config::generate::css::StyleData;
-use crate::config::structs::Modifier;
-use crate::util::TERMINALS;
+use crate::generate::autocomplete::StringAutoCompleter;
+use crate::generate::config::ConfigData;
+use crate::generate::css::StyleData;
+use crate::{Modifier, SearchEngine};
 use anyhow::bail;
 use inquire::formatter::MultiOptionFormatter;
 use inquire::{Confirm, MultiSelect, Select, Text};
-use tracing::{info, warn};
 
 pub mod configurable_launcher_plugins {
     pub const APPLICATIONS: &str = "Open Applications";
@@ -22,7 +18,7 @@ pub mod configurable_launcher_plugins {
         SHELL,
         TERMINAL,
         WEB_SEARCH,
-        #[cfg(feature = "calc")]
+        #[cfg(feature = "launcher_calc_plugin")]
         CALC,
     ];
 }
@@ -93,13 +89,18 @@ pub fn prompt_config() -> anyhow::Result<(ConfigData, StyleData)> {
         if open_overview.trim().is_empty() {
             None
         } else {
-            get_mod_and_key(open_overview).warn()
+            match get_mod_and_key(open_overview) {
+                Ok(data) => Some(data),
+                Err(err) => {
+                    eprintln!("Invalid Modifier: {err:?}");
+                    None
+                }
+            }
         }
     };
     let launcher = if open_overview.is_some() {
-        // let (default_terminal, launcher_plugins, launcher_engines) = {
         let default_terminal = Text::new("Default Terminal")
-                .with_autocomplete(StringAutoCompleter::from(Box::from(TERMINALS)))
+                .with_autocomplete(StringAutoCompleter::from(vec!["alacritty", "kitty", "wezterm", "gnome-terminal"]))
                 .with_help_message("used to open terminal applications (htop), leave empty to chose from installed terminals]\n[Any valid binary name found in path can be typed in]\n[↑↓ to move, tab to autocomplete, enter to submit")
                 .prompt()
                 .map_or(None, |term| if term.trim().is_empty() { None } else { Some(term.into_boxed_str()) });
@@ -153,7 +154,7 @@ pub fn prompt_config() -> anyhow::Result<(ConfigData, StyleData)> {
                     (Some(r#mod), show_workspaces)
                 }
                 Err(err) => {
-                    warn!("{err:?}");
+                    eprintln!("Invalid Modifier: {err:?}");
                     (None, false)
                 }
             }
@@ -192,7 +193,6 @@ fn get_mod(modifier: &str) -> anyhow::Result<Modifier> {
 
 fn get_mod_and_key(modifier: String) -> anyhow::Result<(Modifier, Box<str>)> {
     let split = modifier.split('+').collect::<Vec<_>>();
-    info!("{split:?}");
     let r#mod = get_mod(split.first().unwrap_or(&""))?;
     if let Some(key) = split.get(1) {
         Ok((r#mod, Box::from(key.trim())))

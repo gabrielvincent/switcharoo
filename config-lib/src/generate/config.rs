@@ -1,8 +1,7 @@
-use crate::config::generate::tui::{WEB_SEARCH_ENGINES, configurable_launcher_plugins};
-use crate::config::structs::{Switch, Windows};
-use crate::config::{Config, Launcher, Modifier, Overview, Plugins, WebSearchConfig};
+use crate::generate::tui::{WEB_SEARCH_ENGINES, configurable_launcher_plugins};
+use crate::structs::{Switch, Windows};
+use crate::{Config, Launcher, Modifier, Overview, Plugins, WebSearchConfig};
 use std::path::Path;
-use tracing::warn;
 
 pub fn get_overrides(force: &[String]) -> (bool, bool) {
     // force contains "config" or "css" or "all"
@@ -29,13 +28,13 @@ pub fn check_file_exist(
     override_css: bool,
 ) -> anyhow::Result<()> {
     if !override_config && config_path.exists() {
-        warn!(
-            "Config file {config_path:?} already exists, use -f to override all or -f config to override only the config file"
+        eprintln!(
+            "\x1b[1mConfig file {config_path:?} already exists, use -f to override all or -f config to override only the config file\x1b[0m"
         )
     }
     if !override_css && css_path.exists() {
-        warn!(
-            "CSS file {css_path:?} already exists, use -f to override all or -f css to override only the css file"
+        eprintln!(
+            "\x1b[1mCSS file {css_path:?} already exists, use -f to override all or -f css to override only the css file\x1b[0m"
         )
     }
     Ok(())

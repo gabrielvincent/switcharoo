@@ -1,6 +1,6 @@
 use crate::global::{WindowsSwitchConfig, WindowsSwitchData};
 use async_channel::Sender;
-use core_lib::config::{FilterBy, Modifier, Switch, Windows};
+use config_lib::{FilterBy, Modifier, Switch, Windows};
 use core_lib::transfer::{SwitchSwitchConfig, TransferType};
 use core_lib::{HyprlandData, SWITCH_NAMESPACE, WarnWithDetails};
 use exec_lib::get_initial_active;

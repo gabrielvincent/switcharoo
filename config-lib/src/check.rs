@@ -1,4 +1,4 @@
-use crate::config::Config;
+use crate::Config;
 use anyhow::bail;
 
 pub fn check(config: &Config) -> anyhow::Result<()> {
@@ -61,7 +61,7 @@ pub fn check(config: &Config) -> anyhow::Result<()> {
             }
         }
         if l.plugins.calc.is_some() {
-            #[cfg(not(feature = "calc"))]
+            #[cfg(not(feature = "launcher_calc_plugin"))]
             {
                 bail!("Calc Plugin enabled but not compiled in, please enable the calc feature");
             }

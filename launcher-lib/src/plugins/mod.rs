@@ -1,4 +1,4 @@
-use core_lib::config::Plugins;
+use config_lib::Plugins;
 use gtk::gdk::Key;
 use std::path::Path;
 use tracing::{Level, span};

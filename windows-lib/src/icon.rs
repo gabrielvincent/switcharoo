@@ -13,7 +13,7 @@ pub fn set_icon(class: &str, pid: i32, image: &Image) {
         return;
     }
 
-    if let Ok(cmdline) = fs::read_to_string(format!("/proc/{}/cmdline", pid)) {
+    if let Ok(cmdline) = fs::read_to_string(format!("/proc/{pid}/cmdline")) {
         // convert x00 to space
         trace!("No Icon found for {class}, using Icon by cmdline {cmdline} by PID ({pid})");
         let cmd = cmdline

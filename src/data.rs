@@ -9,7 +9,7 @@ pub(crate) fn launch_history(
     verbose: u8,
 ) {
     let run_cache_weeks = run_cache_weeks.unwrap_or_else(|| {
-        core_lib::config::load_and_migrate_config(config_path)
+        config_lib::load_and_migrate_config(config_path)
             .ok()
             .and_then(|c| {
                 c.windows.and_then(|w| {

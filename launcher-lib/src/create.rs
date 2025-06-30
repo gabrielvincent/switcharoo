@@ -1,7 +1,7 @@
 use crate::global::{LauncherConfig, LauncherData};
 use crate::plugins::get_static_options_chars;
 use async_channel::Sender;
-use core_lib::config::{Launcher, Modifier};
+use config_lib::{Launcher, Modifier};
 use core_lib::transfer::{CloseOverviewConfig, Direction, SwitchOverviewConfig, TransferType};
 use core_lib::{LAUNCHER_NAMESPACE, WarnWithDetails};
 use gtk::gdk::Key;

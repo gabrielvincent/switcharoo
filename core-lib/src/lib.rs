@@ -1,5 +1,4 @@
 pub mod binds;
-pub mod config;
 mod data;
 mod ini;
 mod listener;

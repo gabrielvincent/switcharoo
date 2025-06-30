@@ -9,6 +9,7 @@ use exec_lib::{get_current_monitor, set_remain_focused};
 use gtk::gdk::Cursor;
 use gtk::prelude::*;
 use gtk::{Button, Fixed, Frame, Image, Label, Overflow, Overlay, pango};
+use std::borrow::Cow;
 use tracing::{Level, span, trace};
 
 fn scale(value: i16, scale: f64) -> i32 {
@@ -42,6 +43,7 @@ pub fn open_switch(data: &mut WindowsSwitchData, config: OpenSwitch) -> anyhow::
         active_prev,
         data.config.items_per_row as usize,
     );
+    let remove_html = regex::Regex::new(r"<[^>]*>").context("Invalid regex")?;
 
     // TODO find a way to check if the key was already released and close the window or open it faster
     trace!("Showing window {:?}", data.window.id());
@@ -70,13 +72,24 @@ pub fn open_switch(data: &mut WindowsSwitchData, config: OpenSwitch) -> anyhow::
             if clients.is_empty() {
                 continue;
             }
-            // TODO add strip_html_from_workspace_title;
             let workspace_fixed = Fixed::builder()
                 .width_request(scale(workspace.width as i16, data.config.scale))
                 .height_request(scale(workspace.height as i16, data.config.scale))
                 .build();
+            let id_string = wid.to_string();
+            let title = if !workspace.name.trim().is_empty() {
+                remove_html.replace_all(&workspace.name, "")
+            } else {
+                Cow::from(&id_string)
+            };
+            let workspace_frame = Frame::builder()
+                .label(title)
+                .label_xalign(0.5)
+                .child(&workspace_fixed)
+                .build();
+
             let workspace_button = {
-                let workspace_overlay = Overlay::builder().child(&workspace_fixed).build();
+                let workspace_overlay = Overlay::builder().child(&workspace_frame).build();
                 let button = Button::builder()
                     .child(&workspace_overlay)
                     .css_classes(["workspace", "no-hover"])

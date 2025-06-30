@@ -1,4 +1,4 @@
-use crate::config::generate::tui::DEFAULT_COLORS;
+use crate::generate::tui::DEFAULT_COLORS;
 use anyhow::{Context, bail};
 use std::fs::create_dir_all;
 use std::path::Path;

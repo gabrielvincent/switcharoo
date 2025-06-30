@@ -13,18 +13,12 @@ rust-version.workspace = true
 [dependencies]
 anyhow.workspace = true
 tracing.workspace = true
+config-lib.workspace = true
 serde_json.workspace = true
 
 notify = { version = "8.0.0", features = [] }
-inquire = { version = "0.7.5", optional = true, default-features = false, features = ["termion"] }
 serde = { version = "1.0.219", features = ["derive"] }
-smart-default = { version = "0.7.1" }
-ron = { version = "0.10.1" }
 semver = { version = "1.0.26" }
-toml = { version = "0.8.22", optional = true }
 
 [features]
-toml_config = ["dep:toml"]
-generate_config = ["dep:inquire"]
-calc = []
-no-default-config-values = []
+json5_config = []

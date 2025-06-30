@@ -154,6 +154,9 @@ in
                       }
                     ];
               };
+              path = {
+                enable = mkOpt "Open in File manager" bool true;
+              };
             };
           };
         };

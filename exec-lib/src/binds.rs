@@ -1,12 +1,11 @@
 use anyhow::Context;
 use core_lib::binds::ExecBind;
-use core_lib::config::Modifier;
 use core_lib::{LAUNCHER_NAMESPACE, OVERVIEW_NAMESPACE, SWITCH_NAMESPACE};
 use hyprland::config::binds;
 use hyprland::config::binds::{Binder, Binding, Flag};
 use hyprland::dispatch::DispatchType;
 use hyprland::keyword::Keyword;
-use tracing::trace;
+use tracing::{trace, warn};
 
 pub fn apply_layerrules() -> anyhow::Result<()> {
     Keyword::set("layerrule", format!("noanim, {LAUNCHER_NAMESPACE}"))?;
@@ -38,11 +37,15 @@ pub fn apply_exec_bind(bind: &ExecBind) -> anyhow::Result<()> {
         mods: bind
             .mods
             .iter()
-            .map(|m| match m {
-                Modifier::Alt => binds::Mod::ALT,
-                Modifier::Ctrl => binds::Mod::CTRL,
-                Modifier::Super => binds::Mod::SUPER,
-                Modifier::Shift => binds::Mod::SHIFT,
+            .flat_map(|m| match m.to_lowercase().as_str() {
+                "alt" => Some(binds::Mod::ALT),
+                "control" | "ctrl" => Some(binds::Mod::CTRL),
+                "super" | "win" => Some(binds::Mod::SUPER),
+                "shift" => Some(binds::Mod::SHIFT),
+                _ => {
+                    warn!("unknown mod: {}", m);
+                    None
+                }
             })
             .collect(),
         key: binds::Key::Key(&bind.key),

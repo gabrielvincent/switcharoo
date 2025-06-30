@@ -44,10 +44,7 @@ pub fn switch_workspace(workspace_id: WorkspaceId) -> anyhow::Result<()> {
         );
     } else {
         switch_normal_workspace(workspace_id).with_context(|| {
-            format!(
-                "Failed to execute switch workspace with id {}",
-                workspace_id
-            )
+            format!("Failed to execute switch workspace with id {workspace_id}",)
         })?;
     }
     Ok(())
