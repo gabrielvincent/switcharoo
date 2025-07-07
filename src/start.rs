@@ -21,11 +21,12 @@ use gtk::{
 };
 use launcher_lib::{LauncherData, create_windows_overview_launcher_window};
 use std::any::Any;
+use std::cell::RefCell;
 use std::env;
 use std::path::{Path, PathBuf};
 use std::rc::Rc;
 use std::sync::{Mutex, OnceLock};
-use std::time::{Duration, Instant};
+use std::time::Duration;
 use tracing::{Level, debug, error, info, span};
 use windows_lib::{
     WindowsOverviewData, WindowsSwitchData, create_windows_overview_window,
@@ -221,21 +222,43 @@ pub fn register_event_restarter(
     glib::timeout_add_local_once(Duration::from_millis(delay), move || {
         setup_restart_listener(&config_path, &css_path, restart_sender);
     });
+
+    // State to track the current debounce timer
+    let debounce_timer = Rc::new(RefCell::new(None::<glib::SourceId>));
+
     glib::spawn_future_local(async move {
-        let mut last_send = Instant::now();
         loop {
             let cause = restart_receiver.recv().await.unwrap_or_default();
-            let now = Instant::now();
-            if now.duration_since(last_send) < Duration::from_millis(delay) {
-                debug!("Ignoring restart request ({cause}) too soon after last send");
-                continue;
+            debug!("Received restart request ({cause}), starting debounce timer");
+
+            // Cancel any existing timer
+            if let Some(timer_id) = debounce_timer.borrow_mut().take() {
+                timer_id.remove();
+                debug!("Cancelled previous debounce timer");
             }
-            info!("Restarting gui ({cause})");
-            event_sender
-                .send(TransferType::Restart)
-                .await
-                .warn("unable to send restart");
-            last_send = now;
+
+            // Create new debounce timer
+            let event_sender_clone = event_sender.clone();
+            let debounce_timer_clone = debounce_timer.clone();
+            let timer_id = glib::timeout_add_local_once(Duration::from_millis(delay), move || {
+                debug!("Debounce timer expired, triggering restart ({cause})");
+
+                // Clear the timer reference since it's about to complete
+                *debounce_timer_clone.borrow_mut() = None;
+
+                // Send the restart event
+                let event_sender_inner = event_sender_clone.clone();
+                glib::spawn_future_local(async move {
+                    info!("Restarting gui ({cause})");
+                    event_sender_inner
+                        .send(TransferType::Restart)
+                        .await
+                        .warn("unable to send restart");
+                });
+            });
+
+            // Store the timer ID so we can cancel it if needed
+            *debounce_timer.borrow_mut() = Some(timer_id);
         }
     });
 }
