@@ -1,6 +1,6 @@
 # Config
 
-The main config file is located at `~/.config/hyprshell/config.ron` but can be configured using the `-c` argument. You can also use `.json` and `.toml` as config file formats.
+The main config file is located at `~/.config/hyprshell/config.ron` but can be configured using the `-c` argument. You can also use `.json` and `.json5` as config file formats.
 The config is loaded at startup but is reloaded when the file changes.
 
 To generate a default config file with all possible options set, run the following command:

@@ -42,7 +42,7 @@ pub fn reload_desktop_map(files: &[DirEntry]) {
         .lock()
         .expect("Failed to lock desktop file map");
     map.clear();
-    fill_desktop_file_map(&mut map, files).warn("Failed to fill desktop file map");
+    fill_desktop_file_map(&mut map, files).warn_details("Failed to fill desktop file map");
 }
 
 fn fill_desktop_file_map(map: &mut Vec<DesktopEntry>, files: &[DirEntry]) -> anyhow::Result<()> {

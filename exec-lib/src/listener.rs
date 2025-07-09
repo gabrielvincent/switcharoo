@@ -17,7 +17,7 @@ where
     event_listener
         .start_listener_async()
         .await
-        .warn("Failed to start monitor added/removed listener");
+        .warn_details("Failed to start monitor added/removed listener");
 }
 
 pub async fn hyprland_config_listener<F>(callback: F)
@@ -32,5 +32,5 @@ where
     event_listener
         .start_listener_async()
         .await
-        .warn("Failed to start hyprland config reload listener");
+        .warn_details("Failed to start hyprland config reload listener");
 }

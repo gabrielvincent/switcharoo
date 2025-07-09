@@ -2,13 +2,12 @@ use anyhow::Context;
 use async_channel::Sender;
 use core_lib::transfer::TransferType;
 use core_lib::{get_daemon_socket_path_buff, transfer};
-use gtk::gio::{Cancellable, InputStream, SocketListener, UnixSocketAddress};
-use gtk::prelude::*;
-use gtk::{gio, glib};
 use std::fs::remove_file;
+use std::io::Read;
+use std::os::unix::net::UnixStream;
 use tracing::{info, warn};
 
-pub async fn socket_handler(event_sender: Sender<TransferType>) {
+pub fn socket_handler(event_sender: Sender<TransferType>) {
     let buf = get_daemon_socket_path_buff();
     let path = buf.as_path();
     let listener = {
@@ -16,32 +15,20 @@ pub async fn socket_handler(event_sender: Sender<TransferType>) {
         if path.exists() {
             remove_file(path).expect("Unable to remove old socket file");
         }
-        let socket = SocketListener::new();
-        socket
-            .add_address(
-                &UnixSocketAddress::new(path),
-                gio::SocketType::Stream,
-                gio::SocketProtocol::Default,
-                None::<&glib::Object>,
-            )
-            .unwrap_or_else(|_| panic!("Failed to bind to socket {path:?}"));
-        socket
+        std::os::unix::net::UnixListener::bind(path)
+            .unwrap_or_else(|_| panic!("Failed to bind to socket {path:?}"))
     };
     info!("Starting socket on {path:?}");
 
     loop {
-        let path = listener.accept_future().await;
+        let path = listener.accept();
         match path {
             Ok((conn, _)) => {
-                handle_client(
-                    conn.input_stream(),
-                    conn.socket().available_bytes(),
-                    &event_sender,
-                )
-                .context("Failed to handle client")
-                .unwrap_or_else(|e| {
-                    warn!("Failed to handle connection {:?}", e);
-                });
+                handle_client(conn, &event_sender)
+                    .context("Failed to handle client")
+                    .unwrap_or_else(|e| {
+                        warn!("Failed to handle connection {:?}", e);
+                    });
             }
             Err(e) => {
                 warn!("Failed to accept connection: {e:?}");
@@ -51,13 +38,12 @@ pub async fn socket_handler(event_sender: Sender<TransferType>) {
 }
 
 fn handle_client(
-    stream: InputStream,
-    size: isize,
+    mut stream: UnixStream,
     event_sender: &Sender<TransferType>,
 ) -> anyhow::Result<()> {
-    let mut buffer = vec![0; size as usize];
+    let mut buffer = Vec::with_capacity(1024);
     stream
-        .read(&mut buffer, None::<&Cancellable>)
+        .read_to_end(&mut buffer)
         .context("Failed to read data from buffer")?;
     if buffer.is_empty() {
         return Ok(());

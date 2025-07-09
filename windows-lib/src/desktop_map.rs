@@ -18,7 +18,7 @@ type IconPathMap = HashMap<(Box<str>, Source), (Box<Path>, Box<Path>)>;
 pub fn reload_desktop_map(files: &[DirEntry]) {
     let mut map = get_icon_path_map().lock().expect("Failed to lock icon map");
     map.clear();
-    fill_desktop_file_map(&mut map, files).warn("Failed to fill desktop file map");
+    fill_desktop_file_map(&mut map, files).warn_details("Failed to fill desktop file map");
 }
 
 fn fill_desktop_file_map(map: &mut IconPathMap, files: &[DirEntry]) -> anyhow::Result<()> {

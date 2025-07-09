@@ -25,7 +25,7 @@ pub fn open_overview(
     event_sender: Sender<TransferType>,
 ) -> anyhow::Result<()> {
     let _span = span!(Level::TRACE, "open_overview").entered();
-    set_remain_focused().warn("Failed to set no follow mouse");
+    set_remain_focused().warn_details("Failed to set no follow mouse");
 
     let (clients_data, active) = collect_data(&SortConfig {
         filter_current_monitor: data.config.filter_current_monitor,
@@ -192,7 +192,7 @@ fn click_client(button: &Button, client_id: ClientId, event_sender: Sender<Trans
             .send_blocking(TransferType::CloseOverview(CloseOverviewConfig::Windows(
                 WindowsOverride::ClientId(client_id),
             )))
-            .warn("unable to send");
+            .warn_details("unable to send");
     });
 }
 
@@ -203,6 +203,6 @@ fn click_workspace(button: &Button, workspace_id: WorkspaceId, event_sender: Sen
             .send_blocking(TransferType::CloseOverview(CloseOverviewConfig::Windows(
                 WindowsOverride::WorkspaceID(workspace_id),
             )))
-            .warn("unable to send");
+            .warn_details("unable to send");
     });
 }

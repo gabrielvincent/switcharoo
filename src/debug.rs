@@ -5,7 +5,7 @@ use tracing::{debug, info};
 
 pub fn check_class(class: Option<String>) {
     util::init_gtk();
-    util::fill_icon_map(false);
+    util::fill_icon_name_map(false);
     let desktop_files = core_lib::collect_desktop_files();
     windows_lib::reload_desktop_map(&desktop_files);
     debug!("prepared desktop files and icon map");
@@ -31,14 +31,19 @@ fn check_icon(class: &str) {
     );
     let icon = windows_lib::get_icon_name_by_name_from_desktop_files(class);
     info!(
-        "Icon ({class}) {} in desktop files (second choice)",
-        if icon.is_some() { "is" } else { "is not" }
+        "Icon ({class}) {} in desktop files (second choice) {}",
+        if icon.is_some() { "is" } else { "is not" },
+        if let Some(icon) = icon {
+            format!("{:?} [icon: {:?}]", icon.2, icon.0)
+        } else {
+            "".to_string()
+        }
     );
 }
 
 pub fn list_icons() {
     util::init_gtk();
-    util::fill_icon_map(false);
+    util::fill_icon_name_map(false);
     let icons = get_all_icons();
     for icon in icons.iter() {
         info!("{}", icon);

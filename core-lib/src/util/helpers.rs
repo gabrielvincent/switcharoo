@@ -43,7 +43,7 @@ impl<'a, I: DoubleEndedIterator + 'a> RevIf<'a> for I {
 }
 
 pub trait WarnWithDetails<A> {
-    fn warn(self, msg: &str) -> Option<A>;
+    fn warn_details(self, msg: &str) -> Option<A>;
 }
 
 pub trait Warn<A> {
@@ -51,7 +51,7 @@ pub trait Warn<A> {
 }
 
 impl<A> WarnWithDetails<A> for Option<A> {
-    fn warn(self, msg: &str) -> Option<A> {
+    fn warn_details(self, msg: &str) -> Option<A> {
         match self {
             Some(o) => Some(o),
             None => {
@@ -63,7 +63,7 @@ impl<A> WarnWithDetails<A> for Option<A> {
 }
 
 impl<A, E: fmt::Debug + fmt::Display> WarnWithDetails<A> for Result<A, E> {
-    fn warn(self, msg: &str) -> Option<A> {
+    fn warn_details(self, msg: &str) -> Option<A> {
         match self {
             Ok(o) => Some(o),
             Err(e) => {

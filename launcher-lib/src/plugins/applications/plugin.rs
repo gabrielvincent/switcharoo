@@ -225,9 +225,9 @@ pub fn launch_option(
                 entry.terminal,
                 default_terminal,
             )
-            .warn("Failed to run program");
+            .warn_details("Failed to run program");
             trace!("Saving run: {:?}", entry.source);
-            save_run(&entry.source, data_dir).warn("Failed to cache run");
+            save_run(&entry.source, data_dir).warn_details("Failed to cache run");
             return true;
         } else {
             warn!("Failed to find entry for {:?}", iden);

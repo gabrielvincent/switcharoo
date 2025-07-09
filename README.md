@@ -99,9 +99,9 @@ exec-once = hyprshell run &
 
 ### Feature Flags
 
-- default: `["toml_config", "generate_config_command", "launcher_calc", "debug_command"]`
+- default: `["json5_config", "generate_config_command", "launcher_calc", "debug_command"]`
 - generate_config_command: Adds the `hyprshell config generate` command to interactively generate a config file.
-- toml_config: Adds support for a toml config file.
+- json5_config: Adds support for a toml config file.
 - launcher_calc: Adds support for the calc plugin in the launcher.
 - debug_command: Adds the `hyprshell debug` command to debug icons in the window mode.
 - config_check_is_default: Adds a command to check if the loaded config is equal to the default config. Also diables loading of configs without all values.

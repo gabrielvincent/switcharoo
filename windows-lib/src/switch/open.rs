@@ -22,7 +22,7 @@ pub fn switch_already_open(data: &WindowsSwitchData) -> bool {
 
 pub fn open_switch(data: &mut WindowsSwitchData, config: OpenSwitch) -> anyhow::Result<()> {
     let _span = span!(Level::TRACE, "open_switch").entered();
-    set_remain_focused().warn("Failed to set no follow mouse");
+    set_remain_focused().warn_details("Failed to set no follow mouse");
 
     let (clients_data, active_prev) = collect_data(&SortConfig {
         filter_current_monitor: data.config.filter_current_monitor,

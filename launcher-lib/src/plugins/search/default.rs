@@ -20,9 +20,9 @@ pub(super) fn get_browser_info<'a>() -> MutexGuard<'a, BrowserData> {
 
 static BROWSER_EXEC: OnceLock<Mutex<BrowserData>> = OnceLock::new();
 
-pub fn reload_default_browser(files: &[DirEntry]) {
+pub fn reload_default_browser(files: &[DirEntry], mime_apps: &[DirEntry]) {
     let _span = span!(Level::TRACE, "reload_default_browser").entered();
-    let default_browser = get_default_desktop_file("x-scheme-handler/https");
+    let default_browser = get_default_desktop_file("x-scheme-handler/https", mime_apps);
 
     for entry in files {
         if entry.file_name() == default_browser.as_deref().unwrap_or_default() {

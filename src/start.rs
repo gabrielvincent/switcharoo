@@ -2,7 +2,7 @@ use crate::keybinds::create_binds;
 use crate::receive_handle::event_handler;
 use crate::socket::socket_handler;
 use crate::util;
-use crate::util::{check_themes, fill_icon_map, gtk_handle_sigterm, reload_desktop_data};
+use crate::util::{check_themes, fill_icon_name_map, gtk_handle_sigterm, reload_desktop_data};
 use anyhow::Context;
 use async_channel::{Receiver, Sender};
 use config_lib::Config;
@@ -16,16 +16,16 @@ use exec_lib::{reload_hyprland_config, toast};
 use gtk::gdk::Display;
 use gtk::prelude::*;
 use gtk::{
-    Application, CssProvider, STYLE_PROVIDER_PRIORITY_USER,
-    glib, style_context_add_provider_for_display,
+    Application, CssProvider, STYLE_PROVIDER_PRIORITY_USER, glib,
+    style_context_add_provider_for_display,
 };
 use launcher_lib::{LauncherData, create_windows_overview_launcher_window};
 use std::any::Any;
-use std::env;
 use std::path::{Path, PathBuf};
 use std::rc::Rc;
 use std::sync::{Mutex, OnceLock};
 use std::time::{Duration, Instant};
+use std::{env, thread};
 use tracing::{Level, debug, error, info, span};
 use windows_lib::{
     WindowsOverviewData, WindowsSwitchData, create_windows_overview_window,
@@ -42,7 +42,7 @@ pub fn start(config_path: PathBuf, css_path: PathBuf, data_dir: PathBuf) -> anyh
     check_themes();
     gtk_handle_sigterm();
     reload_desktop_data();
-    fill_icon_map(true);
+    fill_icon_name_map(true);
 
     let (event_sender, event_receiver) = async_channel::unbounded();
 
@@ -51,8 +51,8 @@ pub fn start(config_path: PathBuf, css_path: PathBuf, data_dir: PathBuf) -> anyh
     }
 
     let event_sender_2 = event_sender.clone();
-    glib::spawn_future_local(async move {
-        socket_handler(event_sender_2.clone()).await;
+    thread::spawn(move || {
+        socket_handler(event_sender_2.clone());
     });
 
     info!("Starting gui loop");
@@ -234,7 +234,7 @@ pub fn register_event_restarter(
             event_sender
                 .send(TransferType::Restart)
                 .await
-                .warn("unable to send restart");
+                .warn_details("unable to send restart");
             last_send = now;
         }
     });

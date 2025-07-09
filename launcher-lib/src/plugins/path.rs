@@ -45,7 +45,7 @@ pub fn launch_option(text: &str) -> bool {
         format!("{} {}", file_manager.exec, text)
     };
     debug!("Launching file-manger: {}", cmdline);
-    run_program(&cmdline, None, false, &None).warn("Failed to run program");
+    run_program(&cmdline, None, false, &None).warn_details("Failed to run program");
     true
 }
 
@@ -65,9 +65,9 @@ pub(super) fn get_file_manager_info<'a>() -> MutexGuard<'a, FilemanagerData> {
 
 static FILE_MANAGER_DATA: OnceLock<Mutex<FilemanagerData>> = OnceLock::new();
 
-pub fn reload_default_file_manager(files: &[DirEntry]) {
+pub fn reload_default_file_manager(files: &[DirEntry], mime_apps: &[DirEntry]) {
     let _span = span!(Level::TRACE, "reload_default_file_manager").entered();
-    let default_file_manager = get_default_desktop_file("inode/directory");
+    let default_file_manager = get_default_desktop_file("inode/directory", mime_apps);
 
     for entry in files {
         if entry.file_name() == default_file_manager.as_deref().unwrap_or_default() {

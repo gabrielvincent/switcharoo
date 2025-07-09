@@ -23,7 +23,7 @@ pub fn launch_option(text: &str, default_terminal: &Option<Box<str>>) -> bool {
         debug!("No text to run in shell");
         return false;
     }
-    run_program(text, None, false, default_terminal).warn("Failed to run program");
+    run_program(text, None, false, default_terminal).warn_details("Failed to run program");
     true
 }
 

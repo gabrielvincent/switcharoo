@@ -28,7 +28,7 @@ pub struct GlobalOpts {
     pub quiet: bool,
 
     /// Path to config [default: $XDG_CONFIG_HOME/hyprshell/config.ron],
-    /// allowed file types: ron, toml, json
+    /// allowed file types: ron, toml, json5
     #[arg(short = 'c', long, global = true)]
     pub config_file: Option<std::path::PathBuf>,
 
@@ -103,6 +103,12 @@ pub enum DataCommand {
 
 #[derive(Subcommand, Debug, Clone)]
 pub enum DebugCommand {
+    /// List all icons in the theme
+    ListIcons,
+
+    /// List all desktop files
+    ListDesktopFiles,
+
     /// Search for an icon with a window class
     CheckClass {
         /// The class (from `hyprctl clients -j | jq -e ".[] | {title, class}"`) of a window to find an icon for
@@ -111,13 +117,7 @@ pub enum DebugCommand {
         class: Option<String>,
     },
 
-    /// List all icons in the theme
-    ListIcons,
-
-    /// List all desktop files
-    ListDesktopFiles,
-
-    /// display search insights
+    /// simulate search in launcher and display search insights
     Search {
         /// text entered into the search box
         text: String,
@@ -126,4 +126,22 @@ pub enum DebugCommand {
         #[arg(short = 'a', long)]
         all: bool,
     },
+
+    /// get or set default applications for different mime types
+    DefaultApplications {
+        #[clap(subcommand)]
+        command: DefaultApplicationsCommand,
+    },
+}
+
+#[derive(Subcommand, Debug, Clone)]
+pub enum DefaultApplicationsCommand {
+    /// Get default app for mimetype
+    Get {},
+
+    /// Set default app for mimetype
+    Set {},
+
+    /// List default apps for all mimetypes
+    List {},
 }

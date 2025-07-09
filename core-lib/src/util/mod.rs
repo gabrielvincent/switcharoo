@@ -1,14 +1,14 @@
 mod r#const;
-mod defaults;
+mod default_desktop_file;
 mod exec;
 mod helpers;
-mod version;
+mod path;
 
 pub use r#const::*;
-pub use defaults::*;
+pub use default_desktop_file::*;
 pub use exec::*;
 pub use helpers::*;
-pub use version::*;
+pub use path::*;
 
 pub fn get_daemon_socket_path_buff() -> std::path::PathBuf {
     let mut buf = if let Some(runtime_path) = std::env::var_os("XDG_RUNTIME_DIR") {

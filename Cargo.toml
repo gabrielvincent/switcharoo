@@ -15,6 +15,10 @@ exclude = [
     ".github/*",
 ]
 
+[build-dependencies]
+clap_complete = "4.5.54"
+clap = { version = "4.5.23", features = ["derive"] }
+
 [dependencies]
 anyhow.workspace = true
 tracing.workspace = true
