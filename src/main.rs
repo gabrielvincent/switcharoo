@@ -151,8 +151,8 @@ fn main() -> anyhow::Result<()> {
                     DefaultApplicationsCommand::Get { mime } => {
                         default_apps::get(&mime).context("unable to get default app")?;
                     }
-                    DefaultApplicationsCommand::Set { mime, value } => {
-                        default_apps::set(&mime, &value).context("unable to set default app")?;
+                    DefaultApplicationsCommand::Add { mime, value } => {
+                        default_apps::add(&mime, &value).context("unable to set default app")?;
                     }
                     DefaultApplicationsCommand::List { all } => {
                         default_apps::list(all);

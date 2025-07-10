@@ -45,6 +45,12 @@ impl<'a> Section<'a> {
             .or_insert(vec![])
             .push(desktop_file);
     }
+    pub fn insert_item_at_front(&mut self, mime: &'a str, desktop_file: &'a str) {
+        self.entries
+            .entry(mime)
+            .or_insert(vec![])
+            .insert(0, desktop_file);
+    }
     pub fn insert_items(&mut self, mime: &'a str, mut desktop_files: Vec<&'a str>) {
         self.entries
             .entry(mime)
@@ -113,9 +119,15 @@ impl<'a> IniFile<'a> {
 
     pub fn format(&self) -> String {
         let mut str = String::with_capacity(self.into_iter().count() * 20); // 20 chars per line should be good
-        for (name, section) in &self.sections {
+        let mut sections = self.sections().iter().collect::<Vec<_>>();
+        sections.sort_by_key(|&(name, _)| name);
+        for (name, section) in sections {
             if !name.is_empty() {
-                str.push_str(&format!("[{}]\n", name));
+                if str.is_empty() {
+                    str.push_str(&format!("[{}]\n", name));
+                } else {
+                    str.push_str(&format!("\n[{}]\n", name));
+                }
             }
             let mut section = section.into_iter().collect::<Vec<_>>();
             section.sort_by_key(|(key, _)| *key);
@@ -288,5 +300,32 @@ key with spaces=value with spaces; and more values
             count += 1;
         }
         assert_eq!(count, 3, "There should be 3 items in the iterator");
+    }
+
+    #[test]
+    fn test_format_empty() {
+        let content = "test=test";
+        let ini = IniFile::from_str(content);
+        assert_eq!(ini.format(), "test=test\n");
+    }
+
+    #[test]
+    fn test_format_multiple_sections() {
+        let content = r#"[B]
+key1=value1
+key2=value2;value3
+
+[A]
+foo=bar
+"#;
+        let content2 = r#"[A]
+foo=bar
+
+[B]
+key1=value1
+key2=value2;value3
+"#;
+        let ini = IniFile::from_str(content);
+        assert_eq!(ini.format(), content2);
     }
 }

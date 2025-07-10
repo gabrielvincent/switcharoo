@@ -37,8 +37,18 @@ pub fn get(mime: &str) -> anyhow::Result<()> {
     Ok(())
 }
 
-// write to "$USER/.config/mimeapps.list"
-pub fn set(mime: &str, value: &str) -> anyhow::Result<()> {
+pub fn add(mime: &str, value: &str) -> anyhow::Result<()> {
+    let desktop_files = core_lib::collect_desktop_files();
+
+    // check if valid desktop file
+    if desktop_files
+        .iter()
+        .find(|f| f.file_name() == value)
+        .is_none()
+    {
+        bail!("Invalid desktop file: {value}")
+    }
+
     let mut file = get_config_home();
     file.push("mimeapps.list");
     let str = if file.exists() {
@@ -50,7 +60,7 @@ pub fn set(mime: &str, value: &str) -> anyhow::Result<()> {
     let section = ini
         .section_entry("Default Applications")
         .or_insert(Section::new());
-    section.insert_item(mime, value);
+    section.insert_item_at_front(mime, value);
 
     let str = ini.format();
     write(&file, str).with_context(|| format!("Failed to write file {file:?}"))?;
@@ -93,7 +103,10 @@ pub fn list(all: bool) {
             warn!("Failed to read file: {:?}", file.path());
         }
     }
+
     if all {
+        let mut mimes = mimes.into_iter().collect::<Vec<_>>();
+        mimes.sort_by(|(a, _), (b, _)| a.cmp(b));
         for (mime, (defaults, added)) in mimes {
             println!("{mime}: defaults: {defaults:?}, added: {added:?}");
         }
@@ -123,10 +136,7 @@ pub fn check() {
                         warn!("{mime} already exists");
                     }
                     for value in values {
-                        mimes.insert(
-                            mime.to_string(),
-                            (value.to_string(), file.path().to_string_lossy().to_string()),
-                        );
+                        mimes.insert(mime.to_string(), (value.to_string(), file.path()));
                     }
                 }
             }
@@ -139,10 +149,10 @@ pub fn check() {
     vec.sort_by_key(|&(mime, _)| mime.to_string());
     for (mime, (value, path)) in vec {
         if let Some(_) = desktop_files.iter().find(|d| *d.file_name() == **value) {
-            debug!("{mime} in {path} has desktop file value: {value}");
+            debug!("{mime} in {path:?} has desktop file value: {value}");
         } else {
             eprintln!(
-                "{mime} in {path} has desktop file value: {value}, but this file does not exist"
+                "{mime} in {path:?} has desktop file value: {value}, but this desktop-file does not exist!"
             );
         }
     }
