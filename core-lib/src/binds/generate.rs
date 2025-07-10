@@ -31,3 +31,41 @@ pub fn generate_bind_kill(kill_bind: &str) -> anyhow::Result<ExecBind> {
     };
     Ok(bind)
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn test_generate_bind_kill() {
+        let bind = generate_bind_kill("ctrl+shift,k").unwrap();
+        assert_eq!(bind.mods, vec!["ctrl", "shift"]);
+        assert_eq!(bind.key, "k".into());
+    }
+
+    #[test]
+    fn test_generate_bind_kill_2() {
+        let bind = generate_bind_kill("ctrl+shift, k").unwrap();
+        assert_eq!(bind.mods, vec!["ctrl", "shift"]);
+        assert_eq!(bind.key, "k".into());
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_generate_bind_kill_malformed() {
+        let bind = generate_bind_kill("ctrl+shift+k").unwrap();
+        assert_eq!(bind.mods, vec!["ctrl", "shift"]);
+        assert_eq!(bind.key, "k".into());
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_generate_bind_kill_no_mods_panic() {
+        generate_bind_kill("k").unwrap();
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_generate_bind_kill_no_key_panic() {
+        generate_bind_kill("ctrl+shift").unwrap();
+    }
+}

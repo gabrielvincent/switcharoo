@@ -6,12 +6,12 @@ use std::path::Path;
 use std::sync::{Mutex, MutexGuard, OnceLock};
 use tracing::{Level, debug, span, trace, warn};
 
-pub(crate) fn get_path_options(matches: &mut Vec<SortableLaunchOption>, text: &str) {
+pub fn get_path_options(matches: &mut Vec<SortableLaunchOption>, text: &str) {
     if text.starts_with("/") || text.starts_with("~") {
         let file_manager = get_file_manager_info();
         matches.push(SortableLaunchOption {
             icon: file_manager.icon.clone(),
-            name: format!("open in {}", file_manager.name).into_boxed_str(),
+            name: format!("Open in {}", file_manager.name).into_boxed_str(),
             details: Box::from(""),
             details_long: None,
             score: 100,
@@ -23,7 +23,7 @@ pub(crate) fn get_path_options(matches: &mut Vec<SortableLaunchOption>, text: &s
         });
     }
 }
-// inode/directory
+
 pub fn launch_option(text: &str) -> bool {
     if text.is_empty() {
         debug!("No text to search for");

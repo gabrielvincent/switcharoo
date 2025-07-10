@@ -40,21 +40,18 @@ impl<'a> Section<'a> {
 
 impl<'a> Section<'a> {
     pub fn insert_item(&mut self, mime: &'a str, desktop_file: &'a str) {
-        self.entries
-            .entry(mime)
-            .or_insert(vec![])
-            .push(desktop_file);
+        self.entries.entry(mime).or_default().push(desktop_file);
     }
     pub fn insert_item_at_front(&mut self, mime: &'a str, desktop_file: &'a str) {
         self.entries
             .entry(mime)
-            .or_insert(vec![])
+            .or_default()
             .insert(0, desktop_file);
     }
     pub fn insert_items(&mut self, mime: &'a str, mut desktop_files: Vec<&'a str>) {
         self.entries
             .entry(mime)
-            .or_insert(vec![])
+            .or_default()
             .append(&mut desktop_files);
     }
 }
@@ -65,6 +62,7 @@ pub struct IniFile<'a> {
 }
 
 impl IniFile<'_> {
+    #[allow(clippy::should_implement_trait)]
     pub fn from_str(content: &str) -> IniFile {
         let _span = span!(Level::TRACE, "from_str").entered();
 
@@ -124,15 +122,15 @@ impl<'a> IniFile<'a> {
         for (name, section) in sections {
             if !name.is_empty() {
                 if str.is_empty() {
-                    str.push_str(&format!("[{}]\n", name));
+                    str.push_str(&format!("[{name}]\n"));
                 } else {
-                    str.push_str(&format!("\n[{}]\n", name));
+                    str.push_str(&format!("\n[{name}]\n"));
                 }
             }
             let mut section = section.into_iter().collect::<Vec<_>>();
             section.sort_by_key(|(key, _)| *key);
             for (key, values) in section {
-                str.push_str(&format!("{}={}\n", key, values.join(";")));
+                str.push_str(&format!("{key}={}\n", values.join(";")));
             }
         }
         str

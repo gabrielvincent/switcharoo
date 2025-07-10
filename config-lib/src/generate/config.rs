@@ -40,7 +40,7 @@ pub fn check_file_exist(
     Ok(())
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct ConfigData {
     pub default_terminal: Option<Box<str>>,
     pub overview: Option<(Modifier, Box<str>)>,
@@ -116,5 +116,109 @@ pub fn generate_config(data: ConfigData) -> Config {
             ..Default::default()
         }),
         ..Default::default()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::generate::tui::configurable_launcher_plugins;
+
+    fn assert_config_matches_data(config: &Config, data: &ConfigData) {
+        if let Some(windows) = &config.windows {
+            if let Some(overview) = &windows.overview {
+                assert_eq!(overview.modifier, data.overview.as_ref().unwrap().0);
+                assert_eq!(overview.key, data.overview.as_ref().unwrap().1);
+                assert_eq!(overview.launcher.default_terminal, data.default_terminal);
+
+                let plugins = &overview.launcher.plugins;
+                assert_eq!(
+                    plugins.applications.is_some(),
+                    data.launcher_plugins
+                        .iter()
+                        .any(|p| p.as_ref() == configurable_launcher_plugins::APPLICATIONS)
+                );
+                assert_eq!(
+                    plugins.terminal.is_some(),
+                    data.launcher_plugins
+                        .iter()
+                        .any(|p| p.as_ref() == configurable_launcher_plugins::TERMINAL)
+                );
+                assert_eq!(
+                    plugins.shell.is_some(),
+                    data.launcher_plugins
+                        .iter()
+                        .any(|p| p.as_ref() == configurable_launcher_plugins::SHELL)
+                );
+                assert_eq!(
+                    plugins.websearch.is_some(),
+                    data.launcher_plugins
+                        .iter()
+                        .any(|p| p.as_ref() == configurable_launcher_plugins::WEB_SEARCH)
+                );
+                assert_eq!(
+                    plugins.calc.is_some(),
+                    data.launcher_plugins
+                        .iter()
+                        .any(|p| p.as_ref() == configurable_launcher_plugins::CALC)
+                );
+            }
+            if let Some(switch) = &windows.switch {
+                assert_eq!(switch.modifier, data.switch.0.unwrap());
+                assert_eq!(switch.show_workspaces, data.switch.1);
+            }
+        }
+    }
+
+    #[test]
+    fn test_empty_config() {
+        let data = ConfigData {
+            default_terminal: None,
+            overview: None,
+            switch: (None, false),
+            launcher_plugins: vec![],
+            launcher_engines: vec![],
+        };
+
+        let config = generate_config(data);
+        assert!(config.windows.as_ref().unwrap().overview.is_none());
+        assert!(config.windows.unwrap().switch.is_none());
+    }
+
+    #[test]
+    fn test_full_config() {
+        let data = ConfigData {
+            default_terminal: Some("alacritty".into()),
+            overview: Some((Modifier::Super, "super_l".into())),
+            switch: (Some(Modifier::Alt), true),
+            launcher_plugins: vec![
+                configurable_launcher_plugins::APPLICATIONS.into(),
+                configurable_launcher_plugins::TERMINAL.into(),
+                configurable_launcher_plugins::SHELL.into(),
+                configurable_launcher_plugins::WEB_SEARCH.into(),
+                configurable_launcher_plugins::CALC.into(),
+            ],
+            launcher_engines: vec!["Google".into(), "Wikipedia".into()],
+        };
+
+        let config = generate_config(data.clone());
+        assert_config_matches_data(&config, &data);
+    }
+
+    #[test]
+    fn test_partial_config() {
+        let data = ConfigData {
+            default_terminal: Some("xterm".into()),
+            overview: Some((Modifier::Ctrl, "ctrl_l".into())),
+            switch: (Some(Modifier::Shift), false),
+            launcher_plugins: vec![
+                configurable_launcher_plugins::APPLICATIONS.into(),
+                configurable_launcher_plugins::CALC.into(),
+            ],
+            launcher_engines: vec![],
+        };
+
+        let config = generate_config(data.clone());
+        assert_config_matches_data(&config, &data);
     }
 }

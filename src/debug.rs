@@ -46,7 +46,7 @@ pub fn list_icons() {
     util::fill_icon_name_map(false);
     let icons = get_all_icons();
     for icon in icons.iter() {
-        println!("{}", icon);
+        println!("{icon}");
     }
 }
 

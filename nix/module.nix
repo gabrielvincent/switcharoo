@@ -182,11 +182,11 @@ in
 
   config = lib.mkIf cfg.enable ({
     assertions = [
-        {
-          assertion = if (cfg.package == null) then (if cfg.systemd.enable then false else true) else true;
-          message = "Can't set programs.hyprshell.systemd.enable with the package set to null.";
-        }
-      ];
+      {
+        assertion = if (cfg.package == null) then (if cfg.systemd.enable then false else true) else true;
+        message = "Can't set programs.hyprshell.systemd.enable with the package set to null.";
+      }
+    ];
 
     home.packages = [ cfg.package ];
 

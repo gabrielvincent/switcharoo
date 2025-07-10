@@ -1,5 +1,5 @@
 use anyhow::{Context, bail};
-use core_lib::{IniFile, Section, get_config_home};
+use core_lib::{IniFile, get_config_home};
 use std::collections::HashMap;
 use std::fs::{read_to_string, write};
 use tracing::{debug, warn};
@@ -41,11 +41,7 @@ pub fn add(mime: &str, value: &str) -> anyhow::Result<()> {
     let desktop_files = core_lib::collect_desktop_files();
 
     // check if valid desktop file
-    if desktop_files
-        .iter()
-        .find(|f| f.file_name() == value)
-        .is_none()
-    {
+    if desktop_files.iter().any(|f| f.file_name() == value) {
         bail!("Invalid desktop file: {value}")
     }
 
@@ -57,9 +53,7 @@ pub fn add(mime: &str, value: &str) -> anyhow::Result<()> {
         "".to_string()
     };
     let mut ini = IniFile::from_str(&str);
-    let section = ini
-        .section_entry("Default Applications")
-        .or_insert(Section::new());
+    let section = ini.section_entry("Default Applications").or_default();
     section.insert_item_at_front(mime, value);
 
     let str = ini.format();
@@ -132,7 +126,7 @@ pub fn check() {
             if let Some(section) = ini.get_section("Default Applications") {
                 debug!("mimeapps.list: {:?}", file.path());
                 for (mime, values) in section {
-                    if mimes.get(mime).is_some() {
+                    if mimes.contains_key(mime) {
                         warn!("{mime} already exists");
                     }
                     for value in values {
@@ -148,7 +142,7 @@ pub fn check() {
     let mut vec = mimes.iter().collect::<Vec<_>>();
     vec.sort_by_key(|&(mime, _)| mime.to_string());
     for (mime, (value, path)) in vec {
-        if let Some(_) = desktop_files.iter().find(|d| *d.file_name() == **value) {
+        if desktop_files.iter().any(|d| *d.file_name() == **value) {
             debug!("{mime} in {path:?} has desktop file value: {value}");
         } else {
             eprintln!(

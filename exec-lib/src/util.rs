@@ -145,8 +145,7 @@ pub fn check_version() -> anyhow::Result<()> {
     let parsed_version = Version::parse(&version).context("Unable to parse hyprland Version")?;
     if parsed_version.lt(&MIN_VERSION) {
         toast(&format!(
-            "hyprland version {} is too old or unknown, please update to at least {}",
-            parsed_version, MIN_VERSION
+            "hyprland version {parsed_version} is too old or unknown, please update to at least {MIN_VERSION}",
         ));
     }
     Ok(())

@@ -27,10 +27,16 @@ rec {
       cargoExtraArgs = "--features config_check_is_default";
     }
   );
+  hyprshell-test = craneLib.cargoNextest (
+    buildLib.commonArgsCachedRelease
+    // {
+      checkPhaseCargoCommand = "cargo nextest run --profile release --workspace";
+    }
+  );
   hyprshell-clippy = craneLib.cargoClippy (
     buildLib.commonArgsCachedRelease
     // {
-      buildPhaseCargoCommand = "cargo clippy";
+      buildPhaseCargoCommand = "cargo clippy"; # no release check
       cargoClippyExtraArgs = "--all-targets -- --deny warnings";
     }
   );

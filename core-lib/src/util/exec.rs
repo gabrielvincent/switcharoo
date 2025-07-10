@@ -81,3 +81,62 @@ pub fn analyse_exec(exec: &str) -> ExecType {
         ExecType::Relative(Box::from(exec_trim))
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_relative_exec() {
+        assert!(matches!(
+            analyse_exec("nautilus --new-window"),
+            ExecType::Relative(ref s) if &**s == "nautilus --new-window"
+        ));
+    }
+
+    #[test]
+    fn test_flatpak_pwa_exec() {
+        assert!(matches!(
+            analyse_exec(
+                "flatpak 'run' '--command=/app/bin/chromium' 'org.chromium.Chromium' '--profile-directory=Default' '--app-id=awf'"
+            ),
+            ExecType::FlatpakPWA(ref id, ref browser) if &**id == "org.chromium.Chromium" && &**browser == "chromium"
+        ));
+    }
+
+    #[test]
+    fn test_appimage_exec() {
+        assert!(matches!(
+            analyse_exec(
+                "/home/user/Applications/ungoogled-chromium_71.0.3578.98-2_linux_awf.AppImage %u"
+            ),
+            ExecType::AppImage(ref name, ref path) if &**name == "ungoogled-chromium" && &**path == "/home/user/Applications/ungoogled-chromium_71.0.3578.98-2_linux_awf.AppImage %u"
+        ));
+    }
+
+    #[test]
+    fn test_absolute_pwa_exec() {
+        assert!(matches!(
+            analyse_exec(
+                "/opt/google/chrome/google-chrome --profile-directory=Default --app-id=awf"
+            ),
+            ExecType::PWA(ref browser, ref path) if &**browser == "google-chrome" && &**path == "/opt/google/chrome/google-chrome"
+        ));
+    }
+
+    #[test]
+    fn test_flatpak_exec() {
+        assert!(matches!(
+            analyse_exec("flatpak run org.mozilla.firefox"),
+            ExecType::Flatpak(ref id, ref command) if &**id == "org.mozilla.firefox" && &**command == "unknown"
+        ));
+    }
+
+    #[test]
+    fn test_absolute_exec() {
+        assert!(matches!(
+            analyse_exec("/usr/bin/firefox"),
+            ExecType::Absolute(ref name, ref path) if &**name == "firefox" && &**path == "/usr/bin/firefox"
+        ));
+    }
+}

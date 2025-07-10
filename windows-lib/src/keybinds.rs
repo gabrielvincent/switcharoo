@@ -34,24 +34,6 @@ pub fn generate_open_keybinds(windows: &Windows) -> Vec<ExecBind> {
             exec: generate_transfer_socat(&TransferType::OpenSwitch(OpenSwitch { reverse: true }))
                 .into_boxed_str(),
         });
-        // binds.push(ExecBind {
-        //     mods: vec![switch.modifier],
-        //     key: Box::from("tab"),
-        //     on_release: true,
-        //     exec: generate_transfer_socat(&TransferType::CloseSwitch).into_boxed_str(),
-        // });
-        // binds.push(ExecBind {
-        //     mods: vec![switch.modifier],
-        //     key: Box::from("grave"),
-        //     on_release: true,
-        //     exec: generate_transfer_socat(&TransferType::CloseSwitch).into_boxed_str(),
-        // });
-        // binds.push(ExecBind {
-        //     mods: vec![switch.modifier, Modifier::Shift],
-        //     key: Box::from("tab"),
-        //     on_release: true,
-        //     exec: generate_transfer_socat(&TransferType::CloseSwitch).into_boxed_str(),
-        // });
     }
 
     binds
