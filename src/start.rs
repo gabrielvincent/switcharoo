@@ -12,7 +12,7 @@ use core_lib::{
     hyprshell_css_listener,
 };
 use exec_lib::listener::{hyprland_config_listener, monitor_listener};
-use exec_lib::{reload_hyprland_config, toast};
+use exec_lib::toast;
 use gtk::gdk::Display;
 use gtk::prelude::*;
 use gtk::{
@@ -22,12 +22,12 @@ use gtk::{
 use launcher_lib::{LauncherData, create_windows_overview_launcher_window};
 use std::any::Any;
 use std::cell::RefCell;
-use std::env;
 use std::path::{Path, PathBuf};
 use std::rc::Rc;
 use std::sync::{Mutex, OnceLock};
 use std::time::Duration;
-use tracing::{Level, debug, error, info, span};
+use std::{env, thread};
+use tracing::{Level, debug, error, info, span, trace};
 use windows_lib::{
     WindowsOverviewData, WindowsSwitchData, create_windows_overview_window,
     create_windows_switch_window,
@@ -103,12 +103,12 @@ fn activate(
     let _span = span!(Level::TRACE, "activate").entered();
     apply_css(css_path);
 
-    if let Err(err) = reload_hyprland_config() {
-        error!("Failed to reload hyprland config: {err:?}");
-        toast(&format!("Failed to reload hyprland config: {err}"));
-        hyprshell_config_block(config_path);
-        return; // return needed to exit the application
-    }
+    // if let Err(err) = reload_hyprland_config() {
+    //     error!("Failed to reload hyprland config: {err:?}");
+    //     toast(&format!("Failed to reload hyprland config: {err}"));
+    //     hyprshell_config_block(config_path);
+    //     return; // return needed to exit the application
+    // }
 
     let config = match config_lib::load_and_migrate_config(config_path) {
         Ok(config) => config,
@@ -234,14 +234,14 @@ pub fn register_event_restarter(
             // Cancel any existing timer
             if let Some(timer_id) = debounce_timer.borrow_mut().take() {
                 timer_id.remove();
-                debug!("Cancelled previous debounce timer");
+                trace!("Cancelled previous debounce timer");
             }
 
             // Create new debounce timer
             let event_sender_clone = event_sender.clone();
             let debounce_timer_clone = debounce_timer.clone();
             let timer_id = glib::timeout_add_local_once(Duration::from_millis(delay), move || {
-                debug!("Debounce timer expired, triggering restart ({cause})");
+                trace!("Debounce timer expired, triggering restart ({cause})");
 
                 // Clear the timer reference since it's about to complete
                 *debounce_timer_clone.borrow_mut() = None;

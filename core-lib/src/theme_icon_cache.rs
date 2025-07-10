@@ -1,11 +1,11 @@
 // https://github.com/H3rmt/hyprshell/discussions/137#discussioncomment-12078216
 
 use std::collections::BTreeSet;
-use std::env;
 use std::fs::read_dir;
 use std::path::{Path, PathBuf};
 use std::sync::{Mutex, MutexGuard, OnceLock};
 use std::time::Instant;
+use std::{env, thread};
 use tracing::{Level, debug, span};
 
 fn get_icon_map() -> &'static Mutex<BTreeSet<Box<str>>> {
@@ -29,7 +29,7 @@ pub fn init_icon_name_map(icon_names: Vec<String>, search_path: Vec<PathBuf>, in
         for path in search_path {
             if path.exists() {
                 if in_background {
-                    std::thread::spawn(move || {
+                    thread::spawn(move || {
                         let paths = collect_unique_files_recursive(&path);
                         debug!(
                             "found {} icons from filesystem in {path:?} paths (in background)",
