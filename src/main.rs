@@ -1,4 +1,3 @@
-use crate::cli::DefaultApplicationsCommand;
 use anyhow::Context;
 use clap::Parser;
 use core_lib::{
@@ -150,16 +149,16 @@ fn main() -> anyhow::Result<()> {
                     );
                 }
                 cli::DebugCommand::DefaultApplications { command } => match command {
-                    DefaultApplicationsCommand::Get { mime } => {
+                    cli::DefaultApplicationsCommand::Get { mime } => {
                         default_apps::get(&mime).context("unable to get default app")?;
                     }
-                    DefaultApplicationsCommand::Add { mime, value } => {
+                    cli::DefaultApplicationsCommand::Add { mime, value } => {
                         default_apps::add(&mime, &value).context("unable to set default app")?;
                     }
-                    DefaultApplicationsCommand::List { all } => {
+                    cli::DefaultApplicationsCommand::List { all } => {
                         default_apps::list(all);
                     }
-                    DefaultApplicationsCommand::Check {} => {
+                    cli::DefaultApplicationsCommand::Check {} => {
                         default_apps::check();
                     }
                 },

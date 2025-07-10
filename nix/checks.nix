@@ -30,7 +30,8 @@ rec {
   hyprshell-test = craneLib.cargoNextest (
     buildLib.commonArgsCachedRelease
     // {
-      checkPhaseCargoCommand = "cargo nextest run --profile release --workspace";
+      doCheck = true;
+      cargoNextestExtraArgs = "--workspace";
     }
   );
   hyprshell-clippy = craneLib.cargoClippy (
