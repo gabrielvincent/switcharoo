@@ -79,7 +79,7 @@ pub fn hyprshell_config_block(file_path: &Path) {
         move |res: notify::Result<Event>| match res {
             Ok(event) if event.kind == EventKind::Modify(ModifyKind::Data(DataChange::Any)) => {
                 trace!("Event: {:?}", event);
-                tx.send(()).warn("Failed to send reload signal");
+                tx.send(()).warn_details("Failed to send reload signal");
             }
             Err(err) => {
                 warn!("Watch error: {:?}", err)
@@ -94,5 +94,5 @@ pub fn hyprshell_config_block(file_path: &Path) {
     watcher
         .watch(file_path.as_ref(), RecursiveMode::NonRecursive)
         .expect("Failed to start hyprshell config reload listener");
-    rx.recv().warn("Failed to receive reload signal");
+    rx.recv().warn_details("Failed to receive reload signal");
 }

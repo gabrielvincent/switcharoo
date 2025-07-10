@@ -27,4 +27,8 @@ build() {
 package() {
     install -Dm755 "$pkgname-$pkgver/target/release/$pkgname" "$pkgdir/usr/bin/$pkgname"
     install -Dm644 "$pkgname-$pkgver/LICENSE" "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+
+    "$pkgdir/usr/bin/$pkgname" completion bash -p "$pkgdir/usr/share/bash-completion/completions"
+    "$pkgdir/usr/bin/$pkgname" completion fish -p "$pkgdir/usr/share/fish/vendor_completions.d"
+    "$pkgdir/usr/bin/$pkgname" completion zsh -p "$pkgdir/usr/share/zsh/site-functions"
 }

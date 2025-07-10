@@ -46,7 +46,7 @@ pub fn launch_option(text: &str, default_terminal: &Option<Box<str>>) -> bool {
         true,
         default_terminal,
     )
-    .warn("Failed to run program");
+    .warn_details("Failed to run program");
     true
 }
 

@@ -18,7 +18,7 @@ type IconPathMap = HashMap<(Box<str>, Source), (Box<Path>, Box<Path>)>;
 pub fn reload_desktop_map(files: &[DirEntry]) {
     let mut map = get_icon_path_map().lock().expect("Failed to lock icon map");
     map.clear();
-    fill_desktop_file_map(&mut map, files).warn("Failed to fill desktop file map");
+    fill_desktop_file_map(&mut map, files).warn_details("Failed to fill desktop file map");
 }
 
 fn fill_desktop_file_map(map: &mut IconPathMap, files: &[DirEntry]) -> anyhow::Result<()> {
@@ -27,13 +27,13 @@ fn fill_desktop_file_map(map: &mut IconPathMap, files: &[DirEntry]) -> anyhow::R
     let now = Instant::now();
     for entry in files {
         if let Ok(str) = read_to_string(entry.path()) {
-            let ini = IniFile::parse(&str);
+            let ini = IniFile::from_str(&str);
             if let Some(section) = ini.get_section("Desktop Entry") {
-                let name = section.get("Name");
-                let icon = section.get("Icon");
-                let startup_wm_class = section.get("StartupWMClass");
+                let name = section.get_first("Name");
+                let icon = section.get_first("Icon");
+                let startup_wm_class = section.get_first("StartupWMClass");
                 let exec_name = section
-                    .get("Exec")
+                    .get_first("Exec")
                     .map(extract_exec_name)
                     .and_then(|l| l.split_whitespace().next())
                     .and_then(|l| l.split('/').next_back())

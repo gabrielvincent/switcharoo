@@ -54,7 +54,7 @@ fn open_overview(global: &mut Globals, event_sender: Sender<TransferType>) {
                     .unwrap_or(false)
             {
                 windows_lib::open_overview(overview, event_sender)
-                    .warn("Failed to open overview window");
+                    .warn_details("Failed to open overview window");
                 launcher_lib::open_launcher(launcher)
             } else {
                 warn!("Overview or Switch already open");
@@ -77,7 +77,8 @@ fn open_switch(global: &mut Globals, config: OpenSwitch) {
                     .map(|(o, _)| windows_lib::overview_already_open(o))
                     .unwrap_or(false)
             {
-                windows_lib::open_switch(switch, config).warn("Failed to open switch window");
+                windows_lib::open_switch(switch, config)
+                    .warn_details("Failed to open switch window");
             } else {
                 warn!("Switch or Overview already open");
             }

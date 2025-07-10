@@ -1,0 +1,159 @@
+use anyhow::{Context, bail};
+use core_lib::{IniFile, Section, get_config_home};
+use std::collections::HashMap;
+use std::fs::{read_to_string, write};
+use tracing::{debug, warn};
+
+pub fn get(mime: &str) -> anyhow::Result<()> {
+    let mime_files = core_lib::collect_mime_files();
+
+    let mut mimes = vec![];
+    for file in mime_files {
+        if let Ok(str) = read_to_string(file.path()) {
+            let ini = IniFile::from_str(&str);
+            let default = ini.get_section("Default Applications").and_then(|section| {
+                section.get_first_as_boxed(mime).or_else(|| {
+                    ini.get_section("Added Associations")
+                        .and_then(|section| section.get_first_as_boxed(mime))
+                })
+            });
+            if let Some(default) = default {
+                mimes.push((
+                    default.to_string(),
+                    file.path().to_string_lossy().to_string(),
+                ))
+            }
+        } else {
+            warn!("Failed to read file: {:?}", file.path());
+        }
+    }
+    if mimes.is_empty() {
+        bail!("No default application found for {mime}")
+    }
+
+    for (value, path) in mimes {
+        println!("{mime}: {value} [{path}]");
+    }
+    Ok(())
+}
+
+pub fn add(mime: &str, value: &str) -> anyhow::Result<()> {
+    let desktop_files = core_lib::collect_desktop_files();
+
+    // check if valid desktop file
+    if desktop_files
+        .iter()
+        .find(|f| f.file_name() == value)
+        .is_none()
+    {
+        bail!("Invalid desktop file: {value}")
+    }
+
+    let mut file = get_config_home();
+    file.push("mimeapps.list");
+    let str = if file.exists() {
+        read_to_string(&file).with_context(|| format!("Failed to read file {file:?}"))?
+    } else {
+        "".to_string()
+    };
+    let mut ini = IniFile::from_str(&str);
+    let section = ini
+        .section_entry("Default Applications")
+        .or_insert(Section::new());
+    section.insert_item_at_front(mime, value);
+
+    let str = ini.format();
+    write(&file, str).with_context(|| format!("Failed to write file {file:?}"))?;
+
+    println!("added {mime}: {value} to {file:?}");
+    Ok(())
+}
+
+const USED_MIME_TYPES: &[&str] = &["x-scheme-handler/https", "inode/directory"];
+
+pub fn list(all: bool) {
+    let mime_files = core_lib::collect_mime_files();
+
+    let mut mimes = HashMap::new();
+    for file in mime_files {
+        if let Ok(str) = read_to_string(file.path()) {
+            let ini = IniFile::from_str(&str);
+            debug!("mimeapps.list: {:?}", file.path());
+            if let Some(section) = ini.get_section("Default Applications") {
+                for (mime, values) in section {
+                    let mut values = values.iter().map(|v| v.to_string()).collect::<Vec<_>>();
+                    mimes
+                        .entry(mime.to_string())
+                        .or_insert((vec![], vec![]))
+                        .0
+                        .append(&mut values);
+                }
+            }
+            if let Some(section) = ini.get_section("Added Associations") {
+                for (mime, values) in section {
+                    let mut values = values.iter().map(|v| v.to_string()).collect::<Vec<_>>();
+                    mimes
+                        .entry(mime.to_string())
+                        .or_insert((vec![], vec![]))
+                        .1
+                        .append(&mut values);
+                }
+            }
+        } else {
+            warn!("Failed to read file: {:?}", file.path());
+        }
+    }
+
+    if all {
+        let mut mimes = mimes.into_iter().collect::<Vec<_>>();
+        mimes.sort_by(|(a, _), (b, _)| a.cmp(b));
+        for (mime, (defaults, added)) in mimes {
+            println!("{mime}: defaults: {defaults:?}, added: {added:?}");
+        }
+    } else {
+        for mime in USED_MIME_TYPES {
+            if let Some((defaults, added)) = mimes.get(*mime) {
+                println!("{mime}: defaults: {defaults:?}, added: {added:?}");
+            } else {
+                println!("{mime}: <not set>");
+            }
+        }
+    }
+}
+
+pub fn check() {
+    let mime_files = core_lib::collect_mime_files();
+    let desktop_files = core_lib::collect_desktop_files();
+
+    let mut mimes = HashMap::new();
+    for file in mime_files {
+        if let Ok(str) = read_to_string(file.path()) {
+            let ini = IniFile::from_str(&str);
+            if let Some(section) = ini.get_section("Default Applications") {
+                debug!("mimeapps.list: {:?}", file.path());
+                for (mime, values) in section {
+                    if mimes.get(mime).is_some() {
+                        warn!("{mime} already exists");
+                    }
+                    for value in values {
+                        mimes.insert(mime.to_string(), (value.to_string(), file.path()));
+                    }
+                }
+            }
+        } else {
+            warn!("Failed to read file: {:?}", file.path());
+        }
+    }
+
+    let mut vec = mimes.iter().collect::<Vec<_>>();
+    vec.sort_by_key(|&(mime, _)| mime.to_string());
+    for (mime, (value, path)) in vec {
+        if let Some(_) = desktop_files.iter().find(|d| *d.file_name() == **value) {
+            debug!("{mime} in {path:?} has desktop file value: {value}");
+        } else {
+            eprintln!(
+                "{mime} in {path:?} has desktop file value: {value}, but this desktop-file does not exist!"
+            );
+        }
+    }
+}

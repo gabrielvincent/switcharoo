@@ -8,7 +8,7 @@ use tracing::{Level, span};
 pub fn create_binds(config: &Config) -> anyhow::Result<()> {
     let _span = span!(Level::DEBUG, "create_binds").entered();
     if config.layerrules {
-        apply_layerrules().warn("Failed to apply layerrules");
+        apply_layerrules().warn_details("Failed to apply layerrules");
     }
     generate_bind_kill(&config.kill_bind)
         .and_then(|bind| apply_exec_bind(&bind))

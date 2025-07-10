@@ -4,8 +4,9 @@ use hyprland::ctl::{Color, notify, reload};
 use hyprland::data::{Client, Clients, Monitor, Monitors, Workspace};
 use hyprland::keyword::Keyword;
 use hyprland::prelude::*;
+use semver::Version;
 use std::sync::{Mutex, OnceLock};
-use tracing::{debug, trace};
+use tracing::{debug, info, trace};
 
 pub fn get_clients() -> Vec<Client> {
     Clients::get().map_or(vec![], |clients| clients.to_vec())
@@ -110,18 +111,6 @@ pub fn reset_remain_focused() -> anyhow::Result<()> {
     Ok(())
 }
 
-// pub fn activate_submap(submap_name: &str) -> anyhow::Result<()> {
-//     Dispatch::call(DispatchType::Custom("submap", submap_name)).context("dispatch failed")?;
-//     debug!("Activated submap: {}", submap_name);
-//     Ok(())
-// }
-//
-// pub fn reset_submap() -> anyhow::Result<()> {
-//     Dispatch::call(DispatchType::Custom("submap", "reset")).context("dispatch failed")?;
-//     debug!("reset submap");
-//     Ok(())
-// }
-
 pub fn get_initial_active() -> anyhow::Result<Active> {
     let active_client = Client::get_active()?.map(|c| to_client_id(&c.address));
     let active_ws = Workspace::get_active()?.id;
@@ -133,13 +122,32 @@ pub fn get_initial_active() -> anyhow::Result<Active> {
     })
 }
 
-pub fn get_version() -> anyhow::Result<String> {
+pub fn check_version() -> anyhow::Result<()> {
+    pub const MIN_VERSION: Version = Version::new(0, 42, 0);
+
     let version = hyprland::data::Version::get()
         .context("Failed to get version! (hyprland is probably outdated or too new??)")?;
-
     trace!("hyprland {version:?}");
 
-    Ok(version
+    let version = version
         .version
-        .unwrap_or(version.tag.trim_start_matches('v').to_string()))
+        .unwrap_or(version.tag.trim_start_matches('v').to_string());
+    info!(
+        "Starting hyprshell {} in {} mode on hyprland {}",
+        env!("CARGO_PKG_VERSION"),
+        if cfg!(debug_assertions) {
+            "debug"
+        } else {
+            "release"
+        },
+        version,
+    );
+    let parsed_version = Version::parse(&version).context("Unable to parse hyprland Version")?;
+    if parsed_version.lt(&MIN_VERSION) {
+        toast(&format!(
+            "hyprland version {} is too old or unknown, please update to at least {}",
+            parsed_version, MIN_VERSION
+        ));
+    }
+    Ok(())
 }

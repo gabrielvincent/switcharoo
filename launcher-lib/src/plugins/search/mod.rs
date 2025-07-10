@@ -55,12 +55,12 @@ pub fn launch_option(iden: &Option<Box<str>>, text: &str) -> bool {
             format!("{} '{}'", browser.exec, url)
         };
         debug!("Launching browser: {}", cmdline);
-        run_program(&cmdline, None, false, &None).warn("Failed to run program");
+        run_program(&cmdline, None, false, &None).warn_details("Failed to run program");
 
         // try to focus browser
         if let Some(class) = &browser.startup_wm_class {
             debug!("trying to focus browser with class: {}", class);
-            switch_client_by_initial_class(class).warn("unable to focus browser");
+            switch_client_by_initial_class(class).warn_details("unable to focus browser");
         } else {
             trace!("not class to browser available")
         }

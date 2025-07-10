@@ -42,7 +42,7 @@ pub fn reload_desktop_map(files: &[DirEntry]) {
         .lock()
         .expect("Failed to lock desktop file map");
     map.clear();
-    fill_desktop_file_map(&mut map, files).warn("Failed to fill desktop file map");
+    fill_desktop_file_map(&mut map, files).warn_details("Failed to fill desktop file map");
 }
 
 fn fill_desktop_file_map(map: &mut Vec<DesktopEntry>, files: &[DirEntry]) -> anyhow::Result<()> {
@@ -51,19 +51,18 @@ fn fill_desktop_file_map(map: &mut Vec<DesktopEntry>, files: &[DirEntry]) -> any
     let now = Instant::now();
     for entry in files {
         if let Ok(str) = read_to_string(entry.path()) {
-            let ini = IniFile::parse(&str);
+            let ini = IniFile::from_str(&str);
             if let Some(section) = ini.get_section("Desktop Entry") {
-                let r#type = section.get("Type");
-                let no_display = section.get_boolean("NoDisplay");
+                let r#type = section.get_first("Type");
+                let no_display = section.get_first_as_boolean("NoDisplay");
                 if r#type == Some("Application") && no_display.is_none_or(|n| !n) {
-                    let name = section.get_boxed("Name");
-                    let exec = section.get("Exec");
-                    let icon = section.get_path_boxed("Icon");
-                    let exec_path = section.get_path_boxed("Path");
-                    let terminal = section.get_boolean("Terminal").unwrap_or(false);
+                    let name = section.get_first_as_boxed("Name");
+                    let exec = section.get_first("Exec");
+                    let icon = section.get_first_as_path_boxed("Icon");
+                    let exec_path = section.get_first_as_path_boxed("Path");
+                    let terminal = section.get_first_as_boolean("Terminal").unwrap_or(false);
                     let keywords = section
-                        .get_boxed("Keywords")
-                        .map(|k| k.split(';').map(|k| Box::from(k.trim())).collect())
+                        .get_all_as_boxed("Keywords")
                         .unwrap_or_else(Vec::new);
 
                     if let (Some(name), Some(exec)) = (name, exec) {
@@ -91,8 +90,8 @@ fn fill_desktop_file_map(map: &mut Vec<DesktopEntry>, files: &[DirEntry]) -> any
                             .iter()
                             .filter_map(|(name, section)| {
                                 if name.starts_with("Desktop Action ") {
-                                    let exec = section.get_boxed("Exec")?;
-                                    let name_hr = section.get_boxed("Name")?;
+                                    let exec = section.get_first_as_boxed("Exec")?;
+                                    let name_hr = section.get_first_as_boxed("Name")?;
                                     Some(DesktopAction {
                                         id: Box::from(*name),
                                         name: name_hr,

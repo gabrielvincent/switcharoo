@@ -1,6 +1,6 @@
-use std::fmt::Debug;
-
 use clap::{Args, Parser, Subcommand};
+use std::fmt::Debug;
+use std::path::PathBuf;
 
 #[derive(Parser, Debug, Clone)]
 #[command(
@@ -28,24 +28,24 @@ pub struct GlobalOpts {
     pub quiet: bool,
 
     /// Path to config [default: $XDG_CONFIG_HOME/hyprshell/config.ron],
-    /// allowed file types: ron, toml, json
+    /// allowed file types: ron, toml, json5
     #[arg(short = 'c', long, global = true)]
-    pub config_file: Option<std::path::PathBuf>,
+    pub config_file: Option<PathBuf>,
 
     /// Path to css [default: $XDG_CONFIG_HOME/hyprshell/style.css]
     #[arg(long, short = 's', global = true)]
-    pub css_file: Option<std::path::PathBuf>,
+    pub css_file: Option<PathBuf>,
 
     /// Path to data directory [default: $XDG_DATA_HOME/hyprshell]
     #[arg(long, short = 'd', global = true)]
-    pub data_dir: Option<std::path::PathBuf>,
+    pub data_dir: Option<PathBuf>,
 }
 
 #[derive(Subcommand, Debug, Clone)]
 pub enum Command {
     Run {},
     #[cfg(feature = "generate_config_command")]
-    /// Generate the config file
+    /// Generate or check the config file
     Config {
         #[clap(subcommand)]
         command: ConfigCommand,
@@ -64,10 +64,24 @@ pub enum Command {
         command: DataCommand,
     },
 
+    /// Send json to the hyprshell socket
     #[clap(hide = true)]
     Socat {
         /// JSON to send to the socket
         json: String,
+    },
+
+    /// Generate completions for shells
+    Completion {
+        /// Shell to generate completion for
+        shell: String,
+
+        /// BASE Path for completion without filename
+        /// Bash Default: /usr/share/bash-completion/completions
+        /// Fish Default: /usr/share/fish/vendor_completions.d
+        /// Zsh Default: /usr/share/zsh/site-functions
+        #[arg(long, short = 'p')]
+        bash_path: Option<PathBuf>,
     },
 }
 
@@ -103,6 +117,12 @@ pub enum DataCommand {
 
 #[derive(Subcommand, Debug, Clone)]
 pub enum DebugCommand {
+    /// List all icons in the theme
+    ListIcons,
+
+    /// List all desktop files
+    ListDesktopFiles,
+
     /// Search for an icon with a window class
     CheckClass {
         /// The class (from `hyprctl clients -j | jq -e ".[] | {title, class}"`) of a window to find an icon for
@@ -111,13 +131,7 @@ pub enum DebugCommand {
         class: Option<String>,
     },
 
-    /// List all icons in the theme
-    ListIcons,
-
-    /// List all desktop files
-    ListDesktopFiles,
-
-    /// display search insights
+    /// simulate search in launcher and display search insights
     Search {
         /// text entered into the search box
         text: String,
@@ -126,4 +140,29 @@ pub enum DebugCommand {
         #[arg(short = 'a', long)]
         all: bool,
     },
+
+    /// get or set default applications for different mime types
+    DefaultApplications {
+        #[clap(subcommand)]
+        command: DefaultApplicationsCommand,
+    },
+}
+
+#[derive(Subcommand, Debug, Clone)]
+pub enum DefaultApplicationsCommand {
+    /// Get default app for mimetype
+    Get { mime: String },
+
+    /// Add a default app for mimetype (if one already exists, this one is placed before)
+    Add { mime: String, value: String },
+
+    /// List default apps for all mimetypes
+    List {
+        /// Show all mimes instead of ony the ones used by hyprshell
+        #[arg(short = 'a', long)]
+        all: bool,
+    },
+
+    /// Check if all entries in all mimetype files point to valid desktop files
+    Check {},
 }

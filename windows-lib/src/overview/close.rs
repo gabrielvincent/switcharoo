@@ -3,12 +3,13 @@ use core_lib::transfer::WindowsOverride;
 use core_lib::{FindByFirst, WarnWithDetails};
 use exec_lib::switch::{switch_client, switch_workspace};
 use exec_lib::{reset_remain_focused, to_client_address};
+use gtk::glib;
 use gtk::prelude::*;
 use tracing::{Level, debug, span, trace};
 
 pub fn close_overview(data: &mut WindowsOverviewData, ids: Option<Option<WindowsOverride>>) {
     let _span = span!(Level::TRACE, "close_overview").entered();
-    reset_remain_focused().warn("Failed to reset follow mouse");
+    reset_remain_focused().warn_details("Failed to reset follow mouse");
 
     for (window, monitor_data) in &mut data.window_list.iter_mut() {
         while let Some(child) = monitor_data.workspaces_flow.first_child() {
@@ -40,8 +41,12 @@ pub fn close_overview(data: &mut WindowsOverviewData, ids: Option<Option<Windows
                         .map(|c| c.title.clone())
                         .unwrap_or_else(|| "<Unknown>".to_string())
                 );
-                switch_client(to_client_address(client_id))
-                    .warn(&format!("Failed to execute with id {client_id:?}"));
+                // TODO doesnt move mouse focus (reset_remain_focused is already reset??)
+                glib::idle_add_local(move || {
+                    switch_client(to_client_address(client_id))
+                        .warn_details(&format!("Failed to execute with id {client_id:?}"));
+                    glib::ControlFlow::Break
+                });
             }
             WindowsOverride::WorkspaceID(workspace_id) => {
                 debug!(
@@ -52,9 +57,12 @@ pub fn close_overview(data: &mut WindowsOverviewData, ids: Option<Option<Windows
                         .map(|c| c.name.clone())
                         .unwrap_or_else(|| "<Unknown>".to_string())
                 );
-                switch_workspace(workspace_id).warn(&format!(
-                    "Failed to execute switch workspace with id {workspace_id:?}"
-                ));
+                glib::idle_add_local(move || {
+                    switch_workspace(workspace_id).warn_details(&format!(
+                        "Failed to execute switch workspace with id {workspace_id:?}"
+                    ));
+                    glib::ControlFlow::Break
+                });
             }
         }
     }

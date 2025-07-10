@@ -260,7 +260,7 @@ fn click_plugin(button: &Button, iden: Identifier, event_sender: Sender<Transfer
             .send_blocking(TransferType::CloseOverview(
                 CloseOverviewConfig::LauncherClick(iden.clone()),
             ))
-            .warn("unable to send");
+            .warn_details("unable to send");
     });
 }
 
@@ -272,7 +272,7 @@ fn click_entry(button: &gtk::Box, iden: Identifier, event_sender: Sender<Transfe
             .send_blocking(TransferType::CloseOverview(
                 CloseOverviewConfig::LauncherClick(iden.clone()),
             ))
-            .warn("unable to send");
+            .warn_details("unable to send");
     });
     button.add_controller(gesture);
 }
@@ -284,6 +284,6 @@ fn click_details_entry(button: &Button, iden: Identifier, event_sender: Sender<T
             .send_blocking(TransferType::CloseOverview(
                 CloseOverviewConfig::LauncherClick(iden.clone()),
             ))
-            .warn("unable to send");
+            .warn_details("unable to send");
     });
 }

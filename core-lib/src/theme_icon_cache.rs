@@ -13,7 +13,7 @@ fn get_icon_map() -> &'static Mutex<BTreeSet<Box<str>>> {
     MAP_LOCK.get_or_init(|| Mutex::new(BTreeSet::new()))
 }
 
-pub fn init_icon_map(icon_names: Vec<String>, search_path: Vec<PathBuf>, in_background: bool) {
+pub fn init_icon_name_map(icon_names: Vec<String>, search_path: Vec<PathBuf>, in_background: bool) {
     let _span = span!(Level::TRACE, "init_icon_map").entered();
     let mut map = get_icon_map().lock().expect("Failed to lock icon map");
     let instant = Instant::now();

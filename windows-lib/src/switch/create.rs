@@ -88,7 +88,7 @@ fn handle_release(key: Key, modifier: Modifier, event_sender: Sender<TransferTyp
     {
         event_sender
             .send_blocking(TransferType::CloseSwitch)
-            .warn("unable to send");
+            .warn_details("unable to send");
     }
 }
 
@@ -97,7 +97,7 @@ fn handle_key(key: Key, event_sender: Sender<TransferType>) -> Propagation {
         Key::Escape => {
             event_sender
                 .send_blocking(TransferType::Exit)
-                .warn("unable to send");
+                .warn_details("unable to send");
             Propagation::Stop
         }
         Key::Tab => {
@@ -105,7 +105,7 @@ fn handle_key(key: Key, event_sender: Sender<TransferType>) -> Propagation {
                 .send_blocking(TransferType::SwitchSwitch(SwitchSwitchConfig {
                     reverse: false,
                 }))
-                .warn("unable to send");
+                .warn_details("unable to send");
             Propagation::Stop
         }
         Key::ISO_Left_Tab => {
@@ -113,7 +113,7 @@ fn handle_key(key: Key, event_sender: Sender<TransferType>) -> Propagation {
                 .send_blocking(TransferType::SwitchSwitch(SwitchSwitchConfig {
                     reverse: true,
                 }))
-                .warn("unable to send");
+                .warn_details("unable to send");
             Propagation::Stop
         }
         Key::grave => {
@@ -121,7 +121,7 @@ fn handle_key(key: Key, event_sender: Sender<TransferType>) -> Propagation {
                 .send_blocking(TransferType::SwitchSwitch(SwitchSwitchConfig {
                     reverse: true,
                 }))
-                .warn("unable to send");
+                .warn_details("unable to send");
             Propagation::Stop
         }
         _ => Propagation::Proceed,

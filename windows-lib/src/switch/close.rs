@@ -9,7 +9,7 @@ use tracing::{Level, debug, span, trace};
 pub fn close_switch(data: &mut WindowsSwitchData, switch: bool) {
     let _span = span!(Level::TRACE, "close_switch").entered();
 
-    reset_remain_focused().warn("Failed to reset follow mouse");
+    reset_remain_focused().warn_details("Failed to reset follow mouse");
     while let Some(child) = data.main_flow.first_child() {
         data.main_flow.remove(&child);
     }
@@ -29,7 +29,7 @@ pub fn close_switch(data: &mut WindowsSwitchData, switch: bool) {
             // we need to do this because the window might still be visible and have KeyboardMode::Exclusive
             glib::idle_add_local(move || {
                 switch_client(to_client_address(id))
-                    .warn(&format!("Failed to execute with id {id:?}"));
+                    .warn_details(&format!("Failed to execute with id {id:?}"));
                 glib::ControlFlow::Break
             });
         } else {
@@ -43,7 +43,7 @@ pub fn close_switch(data: &mut WindowsSwitchData, switch: bool) {
                     .unwrap_or_else(|| "<Unknown>".to_string())
             );
             glib::idle_add_local(move || {
-                switch_workspace(id).warn(&format!(
+                switch_workspace(id).warn_details(&format!(
                     "Failed to execute switch workspace with id {id:?}"
                 ));
                 glib::ControlFlow::Break

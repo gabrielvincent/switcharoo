@@ -16,9 +16,10 @@ The application also includes a launcher for running applications, doing calcula
 - **Customizable Keybindings**: Define your own keybindings for window switching and GUI interactions.
 - **Config**: Interactive [config file](./CONFIGURE.md) generation for easy setup.
 - **Launcher Integration**: Launch applications directly from the GUI, sorted by usage frequency.
+- **Launcher Plugins**: Different plugins like Web search or calculations can be enabled.
 - **Theming**: Customize the GUI appearance (gtk4) using [CSS](./CONFIGURE.md).
-- **Sorting and Filtering**: windows sorted by position, can be filtered by class, workspace, or monitor.
 - **Dynamic Configuration**: Automatically reloads configuration/style changes without restarting the application.
+- **Debug command**: Many [Commands](DEBUG.md) to debug desktop files, icons and default applications.
 
 ## Installation
 
@@ -99,9 +100,13 @@ exec-once = hyprshell run &
 
 ### Feature Flags
 
-- default: `["toml_config", "generate_config_command", "launcher_calc", "debug_command"]`
+- default: `["json5_config", "generate_config_command", "launcher_calc", "debug_command"]`
 - generate_config_command: Adds the `hyprshell config generate` command to interactively generate a config file.
-- toml_config: Adds support for a toml config file.
+- json5_config: Adds support for a toml config file.
 - launcher_calc: Adds support for the calc plugin in the launcher.
-- debug_command: Adds the `hyprshell debug` command to debug icons in the window mode.
+- debug_command: Adds the `hyprshell debug` command to debug icons, desktop files, etc.
 - config_check_is_default: Adds a command to check if the loaded config is equal to the default config. Also diables loading of configs without all values.
+
+### Debugging
+
+Debug commands are provided to help troubleshoot desktop files, icons, default applications, and launcher functionality - see [Debug.md](DEBUG.md) for detailed information about available commands and their usage.

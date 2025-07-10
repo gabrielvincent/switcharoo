@@ -1,7 +1,6 @@
 use std::env;
-use std::fs::DirEntry;
 use std::path::PathBuf;
-use tracing::{debug, trace, warn};
+use tracing::{trace, warn};
 
 pub fn get_default_config_path() -> PathBuf {
     let mut path = get_config_home();
@@ -92,29 +91,4 @@ pub fn get_data_dirs() -> Vec<PathBuf> {
     dirs.into_iter()
         .map(|dir| dir.join("applications"))
         .collect()
-}
-
-pub fn collect_desktop_files() -> Vec<DirEntry> {
-    let mut res = Vec::new();
-    for dir in get_data_dirs() {
-        if !dir.exists() {
-            continue;
-        }
-        match dir.read_dir() {
-            Ok(dir) => {
-                for entry in dir.flatten() {
-                    let path = entry.path();
-                    if path.is_file() && path.extension().is_some_and(|e| e == "desktop") {
-                        res.push(entry);
-                    }
-                }
-            }
-            Err(e) => {
-                warn!("Failed to read dir {dir:?}: {e}");
-                continue;
-            }
-        }
-    }
-    debug!("found {} desktop files", res.len());
-    res
 }

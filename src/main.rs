@@ -1,7 +1,8 @@
+use crate::cli::DefaultApplicationsCommand;
 use anyhow::Context;
 use clap::Parser;
 use core_lib::{
-    check_version, daemon_running, get_default_config_path, get_default_css_path,
+    Warn, WarnWithDetails, daemon_running, get_default_config_path, get_default_css_path,
     get_default_data_dir,
 };
 use std::env;
@@ -14,8 +15,10 @@ mod socket;
 mod start;
 mod util;
 
+mod completions;
 #[cfg(feature = "debug_command")]
 mod debug;
+mod default_apps;
 
 fn main() -> anyhow::Result<()> {
     let cli = cli::App::parse();
@@ -39,7 +42,7 @@ fn main() -> anyhow::Result<()> {
                 .unwrap_or(false),
         )
         .with_env_filter(format!(
-            "hyprshell={level},core_lib={level},exec_lib={level},launcher_lib={level},windows_lib={level}",
+            "hyprshell={level},config_lib={level},core_lib={level},exec_lib={level},launcher_lib={level},windows_lib={level}",
         ))
         .finish();
     tracing::subscriber::set_global_default(subscriber)
@@ -57,9 +60,8 @@ fn main() -> anyhow::Result<()> {
             if daemon_running() {
                 anyhow::bail!("Daemon already running");
             }
-            check_version(exec_lib::get_version()).unwrap_or_else(|e| {
-                tracing::warn!("Unable to check hyprland version, continuing anyway: {e}")
-            });
+            exec_lib::check_version()
+                .warn_details("Unable to check hyprland version, continuing anyway");
             start::start(
                 config_path.unwrap_or(get_default_config_path()),
                 css_file.unwrap_or(get_default_css_path()),
@@ -69,7 +71,6 @@ fn main() -> anyhow::Result<()> {
         #[cfg(feature = "generate_config_command")]
         cli::Command::Config { command } => match command {
             cli::ConfigCommand::Generate { force, no_systemd } => {
-                use core_lib::Warn;
                 let config_path = config_path.unwrap_or(get_default_config_path());
                 let css_path = css_file.unwrap_or(get_default_css_path());
 
@@ -129,14 +130,14 @@ fn main() -> anyhow::Result<()> {
         cli::Command::Debug { command } => {
             tracing::info!("use with -vv ... to see full logs!");
             match command {
-                cli::DebugCommand::CheckClass { class } => {
-                    debug::check_class(class);
-                }
                 cli::DebugCommand::ListIcons => {
                     debug::list_icons();
                 }
                 cli::DebugCommand::ListDesktopFiles => {
                     debug::list_desktop_files();
+                }
+                cli::DebugCommand::CheckClass { class } => {
+                    debug::check_class(class);
                 }
                 cli::DebugCommand::Search { text, all } => {
                     debug::search(
@@ -146,6 +147,20 @@ fn main() -> anyhow::Result<()> {
                         &data_dir.unwrap_or(get_default_data_dir()),
                     );
                 }
+                cli::DebugCommand::DefaultApplications { command } => match command {
+                    DefaultApplicationsCommand::Get { mime } => {
+                        default_apps::get(&mime).context("unable to get default app")?;
+                    }
+                    DefaultApplicationsCommand::Add { mime, value } => {
+                        default_apps::add(&mime, &value).context("unable to set default app")?;
+                    }
+                    DefaultApplicationsCommand::List { all } => {
+                        default_apps::list(all);
+                    }
+                    DefaultApplicationsCommand::Check {} => {
+                        default_apps::check();
+                    }
+                },
             };
         }
         cli::Command::Data { command } => match command {
@@ -158,6 +173,9 @@ fn main() -> anyhow::Result<()> {
                 );
             }
         },
+        cli::Command::Completion { shell, bash_path } => {
+            completions::generate(&shell, bash_path).context("Failed to generate completions")?
+        }
         cli::Command::Socat { json } => core_lib::transfer::send_raw_to_socket(&json)
             .context("Failed to send JSON to socket: is hyprshell running?")?,
     }

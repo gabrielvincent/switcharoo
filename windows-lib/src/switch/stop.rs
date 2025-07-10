@@ -6,7 +6,7 @@ use tracing::{Level, span, trace};
 
 pub fn stop_switch(data: &WindowsSwitchData) {
     let _span = span!(Level::TRACE, "stop_switch").entered();
-    reset_remain_focused().warn("Failed to reset follow mouse");
+    reset_remain_focused().warn_details("Failed to reset follow mouse");
     trace!("Closing window {:?}", data.window.id());
     data.window.close();
 }
