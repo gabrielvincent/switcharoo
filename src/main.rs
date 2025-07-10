@@ -173,8 +173,15 @@ fn main() -> anyhow::Result<()> {
                 );
             }
         },
-        cli::Command::Completion { shell, bash_path } => {
-            completions::generate(&shell, bash_path).context("Failed to generate completions")?
+        cli::Command::Completions { shell, base_path } => {
+            if let Some(shell) = shell {
+                completions::generate(&shell, base_path)
+                    .context("Failed to generate completions")?
+            } else {
+                for shell in vec!["bash", "fish", "zsh"] {
+                    completions::generate(&shell, None).context("Failed to generate completions")?
+                }
+            }
         }
         cli::Command::Socat { json } => core_lib::transfer::send_raw_to_socket(&json)
             .context("Failed to send JSON to socket: is hyprshell running?")?,

@@ -43,6 +43,7 @@ pub struct GlobalOpts {
 
 #[derive(Subcommand, Debug, Clone)]
 pub enum Command {
+    /// Run the hyprshell daemon
     Run {},
     #[cfg(feature = "generate_config_command")]
     /// Generate or check the config file
@@ -72,16 +73,16 @@ pub enum Command {
     },
 
     /// Generate completions for shells
-    Completion {
-        /// Shell to generate completion for
-        shell: String,
+    Completions {
+        /// Shell to generate completion for (if not set completions for all shells will be generated)
+        shell: Option<String>,
 
         /// BASE Path for completion without filename
         /// Bash Default: /usr/share/bash-completion/completions
         /// Fish Default: /usr/share/fish/vendor_completions.d
         /// Zsh Default: /usr/share/zsh/site-functions
         #[arg(long, short = 'p')]
-        bash_path: Option<PathBuf>,
+        base_path: Option<PathBuf>,
     },
 }
 
