@@ -55,7 +55,7 @@ rec {
     rm -r "$TMP"
   '';
   check-all-feature-combinations = craneLib.cargoClippy (
-    buildLib.commonArgsCachedDebug
+    buildLib.commonArgsCachedRelease
     // {
       pnameSuffix = "-check-all-feature-combinations";
       nativeBuildInputs = [ pkgs.bash ] ++ buildLib.commonArgs.nativeBuildInputs;
@@ -79,10 +79,10 @@ rec {
 
           if [[ -z "$feature_combination" ]]; then
             echo "[$iteration] Running clippy without any features..."
-            cargo clippy --locked --no-default-features --message-format json-render-diagnostics > "$cargoBuildLog"
+            cargo clippy --release --locked --no-default-features --message-format json-render-diagnostics > "$cargoBuildLog"
           else
             echo "[$iteration] Building with features: $feature_combination"
-            cargo clippy --locked --no-default-features --features "$feature_combination" --message-format json-render-diagnostics > "$cargoBuildLog"
+            cargo clippy --release --locked --no-default-features --features "$feature_combination" --message-format json-render-diagnostics > "$cargoBuildLog"
           fi
 
           local duration=$(awk "BEGIN {print $(date +%s.%N) - $start_time}")

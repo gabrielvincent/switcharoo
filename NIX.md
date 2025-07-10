@@ -118,3 +118,7 @@ in {
    environment.systemPackages = [hyprshell.packages.${pkgs.system}.hyprshell];
 }
 ```
+
+## Without Flakes with Home-manager
+
+https://github.com/nix-community/home-manager/pull/7409
