@@ -65,18 +65,18 @@ pub(super) fn get_file_manager_info<'a>() -> MutexGuard<'a, FilemanagerData> {
 
 static FILE_MANAGER_DATA: OnceLock<Mutex<FilemanagerData>> = OnceLock::new();
 
-pub fn reload_default_file_manager(files: &[DirEntry], mime_apps: &[DirEntry]) {
+pub fn reload_default_file_manager(files: &[DirEntry], mime_files: &[DirEntry]) {
     let _span = span!(Level::TRACE, "reload_default_file_manager").entered();
-    let default_file_manager = get_default_desktop_file("inode/directory", mime_apps);
+    let default_file_manager = get_default_desktop_file("inode/directory", mime_files);
 
     for entry in files {
         if entry.file_name() == default_file_manager.as_deref().unwrap_or_default() {
             if let Ok(str) = read_to_string(entry.path()) {
-                let ini = IniFile::parse(&str);
+                let ini = IniFile::from_str(&str);
                 if let Some(section) = ini.get_section("Desktop Entry") {
-                    let exec = section.get("Exec");
-                    let icon = section.get("Icon");
-                    let name = section.get_boxed("Name").unwrap_or_default();
+                    let exec = section.get_first("Exec");
+                    let icon = section.get_first("Icon");
+                    let name = section.get_first_as_boxed("Name").unwrap_or_default();
                     trace!("Found exec: {:?}, icon: {:?}", exec, icon);
                     if let Some(exec) = exec {
                         trace!(

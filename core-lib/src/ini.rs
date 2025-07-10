@@ -1,44 +1,67 @@
 use std::collections::HashMap;
+use std::collections::hash_map::Entry;
 use std::path::Path;
+use tracing::{Level, span, warn};
+
+#[derive(Debug, Default)]
+pub struct Section<'a> {
+    entries: HashMap<&'a str, Vec<&'a str>>,
+}
+
+impl<'a> Section<'a> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn get_all(&self, key: &str) -> Option<&Vec<&'a str>> {
+        self.entries.get(key)
+    }
+    pub fn get_first(&self, key: &str) -> Option<&'a str> {
+        self.entries.get(key)?.first().cloned()
+    }
+
+    pub fn get_all_as_boxed(&self, key: &str) -> Option<Vec<Box<str>>> {
+        self.get_all(key)
+            .map(|vec| vec.iter().cloned().map(Box::from).collect::<Vec<_>>())
+    }
+
+    pub fn get_first_as_boxed(&self, key: &str) -> Option<Box<str>> {
+        self.get_first(key).map(Box::from)
+    }
+
+    pub fn get_first_as_path_boxed(&self, key: &str) -> Option<Box<Path>> {
+        self.get_first(key).map(Path::new).map(Box::from)
+    }
+
+    pub fn get_first_as_boolean(&self, key: &str) -> Option<bool> {
+        self.get_first(key).map(|s| s == "true")
+    }
+}
+
+impl<'a> Section<'a> {
+    pub fn insert_item(&mut self, mime: &'a str, desktop_file: &'a str) {
+        self.entries
+            .entry(mime)
+            .or_insert(vec![])
+            .push(desktop_file);
+    }
+    pub fn insert_items(&mut self, mime: &'a str, mut desktop_files: Vec<&'a str>) {
+        self.entries
+            .entry(mime)
+            .or_insert(vec![])
+            .append(&mut desktop_files);
+    }
+}
 
 #[derive(Debug, Default)]
 pub struct IniFile<'a> {
     sections: HashMap<&'a str, Section<'a>>,
 }
 
-#[derive(Debug, Default)]
-pub struct Section<'a> {
-    entries: HashMap<&'a str, &'a str>,
-}
+impl IniFile<'_> {
+    pub fn from_str(content: &str) -> IniFile {
+        let _span = span!(Level::TRACE, "from_str").entered();
 
-impl<'a> Section<'a> {
-    pub fn insert(&mut self, key: &'a str, value: &'a str) {
-        self.entries.insert(key, value);
-    }
-
-    pub fn get(&self, key: &str) -> Option<&'a str> {
-        self.entries.get(key).copied()
-    }
-
-    pub fn get_boxed(&self, key: &str) -> Option<Box<str>> {
-        self.get(key).map(Box::from)
-    }
-
-    pub fn get_path_boxed(&self, key: &str) -> Option<Box<Path>> {
-        self.get(key).map(Path::new).map(Box::from)
-    }
-
-    pub fn get_boolean(&self, key: &str) -> Option<bool> {
-        self.get(key).map(|s| s == "true")
-    }
-
-    pub fn values(&'a self) -> impl Iterator<Item = &'a str> {
-        self.entries.values().copied()
-    }
-}
-
-impl<'a> IniFile<'a> {
-    pub fn parse(content: &'a str) -> Self {
         let mut sections = HashMap::new();
         let mut current_section = sections.entry("").or_insert_with(Section::default);
 
@@ -64,36 +87,86 @@ impl<'a> IniFile<'a> {
                 if key.contains('[') {
                     continue;
                 }
-                current_section.insert(key, value);
+                let values = value
+                    .split(';')
+                    .map(|s| s.trim())
+                    .filter(|s| !s.is_empty())
+                    .collect::<Vec<_>>();
+                current_section.insert_items(key, values);
+            } else {
+                warn!("malformed line: {}", line);
             }
         }
 
-        Self { sections }
+        IniFile { sections }
+    }
+}
+
+impl<'a> IniFile<'a> {
+    pub fn get_section(&'a self, section_name: &str) -> Option<&'a Section<'a>> {
+        self.sections.get(section_name)
     }
 
-    pub fn get_section(&self, section: &str) -> Option<&Section> {
-        self.sections.get(section)
-    }
-
-    pub fn get_value(&self, section: &str, key: &str) -> Option<&'a str> {
-        self.sections.get(section).and_then(|s| s.get(key))
-    }
-
-    pub fn sections(&self) -> &HashMap<&'a str, Section> {
+    pub fn sections(&self) -> &HashMap<&'a str, Section<'a>> {
         &self.sections
     }
 
-    pub fn values(&'a self) -> impl Iterator<Item = &'a str> + 'a {
-        self.sections.values().flat_map(|section| section.values())
+    pub fn format(&self) -> String {
+        let mut str = String::with_capacity(self.into_iter().count() * 20); // 20 chars per line should be good
+        for (name, section) in &self.sections {
+            if !name.is_empty() {
+                str.push_str(&format!("[{}]\n", name));
+            }
+            let mut section = section.into_iter().collect::<Vec<_>>();
+            section.sort_by_key(|(key, _)| *key);
+            for (key, values) in section {
+                str.push_str(&format!("{}={}\n", key, values.join(";")));
+            }
+        }
+        str
+    }
+}
+
+impl<'a> IniFile<'a> {
+    pub fn get_section_mut<'b>(&'b mut self, section_name: &str) -> Option<&'b mut Section<'a>>
+    where
+        'a: 'b,
+    {
+        self.sections.get_mut(section_name)
+    }
+
+    pub fn section_entry<'b>(&'b mut self, section_name: &'a str) -> Entry<'b, &'a str, Section<'a>>
+    where
+        'a: 'b,
+    {
+        self.sections.entry(section_name)
+    }
+    pub fn insert_section(&mut self, name: &'a str, section: Section<'a>) {
+        self.sections.insert(name, section);
     }
 }
 
 impl<'a> IntoIterator for &'a IniFile<'a> {
-    type Item = &'a str;
-    type IntoIter = Box<dyn Iterator<Item = &'a str> + 'a>;
+    type Item = (&'a str, &'a str, &'a Vec<&'a str>);
+    type IntoIter = Box<dyn Iterator<Item = (&'a str, &'a str, &'a Vec<&'a str>)> + 'a>;
 
     fn into_iter(self) -> Self::IntoIter {
-        Box::new(self.values())
+        let iter = self.sections.iter().flat_map(|(section_name, section)| {
+            section
+                .into_iter()
+                .map(move |(key, values)| (*section_name, key, values))
+        });
+        Box::new(iter)
+    }
+}
+
+impl<'a> IntoIterator for &'a Section<'a> {
+    type Item = (&'a str, &'a Vec<&'a str>);
+    type IntoIter = Box<dyn Iterator<Item = (&'a str, &'a Vec<&'a str>)> + 'a>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        let iter = self.entries.iter().map(|(key, value)| (*key, value));
+        Box::new(iter)
     }
 }
 
@@ -116,41 +189,61 @@ baz=qux
 [Empty Section]
 
 [Section With Spaces]
-key with spaces=value with spaces
+key with spaces=value with spaces; and more values
 "#;
 
-        let ini = IniFile::parse(content);
+        let ini = IniFile::from_str(content);
 
-        // Test section content
-        assert_eq!(ini.get_value("Section1", "key1"), Some("value1"));
-        assert_eq!(ini.get_value("Section2", "foo"), Some("bar"));
-
-        // Test section existence
-        assert!(ini.get_section("Empty Section").is_some());
-
-        // Test spaces in keys and values
         assert_eq!(
-            ini.get_value("Section With Spaces", "key with spaces"),
-            Some("value with spaces")
+            ini.get_section("Section1").unwrap().get_first("key1"),
+            Some("value1")
+        );
+        assert_eq!(
+            ini.get_section("Section2").unwrap().get_first("foo"),
+            Some("bar")
         );
 
-        // Test non-existent sections and keys
-        assert_eq!(ini.get_value("NonExistent", "key"), None);
-        assert_eq!(ini.get_value("Section1", "nonexistent"), None);
+        assert!(ini.get_section("Empty Section").is_some());
+        assert_ne!(
+            ini.get_section("Section With Spaces")
+                .unwrap()
+                .get_all("key with spaces"),
+            Some(&vec!["value with spaces"])
+        );
+        assert_ne!(
+            ini.get_section("Section With Spaces")
+                .unwrap()
+                .get_all("key with spaces"),
+            Some(&vec!["value with spaces"])
+        );
+        assert_eq!(
+            ini.get_section("Section With Spaces")
+                .unwrap()
+                .get_all("key with spaces"),
+            Some(&vec!["value with spaces", "and more values"])
+        );
+
+        assert!(ini.get_section("NonExistent").is_none());
+        assert_eq!(
+            ini.get_section("Section1")
+                .unwrap()
+                .get_first("nonexistent"),
+            None
+        );
     }
 
     #[test]
     fn test_empty_ini() {
         let content = "";
-        let ini = IniFile::parse(content);
+        let ini = IniFile::from_str(content);
         assert_eq!(ini.sections().len(), 1);
     }
 
     #[test]
     fn test_no_sections() {
         let content = "key=value";
-        let ini = IniFile::parse(content);
-        assert_eq!(ini.get_value("", "key"), Some("value"));
+        let ini = IniFile::from_str(content);
+        assert_eq!(ini.get_section("").unwrap().get_first("key"), Some("value"));
     }
 
     #[test]
@@ -158,16 +251,21 @@ key with spaces=value with spaces
         let content = r#"
     [Section1]
     key1=value1
-    key2=value2
+    key2=value2;values3
 
     [Section2]
     foo=bar
     "#;
-        let ini = IniFile::parse(content);
-        let values: Vec<_> = ini.values().collect();
-        assert!(values.contains(&"value1"));
-        assert!(values.contains(&"value2"));
-        assert!(values.contains(&"bar"));
+        let ini = IniFile::from_str(content);
+        let mut values: Vec<_> = ini.into_iter().collect();
+        values.sort_by_key(|&(section, key, _)| (section, key));
+        let mut iter = values.iter();
+        assert_eq!(iter.next(), Some(&("Section1", "key1", &vec!["value1"])));
+        assert_eq!(
+            iter.next(),
+            Some(&("Section1", "key2", &vec!["value2", "values3"]))
+        );
+        assert_eq!(iter.next(), Some(&("Section2", "foo", &vec!["bar"])));
         assert_eq!(values.len(), 3);
     }
 
@@ -181,10 +279,12 @@ key with spaces=value with spaces
     [Section2]
     foo=bar
     "#;
-        let ini = IniFile::parse(content);
+        let ini = IniFile::from_str(content);
         let mut count = 0;
-        for item in &ini {
-            assert!(!item.is_empty(), "Item should not be empty");
+        for (section, name, value) in ini.into_iter() {
+            assert!(!section.is_empty(), "Item should not be empty");
+            assert!(!name.is_empty(), "Item should not be empty");
+            assert!(!value.is_empty(), "Item should not be empty");
             count += 1;
         }
         assert_eq!(count, 3, "There should be 3 items in the iterator");

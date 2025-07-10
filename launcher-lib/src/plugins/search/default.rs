@@ -20,18 +20,18 @@ pub(super) fn get_browser_info<'a>() -> MutexGuard<'a, BrowserData> {
 
 static BROWSER_EXEC: OnceLock<Mutex<BrowserData>> = OnceLock::new();
 
-pub fn reload_default_browser(files: &[DirEntry], mime_apps: &[DirEntry]) {
+pub fn reload_default_browser(files: &[DirEntry], mime_files: &[DirEntry]) {
     let _span = span!(Level::TRACE, "reload_default_browser").entered();
-    let default_browser = get_default_desktop_file("x-scheme-handler/https", mime_apps);
+    let default_browser = get_default_desktop_file("x-scheme-handler/https", mime_files);
 
     for entry in files {
         if entry.file_name() == default_browser.as_deref().unwrap_or_default() {
             if let Ok(str) = read_to_string(entry.path()) {
-                let ini = IniFile::parse(&str);
+                let ini = IniFile::from_str(&str);
                 if let Some(section) = ini.get_section("Desktop Entry") {
-                    let exec = section.get("Exec");
-                    let startup_wm_class = section.get("StartupWMClass");
-                    let icon = section.get("Icon");
+                    let exec = section.get_first("Exec");
+                    let startup_wm_class = section.get_first("StartupWMClass");
+                    let icon = section.get_first("Icon");
                     trace!(
                         "Found exec: {:?}, startup_wm_class: {:?}, icon: {:?}",
                         exec, startup_wm_class, icon

@@ -1,7 +1,7 @@
 use crate::util;
 use core_lib::theme_icon_cache::get_all_icons;
 use std::path::Path;
-use tracing::{debug, info};
+use tracing::debug;
 
 pub fn check_class(class: Option<String>) {
     util::init_gtk();
@@ -25,12 +25,12 @@ pub fn check_class(class: Option<String>) {
 
 fn check_icon(class: &str) {
     let in_theme = core_lib::theme_icon_cache::theme_has_icon_name(class);
-    info!(
+    println!(
         "Icon ({class}) {} in theme (first choice)",
         if in_theme { "is" } else { "is not" }
     );
     let icon = windows_lib::get_icon_name_by_name_from_desktop_files(class);
-    info!(
+    println!(
         "Icon ({class}) {} in desktop files (second choice) {}",
         if icon.is_some() { "is" } else { "is not" },
         if let Some(icon) = icon {
@@ -46,14 +46,14 @@ pub fn list_icons() {
     util::fill_icon_name_map(false);
     let icons = get_all_icons();
     for icon in icons.iter() {
-        info!("{}", icon);
+        println!("{}", icon);
     }
 }
 
 pub fn list_desktop_files() {
     let desktop_files = core_lib::collect_desktop_files();
     for file in desktop_files.iter() {
-        info!("{}", file.path().display());
+        println!("{}", file.path().display());
     }
 }
 

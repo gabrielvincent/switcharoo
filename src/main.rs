@@ -1,3 +1,4 @@
+use crate::cli::DefaultApplicationsCommand;
 use anyhow::Context;
 use clap::Parser;
 use core_lib::{
@@ -14,8 +15,10 @@ mod socket;
 mod start;
 mod util;
 
+mod completions;
 #[cfg(feature = "debug_command")]
 mod debug;
+mod default_apps;
 
 fn main() -> anyhow::Result<()> {
     let cli = cli::App::parse();
@@ -144,7 +147,20 @@ fn main() -> anyhow::Result<()> {
                         &data_dir.unwrap_or(get_default_data_dir()),
                     );
                 }
-                _ => {}
+                cli::DebugCommand::DefaultApplications { command } => match command {
+                    DefaultApplicationsCommand::Get { mime } => {
+                        default_apps::get(&mime).context("unable to get default app")?;
+                    }
+                    DefaultApplicationsCommand::Set { mime, value } => {
+                        default_apps::set(&mime, &value).context("unable to set default app")?;
+                    }
+                    DefaultApplicationsCommand::List { all } => {
+                        default_apps::list(all);
+                    }
+                    DefaultApplicationsCommand::Check {} => {
+                        default_apps::check();
+                    }
+                },
             };
         }
         cli::Command::Data { command } => match command {
@@ -157,6 +173,9 @@ fn main() -> anyhow::Result<()> {
                 );
             }
         },
+        cli::Command::Completion { shell, bash_path } => {
+            completions::generate(&shell, bash_path).context("Failed to generate completions")?
+        }
         cli::Command::Socat { json } => core_lib::transfer::send_raw_to_socket(&json)
             .context("Failed to send JSON to socket: is hyprshell running?")?,
     }

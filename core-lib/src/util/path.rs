@@ -29,8 +29,10 @@ pub fn collect_desktop_files() -> Vec<DirEntry> {
 
 pub fn collect_mime_files() -> Vec<DirEntry> {
     let mut res = Vec::new();
-    let mut dirs = get_config_dirs();
+    let mut dirs = Vec::new();
+    // ensure correct order
     dirs.push(get_config_home());
+    dirs.append(&mut get_config_dirs());
     for dir in dirs {
         if !dir.exists() {
             continue;
