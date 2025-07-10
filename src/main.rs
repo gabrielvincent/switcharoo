@@ -2,7 +2,7 @@ use crate::cli::DefaultApplicationsCommand;
 use anyhow::Context;
 use clap::Parser;
 use core_lib::{
-    Warn, WarnWithDetails, daemon_running, get_default_config_path, get_default_css_path,
+    WarnWithDetails, daemon_running, get_default_config_path, get_default_css_path,
     get_default_data_dir,
 };
 use std::env;
@@ -18,6 +18,7 @@ mod util;
 mod completions;
 #[cfg(feature = "debug_command")]
 mod debug;
+#[cfg(feature = "debug_command")]
 mod default_apps;
 
 fn main() -> anyhow::Result<()> {
@@ -71,6 +72,7 @@ fn main() -> anyhow::Result<()> {
         #[cfg(feature = "generate_config_command")]
         cli::Command::Config { command } => match command {
             cli::ConfigCommand::Generate { force, no_systemd } => {
+                use core_lib::Warn;
                 let config_path = config_path.unwrap_or(get_default_config_path());
                 let css_path = css_file.unwrap_or(get_default_css_path());
 
@@ -178,8 +180,8 @@ fn main() -> anyhow::Result<()> {
                 completions::generate(&shell, base_path)
                     .context("Failed to generate completions")?
             } else {
-                for shell in vec!["bash", "fish", "zsh"] {
-                    completions::generate(&shell, None).context("Failed to generate completions")?
+                for shell in ["bash", "fish", "zsh"] {
+                    completions::generate(shell, None).context("Failed to generate completions")?
                 }
             }
         }

@@ -36,7 +36,7 @@ rec {
   hyprshell-clippy = craneLib.cargoClippy (
     buildLib.commonArgsCachedRelease
     // {
-      buildPhaseCargoCommand = "cargo clippy"; # no release check
+      buildPhaseCargoCommand = "cargo clippyy"; # no release check
       cargoClippyExtraArgs = "--all-targets -- --deny warnings";
     }
   );
@@ -54,11 +54,12 @@ rec {
     ${hyprshell-default-check}/bin/hyprshell -vv config check-if-default -c "$TMP/test.json" && (mkdir "$out")
     rm -r "$TMP"
   '';
-  check-all-feature-combinations = craneLib.cargoClippy (
+  check-all-feature-combinations = craneLib.mkCargoDerivation (
     buildLib.commonArgsCachedRelease
     // {
       pnameSuffix = "-check-all-feature-combinations";
-      nativeBuildInputs = [ pkgs.bash ] ++ buildLib.commonArgs.nativeBuildInputs;
+      nativeBuildInputs = [ pkgs.bash pkgs.clippy ] ++ buildLib.commonArgs.nativeBuildInputs;
+      cargoClippyExtraArgs = "";
       buildPhaseCargoCommand = ''
         cargoBuildLog=$(mktemp cargoBuildLogXXXX.json)
 
@@ -68,8 +69,6 @@ rec {
 
         # Get the total number of features
         num_features=''${#features[@]}
-
-        cargo --list
 
         # Function to build with a specific combination of features
         build_with_features() {

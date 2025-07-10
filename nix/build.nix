@@ -47,35 +47,21 @@ rec {
     ];
   };
 
-  mkDummySrc = craneLib.mkDummySrc {
-    inherit stdenv;
-    src = ../.;
-  };
+  cargoArtifacts = craneLib.buildDepsOnly (
+    commonArgs
+    // {
+      mkDummySrc = craneLib.mkDummySrc {
+        inherit stdenv;
+        src = ../.;
+      };
+      pname = "hyprshell-release";
+    }
+  );
 
   commonArgsCachedRelease = (
     commonArgs
     // {
-      cargoArtifacts = craneLib.buildDepsOnly (
-        commonArgs
-        // {
-          inherit mkDummySrc;
-          pname = "hyprshell-release";
-        }
-      );
-    }
-  );
-
-  commonArgsCachedDebug = (
-    commonArgs
-    // {
-      cargoArtifacts = craneLib.buildDepsOnly (
-        commonArgs
-        // {
-          inherit mkDummySrc;
-          cargoBuildCommand = "cargo build --locked";
-          pname = "hyprshell-debug";
-        }
-      );
+      inherit cargoArtifacts;
     }
   );
 }
