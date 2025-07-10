@@ -28,12 +28,13 @@ let
 in
 {
   options.programs.hyprshell = {
-    enable = lib.mkEnableOption "Configure Hyprshell";
+    enable = lib.mkEnableOption "hyprshell";
 
     package = lib.mkOption {
       description = "The Hyprshell package";
       type = package;
       default = self.packages.${pkgs.stdenv.hostPlatform.system}.default;
+      nullable = true;
     };
 
     systemd = {
@@ -180,6 +181,13 @@ in
   };
 
   config = lib.mkIf cfg.enable ({
+    assertions = [
+        {
+          assertion = if (cfg.package == null) then (if cfg.systemd.enable then false else true) else true;
+          message = "Can't set programs.hyprshell.systemd.enable with the package set to null.";
+        }
+      ];
+
     home.packages = [ cfg.package ];
 
     systemd.user.services.hyprshell = lib.mkIf cfg.systemd.enable {
