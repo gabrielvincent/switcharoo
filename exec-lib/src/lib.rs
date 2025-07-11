@@ -4,6 +4,7 @@ pub mod switch;
 mod util;
 
 pub mod binds;
+pub mod plugin;
 pub mod run;
 
 pub use util::*;

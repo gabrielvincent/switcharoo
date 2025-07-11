@@ -42,7 +42,7 @@ fn main() -> anyhow::Result<()> {
                 .unwrap_or(false),
         )
         .with_env_filter(format!(
-            "hyprshell={level},config_lib={level},core_lib={level},exec_lib={level},launcher_lib={level},windows_lib={level}",
+            "hyprshell={level},config_lib={level},core_lib={level},exec_lib={level},launcher_lib={level},windows_lib={level},hyprland_plugin={level}",
         ))
         .finish();
     tracing::subscriber::set_global_default(subscriber)
@@ -57,6 +57,7 @@ fn main() -> anyhow::Result<()> {
 
     match cli.command {
         cli::Command::Run {} => {
+            exec_lib::plugin::test();
             if daemon_running() {
                 anyhow::bail!("Daemon already running");
             }

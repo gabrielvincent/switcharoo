@@ -41,7 +41,7 @@ config_check_is_default = ["config-lib/no-default-config-values"]
 
 
 [workspace]
-members = ["exec-lib", "core-lib", "windows-lib", "launcher-lib", "config-lib"]
+members = ["exec-lib", "core-lib", "windows-lib", "launcher-lib", "config-lib", "hyprland-plugin"]
 resolver = "2"
 
 [workspace.package]
@@ -68,7 +68,7 @@ core-lib = { path = "core-lib", package = "hyprshell-core-lib", version = "=4.5.
 exec-lib = { path = "exec-lib", package = "hyprshell-exec-lib", version = "=4.5.0" }
 windows-lib = { path = "windows-lib", package = "hyprshell-windows-lib", version = "=4.5.0" }
 launcher-lib = { path = "launcher-lib", package = "hyprshell-launcher-lib", version = "=4.5.0" }
-
+hyprland-plugin = { path = "hyprland-plugin", package = "hyprshell-hyprland-plugin", version = "=4.5.0" }
 
 [profile.release]
 strip = "debuginfo"

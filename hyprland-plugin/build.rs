@@ -1,0 +1,41 @@
+use std::error::Error;
+use std::fs::read_dir;
+use std::io::{Read, Write};
+use std::{env, fs::File, path::Path};
+use zip::ZipWriter;
+use zip::write::FileOptions;
+
+fn include_plugin() -> Result<(), Box<dyn Error>> {
+    let out_dir = env::var("OUT_DIR")?;
+    let zip_path = Path::new(&out_dir).join("plugin.zip");
+
+    let file = File::create(&zip_path)?;
+    let mut zip = ZipWriter::new(&file);
+    let options: FileOptions<()> = FileOptions::default()
+        .compression_method(zip::CompressionMethod::Zstd)
+        .compression_level(None)
+        .unix_permissions(0o755);
+    let mut buffer = Vec::new();
+    for file in read_dir("plugin")?.flatten() {
+        if file.path().is_dir() {
+            continue;
+        }
+        // we can use the name as we dont allow for folders here
+        zip.start_file(file.file_name().to_string_lossy(), options)?;
+        let mut f = File::open(file.path())?;
+        f.read_to_end(&mut buffer)?;
+        zip.write_all(&buffer)?;
+        buffer.clear();
+    }
+    zip.finish()?;
+
+    println!("cargo:warning=Plugin included in build at: {zip_path:?}");
+    Ok(())
+}
+
+fn main() {
+    include_plugin().expect("Failed to include plugin");
+    // pass TARGET env var through
+    println!("cargo:rustc-env=TARGET={}", env::var("TARGET").unwrap());
+    println!("cargo:rerun-if-changed=plugin");
+}

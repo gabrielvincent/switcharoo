@@ -1,0 +1,22 @@
+[package]
+name = "hyprshell-hyprland-plugin"
+documentation = "https://docs.rs/hyprshell-hyprland-plugin"
+version = "4.5.0"
+description = "Plugin for hyprland, used to monitor keypresses"
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+keywords.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+anyhow.workspace = true
+tracing.workspace = true
+tempfile = { version = "3.20.0" }
+zip = { version = "4.3.0" }
+cmake = { version = "0.1.54" }
+gag = { version = "1.0.0" }
+
+[build-dependencies]
+zip = { version = "4.3.0" }
