@@ -7,6 +7,7 @@
 inline void *PHANDLE = nullptr;
 
 inline bool LAYER_VISIBLE = false;
+inline bool MOUSE_BUTTON_PRESSED = false;
 
 inline xkb_keysym_t OVERVIEW_KEY;
 

@@ -17,6 +17,7 @@ pub fn get_monitors() -> Vec<Monitor> {
     Monitors::get().map_or(vec![], hyprland::shared::HyprDataVec::to_vec)
 }
 
+#[must_use]
 pub fn get_current_monitor() -> Option<Monitor> {
     Monitor::get_active().ok()
 }
@@ -48,11 +49,14 @@ pub fn info_toast(body: &str, duration: Duration) {
 ///
 /// # Panics
 /// Panics if the id cannot be parsed, this should never happen as the id is always a valid hexadecimal string
+#[must_use]
 pub fn to_client_id(id: &hyprland::shared::Address) -> ClientId {
     u64::from_str_radix(id.to_string().trim_start_matches("0x"), 16)
         .expect("Failed to parse client id, this should never happen")
 }
+
 /// convert id to hexadecimal (base-16) string
+#[must_use]
 pub fn to_client_address(id: ClientId) -> hyprland::shared::Address {
     hyprland::shared::Address::new(format!("{id:x}"))
 }
@@ -70,7 +74,7 @@ fn get_gestures_enabled() -> &'static Mutex<Option<bool>> {
 pub fn set_remain_focused() -> anyhow::Result<()> {
     let mut lock = get_prev_follow_mouse()
         .lock()
-        .map_err(|e| anyhow::anyhow!("unable to lock get_prev_follow_mouse mutex: {}", e))?;
+        .map_err(|e| anyhow::anyhow!("unable to lock get_prev_follow_mouse mutex: {e:?}"))?;
     // only set once
     if lock.is_none() {
         let follow = Keyword::get("input:follow_mouse").context("keyword failed")?;
@@ -83,7 +87,7 @@ pub fn set_remain_focused() -> anyhow::Result<()> {
 
     let mut lock = get_gestures_enabled()
         .lock()
-        .map_err(|e| anyhow::anyhow!("unable to lock get_gestures_enabled mutex: {}", e))?;
+        .map_err(|e| anyhow::anyhow!("unable to lock get_gestures_enabled mutex: {e:?}"))?;
     if lock.is_none() {
         let gestures_enabled =
             Keyword::get("gestures:workspace_swipe").context("keyword failed")?;
@@ -102,10 +106,10 @@ pub fn set_remain_focused() -> anyhow::Result<()> {
 pub fn reset_remain_focused() -> anyhow::Result<()> {
     let follow = get_prev_follow_mouse()
         .lock()
-        .map_err(|e| anyhow::anyhow!("unable to lock get_prev_follow_mouse mutex: {}", e))?;
+        .map_err(|e| anyhow::anyhow!("unable to lock get_prev_follow_mouse mutex: {e:?}"))?;
     if let Some(follow) = follow.as_ref() {
-        Keyword::set("input:follow_mouse", follow.to_string()).context("keyword failed")?;
-        trace!("Restored previous follow_mouse value: {}", follow);
+        Keyword::set("input:follow_mouse", follow.clone()).context("keyword failed")?;
+        trace!("Restored previous follow_mouse value: {follow}");
     } else {
         trace!("No previous follow_mouse value stored, skipping reset");
     }
@@ -113,14 +117,11 @@ pub fn reset_remain_focused() -> anyhow::Result<()> {
 
     let gestures_enabled = get_gestures_enabled()
         .lock()
-        .map_err(|e| anyhow::anyhow!("unable to lock get_gestures_enabled mutex: {}", e))?;
+        .map_err(|e| anyhow::anyhow!("unable to lock get_gestures_enabled mutex: {e:?}"))?;
     if let Some(enabled) = gestures_enabled.as_ref() {
         Keyword::set("gestures:workspace_swipe", if *enabled { "1" } else { "0" })
             .context("keyword failed")?;
-        trace!(
-            "Restored previous gestures:workspace_swipe value: {}",
-            enabled
-        );
+        trace!("Restored previous gestures:workspace_swipe value: {enabled}");
     } else {
         trace!("No previous gestures:workspace_swipe value stored, skipping reset");
     }
@@ -150,14 +151,13 @@ pub fn check_version() -> anyhow::Result<()> {
         .version
         .unwrap_or_else(|| version.tag.trim_start_matches('v').to_string());
     info!(
-        "Starting hyprshell {} in {} mode on hyprland {}",
+        "Starting hyprshell {} in {} mode on hyprland {version}",
         env!("CARGO_PKG_VERSION"),
         if cfg!(debug_assertions) {
             "debug"
         } else {
             "release"
         },
-        version,
     );
     let parsed_version = Version::parse(&version).context("Unable to parse hyprland Version")?;
     if parsed_version.lt(&MIN_VERSION) {

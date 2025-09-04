@@ -66,14 +66,14 @@ fn get_command(command: &str) -> Command {
 }
 
 fn run_command(run: &str, path: Option<&Path>) -> anyhow::Result<()> {
-    trace!("Original command: {:?}", run);
+    trace!("Original command: {run:?}");
     let mut cmd = get_command(run);
     cmd.process_group(0);
     if let Some(path) = path {
         cmd.current_dir(path);
     }
 
-    debug!("Running command: {:?}", cmd);
+    debug!("Running command: {cmd:?}");
     let out = cmd.stdout(Stdio::piped()).stderr(Stdio::piped()).spawn()?;
     thread::spawn(move || {
         let start = std::time::Instant::now();

@@ -1,3 +1,5 @@
+#![allow(clippy::print_stderr, clippy::print_stdout)]
+
 use crate::util;
 use anyhow::{Context, bail};
 use core_lib::default::get_all_mime_files;
@@ -51,8 +53,7 @@ pub fn set_default(mime: &str, value: &str) -> anyhow::Result<()> {
         None => bail!("Invalid desktop file: {value}"),
     }
 
-    let mut file = get_config_home();
-    file.push("mimeapps.list");
+    let file = get_config_home().join("mimeapps.list");
     let str = if file.exists() {
         read_to_string(&file).with_context(|| format!("Failed to read file {}", file.display()))?
     } else {
@@ -63,9 +64,9 @@ pub fn set_default(mime: &str, value: &str) -> anyhow::Result<()> {
     section.set_items(mime, vec![value]);
 
     let str = ini.format();
-    write(&file, str).with_context(|| format!("Failed to write file {:?}", file.display()))?;
+    write(&file, str).with_context(|| format!("Failed to write file {}", file.display()))?;
 
-    println!("added {mime}: {value} to {:?}", file.display());
+    println!("added {mime}: {value} to {}", file.display());
     Ok(())
 }
 
@@ -83,8 +84,7 @@ pub fn add_association(mime: &str, value: &str) -> anyhow::Result<()> {
         None => bail!("Invalid desktop file: {value}"),
     }
 
-    let mut file = get_config_home();
-    file.push("mimeapps.list");
+    let file = get_config_home().join("mimeapps.list");
     let str = if file.exists() {
         read_to_string(&file).with_context(|| format!("Failed to read file {}", file.display()))?
     } else {
@@ -95,9 +95,9 @@ pub fn add_association(mime: &str, value: &str) -> anyhow::Result<()> {
     section.insert_item_at_front(mime, value);
 
     let str = ini.format();
-    write(&file, str).with_context(|| format!("Failed to write file {:?}", file.display()))?;
+    write(&file, str).with_context(|| format!("Failed to write file {}", file.display()))?;
 
-    println!("added {mime}: {value} to {:?}", file.display());
+    println!("added {mime}: {value} to {}", file.display());
     Ok(())
 }
 
@@ -110,7 +110,7 @@ pub fn list(all: bool) {
     for file in mime_files {
         if let Ok(str) = read_to_string(file.path()) {
             let ini = IniFile::from_str(&str);
-            debug!("mimeapps.list: {:?}", file.path());
+            debug!("mimeapps.list: {}", file.path().display());
             if let Some(section) = ini.get_section("Default Applications") {
                 for (mime, values) in section {
                     let mut values = values.iter().map(ToString::to_string).collect::<Vec<_>>();
@@ -132,7 +132,7 @@ pub fn list(all: bool) {
                 }
             }
         } else {
-            warn!("Failed to read file: {:?}", file.path());
+            warn!("Failed to read file: {:?}", file.path().display());
         }
     }
 
@@ -164,7 +164,10 @@ pub fn check() {
         if let Ok(str) = read_to_string(file.path()) {
             let ini = IniFile::from_str(&str);
             if let Some(section) = ini.get_section("Default Applications") {
-                debug!("mimeapps.list: {:?} Default Applications", file.path());
+                debug!(
+                    "mimeapps.list: {} Default Applications",
+                    file.path().display()
+                );
                 for (mime, values) in section {
                     if default_mimes.contains_key(mime) {
                         warn!("{mime} already exists");
@@ -175,7 +178,10 @@ pub fn check() {
                 }
             }
             if let Some(section) = ini.get_section("Added Associations") {
-                debug!("mimeapps.list: {:?} Added Associations", file.path());
+                debug!(
+                    "mimeapps.list: {} Added Associations",
+                    file.path().display()
+                );
                 for (mime, values) in section {
                     if added_mimes.contains_key(mime) {
                         warn!("{mime} already exists");
@@ -186,7 +192,7 @@ pub fn check() {
                 }
             }
         } else {
-            warn!("Failed to read file: {:?}", file.path());
+            warn!("Failed to read file: {}", file.path().display());
         }
         mime_files_map.insert(file.path(), (default_mimes, added_mimes));
     }
@@ -194,7 +200,7 @@ pub fn check() {
     for (file, (default_mimes, added_mimes)) in mime_files_map {
         println!("{}", file.display());
         let mut vec = default_mimes.iter().collect::<Vec<_>>();
-        vec.sort_by_key(|&(mime, _)| mime.to_string());
+        vec.sort_by_key(|&(mime, _)| mime.clone());
         for (mime, value) in vec {
             if desktop_files.iter().any(|d| *d.file_name() == **value) {
                 debug!("default {mime} in has desktop file value: {value}");
@@ -205,7 +211,7 @@ pub fn check() {
             }
         }
         let mut vec = added_mimes.iter().collect::<Vec<_>>();
-        vec.sort_by_key(|&(mime, _)| mime.to_string());
+        vec.sort_by_key(|&(mime, _)| mime.clone());
         for (mime, value) in vec {
             if desktop_files.iter().any(|d| *d.file_name() == **value) {
                 debug!("added {mime} in has desktop file value: {value}");

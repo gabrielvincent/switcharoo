@@ -10,6 +10,7 @@ pub enum ExecType {
 
 const UNKNOWN_EXEC: &str = "unknown";
 
+#[must_use]
 pub fn analyse_exec(exec: &str) -> ExecType {
     let exec_trim = exec.replace(['\'', '"'], "");
     // pwa detection

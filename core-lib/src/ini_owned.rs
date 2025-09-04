@@ -92,7 +92,7 @@ impl IniFileOwned {
                     .collect::<Vec<_>>();
                 current_section.insert_items(Box::from(key), values);
             } else {
-                warn!("malformed line: {}", line);
+                warn!("malformed line: {line}");
             }
         }
 

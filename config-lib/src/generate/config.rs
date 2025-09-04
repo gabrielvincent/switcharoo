@@ -6,6 +6,7 @@ use crate::{
 };
 use std::path::Path;
 
+#[must_use]
 pub fn get_overrides(force: &[String]) -> (bool, bool) {
     // force contains "config" or "css" or "all"
     let mut override_config = false;
@@ -24,6 +25,7 @@ pub fn get_overrides(force: &[String]) -> (bool, bool) {
     (override_config, override_css)
 }
 
+#[allow(clippy::print_stderr, clippy::print_stdout)]
 pub fn check_file_exist(
     config_path: &Path,
     css_path: &Path,
@@ -54,6 +56,8 @@ pub struct ConfigData {
     pub launcher_engines: Vec<Box<str>>,
 }
 
+#[must_use]
+#[allow(clippy::print_stderr, clippy::print_stdout)]
 pub fn generate_config(data: ConfigData) -> Config {
     Config {
         windows: Some(Windows {

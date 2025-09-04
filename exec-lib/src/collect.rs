@@ -118,8 +118,8 @@ pub fn collect_hypr_data() -> anyhow::Result<(
                 ));
             } else {
                 warn!(
-                    "workspace {:?} not found for client {:?}",
-                    client.workspace, client
+                    "workspace {:?} not found for client {client:?}",
+                    client.workspace
                 );
             }
         }

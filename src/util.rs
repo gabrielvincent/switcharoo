@@ -67,7 +67,7 @@ fn handle_sigterm() {
             exec_lib::reset_remain_focused()
                 .warn_details("Failed to reset follow mouse on SIGTERM");
             if let Err(err) = exec_lib::plugin::unload() {
-                warn!("Failed to unload plugin: {err}");
+                warn!("Failed to unload plugin: {err:?}",);
             }
             exit(0);
         }

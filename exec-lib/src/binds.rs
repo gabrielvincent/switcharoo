@@ -44,7 +44,7 @@ pub fn apply_exec_bind(bind: &ExecBind) -> anyhow::Result<()> {
                 "super" | "win" => Some(binds::Mod::SUPER),
                 "shift" => Some(binds::Mod::SHIFT),
                 _ => {
-                    warn!("unknown mod: {}", m);
+                    warn!("unknown mod: {m}");
                     None
                 }
             })

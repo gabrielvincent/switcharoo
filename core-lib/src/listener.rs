@@ -19,11 +19,11 @@ where
     let mut watcher = RecommendedWatcher::new(
         move |res: notify::Result<Event>| match res {
             Ok(event) if event.kind == EventKind::Modify(ModifyKind::Data(DataChange::Any)) => {
-                trace!("Event: {:?}", event);
+                trace!("Event: {event:?}");
                 callback("hyprshell config change");
             }
             Err(err) => {
-                warn!("Watch error: {:?}", err);
+                warn!("Watch error: {err:?}");
             }
             Ok(_) => {}
         },
@@ -53,11 +53,11 @@ where
     let mut watcher = RecommendedWatcher::new(
         move |res: notify::Result<Event>| match res {
             Ok(event) if event.kind == EventKind::Modify(ModifyKind::Data(DataChange::Any)) => {
-                trace!("Event: {:?}", event);
+                trace!("Event: {event:?}");
                 callback("hyprshell css change");
             }
             Err(err) => {
-                warn!("Watch error: {:?}", err);
+                warn!("Watch error: {err:?}");
             }
             Ok(_) => {}
         },
@@ -82,11 +82,11 @@ pub fn hyprshell_config_block(file_path: &Path) -> anyhow::Result<()> {
     let mut watcher = RecommendedWatcher::new(
         move |res: notify::Result<Event>| match res {
             Ok(event) if event.kind == EventKind::Modify(ModifyKind::Data(DataChange::Any)) => {
-                trace!("Event: {:?}", event);
+                trace!("Event: {event:?}");
                 tx.send(()).warn_details("Failed to send reload signal");
             }
             Err(err) => {
-                warn!("Watch error: {:?}", err);
+                warn!("Watch error: {err:?}");
             }
             Ok(_) => {}
         },

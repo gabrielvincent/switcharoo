@@ -38,7 +38,7 @@ pub fn find_next(
         find_first_client(direction, &hypr_data.clients, &hypr_data.workspaces, active)
             .unwrap_or(active)
     };
-    trace!("Next active: {:?}", next);
+    trace!("Next active: {next:?}");
     next
 }
 

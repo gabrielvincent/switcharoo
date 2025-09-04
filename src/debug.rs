@@ -1,3 +1,5 @@
+#![allow(clippy::print_stderr, clippy::print_stdout)]
+
 use crate::util;
 use anyhow::Context;
 use config_lib::ApplicationsPluginConfig;

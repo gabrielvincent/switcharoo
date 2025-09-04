@@ -215,7 +215,7 @@ pub fn launch_option(
             save_run(&entry.source, data_dir).warn_details("Failed to cache run");
             return true;
         }
-        warn!("Failed to find entry for {:?}|{:?}", data, data_additional);
+        warn!("Failed to find entry for {data:?}|{data_additional:?}");
     }
     drop(entries);
     false

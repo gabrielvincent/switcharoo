@@ -39,6 +39,7 @@ pub fn get_all_icons<'a>() -> anyhow::Result<RwLockReadGuard<'a, BTreeSet<Box<st
         .map_err(|_| anyhow::anyhow!("Failed to lock icon map"))
 }
 
+#[must_use]
 pub fn theme_has_icon_name(name: &str) -> bool {
     get_icons()
         .read()

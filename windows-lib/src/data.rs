@@ -59,9 +59,9 @@ pub fn collect_data(config: &SortConfig) -> anyhow::Result<(HyprlandData, Active
             .any(|(_, c)| c.workspace.eq(id));
     }
 
-    trace!("client_data: {:?}", client_data);
-    trace!("workspace_data: {:?}", workspace_data);
-    trace!("monitor_data: {:?}", monitor_data);
+    trace!("client_data: {client_data:?}");
+    trace!("workspace_data: {workspace_data:?}");
+    trace!("monitor_data: {monitor_data:?}");
 
     Ok((
         HyprlandData {
@@ -95,7 +95,7 @@ pub fn update_client_position(
                 .find_by_first(&c.workspace)
                 .map(|ws| (ws.x, ws.y))
                 .or_else(|| {
-                    warn!("Workspace {:?} not found for client: {:?}", c.workspace, c);
+                    warn!("Workspace {:?} not found for client: {c:?}", c.workspace);
                     None
                 });
 
@@ -103,7 +103,7 @@ pub fn update_client_position(
                 .find_by_first(&c.monitor)
                 .map(|md| (md.x, md.y))
                 .or_else(|| {
-                    warn!("Monitor {:?} not found: {:?}", c.monitor, c);
+                    warn!("Monitor {:?} not found: {c:?}", c.monitor);
                     None
                 });
 

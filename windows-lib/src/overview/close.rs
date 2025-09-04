@@ -7,6 +7,7 @@ use gtk::glib;
 use gtk::prelude::*;
 use tracing::{debug, debug_span, trace};
 
+#[must_use]
 pub fn overview_already_hidden(data: &WindowsOverviewData) -> bool {
     !data.window_list.iter().any(|w| w.0.get_visible())
 }

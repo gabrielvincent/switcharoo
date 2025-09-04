@@ -8,6 +8,7 @@ const BLUE: &str = "\x1b[34m";
 const GREEN: &str = "\x1b[32m";
 const RESET: &str = "\x1b[0m";
 
+#[must_use]
 pub fn explain(config: &Config, config_path: &Path) -> String {
     let config_path_display = config_path.display();
     let mut builder = format!(

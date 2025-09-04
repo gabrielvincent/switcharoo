@@ -6,6 +6,7 @@ use gtk::glib;
 use gtk::prelude::*;
 use tracing::{debug, debug_span, trace};
 
+#[must_use]
 pub fn switch_already_hidden(data: &WindowsSwitchData) -> bool {
     !data.window.is_visible()
 }

@@ -57,12 +57,11 @@ pub(super) fn get_file_manager_info() -> FilemanagerData {
             let exec = section.get_first("Exec");
             let icon = section.get_first_as_path("Icon");
             let name = section.get_first("Name").unwrap_or_default();
-            trace!("Found exec: {:?}, icon: {:?}", exec, icon);
+            trace!("Found exec: {exec:?}, icon: {icon:?}");
             if let Some(exec) = exec {
                 trace!(
-                    "Found default file-manager file: {:?} with exec: {:?}",
-                    entry.path(),
-                    exec,
+                    "Found default file-manager file: {} with exec: {exec}",
+                    entry.path().display()
                 );
                 return Some(Some(FilemanagerData { exec, name, icon }));
             }

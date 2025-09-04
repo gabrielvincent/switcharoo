@@ -8,7 +8,7 @@ use hyprland::shared::{Address, WorkspaceId};
 use tracing::{trace, warn};
 
 pub fn switch_client(address: Address) -> anyhow::Result<()> {
-    trace!("execute switch to client: {}", address);
+    trace!("execute switch to client: {address}");
     Dispatch::call(DispatchType::FocusWindow(WindowIdentifier::Address(
         address,
     )))?;
@@ -17,7 +17,7 @@ pub fn switch_client(address: Address) -> anyhow::Result<()> {
 }
 
 pub fn switch_client_by_initial_class(class: &str) -> anyhow::Result<()> {
-    trace!("execute switch to client: {} by initial_class", class);
+    trace!("execute switch to client: {class} by initial_class");
     Dispatch::call(DispatchType::FocusWindow(
         WindowIdentifier::ClassRegularExpression(&format!(
             "initialclass:{}",

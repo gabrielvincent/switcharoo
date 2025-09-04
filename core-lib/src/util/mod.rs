@@ -10,6 +10,7 @@ pub use path::*;
 use std::env::{var, var_os};
 use std::path::Path;
 
+#[must_use]
 pub fn get_daemon_socket_path_buff() -> std::path::PathBuf {
     #[allow(clippy::option_if_let_else)]
     let mut buf = if let Some(runtime_path) = var_os("XDG_RUNTIME_DIR") {
@@ -41,6 +42,7 @@ pub fn daemon_running() -> bool {
     }
 }
 
+#[allow(clippy::print_stderr, clippy::print_stdout)]
 pub fn explain_config(config_path: &Path) {
     let config = match config_lib::load_and_migrate_config(config_path, true) {
         Ok(config) => config,

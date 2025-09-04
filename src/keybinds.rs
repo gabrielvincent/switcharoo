@@ -2,6 +2,7 @@ use anyhow::Context;
 use config_lib::Config;
 use core_lib::WarnWithDetails;
 use exec_lib::binds::{apply_exec_bind, apply_layerrules};
+use exec_lib::toast;
 use std::env;
 use tracing::{debug_span, info, warn};
 
@@ -10,7 +11,10 @@ pub fn configure_wm(config: &Config) -> anyhow::Result<()> {
 
     if env::var_os("HYPRSHELL_NO_USE_PLUGIN").is_none() {
         if let Err(err) = plugin(config) {
-            warn!("Failed to load hyprland plugin: {}", err);
+            toast(
+                "Unable to load hyprland plugin, please create a issue on github including the error. pass -vv to see the logs",
+            );
+            warn!("Failed to load hyprland plugin: {err:?}");
             info!("Falling back to default keybinds");
             apply_binds(config)?;
         }

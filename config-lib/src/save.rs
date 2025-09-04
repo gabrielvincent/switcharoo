@@ -23,7 +23,7 @@ pub fn write_config(
     }
     if let Some(parent) = config_path.parent() {
         create_dir_all(parent)
-            .with_context(|| format!("Failed to create config dir at ({:?})", parent.display()))?;
+            .with_context(|| format!("Failed to create config dir at ({})", parent.display()))?;
     }
     let str = match config_path.extension().and_then(OsStr::to_str) {
         None | Some("ron") => Options::default()
@@ -37,8 +37,7 @@ pub fn write_config(
         }
         Some("toml") => toml::to_string_pretty(config).context("Failed to generate TOML config"),
         Some(ext) => bail!(
-            "Invalid config file extension: {} (run with -vv and check `FEATURES: ` debug log to see enabled extensions)",
-            ext
+            "Invalid config file extension: {ext} (run with -vv and check `FEATURES: ` debug log to see enabled extensions)"
         ),
     }?;
     let mut file = File::create(config_path)
@@ -46,7 +45,7 @@ pub fn write_config(
     file.write_all(str.as_bytes())
         .with_context(|| format!("Failed to write to config file at ({config_path_display})"))
         .inspect_err(|_| {
-            info!("New config contents: {:?}", config);
+            info!("New config contents: {config:?}");
         })?;
 
     debug!("Config file written successfully at {config_path_display}");

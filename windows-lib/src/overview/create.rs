@@ -60,9 +60,8 @@ pub fn create_windows_overview_window(
                 window.set_visible(false);
 
                 debug!(
-                    "Created overview window ({}) for monitor {:?}",
-                    window.id(),
-                    monitor_name
+                    "Created overview window ({}) for monitor {monitor_name:?}",
+                    window.id()
                 );
                 window_list.insert(
                     window,

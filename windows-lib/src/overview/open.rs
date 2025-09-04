@@ -16,6 +16,7 @@ fn scale<T: Into<f64>>(value: T, scale: f64) -> i32 {
     (value.into() / (15f64 - scale)) as i32
 }
 
+#[must_use]
 pub fn overview_already_open(data: &WindowsOverviewData) -> bool {
     data.window_list.iter().any(|w| w.0.get_visible())
 }
@@ -53,8 +54,7 @@ pub fn open_overview(
 
         for (wid, workspace) in workspaces {
             trace!(
-                "Creating workspace {:?} with ({}x{})",
-                wid,
+                "Creating workspace {wid} with ({}x{})",
                 scale(workspace.width, data.config.scale),
                 scale(workspace.height, data.config.scale)
             );
@@ -159,8 +159,7 @@ pub fn open_overview(
                     button
                 };
                 trace!(
-                    "Creating Client {:?} with ({}x{}) at ({}x{})",
-                    address,
+                    "Creating Client {address} with ({}x{}) at ({}x{})",
                     scale(client.width, data.config.scale),
                     scale(client.height, data.config.scale),
                     f64::from(scale(

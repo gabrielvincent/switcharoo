@@ -144,7 +144,7 @@ fn handle_release(
         || ((key == Key::Control_L || key == Key::Control_R) && modifier == Modifier::Ctrl)
         || ((key == Key::Super_L || key == Key::Super_R) && modifier == Modifier::Super)
     {
-        trace!("Modifier key released: {:?}", key);
+        trace!("Modifier key released: {key:?}");
         event_sender
             .send_blocking(TransferType::Exit)
             .warn_details("unable to send");

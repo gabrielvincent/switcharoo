@@ -56,7 +56,7 @@ impl<A> WarnWithDetails<A> for Option<A> {
         if let Some(o) = self {
             Some(o)
         } else {
-            warn!("{}", msg);
+            warn!("{msg}");
             None
         }
     }
@@ -67,7 +67,7 @@ impl<A, E: fmt::Debug + fmt::Display> WarnWithDetails<A> for Result<A, E> {
         match self {
             Ok(o) => Some(o),
             Err(e) => {
-                warn!("{}: {}", msg, e);
+                warn!("{msg}: {e:?}");
                 debug!("Error: {e:?}");
                 None
             }
@@ -80,7 +80,7 @@ impl<A, E: fmt::Debug + fmt::Display> Warn<A> for Result<A, E> {
         match self {
             Ok(o) => Some(o),
             Err(e) => {
-                warn!("{}", e);
+                warn!("{e}");
                 debug!("Error: {e:?}");
                 None
             }

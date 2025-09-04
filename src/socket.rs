@@ -29,7 +29,7 @@ pub fn socket_handler(event_sender: &Sender<TransferType>) {
                 handle_client(conn, event_sender)
                     .context("Failed to handle client")
                     .unwrap_or_else(|e| {
-                        warn!("Failed to handle connection {:?}", e);
+                        warn!("Failed to handle connection {e:?}");
                     });
             }
             Err(e) => {

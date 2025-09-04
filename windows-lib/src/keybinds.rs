@@ -2,6 +2,7 @@ use config_lib::Windows;
 use core_lib::binds::{ExecBind, generate_transfer_socat};
 use core_lib::transfer::{OpenSwitch, TransferType};
 
+#[must_use]
 pub fn generate_open_keybinds(windows: &Windows) -> Vec<ExecBind> {
     let mut binds = Vec::new();
     if let Some(overview) = &windows.overview {

@@ -1,3 +1,4 @@
+#![allow(clippy::print_stderr, clippy::print_stdout)]
 use std::fs::read_to_string;
 use std::path::Path;
 use tracing::debug;
@@ -20,7 +21,7 @@ pub fn launch_history(
             })
             .unwrap_or(4)
     });
-    debug!("showing history for the last {} weeks", run_cache_weeks);
+    debug!("showing history for the last {run_cache_weeks} weeks");
 
     let runs = launcher_lib::get_applications_stored_runs(run_cache_weeks, data_dir);
     let mut sorted = runs.into_iter().collect::<Vec<_>>();

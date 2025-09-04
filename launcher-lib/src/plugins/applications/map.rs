@@ -112,8 +112,8 @@ pub fn reload_desktop_entries_map() -> anyhow::Result<()> {
             }
         } else {
             warn!(
-                "Failed to find section 'Desktop Entry' in file: {:?}",
-                entry.path()
+                "Failed to find section 'Desktop Entry' in file: {}",
+                entry.path().display()
             );
         }
     }

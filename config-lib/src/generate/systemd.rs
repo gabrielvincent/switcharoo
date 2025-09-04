@@ -15,9 +15,9 @@ pub fn write_systemd_unit(
 ) -> anyhow::Result<()> {
     let _span = debug_span!("write_systemd_unit").entered();
     let path = {
-        let mut data_home_dir = data_home_dir.to_path_buf();
-        data_home_dir.push("systemd/user/hyprshell.service");
         data_home_dir
+            .to_path_buf()
+            .join("systemd/user/hyprshell.service")
     };
 
     if let Some(parent) = path.parent() {
@@ -57,12 +57,8 @@ pub fn write_systemd_unit(
         .replace("{extra}", &extra);
 
     trace!("writing {unit_text} to {path:?}");
-    std::fs::write(&path, unit_text).with_context(|| {
-        format!(
-            "Failed to write Systemd unit file at ({:?})",
-            path.display()
-        )
-    })?;
+    std::fs::write(&path, unit_text)
+        .with_context(|| format!("Failed to write Systemd unit file at ({})", path.display()))?;
 
     info!("Systemd unit file generated successfully at {path:?}");
     Ok(())

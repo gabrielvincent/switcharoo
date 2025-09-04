@@ -33,7 +33,7 @@ pub fn close_launcher_by_char(data: &mut LauncherData, char: Option<char>) {
 pub fn close_launcher_by_iden(data: &mut LauncherData, iden: &Identifier) {
     let _span = debug_span!("close_launcher_by_iden").entered();
     data.window.set_keyboard_mode(KeyboardMode::None);
-    trace!("Closing launcher with iden: {:?}", iden);
+    trace!("Closing launcher with iden: {iden:?}");
 
     close_launcher(data, iden);
 }
@@ -51,8 +51,7 @@ fn close_launcher(data: &LauncherData, iden: &Identifier) {
     );
     if animate {
         trace!(
-            "starting timeout({}ms) animation after {:?} time",
-            ANIMATE_LAUNCH_MS,
+            "starting timeout({ANIMATE_LAUNCH_MS}ms) animation after {:?} time",
             instant.elapsed()
         );
         data.entry.set_editable(false);

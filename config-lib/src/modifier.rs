@@ -10,6 +10,7 @@ pub enum Modifier {
     Super,
 }
 
+#[allow(clippy::must_use_candidate)]
 impl Modifier {
     pub fn to_l_key(&self) -> String {
         match self {

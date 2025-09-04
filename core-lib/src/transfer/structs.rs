@@ -64,6 +64,7 @@ pub struct Identifier {
 }
 
 impl Identifier {
+    #[must_use]
     pub const fn plugin(plugin: PluginNames) -> Self {
         Self {
             plugin,
@@ -72,6 +73,7 @@ impl Identifier {
         }
     }
 
+    #[must_use]
     pub const fn data(plugin: PluginNames, data: Box<str>) -> Self {
         Self {
             plugin,
@@ -80,6 +82,7 @@ impl Identifier {
         }
     }
 
+    #[must_use]
     pub const fn data_additional(
         plugin: PluginNames,
         data: Box<str>,

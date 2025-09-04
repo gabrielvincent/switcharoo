@@ -42,7 +42,7 @@ pub fn generate(shell: &str, bash_path: Option<PathBuf>) -> anyhow::Result<()> {
                 .with_context(|| format!("failed to write to file: {}", &path.display()))?;
             info!("Generated fish completion script at: {}", path.display());
         }
-        _ => bail!("unknown shell: {}", shell),
+        _ => bail!("unknown shell: {shell}"),
     }
     Ok(())
 }

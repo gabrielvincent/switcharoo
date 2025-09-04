@@ -39,6 +39,7 @@ pub fn get_default_config_path() -> PathBuf {
     path
 }
 
+#[must_use]
 pub fn get_default_css_path() -> PathBuf {
     let mut path = get_config_home();
 
@@ -49,6 +50,7 @@ pub fn get_default_css_path() -> PathBuf {
     path
 }
 
+#[must_use]
 pub fn get_default_data_dir() -> PathBuf {
     let mut path = get_data_home();
 
@@ -59,6 +61,7 @@ pub fn get_default_data_dir() -> PathBuf {
     path
 }
 
+#[must_use]
 pub fn get_default_cache_dir() -> PathBuf {
     let mut path = get_cache_home();
 
@@ -105,6 +108,7 @@ pub fn get_config_home() -> PathBuf {
         .expect("Failed to get config dir (XDG_CONFIG_HOME or HOME not set)")
 }
 
+#[must_use]
 pub fn get_config_dirs() -> Vec<PathBuf> {
     env::var_os("XDG_CONFIG_DIRS").map_or_else(
         || vec![PathBuf::from("/etc/xdg/")],
@@ -112,6 +116,7 @@ pub fn get_config_dirs() -> Vec<PathBuf> {
     )
 }
 
+#[must_use]
 pub fn get_data_dirs() -> Vec<PathBuf> {
     let mut dirs = env::var_os("XDG_DATA_DIRS").map_or_else(
         || {

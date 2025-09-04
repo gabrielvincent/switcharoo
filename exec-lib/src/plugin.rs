@@ -37,7 +37,7 @@ pub fn load_plugin(
 
 pub fn check_new_plugin_needed(config: &PluginConfig) -> bool {
     let plugins = plugin::list().unwrap_or_default();
-    trace!("plugins: {:?}", plugins);
+    trace!("plugins: {plugins:?}");
     for plugin in plugins {
         if plugin.name == hyprland_plugin::PLUGIN_NAME {
             let Some(desc) = plugin.description.split(" - ").last() else {
@@ -69,6 +69,7 @@ pub fn unload() -> anyhow::Result<()> {
     Ok(())
 }
 
+#[allow(clippy::must_use_candidate)]
 pub const fn mod_to_xkb_key(r#mod: Modifier) -> &'static str {
     match r#mod {
         Modifier::Alt => "XKB_KEY_Alt",

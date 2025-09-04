@@ -10,30 +10,37 @@ pub struct Section<'a> {
 }
 
 impl<'a> Section<'a> {
+    #[must_use]
     pub fn new() -> Self {
         Self::default()
     }
 
+    #[must_use]
     pub fn get_all(&self, key: &str) -> Option<&Vec<&'a str>> {
         self.entries.get(key)
     }
+
+    #[must_use]
     pub fn get_first(&self, key: &str) -> Option<&'a str> {
         self.entries.get(key)?.first().copied()
     }
 
+    #[must_use]
     pub fn get_all_as_boxed(&self, key: &str) -> Option<Vec<Box<str>>> {
         self.get_all(key)
             .map(|vec| vec.iter().copied().map(Box::from).collect::<Vec<_>>())
     }
 
+    #[must_use]
     pub fn get_first_as_boxed(&self, key: &str) -> Option<Box<str>> {
         self.get_first(key).map(Box::from)
     }
-
+    #[must_use]
     pub fn get_first_as_path_boxed(&self, key: &str) -> Option<Box<Path>> {
         self.get_first(key).map(Path::new).map(Box::from)
     }
 
+    #[must_use]
     pub fn get_first_as_boolean(&self, key: &str) -> Option<bool> {
         self.get_first(key).map(|s| s == "true")
     }
@@ -105,7 +112,7 @@ impl IniFile<'_> {
                     .collect::<Vec<_>>();
                 current_section.insert_items(key, values);
             } else {
-                warn!("malformed line: {}", line);
+                warn!("malformed line: {line}");
             }
         }
 
@@ -114,14 +121,17 @@ impl IniFile<'_> {
 }
 
 impl<'a> IniFile<'a> {
+    #[must_use]
     pub fn get_section(&'a self, section_name: &str) -> Option<&'a Section<'a>> {
         self.sections.get(section_name)
     }
 
+    #[must_use]
     pub const fn sections(&self) -> &HashMap<&'a str, Section<'a>> {
         &self.sections
     }
 
+    #[must_use]
     pub fn format(&self) -> String {
         let mut str = String::with_capacity(self.into_iter().count() * 20); // 20 chars per line should be good
         let mut sections = self.sections().iter().collect::<Vec<_>>();

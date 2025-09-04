@@ -6,8 +6,8 @@ use tracing::{debug, trace};
 
 pub fn send_raw_to_socket(data: &str) -> anyhow::Result<()> {
     let path = get_daemon_socket_path_buff();
-    debug!("Sending data to socket: {}", data);
-    trace!("Socket path: {:?}", path);
+    debug!("Sending data to socket: {data}");
+    trace!("Socket path: {}", path.display());
     let mut stream = UnixStream::connect(&path)
         .with_context(|| format!("Can't connect to daemon socket {}", path.display()))?;
     trace!("Socket connected, sending data");

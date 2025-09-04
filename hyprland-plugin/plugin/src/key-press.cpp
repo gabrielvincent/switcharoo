@@ -39,6 +39,10 @@ void onKeyPress(const std::unordered_map<std::string, std::any> &data) {
             HyprlandAPI::addNotification(PHANDLE, "[Hyprshell Plugin] " + bigString, GREEN, 4000);
         }
 
+        if (MOUSE_BUTTON_PRESSED) {
+            return;
+        }
+
         if (keysym == OVERVIEW_KEY) {
             if (OVERVIEW_KEY == XKB_KEY_Super_L || OVERVIEW_KEY == XKB_KEY_Super_R ||
                 OVERVIEW_KEY == XKB_KEY_Alt_L || OVERVIEW_KEY == XKB_KEY_Alt_R ||
@@ -79,7 +83,8 @@ void onKeyPress(const std::unordered_map<std::string, std::any> &data) {
                     (HYPRSHELL_SWTICH_XKB_MOD_L == XKB_KEY_Control_L && ctrlActive)
                 ) {
                     if constexpr (HYPRSHELL_PRINT_DEBUG == 1) {
-                        HyprlandAPI::addNotification(PHANDLE, "[Hyprshell Plugin] switch open (tab) pressed", GREEN, 2000);
+                        HyprlandAPI::addNotification(PHANDLE, "[Hyprshell Plugin] switch open (tab) pressed", GREEN,
+                                                     2000);
                     }
                     sendStringToHyprshellSocket(HYPRSHELL_OPEN_SWITCH);
                 }
@@ -90,7 +95,8 @@ void onKeyPress(const std::unordered_map<std::string, std::any> &data) {
                     (HYPRSHELL_SWTICH_XKB_MOD_L == XKB_KEY_Control_L && ctrlActive)
                 ) {
                     if constexpr (HYPRSHELL_PRINT_DEBUG == 1) {
-                        HyprlandAPI::addNotification(PHANDLE, "[Hyprshell Plugin] switch open (shift + tab) pressed", GREEN, 2000);
+                        HyprlandAPI::addNotification(PHANDLE, "[Hyprshell Plugin] switch open (shift + tab) pressed",
+                                                     GREEN, 2000);
                     }
                     sendStringToHyprshellSocket(HYPRSHELL_OPEN_SWITCH_REVERSE);
                 }
@@ -101,7 +107,8 @@ void onKeyPress(const std::unordered_map<std::string, std::any> &data) {
                     (HYPRSHELL_SWTICH_XKB_MOD_L == XKB_KEY_Control_L && ctrlActive)
                 ) {
                     if constexpr (HYPRSHELL_PRINT_DEBUG == 1) {
-                        HyprlandAPI::addNotification(PHANDLE, "[Hyprshell Plugin] switch open (grave) pressed", GREEN, 2000);
+                        HyprlandAPI::addNotification(PHANDLE, "[Hyprshell Plugin] switch open (grave) pressed", GREEN,
+                                                     2000);
                     }
                     sendStringToHyprshellSocket(HYPRSHELL_OPEN_SWITCH_REVERSE);
                 }

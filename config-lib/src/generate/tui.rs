@@ -73,6 +73,7 @@ pub const DEFAULT_COLORS: [(&str, &str); 8] = [
     ("White", "rgba(255, 255, 255, 0.9)"),
 ];
 
+#[allow(clippy::print_stderr, clippy::print_stdout)]
 pub fn prompt_config() -> anyhow::Result<(ConfigData, StyleData)> {
     let open_overview = {
         let open_overview = Text::new("Key combination to open the overview and launcher (optional) [similar to gnome's overview]")

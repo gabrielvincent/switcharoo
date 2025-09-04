@@ -16,6 +16,7 @@ fn scale<T: Into<f64>>(value: T, scale: f64) -> i32 {
     (value.into() / (15f64 - scale)) as i32
 }
 
+#[must_use]
 pub fn switch_already_open(data: &WindowsSwitchData) -> bool {
     data.window.get_visible()
 }

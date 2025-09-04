@@ -33,6 +33,8 @@ use windows_lib::{
     create_windows_switch_window,
 };
 
+const NEW_VERSION_INFO: &str = "This version uses a hyprland plugin to register keypresses, adds shell completion, improves UI, adds usefull commands and much more.";
+
 pub fn start(
     config_path: PathBuf,
     css_path: PathBuf,
@@ -101,8 +103,6 @@ pub struct WindowsGlobal {
     pub switch: Option<WindowsSwitchData>,
 }
 
-const NEW_VERSION_INFO: &str = "This version uses a hyprland plugin to register keypresses, adds shell completion, improves UI, adds usefull commands and much more.";
-
 fn activate(
     app: &Application,
     config_path: &Path,
@@ -144,10 +144,10 @@ fn activate(
     let config = match config_lib::load_and_migrate_config(config_path, true) {
         Ok(config) => config,
         Err(err) => {
-            error!("Failed to load config: {:?}", err);
+            error!("Failed to load config: {err:?}",);
             toast(&format!("Failed to load config: {err:?}"));
             if let Err(err) = hyprshell_config_block(config_path) {
-                error!("Failed to block config: {:?}", err);
+                error!("Failed to block config: {err:?}",);
                 process::exit(1);
             }
             return; // return needed to exit the application
@@ -156,9 +156,9 @@ fn activate(
 
     if let Err(err) = configure_wm(&config) {
         error!("Failed to create keybinds: {err:?}");
-        toast(&format!("Failed to create keybinds: {err}"));
+        toast(&format!("Failed to create keybinds: {err:?}"));
         if let Err(err) = hyprshell_config_block(config_path) {
-            error!("Failed to block config: {:?}", err);
+            error!("Failed to block config: {err:?}");
             process::exit(1);
         }
         return; // return needed to exit the application
@@ -168,9 +168,9 @@ fn activate(
         Ok(data) => data,
         Err(err) => {
             error!("Failed to create windows: {err:?}");
-            toast(&format!("Failed to create windows: {err}"));
+            toast(&format!("Failed to create windows: {err:?}"));
             if let Err(err) = hyprshell_config_block(config_path) {
-                error!("Failed to block config: {:?}", err);
+                error!("Failed to block config: {err:?}");
                 process::exit(1);
             }
             return; // return needed to exit the application
@@ -270,7 +270,6 @@ pub fn register_event_restarter(
 
     // State to track the current debounce timer
     let debounce_timer = Rc::new(RefCell::new(None::<glib::SourceId>));
-
     glib::spawn_future_local(async move {
         loop {
             let cause = restart_receiver.recv().await.unwrap_or_default();

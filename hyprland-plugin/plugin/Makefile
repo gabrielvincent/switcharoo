@@ -1,7 +1,7 @@
 .PHONY: all clean combine prepare-combined copy-defs build build-combined
 
 SRCS_DIR = ./src
-SRCS = key-press.cpp layer-change.cpp init.cpp exit.cpp main.cpp send.cpp
+SRCS = key-press.cpp layer-change.cpp init.cpp exit.cpp main.cpp send.cpp mouse-button.cpp
 PREPAREDIR = out
 OUTNAME = hyprshell.so
 TARGET = $(OUTNAME)

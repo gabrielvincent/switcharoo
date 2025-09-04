@@ -24,7 +24,7 @@ pub fn build(dir: &TempDir) -> anyhow::Result<()> {
     // }
     cmd.arg("all.cpp");
 
-    trace!("Running build command: {:?}", cmd);
+    trace!("Running build command: {cmd:?}");
     let out = cmd
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())

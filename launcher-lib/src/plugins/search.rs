@@ -86,11 +86,8 @@ pub(super) fn get_browser_info() -> BrowserData {
             let icon = section.get_first_as_path("Icon");
             if let Some(exec) = exec {
                 trace!(
-                    "Found default browser file: {:?} with exec: {:?}, icon: {:?} and startup_wm_class: {:?}",
-                    entry.path(),
-                    exec,
-                    icon,
-                    startup_wm_class
+                    "Found default browser file: {} with exec: {exec}, icon: {icon:?} and startup_wm_class: {startup_wm_class:?}",
+                    entry.path().display()
                 );
                 return Some(BrowserData {
                     exec,

@@ -26,7 +26,7 @@ pub fn save_run(desktop_file: &Path, data_dir: &Path) -> anyhow::Result<()> {
             .map_or(1, |v| v.as_i64().unwrap_or(0) + 1)
     );
 
-    trace!("Cache saved to {file:?} (added {:?})", desktop_file);
+    trace!("Cache saved to {file:?} (added {desktop_file:?})");
     let file = OpenOptions::new()
         .write(true)
         .create(true)
@@ -38,18 +38,17 @@ pub fn save_run(desktop_file: &Path, data_dir: &Path) -> anyhow::Result<()> {
 }
 
 fn get_current_week(data_dir: &Path) -> PathBuf {
-    let mut path = PathBuf::from(data_dir);
-    path.push("runs");
-    path.push(get_name_from_timestamp(0));
-    path
+    PathBuf::from(data_dir)
+        .join("runs")
+        .join(get_name_from_timestamp(0))
 }
 
 fn get_all_weeks(run_cache_weeks: u8, data_dir: &Path) -> Vec<Box<Path>> {
     let mut weeks = Vec::new();
     for week in 0..run_cache_weeks {
-        let mut path = PathBuf::from(data_dir);
-        path.push("runs");
-        path.push(get_name_from_timestamp(week));
+        let path = PathBuf::from(data_dir)
+            .join("runs")
+            .join(get_name_from_timestamp(week));
         weeks.push(path.into_boxed_path());
     }
     weeks
@@ -72,13 +71,13 @@ pub fn get_stored_runs(run_cache_weeks: u8, data_dir: &Path) -> HashMap<Box<Path
         let cache_data = if week.exists() {
             match OpenOptions::new().read(true).open(&week) {
                 Ok(file) => from_reader(file).unwrap_or_else(|err| {
-                    warn!("Failed to open cache file: {:?}", week);
-                    debug!("Error: {:?}", err);
+                    warn!("Failed to open cache file: {week:?}");
+                    debug!("Error: {err:?}");
                     serde_json::json!({})
                 }),
                 Err(err) => {
-                    warn!("Failed to open cache file: {:?}", week);
-                    debug!("Error: {:?}", err);
+                    warn!("Failed to open cache file: {week:?}");
+                    debug!("Error: {err:?}");
                     serde_json::json!({})
                 }
             }

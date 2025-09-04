@@ -1,5 +1,3 @@
-#![warn(clippy::all, clippy::pedantic, clippy::nursery)]
-
 use anyhow::{Context, bail};
 use clap::Parser;
 use core_lib::{
@@ -25,6 +23,7 @@ mod default_apps;
 
 #[allow(clippy::too_many_lines)]
 fn main() -> anyhow::Result<()> {
+    let _ = format!("{}", 2);
     let cli = cli::App::parse();
     let opts = cli.global_opts.clone();
 
@@ -114,7 +113,7 @@ fn main() -> anyhow::Result<()> {
                     &config_path.unwrap_or_else(get_default_config_path),
                     true,
                 ) {
-                    tracing::warn!("Failed to load config: {err}");
+                    tracing::warn!("Failed to load config: {err:?}");
                     exit(1);
                 }
             }
@@ -137,26 +136,29 @@ fn main() -> anyhow::Result<()> {
             #[cfg(feature = "config_check")]
             cli::ConfigCommand::CheckIfFull {} => {
                 let config = config_lib::load_and_migrate_config(
-                    &config_path.unwrap_or(get_default_config_path()),
+                    &config_path.unwrap_or_else(get_default_config_path),
                     false,
                 )?;
-                let mut config_all = config_lib::Config::default();
-                config_all.windows = Some(config_lib::Windows {
-                    overview: Some(config_lib::Overview::default()),
-                    switch: Some(config_lib::Switch::default()),
+                let config_all = config_lib::Config {
+                    windows: Some(config_lib::Windows {
+                        overview: Some(config_lib::Overview::default()),
+                        switch: Some(config_lib::Switch::default()),
+                        ..Default::default()
+                    }),
                     ..Default::default()
-                });
-                if config != config_all {
+                };
+                if config == config_all {
+                    tracing::info!("Current config matches the default configuration");
+                } else {
                     tracing::warn!("Current config does not match the full configuration");
                     tracing::info!("All config: {:#?}", config_all);
                     tracing::info!("Current config: {:#?}", config);
                     exit(1);
-                } else {
-                    tracing::info!("Current config matches the default configuration");
                 }
             }
         },
         #[cfg(feature = "debug_command")]
+        #[allow(clippy::print_stderr, clippy::print_stdout)]
         cli::Command::Debug { command } => {
             println!("run with -vv ... to see all logs");
             match command {

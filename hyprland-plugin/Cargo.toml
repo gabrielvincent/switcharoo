@@ -19,3 +19,6 @@ zip = { version = "4.3.0" }
 
 [build-dependencies]
 zip = { version = "4.3.0" }
+
+[lints]
+workspace = true
