@@ -142,6 +142,10 @@ pub fn sort_workspaces_by_recent(
     });
 }
 
+// TODO sort by monitor x instead of ordering of idl
 pub fn sort_workspaces_by_position(workspaces: &mut [(WorkspaceId, WorkspaceData)]) {
-    workspaces.sort_by(|(_, a), (_, b)| a.x.cmp(&b.x));
+    workspaces.sort_by(|(_, a), (_, b)| match a.monitor.cmp(&b.monitor) {
+        std::cmp::Ordering::Equal => a.x.cmp(&b.x),
+        other => other,
+    });
 }

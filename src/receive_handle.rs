@@ -4,7 +4,8 @@ use core_lib::WarnWithDetails;
 use core_lib::transfer::{
     CloseOverviewConfig, OpenSwitch, SwitchOverviewConfig, SwitchSwitchConfig, TransferType,
 };
-use gtk::prelude::EntryExt;
+use gtk::glib;
+use gtk::prelude::{ApplicationExt, EntryExt};
 use tracing::{debug, trace, warn};
 
 #[allow(clippy::future_not_send)]
@@ -195,4 +196,8 @@ fn restart(global: &Globals) {
             windows_lib::stop_switch(switch);
         }
     }
+    let app = global.app.clone();
+    glib::idle_add_local_once(move || {
+        app.quit();
+    });
 }

@@ -92,6 +92,7 @@ pub fn start(
 
 pub struct Globals {
     pub windows: Option<WindowsGlobal>,
+    pub app: Application,
 }
 
 #[derive(Debug, Default)]
@@ -189,7 +190,10 @@ fn create_windows(
     data_dir: &Path,
     event_sender: Sender<TransferType>,
 ) -> anyhow::Result<Globals> {
-    let mut global = Globals { windows: None };
+    let mut global = Globals {
+        windows: None,
+        app: app.clone(),
+    };
     if let Some(windows) = &config.windows {
         let mut windows_data = WindowsGlobal::default();
         if let Some(overview) = &windows.overview {
@@ -198,8 +202,8 @@ fn create_windows(
             let launcher_data = create_windows_overview_launcher_window(
                 app,
                 &overview.launcher,
-                overview.modifier,
-                &overview.key,
+                // overview.modifier,
+                // &overview.key,
                 data_dir,
                 &event_sender,
             )
