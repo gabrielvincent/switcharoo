@@ -41,6 +41,7 @@ config_check = ["config-lib/no-default-config-values"]
 
 [workspace]
 members = ["exec-lib", "core-lib", "windows-lib", "launcher-lib", "config-lib", "hyprland-plugin", "hyprland-rs", "hyprland-rs/hyprland-macros"]
+exclude = ["test-global"]
 
 [workspace.package]
 version = "4.5.0"
