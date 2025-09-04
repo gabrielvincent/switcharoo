@@ -16,7 +16,8 @@ jobs:
         with:
           github_access_token: ${{ secrets.GITHUB_TOKEN }}
           extra_nix_config: "download-buffer-size = 1048576000"
-      - run: |
+      - name: Update flake
+        run: |
           git fetch
           git switch hyprshell
           nix flake update

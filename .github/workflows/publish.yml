@@ -65,7 +65,7 @@ jobs:
           current_sha=$(git rev-parse HEAD)
           jq --arg sha "$current_sha" '.["last-release-sha"]=$sha' release-please-config.json > tmp.json && mv tmp.json release-please-config.json
           git add release-please-config.json
-          git commit -m "chore: update last-release-sha"
+          git commit -m "chore(release): update last-release-sha"
           git push origin hyprshell-release
           
           git tag --delete ${{ github.ref_name }}
@@ -78,15 +78,6 @@ jobs:
           gh release edit ${{ github.ref_name }} --latest --draft=false --title "hyprshell ${{ github.ref_name }}"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - uses: cachix/install-nix-action@56a7bb7b56d9a92d4fd1bc05758de7eea4a370a8 # v31.6.0
-        with:
-          github_access_token: ${{ secrets.GITHUB_TOKEN }}
-      - uses: cachix/cachix-action@v14
-        with:
-          name: hyprshell
-          authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
-      - name: Run Nix Flake Check build
-        run: nix build '.?submodules=1#packages.x86_64-linux.default' -L
       - name: Publish AUR package
         uses: KSXGitHub/github-actions-deploy-aur@2ac5a4c1d7035885d46b10e3193393be8460b6f1 # v4.1.1
         with:
@@ -98,3 +89,12 @@ jobs:
           commit_message: Update hyprshell AUR package
           updpkgsums: true
           ssh_keyscan_types: rsa,ecdsa,ed25519
+      - uses: cachix/install-nix-action@56a7bb7b56d9a92d4fd1bc05758de7eea4a370a8 # v31.6.0
+        with:
+          github_access_token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: cachix/cachix-action@v14
+        with:
+          name: hyprshell
+          authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
+      - name: Run Nix Flake Check build
+        run: nix build '.#packages.x86_64-linux.hyprshell' -L
