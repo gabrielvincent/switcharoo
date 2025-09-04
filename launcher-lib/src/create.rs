@@ -20,8 +20,8 @@ use tracing::{debug, debug_span, trace};
 pub fn create_windows_overview_launcher_window(
     app: &Application,
     launcher: &Launcher,
-    open_modifier: Modifier,
-    open_key: &Box<str>,
+    // open_modifier: Modifier,
+    // open_key: &str,
     data_dir: &Path,
     event_sender: &Sender<TransferType>,
 ) -> anyhow::Result<LauncherData> {
@@ -80,7 +80,7 @@ pub fn create_windows_overview_launcher_window(
         handle_key(
             &entry_2,
             key,
-            open_modifier,
+            // open_modifier,
             modt,
             &plugin_keys,
             launch_modifier,
@@ -130,13 +130,14 @@ fn launcher_entry_text_change(text: String, event_sender: &Sender<TransferType>)
         .warn_details("unable to send");
 }
 
+#[allow(unused)]
 // TODO this doesnt work if key is not a modifier (tab instead of super_l)
 // instead handle close with esc and close with mod again in plugin
 fn handle_release(
     key: Key,
     modifier: Modifier,
-    open_key: &Box<str>,
-    mt: ModifierType,
+    // open_key: &str,
+    // mt: ModifierType,
     event_sender: &Sender<TransferType>,
 ) {
     if ((key == Key::Alt_L || key == Key::Alt_R) && modifier == Modifier::Alt)
@@ -154,7 +155,7 @@ fn handle_release(
 fn handle_key(
     entry: &Entry,
     key: Key,
-    modifier: Modifier,
+    // modifier: Modifier,
     modt: ModifierType,
     plugin_keys: &[Key],
     launch_modifier: Modifier,

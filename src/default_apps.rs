@@ -192,7 +192,7 @@ pub fn check() {
     }
 
     for (file, (default_mimes, added_mimes)) in mime_files_map {
-        println!("{file:?}");
+        println!("{file}");
         let mut vec = default_mimes.iter().collect::<Vec<_>>();
         vec.sort_by_key(|&(mime, _)| mime.to_string());
         for (mime, value) in vec {

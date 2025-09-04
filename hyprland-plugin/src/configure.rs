@@ -66,11 +66,11 @@ pub fn configure(dir: &TempDir, config: &PluginConfig) -> anyhow::Result<()> {
         ),
         (
             "$HYPRSHELL_OVERVIEW_MOD$",
-            &format!("{}", config.xkb_key_overview_mod.as_deref().unwrap_or("")),
+            config.xkb_key_overview_mod.as_deref().unwrap_or(""),
         ),
         (
             "$HYPRSHELL_OVERVIEW_KEY$",
-            &format!("{}", config.xkb_key_overview_key.as_deref().unwrap_or("")),
+            config.xkb_key_overview_key.as_deref().unwrap_or(""),
         ),
         (
             "$HYPRSHELL_OPEN_OVERVIEW$",

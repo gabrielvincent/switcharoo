@@ -18,7 +18,7 @@ pub fn configure_wm(config: &Config) -> anyhow::Result<()> {
         apply_binds(config)?;
     }
 
-    layerrules(config)?;
+    layerrules(config);
     Ok(())
 }
 
@@ -44,9 +44,8 @@ fn apply_binds(config: &Config) -> anyhow::Result<()> {
     Ok(())
 }
 
-fn layerrules(config: &Config) -> anyhow::Result<()> {
+fn layerrules(config: &Config) {
     if config.layerrules {
         apply_layerrules().warn_details("Failed to apply layerrules");
     }
-    Ok(())
 }
