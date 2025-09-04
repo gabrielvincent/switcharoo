@@ -1,6 +1,5 @@
 {
   description = "hyprshell - A Rust-based GUI designed to enhance window management in hyprland";
-  inputs.self.submodules = true;
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
     home-manager = {
