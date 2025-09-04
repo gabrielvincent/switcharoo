@@ -1,11 +1,12 @@
 use crate::start::Globals;
+use crate::util;
 use async_channel::{Receiver, Sender};
 use core_lib::WarnWithDetails;
 use core_lib::transfer::{
     CloseOverviewConfig, OpenSwitch, SwitchOverviewConfig, SwitchSwitchConfig, TransferType,
 };
-use gtk::glib;
 use gtk::prelude::{ApplicationExt, EntryExt};
+use gtk::{gio, glib};
 use tracing::{debug, trace, warn};
 
 #[allow(clippy::future_not_send)]
@@ -58,6 +59,9 @@ fn open_overview(global: &mut Globals, event_sender: &Sender<TransferType>) {
                     .warn_details("Failed to open overview window");
                 launcher_lib::open_launcher(launcher);
                 launcher_lib::update_launcher(launcher, "", event_sender);
+
+                // update desktop data in background
+                gio::spawn_blocking(util::reload_desktop_data);
             } else {
                 debug!("Overview or Switch already open");
             }

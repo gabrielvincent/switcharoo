@@ -9,8 +9,8 @@ use std::fs::{File, read_to_string, write};
 use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::process::exit;
-use std::thread;
-use tracing::{info, trace, warn};
+use std::{thread, time};
+use tracing::{debug, info, trace, warn};
 
 pub fn preactivate() -> anyhow::Result<()> {
     let _span = tracing::span!(tracing::Level::TRACE, "preactivate").entered();
@@ -31,12 +31,13 @@ pub fn reload_icons(background: bool) {
         .warn();
 }
 
-/// TODO run this after each launcher open async
 pub fn reload_desktop_data() -> anyhow::Result<()> {
+    let start = time::Instant::now();
     default::reload_default_files().context("Failed to reload default files")?;
     windows_lib::reload_class_to_icon_map().context("Failed to reload class to icon map")?;
     launcher_lib::reload_applications_desktop_entries_map()
         .context("Failed to reload desktop entries")?;
+    debug!("Reloaded desktop data in {:?}", start.elapsed());
     Ok(())
 }
 

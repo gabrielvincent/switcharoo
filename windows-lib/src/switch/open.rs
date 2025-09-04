@@ -74,7 +74,6 @@ pub fn open_switch(data: &mut WindowsSwitchData, config: &OpenSwitch) -> anyhow:
                 continue;
             }
             let workspace_fixed = Fixed::builder()
-                // TODO
                 .width_request(scale(workspace.width, data.config.scale))
                 .height_request(scale(workspace.height, data.config.scale))
                 .build();

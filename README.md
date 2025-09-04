@@ -33,6 +33,8 @@ gtk4 and [gtk4-layer-shell](https://github.com/wmww/gtk4-layer-shell)[1.1.1] mus
 cargo install hyprshell
 ```
 
+Minimum required rustc version: `1.87.0`
+
 ### Arch Linux
 
 ```bash

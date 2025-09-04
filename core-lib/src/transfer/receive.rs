@@ -3,7 +3,6 @@ use anyhow::Context;
 use tracing::debug;
 
 pub fn receive_from_buffer(mut buffer: Vec<u8>) -> anyhow::Result<TransferType> {
-    // TODO use this if newer rust version
     if buffer.last() == Some(&0) {
         let _ = buffer.pop();
     }
