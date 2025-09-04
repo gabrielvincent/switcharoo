@@ -1230,7 +1230,7 @@ dependencies = [
 
 [[package]]
 name = "hyprshell-hyprland"
-version = "0.4.0-beta.2"
+version = "4.5.0"
 dependencies = [
  "ahash",
  "async-net",
@@ -1248,7 +1248,7 @@ dependencies = [
 
 [[package]]
 name = "hyprshell-hyprland-macros"
-version = "0.4.0-beta.2"
+version = "4.5.0"
 dependencies = [
  "proc-macro2",
  "quote",
