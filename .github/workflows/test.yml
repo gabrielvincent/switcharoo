@@ -27,12 +27,12 @@ jobs:
           authToken: ${{ secrets.CACHIX_AUTH_TOKEN_DEV }}
       - name: Run Nix Flake Check build
         run: nix build '.?submodules=1#checks.x86_64-linux.hyprshell-config-check' -L
-      - name: Run Nix Flake Check test
-        run: nix build '.?submodules=1#checks.x86_64-linux.hyprshell-test' -L
       - name: Run Nix Flake Check clippy
         run: nix build '.?submodules=1#checks.x86_64-linux.hyprshell-clippy' -L
       - name: Run Nix Flake Check fmt
         run: nix build '.?submodules=1#checks.x86_64-linux.hyprshell-fmt' -L
+      - name: Run Nix Flake Check test
+        run: nix build '.?submodules=1#checks.x86_64-linux.hyprshell-test' -L
       - name: Run Nix Flake Check check-nix-configs
         run: nix build '.?submodules=1#checks.x86_64-linux.check-nix-configs' -L
 
