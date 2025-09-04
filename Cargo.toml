@@ -11,6 +11,7 @@ authors.workspace = true
 keywords.workspace = true
 repository.workspace = true
 rust-version.workspace = true
+publish.workspace = true
 exclude = [".idea/*", ".github/*"]
 
 [dependencies]

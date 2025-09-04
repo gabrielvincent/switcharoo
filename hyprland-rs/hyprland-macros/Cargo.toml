@@ -7,6 +7,7 @@ readme = "README.md"
 edition = "2021"
 homepage = "https://github.com/hyprland-community/hyprland-rs/tree/master/hyprland-macros"
 repository = "https://github.com/hyprland-community/hyprland-rs"
+publish.workspace = true
 
 [package.metadata.nix]
 build = true
@@ -15,6 +16,6 @@ build = true
 proc-macro = true
 
 [dependencies]
-syn = { version = "2", features = ["full", "parsing"]}
+syn = { version = "2", features = ["full", "parsing"] }
 quote = "1"
 proc-macro2 = "1"
