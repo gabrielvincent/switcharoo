@@ -56,11 +56,19 @@ fn get_command(command: &str) -> Command {
     // if run as systemd unit all programs exit when not run outside the units cgroup
     if env::var_os("INVOCATION_ID").is_some() {
         let mut cmd = Command::new("systemd-run");
-        cmd.args(["--user", "--scope", "--collect", "sh", "-c", &command]);
+        cmd.args([
+            "--user",
+            "--scope",
+            "--collect",
+            "/usr/bin/env",
+            "bash",
+            "-c",
+            &command,
+        ]);
         cmd
     } else {
-        let mut cmd = Command::new("sh");
-        cmd.args(["-c", &command]);
+        let mut cmd = Command::new("/usr/bin/env");
+        cmd.args(["bash", "-c", &command]);
         cmd
     }
 }

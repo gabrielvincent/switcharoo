@@ -3,7 +3,8 @@
 use crate::util;
 use anyhow::Context;
 use config_lib::ApplicationsPluginConfig;
-use core_lib::default;
+use core_lib::{IniFile, default};
+use std::fs;
 use std::path::Path;
 use tracing::debug;
 
@@ -62,7 +63,31 @@ pub fn list_icons() -> anyhow::Result<()> {
 pub fn list_desktop_files() {
     let desktop_files = core_lib::collect_desktop_files();
     for file in desktop_files {
-        println!("{}", file.path().display());
+        let Ok(content) = fs::read_to_string(file.path()) else {
+            eprintln!("Failed to read desktop file: {}", file.path().display());
+            continue;
+        };
+        let ini = IniFile::from_str(&content);
+        println!(
+            "{}: {} [Type={}] [Terminal={}] [NoDisplay={}]",
+            file.path().display(),
+            ini.get_section("Desktop Entry")
+                .map(|s| s.get_first("Name"))
+                .flatten()
+                .unwrap_or_default(),
+            ini.get_section("Desktop Entry")
+                .map(|s| s.get_first("Type"))
+                .flatten()
+                .unwrap_or_default(),
+            ini.get_section("Desktop Entry")
+                .map(|s| s.get_first("Terminal"))
+                .flatten()
+                .unwrap_or_default(),
+            ini.get_section("Desktop Entry")
+                .map(|s| s.get_first("NoDisplay"))
+                .flatten()
+                .unwrap_or_default(),
+        );
     }
 }
 
