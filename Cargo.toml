@@ -19,9 +19,9 @@ tracing.workspace = true
 gtk.workspace = true
 async-channel.workspace = true
 semver.workspace = true
-clap = { version = "4.5.23", features = ["derive"] }
-clap_complete = "4.5.56"
-tracing-subscriber = { version = "0.3.19", features = ["fmt", "env-filter", "ansi"], default-features = false }
+clap = { version = "4.5.47", features = ["derive"] }
+clap_complete = "4.5.57"
+tracing-subscriber = { version = "0.3.20", features = ["fmt", "env-filter", "ansi"], default-features = false }
 signal-hook = { version = "0.3.18" }
 
 config-lib.workspace = true
@@ -54,9 +54,9 @@ rust-version = "1.87.0"
 edition = "2024"
 
 [workspace.dependencies]
-anyhow = { version = "1.0.98" }
+anyhow = { version = "1.0.99" }
 tracing = { version = "0.1.41" }
-serde_json = { version = "1.0.142" }
+serde_json = { version = "1.0.143" }
 serde = { version = "1.0.219", features = ["derive"] }
 async-channel = { version = "2.5.0", default-features = true }
 semver = { version = "1.0.26" }
