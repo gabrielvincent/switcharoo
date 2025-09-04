@@ -25,12 +25,9 @@ PluginDescriptionInfo init(HANDLE handle) {
         const auto info = std::string("Config: ") +
                           HYPRSHELL_OVERVIEW_KEY + ", " +
                           std::to_string(OVERVIEW_KEY) + ", " +
-                          HYPRSHELL_SOCKET_PATH + ", " +
                           HYPRSHELL_OVERVIEW_MOD + ", " +
                           std::to_string(HYPRSHELL_SWTICH_XKB_MOD_L) + ", " +
-                          std::to_string(HYPRSHELL_SWTICH_XKB_MOD_R) + ", " +
-                          HYPRSHELL_OPEN_SWITCH + ", " +
-                          HYPRSHELL_OPEN_SWITCH_REVERSE;
+                          std::to_string(HYPRSHELL_SWTICH_XKB_MOD_R) + ", ";
         HyprlandAPI::addNotification(PHANDLE, "[Hyprshell Plugin] Plugin started " + info, GREEN, 8000);
     }
 

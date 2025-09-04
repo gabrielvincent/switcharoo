@@ -35,27 +35,34 @@ void onKeyPress(const std::unordered_map<std::string, std::any> &data) {
                                    (ctrlActive ? " | Control: Active" : "") +
                                    (superActive ? " | Meta: Active" : "") +
                                    (altActive ? " | Alt: Active" : "") +
-                                   (release ? " | State: Released" : " | State: Pressed");
+                                   (release ? " | State: Released" : " | State: Pressed") +
+                                   (last_press_was_mod_press ? " | Last press was mod press" : "");
             HyprlandAPI::addNotification(PHANDLE, "[Hyprshell Plugin] " + bigString, GREEN, 4000);
         }
 
-        if (MOUSE_BUTTON_PRESSED) {
-            return;
-        }
-
         if (keysym == OVERVIEW_KEY) {
+            if constexpr (HYPRSHELL_PRINT_DEBUG == 1) {
+                HyprlandAPI::addNotification(
+                    PHANDLE, std::string("[Hyprshell Plugin] overview pressed??: ") + std::to_string(OVERVIEW_KEY),
+                    GREEN,
+                    2000);
+            }
             if (OVERVIEW_KEY == XKB_KEY_Super_L || OVERVIEW_KEY == XKB_KEY_Super_R ||
                 OVERVIEW_KEY == XKB_KEY_Alt_L || OVERVIEW_KEY == XKB_KEY_Alt_R ||
                 OVERVIEW_KEY == XKB_KEY_Control_L || OVERVIEW_KEY == XKB_KEY_Control_R
             ) {
                 // open overview is only a modifier key
-                if (release && last_press_was_mod_press) {
+                if (release && last_press_was_mod_press && CHECK_NO_MOUSE_BUTTON_PRESSED) {
                     if constexpr (HYPRSHELL_PRINT_DEBUG == 1) {
                         HyprlandAPI::addNotification(PHANDLE, "[Hyprshell Plugin] mod pressed", GREEN, 2000);
                     }
                     sendStringToHyprshellSocket(HYPRSHELL_OPEN_OVERVIEW);
                 } else {
+                    // between pressing and releasing the mod key, there must be
+                    // no mouse click (dnd)
+                    // and no other key pressed
                     last_press_was_mod_press = true;
+                    CHECK_NO_MOUSE_BUTTON_PRESSED = true;
                 }
             } else {
                 // open overview is mod + key
