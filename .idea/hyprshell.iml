@@ -11,7 +11,6 @@
       <sourceFolder url="file://$MODULE_DIR$/test-global/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/config-lib/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/hyprland-plugin/src" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/hyprland-rs/examples" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/hyprland-rs/hyprland-macros/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/hyprland-rs/src" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/config" />

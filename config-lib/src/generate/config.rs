@@ -215,7 +215,7 @@ mod tests {
         let data = ConfigData {
             default_terminal: Some("xterm".into()),
             overview: Some((Modifier::Ctrl, "ctrl_l".into())),
-            switch: (Some(Modifier::Shift), false),
+            switch: (Some(Modifier::Alt), false),
             launcher_plugins: vec![
                 configurable_launcher_plugins::APPLICATIONS.into(),
                 configurable_launcher_plugins::CALC.into(),
