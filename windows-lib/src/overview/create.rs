@@ -23,7 +23,7 @@ pub fn create_windows_overview_window(
         let gtk_monitors = display
             .monitors()
             .iter()
-            .filter_map(std::result::Result::ok)
+            .filter_map(Result::ok)
             .collect::<Vec<Monitor>>();
 
         for gtk_monitor in gtk_monitors {

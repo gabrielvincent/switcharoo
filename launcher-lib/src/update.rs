@@ -1,5 +1,7 @@
 use crate::LauncherData;
-use crate::plugins::{DetailsMenuItem, get_sortable_launch_options, get_static_launch_options};
+use crate::plugins::{
+    DetailsMenuItem, StaticLaunchOption, get_sortable_launch_options, get_static_launch_options,
+};
 use async_channel::Sender;
 use config_lib::Modifier;
 use core_lib::transfer::{CloseOverviewConfig, Identifier, TransferType};
@@ -63,11 +65,8 @@ pub fn update_launcher(data: &mut LauncherData, text: &str, event_sender: &Sende
     );
     for opt in static_launch_options {
         let button = create_static_plugin_box(
-            &opt.iden,
-            opt.icon,
-            &opt.text,
-            &opt.details,
-            opt.key,
+            &opt,
+            text,
             data.config.launch_modifier,
             event_sender.clone(),
         );
@@ -78,11 +77,8 @@ pub fn update_launcher(data: &mut LauncherData, text: &str, event_sender: &Sende
 }
 
 fn create_static_plugin_box(
-    iden: &Identifier,
-    icon: Option<Box<Path>>,
+    opt: &StaticLaunchOption,
     text: &str,
-    details: &str,
-    key: char,
     launch_modifier: Modifier,
     event_sender: Sender<TransferType>,
 ) -> Button {
@@ -92,8 +88,8 @@ fn create_static_plugin_box(
         .spacing(6)
         .build();
 
-    if let Some(icon) = icon {
-        // trace!("icon: {:?}", icon);
+    if let Some(icon) = opt.icon.clone() {
+        // tracing::trace!("icon: {icon:?}");
         let icon = Image::builder()
             .icon_size(IconSize::Large)
             .icon_name(icon.to_string_lossy())
@@ -109,9 +105,9 @@ fn create_static_plugin_box(
     let title = Label::builder()
         .halign(Align::Center)
         .valign(Align::Start)
-        .label(text)
+        .label(opt.text.clone())
         .css_classes(["underline"])
-        .tooltip_text(details)
+        .tooltip_text(opt.details.clone())
         .build();
     vbox.append(&title);
 
@@ -120,7 +116,7 @@ fn create_static_plugin_box(
         .valign(Align::End)
         .ellipsize(EllipsizeMode::End)
         .css_classes(["launcher-key"])
-        .label(format!("{launch_modifier} + {key}"))
+        .label(format!("{launch_modifier} + {}", opt.key))
         .build();
     vbox.append(&exec);
 
@@ -131,7 +127,10 @@ fn create_static_plugin_box(
         .css_classes(["launcher-plugin"])
         .build();
     button.set_cursor(Cursor::from_name("pointer", None).as_ref());
-    click_plugin(&button, iden.clone(), event_sender);
+    if text == "" {
+        button.add_css_class("monochrome");
+    }
+    click_plugin(&button, opt.iden.clone(), event_sender);
     button
 }
 

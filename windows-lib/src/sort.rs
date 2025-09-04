@@ -1,4 +1,4 @@
-use core_lib::{ClientData, ClientId, MonitorId, WorkspaceData, WorkspaceId};
+use core_lib::{ClientData, ClientId, MonitorData, MonitorId, WorkspaceData, WorkspaceId};
 use std::collections::{BTreeMap, HashMap, VecDeque};
 
 /// Sorts clients with complex sorting
@@ -142,10 +142,27 @@ pub fn sort_workspaces_by_recent(
     });
 }
 
-// TODO sort by monitor x instead of ordering of idl
-pub fn sort_workspaces_by_position(workspaces: &mut [(WorkspaceId, WorkspaceData)]) {
-    workspaces.sort_by(|(_, a), (_, b)| match a.monitor.cmp(&b.monitor) {
-        std::cmp::Ordering::Equal => a.x.cmp(&b.x),
-        other => other,
+pub fn sort_monitor_by_x(monitors: &mut [(MonitorId, MonitorData)]) {
+    monitors.sort_by(|(_, a), (_, b)| a.x.cmp(&b.x));
+}
+
+pub fn sort_workspaces_by_position(
+    workspaces: &mut [(WorkspaceId, WorkspaceData)],
+    monitors: &[(MonitorId, MonitorData)],
+) {
+    workspaces.sort_by(|(_, a), (_, b)| {
+        match (monitors
+            .iter()
+            .position(|(id, _)| id == &a.monitor)
+            .unwrap_or(0))
+        .cmp(
+            &monitors
+                .iter()
+                .position(|(id, _)| id == &b.monitor)
+                .unwrap_or(0),
+        ) {
+            std::cmp::Ordering::Equal => a.x.cmp(&b.x),
+            other => other,
+        }
     });
 }

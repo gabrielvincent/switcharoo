@@ -1,9 +1,9 @@
-use anyhow::Context;
+use anyhow::{Context, bail};
 use async_channel::Sender;
 use core_lib::transfer::TransferType;
 use core_lib::{get_daemon_socket_path_buff, transfer};
 use std::fs::remove_file;
-use std::io::Read;
+use std::io::{BufRead, BufReader, Write};
 use std::os::unix::net;
 use std::os::unix::net::UnixStream;
 use tracing::{debug_span, info, warn};
@@ -44,17 +44,30 @@ fn handle_client(
     event_sender: &Sender<TransferType>,
 ) -> anyhow::Result<()> {
     let _span = debug_span!("handle_client").entered();
-    let mut buffer = Vec::with_capacity(1024);
-    stream
-        .read_to_end(&mut buffer)
-        .context("Failed to read data from buffer")?;
+    let mut buffer = vec![];
+    let mut reader = BufReader::new(&mut stream);
+    reader
+        .read_until(b'\0', &mut buffer)
+        .context("Can't read data from socket")?;
     if buffer.is_empty() {
         return Ok(());
     }
-    let transfer =
-        transfer::receive_from_buffer(buffer).context("Failed to receive from buffer")?;
-    event_sender
-        .send_blocking(transfer)
-        .context("Failed to send transfer")?;
+    match transfer::receive_from_buffer(buffer) {
+        Ok(transfer) => {
+            event_sender
+                .send_blocking(transfer)
+                .context("Failed to send transfer")?;
+            let _ = stream
+                .write_all(b"OK")
+                .and_then(|_| stream.write_all(b"\0"));
+        }
+        Err(err) => {
+            let _ = stream
+                .write_all(b"ERR")
+                .and_then(|_| stream.write_all(b"\0"));
+            bail!("Invalid transfer received.\n{err:?}");
+        }
+    }
+
     Ok(())
 }

@@ -1,6 +1,6 @@
 use crate::sort::{
-    sort_clients_by_position, sort_clients_by_recent, sort_workspaces_by_position,
-    sort_workspaces_by_recent,
+    sort_clients_by_position, sort_clients_by_recent, sort_monitor_by_x,
+    sort_workspaces_by_position, sort_workspaces_by_recent,
 };
 use core_lib::{
     Active, ClientData, ClientId, FindByFirst, HyprlandData, MonitorData, MonitorId, WorkspaceData,
@@ -24,18 +24,19 @@ pub fn collect_data(config: &SortConfig) -> anyhow::Result<(HyprlandData, Active
     let (
         mut client_data,
         mut workspace_data,
-        monitor_data,
+        mut monitor_data,
         active_client,
         active_ws,
         active_monitor,
     ) = collect_hypr_data()?;
     client_data = update_client_position(client_data, &workspace_data, &monitor_data);
+    sort_monitor_by_x(&mut monitor_data);
     if config.sort_recent {
         sort_clients_by_recent(&mut client_data);
         sort_workspaces_by_recent(&mut workspace_data, &client_data); // ! must be after sort_clients_by_recent
     } else {
         client_data = sort_clients_by_position(client_data);
-        sort_workspaces_by_position(&mut workspace_data);
+        sort_workspaces_by_position(&mut workspace_data, &monitor_data);
     }
 
     trace!(
