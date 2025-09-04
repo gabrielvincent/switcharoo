@@ -7,5 +7,8 @@
   ],
   "baseBranchPatterns": [
     "hyprshell"
+  ],
+  "ignorePaths": [
+    "./test-global/**/*"
   ]
 }
