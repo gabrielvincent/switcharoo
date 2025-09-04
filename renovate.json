@@ -9,6 +9,7 @@
     "hyprshell"
   ],
   "ignorePaths": [
-    "./test-global/**/*"
+    "./test-global/**/*",
+    "./hyprland-rs/**/*"
   ]
 }
