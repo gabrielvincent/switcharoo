@@ -49,7 +49,7 @@ jobs:
       - name: Install cargo-workspaces
         run: |
           mkdir -p $HOME/.cargo/bin
-          curl --location --silent --show-error --fail "https://github.com/cargo-bins/cargo-quickinstall/releases/download/cargo-workspaces-0.3.6/cargo-workspaces-0.3.6-x86_64-unknown-linux-gnu.tar.gz" | tar -xzvvf - -C $HOME/.cargo/bin
+          cargo install cargo-workspaces
       - name: Publish to crates.io
         run: |
           set -euxo pipefail
