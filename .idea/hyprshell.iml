@@ -24,6 +24,7 @@
       <excludeFolder url="file://$MODULE_DIR$/windows-lib/target" />
       <excludeFolder url="file://$MODULE_DIR$/hyprland-plugin/Hyprland" />
       <excludeFolder url="file://$MODULE_DIR$/hyprland-rs/target" />
+      <excludeFolder url="file://$MODULE_DIR$/test-global" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

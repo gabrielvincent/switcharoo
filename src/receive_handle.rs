@@ -63,7 +63,9 @@ fn open_overview(global: &mut Globals, event_sender: &Sender<TransferType>) {
                 // update desktop data in background
                 gio::spawn_blocking(util::reload_desktop_data);
             } else {
-                debug!("Overview or Switch already open");
+                debug!("Overview or Switch already open, closing");
+                windows_lib::close_overview(overview, None);
+                launcher_lib::close_launcher_by_char(launcher, None); // this will never open a program and need the default terminal
             }
         } else {
             warn!("Window overview not active");
@@ -106,6 +108,7 @@ fn switch_switch(global: &mut Globals, config: &SwitchSwitchConfig) {
         warn!("Windows not active");
     }
 }
+
 fn switch_overview(global: &mut Globals, config: &SwitchOverviewConfig) {
     if let Some(windows) = &mut global.windows {
         if let Some((overview, launcher)) = &mut windows.overview {
@@ -121,6 +124,7 @@ fn switch_overview(global: &mut Globals, config: &SwitchOverviewConfig) {
         warn!("Windows not active");
     }
 }
+
 fn exit(global: &mut Globals) {
     if let Some(windows) = &mut global.windows {
         if let Some((overview, launcher)) = &mut windows.overview {

@@ -5,9 +5,10 @@ use tracing::{trace, warn};
 pub fn get_default_config_path() -> PathBuf {
     let mut path = get_config_home();
     #[cfg(debug_assertions)]
-    path.push("hyprshell/config.debug.ron");
+    path.push("hyprshell.debug/");
     #[cfg(not(debug_assertions))]
-    path.push("hyprshell/config.ron");
+    path.push("hyprshell/");
+    path.push("config.ron");
 
     if path.exists() {
         trace!("Found config file at {path:?}");
@@ -44,7 +45,7 @@ pub fn get_default_css_path() -> PathBuf {
     let mut path = get_config_home();
 
     #[cfg(debug_assertions)]
-    path.push("hyprshell/styles.debug.css");
+    path.push("hyprshell.debug/styles.css");
     #[cfg(not(debug_assertions))]
     path.push("hyprshell/styles.css");
     path

@@ -32,12 +32,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="841e5689-e8a3-4a78-b7a4-76d1dbd901c1" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/globals.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/globals.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/init.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/init.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/key-press.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/key-press.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/layer-change.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/layer-change.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/mouse-button.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/mouse-button.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -326,7 +321,7 @@
       <workItem from="1756050154576" duration="11299000" />
       <workItem from="1757002904532" duration="1572000" />
       <workItem from="1757004581298" duration="76000" />
-      <workItem from="1757010082222" duration="732000" />
+      <workItem from="1757010082222" duration="1034000" />
     </task>
     <servers />
   </component>
