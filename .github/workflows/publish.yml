@@ -72,8 +72,7 @@ jobs:
           git push --delete origin ${{ github.ref_name }}
           
           version=$(echo ${{ github.ref_name }} | sed 's/v//')
-          # use --no-verify as make command is being run as buildscript in hyprland-plugin
-          cargo ws publish custom $version -m "chore(release): bump rust versions to $version" --no-individual-tags --allow-branch hyprshell-release --exact --yes --force "hyprshell*" --token ${{ secrets.CRATES_TOKEN }} --no-verify
+          cargo ws publish custom $version -m "chore(release): bump rust versions to $version" --no-individual-tags --allow-branch hyprshell-release --exact --yes --force "hyprshell*" --token ${{ secrets.CRATES_TOKEN }}
           
           gh release edit ${{ github.ref_name }} --latest --draft=false --title "hyprshell ${{ github.ref_name }}"
         env:
