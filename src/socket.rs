@@ -59,12 +59,12 @@ fn handle_client(
                 .context("Failed to send transfer")?;
             let _ = stream
                 .write_all(b"OK")
-                .and_then(|_| stream.write_all(b"\0"));
+                .and_then(|()| stream.write_all(b"\0"));
         }
         Err(err) => {
             let _ = stream
                 .write_all(b"ERR")
-                .and_then(|_| stream.write_all(b"\0"));
+                .and_then(|()| stream.write_all(b"\0"));
             bail!("Invalid transfer received.\n{err:?}");
         }
     }

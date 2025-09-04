@@ -49,7 +49,7 @@ license = "MIT"
 authors = ["h3rmt"]
 keywords = ["hyprland"]
 repository = "https://github.com/h3rmt/hyprshell/"
-rust-version = "1.85.0"
+rust-version = "1.87.0"
 edition = "2024"
 
 [workspace.dependencies]

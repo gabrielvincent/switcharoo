@@ -1,6 +1,6 @@
 use crate::get_daemon_socket_path_buff;
 use anyhow::Context;
-use std::io::{BufRead, BufReader, Read, Write};
+use std::io::{BufRead, BufReader, Write};
 use std::os::unix::net::UnixStream;
 use tracing::{debug, trace};
 
@@ -13,7 +13,7 @@ pub fn send_raw_to_socket(data: &str) -> anyhow::Result<()> {
     trace!("Socket connected, sending data");
     stream
         .write_all(data.as_bytes())
-        .and_then(|_| stream.write_all(b"\0"))
+        .and_then(|()| stream.write_all(b"\0"))
         .context("Can't send data to socket")?;
     trace!("Data sent");
     let mut reader = BufReader::new(stream);

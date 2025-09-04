@@ -131,7 +131,7 @@ fn activate(
                 ),
                 Duration::from_secs(5),
             );
-            info_toast(NEW_VERSION_INFO, Duration::from_secs(10))
+            info_toast(NEW_VERSION_INFO, Duration::from_secs(10));
         }
         Ok(Ordering::Less) => {
             toast("Hyprshell was downgraded, downgrading config must be done manually if needed");

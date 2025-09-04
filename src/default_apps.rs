@@ -49,7 +49,7 @@ pub fn set_default(mime: &str, value: &str) -> anyhow::Result<()> {
             file.path().display()
         ),
         None => bail!("Invalid desktop file: {value}"),
-    };
+    }
 
     let mut file = get_config_home();
     file.push("mimeapps.list");
@@ -81,7 +81,7 @@ pub fn add_association(mime: &str, value: &str) -> anyhow::Result<()> {
             file.path().display()
         ),
         None => bail!("Invalid desktop file: {value}"),
-    };
+    }
 
     let mut file = get_config_home();
     file.push("mimeapps.list");

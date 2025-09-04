@@ -127,7 +127,7 @@ fn create_static_plugin_box(
         .css_classes(["launcher-plugin"])
         .build();
     button.set_cursor(Cursor::from_name("pointer", None).as_ref());
-    if text == "" {
+    if text.is_empty() {
         button.add_css_class("monochrome");
     }
     click_plugin(&button, opt.iden.clone(), event_sender);
