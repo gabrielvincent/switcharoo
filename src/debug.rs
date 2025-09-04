@@ -72,20 +72,16 @@ pub fn list_desktop_files() {
             "{}: {} [Type={}] [Terminal={}] [NoDisplay={}]",
             file.path().display(),
             ini.get_section("Desktop Entry")
-                .map(|s| s.get_first("Name"))
-                .flatten()
+                .and_then(|s| s.get_first("Name"))
                 .unwrap_or_default(),
             ini.get_section("Desktop Entry")
-                .map(|s| s.get_first("Type"))
-                .flatten()
+                .and_then(|s| s.get_first("Type"))
                 .unwrap_or_default(),
             ini.get_section("Desktop Entry")
-                .map(|s| s.get_first("Terminal"))
-                .flatten()
+                .and_then(|s| s.get_first("Terminal"))
                 .unwrap_or_default(),
             ini.get_section("Desktop Entry")
-                .map(|s| s.get_first("NoDisplay"))
-                .flatten()
+                .and_then(|s| s.get_first("NoDisplay"))
                 .unwrap_or_default(),
         );
     }
