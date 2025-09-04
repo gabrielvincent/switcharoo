@@ -81,7 +81,7 @@ fn show_launch(
     open_iden: &Identifier,
 ) {
     for (iden, child) in results_items {
-        if iden.data == open_iden.data {
+        if iden.plugin == open_iden.plugin && iden.data == open_iden.data {
             for (iden_2, row) in &child.1 {
                 if iden_2.data_additional == open_iden.data_additional {
                     row.add_css_class("launch");
@@ -94,7 +94,7 @@ fn show_launch(
         }
     }
     for (iden, child) in plugins_items {
-        if iden.data == open_iden.data {
+        if iden.plugin == open_iden.plugin && iden.data == open_iden.data {
             child.add_css_class("launch");
             return;
         }

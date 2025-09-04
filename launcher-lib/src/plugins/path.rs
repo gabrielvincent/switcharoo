@@ -7,6 +7,7 @@ use tracing::{debug, trace, warn};
 
 pub fn get_path_options(matches: &mut Vec<SortableLaunchOption>, text: &str) {
     if text.starts_with('/') || text.starts_with('~') {
+        // TODO add option to set rayed out (if path doesn't exist)
         let file_manager = get_file_manager_info();
         matches.push(SortableLaunchOption {
             icon: file_manager.icon.clone(),

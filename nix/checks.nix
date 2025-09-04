@@ -100,7 +100,8 @@ rec {
       nativeBuildInputs = [
         pkgs.bash
         pkgs.clippy
-      ] ++ buildLib.commonArgs.nativeBuildInputs;
+      ]
+      ++ buildLib.commonArgs.nativeBuildInputs;
       cargoClippyExtraArgs = "";
       buildPhaseCargoCommand = ''
         cargoBuildLog=$(mktemp cargoBuildLogXXXX.json)

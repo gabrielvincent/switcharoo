@@ -74,7 +74,7 @@ If you want to modify these settings, look at the [Documentation](CONFIGURE.md) 
 To validate your configuration file, run:
 
 ```bash
-hyprshell config check
+hyprshell config explain
 ```
 
 This checks for any syntax errors or issues in your configuration file and shows a `explanation` of how to use hyprshell.
@@ -115,4 +115,4 @@ Debug commands are provided to help troubleshoot desktop files, icons, default a
 - json5_config: Adds support for a toml config file.
 - launcher_calc: Adds support for the calc plugin in the launcher.
 - debug_command: Adds the `hyprshell debug` command to debug icons, desktop files, etc.
-- config_check: Adds a command to check if the loaded config is equal to the default config or the full config. Also diables loading of configs without all values. (used for ci testing)
+- config_check: (used for ci tests) Adds a command to check if the loaded config is equal to the default config or the full config. Also diables loading of configs without all values.

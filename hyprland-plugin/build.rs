@@ -14,7 +14,7 @@ fn include_plugin() {
     let file = File::create(&zip_path).expect("Failed to create zip file");
     let mut zip = ZipWriter::new(&file);
     let options: FileOptions<()> = FileOptions::default()
-        .compression_method(zip::CompressionMethod::Zstd)
+        .compression_method(zip::CompressionMethod::Stored)
         .compression_level(None)
         .unix_permissions(0o755);
     let mut buffer = Vec::new();

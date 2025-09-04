@@ -47,6 +47,7 @@ rec {
       pkgs.pkg-config
       pkgs.wrapGAppsHook4
       pkgs.makeBinaryWrapper
+      #      pkgs.makeWrapper
     ];
 
     buildInputs = [
@@ -69,7 +70,7 @@ rec {
   commonArgsCachedRelease = (
     commonArgs
     // {
-      inherit cargoArtifacts meta;
+      inherit cargoArtifacts meta postInstall;
     }
   );
 }
