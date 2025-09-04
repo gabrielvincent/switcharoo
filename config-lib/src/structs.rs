@@ -1,4 +1,4 @@
-use crate::{CURRENT_CONFIG_VERSION, Modifier};
+use crate::Modifier;
 use serde::{Deserialize, Serialize};
 use smart_default::SmartDefault;
 
@@ -10,7 +10,11 @@ pub struct Config {
     pub layerrules: bool,
     #[default = "ctrl+shift+alt, h"]
     pub kill_bind: Box<str>,
-    #[default(Some(CURRENT_CONFIG_VERSION))]
+    #[cfg_attr(
+        not(feature = "no-default-config-values"),
+        default(Some(crate::CURRENT_CONFIG_VERSION))
+    )]
+    #[cfg_attr(feature = "no-default-config-values", default(None))]
     pub version: Option<u16>,
     #[default(None)]
     pub windows: Option<Windows>,

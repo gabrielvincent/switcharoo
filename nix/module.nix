@@ -111,7 +111,7 @@ in
                 enable = mkOpt "Open applications" bool true;
                 run_cache_weeks = mkOpt "Run Cache weeks" int 4;
                 show_execs = mkOpt "Show execs" bool true;
-                show_actions_submenu = mkOpt "Show actions submenu" bool false;
+                show_actions_submenu = mkOpt "Show actions submenu" bool true;
               };
               calc = {
                 enable = mkOpt "Enable calculator" bool true;

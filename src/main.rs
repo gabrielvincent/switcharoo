@@ -147,7 +147,7 @@ fn main() -> anyhow::Result<()> {
                     ..Default::default()
                 });
                 if config != config_all {
-                    tracing::warn!("Current config does not match the default configuration");
+                    tracing::warn!("Current config does not match the full configuration");
                     tracing::info!("All config: {:#?}", config_all);
                     tracing::info!("Current config: {:#?}", config);
                     exit(1);
