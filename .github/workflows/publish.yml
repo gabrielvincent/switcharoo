@@ -68,6 +68,9 @@ jobs:
           git commit -m "chore(release): update last-release-sha"
           git push origin hyprshell-release
           
+          git fetch origin hyprshell
+          git push origin HEAD:hyprshell
+          
           git tag --delete ${{ github.ref_name }}
           git push --delete origin ${{ github.ref_name }}
           
