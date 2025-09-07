@@ -32,7 +32,6 @@ jobs:
         with:
           fetch-depth: 0
           ssh-key: ${{ secrets.SSH_KEY }}
-          submodules: 'true'
       - name: install Rust stable
         uses: dtolnay/rust-toolchain@stable
       - name: Install gtk4-layer-shell
@@ -95,6 +94,7 @@ jobs:
       - uses: cachix/install-nix-action@56a7bb7b56d9a92d4fd1bc05758de7eea4a370a8 # v31.6.0
         with:
           github_access_token: ${{ secrets.GITHUB_TOKEN }}
+          extra_nix_config: "download-buffer-size = 5368709120"
       - uses: cachix/cachix-action@v14
         with:
           name: hyprshell

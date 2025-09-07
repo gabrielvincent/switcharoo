@@ -35,10 +35,11 @@ rec {
       stdenv
       pname
       version
+      meta
       ;
     strictDeps = true;
     doCheck = false;
-    cargoBuildCommand = "cargo build --profile release --locked";
+    cargoBuildCommand = "cargo build --release --locked";
     cargoTestCommand = "";
     cargoCheckCommand = "";
     cargoCheckExtraArgs = "";
@@ -64,7 +65,7 @@ rec {
         inherit stdenv;
         src = ../.;
       };
-      pname = "hyprshell-release";
+      pname = "hyprshell";
     }
   );
   cargoFullArtifacts = craneLib.buildDepsOnly (
@@ -74,25 +75,24 @@ rec {
         inherit stdenv;
         src = craneLib.cleanCargoSource ../.;
       };
-      pname = "hyprshell-full-release";
+      pname = "hyprshell-full";
       doCheck = true;
-      cargoBuildCommand = "cargo build --profile release --locked --all-targets --all-features";
-      cargoCheckCommand = "cargo check --release --locked --all-targets --all-features";
-      cargoTestCommand = "cargo test --release --locked --all-targets --all-features";
+      cargoBuildCommand = "cargo build --profile dev --locked --all-targets --all-features";
+      cargoCheckCommand = "cargo check --profile dev --locked --all-targets --all-features";
+      cargoTestCommand = "cargo test --profile dev --locked --all-targets --all-features";
     }
   );
 
   commonArgsCachedRelease = (
     commonArgs
     // {
-      inherit cargoArtifacts meta;
+      inherit cargoArtifacts;
     }
   );
 
-  commonArgsFullCachedRelease = (
+  commonArgsFullCached = (
     commonArgs
     // {
-      inherit meta;
       cargoArtifacts = cargoFullArtifacts;
     }
   );
