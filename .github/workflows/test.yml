@@ -26,15 +26,15 @@ jobs:
           name: hyprshell-dev
           authToken: ${{ secrets.CACHIX_AUTH_TOKEN_DEV }}
       - name: Run Nix Flake Check build
-        run: nix build '.?submodules=1#checks.x86_64-linux.hyprshell-config-check' -L
+        run: nix build '.#checks.x86_64-linux.hyprshell-config-check' -L
       - name: Run Nix Flake Check clippy
-        run: nix build '.?submodules=1#checks.x86_64-linux.hyprshell-clippy' -L
+        run: nix build '.#checks.x86_64-linux.hyprshell-clippy' -L
       - name: Run Nix Flake Check fmt
-        run: nix build '.?submodules=1#checks.x86_64-linux.hyprshell-fmt' -L
+        run: nix build '.#checks.x86_64-linux.hyprshell-fmt' -L
       - name: Run Nix Flake Check test
-        run: nix build '.?submodules=1#checks.x86_64-linux.hyprshell-test' -L
+        run: nix build '.#checks.x86_64-linux.hyprshell-test' -L
       - name: Run Nix Flake Check check-nix-configs
-        run: nix build '.?submodules=1#checks.x86_64-linux.check-nix-configs' -L
+        run: nix build '.#checks.x86_64-linux.check-nix-configs' -L
 
   check-all-features:
     name: Run Nix Flake all features Check
@@ -52,4 +52,4 @@ jobs:
           name: hyprshell-dev
           authToken: ${{ secrets.CACHIX_AUTH_TOKEN_DEV }}
       - name: Run Nix Flake Check check-all-feature-combinations
-        run: nix build '.?submodules=1#checks.x86_64-linux.check-all-feature-combinations' -L
+        run: nix build '.#checks.x86_64-linux.check-all-feature-combinations' -L
