@@ -101,7 +101,7 @@ mod tests {
 
     #[test]
     fn test_explain_with_overview() {
-        const CONFIG: &str = r#"Config is valid (/test/config.ron)
+        const CONFIG: &str = r"Config is valid (/test/config.ron)
 Explanation (blue are keys, bold blue keys can be configured in config):
 Use Super + super_l to open the Overview. Use tab and grave / shift + tab to select a different window, press return to switch
 You can also use the arrow keys to navigate the workspaces. Use Esc to close the overview.
@@ -113,7 +113,7 @@ After opening the Overview the Launcher is available:
 	- Paths (starting with ~ or /) can be open in default file-manager.
 
 Press Alt + tab and hold Alt to view recently used applications. Press tab and grave / shift + tab to select a different window, release Alt to close the window.
-"#;
+";
         let config = create_test_config();
         let path = PathBuf::from("/test/config.ron");
         let result = explain(&config, &path, false);
@@ -122,12 +122,12 @@ Press Alt + tab and hold Alt to view recently used applications. Press tab and g
 
     #[test]
     fn test_explain_without_overview() {
-        const CONFIG: &str = r#"Config is valid (/test/config.ron)
+        const CONFIG: &str = r"Config is valid (/test/config.ron)
 Explanation (blue are keys, bold blue keys can be configured in config):
 <Overview move disabled>
 
 Press Alt + tab and hold Alt to view recently used applications. Press tab and grave / shift + tab to select a different window, release Alt to close the window.
-"#;
+";
         let mut config = create_test_config();
         config.windows.as_mut().unwrap().overview = None;
         let path = PathBuf::from("/test/config.ron");
@@ -137,7 +137,7 @@ Press Alt + tab and hold Alt to view recently used applications. Press tab and g
 
     #[test]
     fn test_explain_without_switch() {
-        const CONFIG: &str = r#"Config is valid (/test/config.ron)
+        const CONFIG: &str = r"Config is valid (/test/config.ron)
 Explanation (blue are keys, bold blue keys can be configured in config):
 Use Super + super_l to open the Overview. Use tab and grave / shift + tab to select a different window, press return to switch
 You can also use the arrow keys to navigate the workspaces. Use Esc to close the overview.
@@ -149,7 +149,7 @@ After opening the Overview the Launcher is available:
 	- Paths (starting with ~ or /) can be open in default file-manager.
 
 <Switch mode disabled>
-"#;
+";
         let mut config = create_test_config();
         config.windows.as_mut().unwrap().switch = None;
         let path = PathBuf::from("/test/config.ron");
@@ -159,14 +159,14 @@ After opening the Overview the Launcher is available:
 
     #[test]
     fn test_explain_without_plugins() {
-        const CONFIG: &str = r#"Config is valid (/test/config.ron)
+        const CONFIG: &str = r"Config is valid (/test/config.ron)
 Explanation (blue are keys, bold blue keys can be configured in config):
 Use Super + super_l to open the Overview. Use tab and grave / shift + tab to select a different window, press return to switch
 You can also use the arrow keys to navigate the workspaces. Use Esc to close the overview.
 After opening the Overview the Launcher is available:
 
 Press Alt + tab and hold Alt to view recently used applications. Press tab and grave / shift + tab to select a different window, release Alt to close the window.
-"#;
+";
         let mut config = create_test_config();
         config
             .windows

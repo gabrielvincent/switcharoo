@@ -101,7 +101,7 @@ mod tests {
     fn test_same_modifier() {
         let mut config = full();
         let overview = config.windows.as_mut().unwrap().overview.as_mut().unwrap();
-        overview.launcher.launch_modifier = overview.modifier.clone();
+        overview.launcher.launch_modifier = overview.modifier;
         assert!(check(&config).is_err());
     }
 
