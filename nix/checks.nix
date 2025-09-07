@@ -10,6 +10,7 @@ let
   customLib = import ./util.nix { lib = pkgs.lib; };
 in
 rec {
+  hyprshell-build-deps = buildLib.cargoFullArtifacts;
   hyprshell-config-check = craneLib.buildPackage (
     buildLib.commonArgsFullCached
     // {

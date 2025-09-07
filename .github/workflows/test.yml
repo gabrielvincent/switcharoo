@@ -23,6 +23,8 @@ jobs:
         with:
           name: hyprshell-dev
           authToken: ${{ secrets.CACHIX_AUTH_TOKEN_DEV }}
+      - name: Run Nix Flake Build deps
+        run: nix build '.#checks.x86_64-linux.hyprshell-build-deps' -L
       - name: Run Nix Flake Check build
         run: nix build '.#checks.x86_64-linux.hyprshell-config-check' -L
       - name: Run Nix Flake Check clippy
