@@ -31,6 +31,8 @@ pub fn get_config_version(config_path: &Path) -> anyhow::Result<u16> {
     if let Some(version) = config.version {
         Ok(version)
     } else {
-        bail!("Config file does not have a version, unable to determine if migration need");
+        bail!(
+            "Config file does not have a version specified (if you use home-manager you can ignore this error)"
+        );
     }
 }

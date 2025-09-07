@@ -1,6 +1,7 @@
 use crate::LauncherData;
 use crate::plugins::{
-    DetailsMenuItem, StaticLaunchOption, get_sortable_launch_options, get_static_launch_options,
+    SortableLaunchOption, StaticLaunchOption, get_sortable_launch_options,
+    get_static_launch_options,
 };
 use async_channel::Sender;
 use config_lib::Modifier;
@@ -41,17 +42,12 @@ pub fn update_launcher(data: &mut LauncherData, text: &str, event_sender: &Sende
         }
         items -= 1;
         let (row, details) = create_entry(
-            &opt.iden,
+            &opt,
             match index {
                 0 => "Return".to_string(),
                 i if i <= 9 => format!("{}+{i}", data.config.launch_modifier),
                 _ => String::new(),
             },
-            opt.icon,
-            &opt.name,
-            opt.details,
-            opt.details_long,
-            opt.details_menu,
             event_sender.clone(),
         );
         data.results_box.append(&row);
@@ -134,15 +130,10 @@ fn create_static_plugin_box(
     button
 }
 
-#[allow(clippy::too_many_arguments)]
+#[allow(clippy::too_many_lines)]
 fn create_entry(
-    iden: &Identifier,
+    opt: &SortableLaunchOption,
     key: impl Into<glib::GString>,
-    icon_path: Option<Box<Path>>,
-    name: &str,
-    details: Box<str>,
-    details_long: Option<Box<str>>,
-    details_menu: Vec<DetailsMenuItem>,
     event_sender: Sender<TransferType>,
 ) -> (gtk::Box, HashMap<Identifier, ListBoxRow>) {
     let hbox = gtk::Box::builder()
@@ -155,13 +146,13 @@ fn create_entry(
         .build();
 
     let icon = Image::builder().icon_size(IconSize::Large).build();
-    if let Some(icon_path) = icon_path {
+    if let Some(icon_path) = &opt.icon {
         if icon_path.is_absolute() {
             if let Some(icon_name) = icon_path.file_stem() {
                 if default::theme_has_icon_name(&icon_name.to_string_lossy()) {
                     icon.set_icon_name(Some(&icon_name.to_string_lossy()));
                 } else {
-                    icon.set_from_file(Some(Path::new(&*icon_path)));
+                    icon.set_from_file(Some(Path::new(&*icon_path.clone())));
                 }
             } else {
                 warn!("invalid icon name: {icon_path:?}");
@@ -180,7 +171,7 @@ fn create_entry(
     let title = Label::builder()
         .halign(Align::Start)
         .valign(Align::Center)
-        .label(name)
+        .label(opt.name.clone())
         .build();
     hbox.append(&title);
 
@@ -190,16 +181,16 @@ fn create_entry(
         .hexpand(true)
         .css_classes(["launcher-exec"])
         .ellipsize(EllipsizeMode::End)
-        .label(details)
+        .label(opt.details.clone())
         .build();
-    if let Some(details_long) = details_long {
-        exec.set_tooltip_text(Some(&details_long));
+    if let Some(details_long) = &opt.details_long {
+        exec.set_tooltip_text(Some(details_long));
         exec.add_css_class("underline");
     }
     hbox.append(&exec);
 
     let mut details_list = HashMap::new();
-    if !details_menu.is_empty() {
+    if !opt.details_menu.is_empty() {
         let button = Button::builder()
             .css_classes(["launcher-other-menu-button"])
             .icon_name("open-menu-symbolic")
@@ -215,15 +206,15 @@ fn create_entry(
             .selection_mode(SelectionMode::None)
             .build();
 
-        for item in details_menu {
+        for item in &opt.details_menu {
             let menu_item_text = Label::builder()
                 .css_classes(["underline"])
-                .label(format!("{}: {}", name, item.text))
+                .label(format!("{}: {}", opt.name, item.text))
                 .build();
             let menu_item_button = Button::builder()
                 .css_classes(["launcher-other-menu-item-inner"])
                 .child(&menu_item_text)
-                .tooltip_text(item.exec)
+                .tooltip_text(item.exec.clone())
                 .build();
             let menu_item = ListBoxRow::builder()
                 .css_classes(["launcher-other-menu-item"])
@@ -252,9 +243,12 @@ fn create_entry(
 
     let outer_box = gtk::Box::builder().css_classes(["launcher-item"]).build();
     outer_box.append(&hbox);
+    if opt.grayed {
+        outer_box.add_css_class("monochrome");
+    }
 
     outer_box.set_cursor(Cursor::from_name("pointer", None).as_ref());
-    click_entry(&outer_box, iden.clone(), event_sender);
+    click_entry(&outer_box, opt.iden.clone(), event_sender);
     (outer_box, details_list)
 }
 

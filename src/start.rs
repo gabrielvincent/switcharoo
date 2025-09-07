@@ -144,7 +144,10 @@ fn activate(
     let config = match config_lib::load_and_migrate_config(config_path, true) {
         Ok(config) => config,
         Err(err) => {
-            error!("Failed to load config: {err:?}",);
+            error!(
+                "Failed to load config from path {}: {err:?}",
+                config_path.display()
+            );
             toast(&format!("Failed to load config: {err:?}"));
             if let Err(err) = hyprshell_config_block(config_path) {
                 error!("Failed to block config: {err:?}",);

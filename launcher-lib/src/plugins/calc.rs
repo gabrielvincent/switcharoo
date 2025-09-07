@@ -14,9 +14,10 @@ pub fn get_calc_options(matches: &mut Vec<SortableLaunchOption>, text: &str) {
         matches.push(SortableLaunchOption {
             icon: Some(Box::from(Path::new("accessories-calculator"))),
             name: format!("{eval}").into_boxed_str(),
-            details: Box::from(""),
+            details: Box::from("Copy to clipboard"),
             details_long: None,
             score: 0,
+            grayed: false,
             iden: Identifier::data(PluginNames::Calc, format!("{eval}").into_boxed_str()),
             details_menu: vec![],
         });

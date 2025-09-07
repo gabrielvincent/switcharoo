@@ -4,7 +4,6 @@ use core_lib::{
     WarnWithDetails, daemon_running, get_default_cache_dir, get_default_config_path,
     get_default_css_path, get_default_data_dir,
 };
-use std::process::exit;
 use std::{env, fs};
 
 mod cli;
@@ -114,7 +113,7 @@ fn main() -> anyhow::Result<()> {
                     true,
                 ) {
                     tracing::warn!("Failed to load config: {err:?}");
-                    exit(1);
+                    std::process::exit(1);
                 }
             }
             #[cfg(feature = "config_check")]
@@ -130,7 +129,7 @@ fn main() -> anyhow::Result<()> {
                     tracing::warn!("Current config does not match the default configuration");
                     tracing::info!("Default config: {:#?}", config_default);
                     tracing::info!("Current config: {:#?}", config);
-                    exit(1);
+                    std::process::exit(1);
                 }
             }
             #[cfg(feature = "config_check")]
@@ -153,7 +152,7 @@ fn main() -> anyhow::Result<()> {
                     tracing::warn!("Current config does not match the full configuration");
                     tracing::info!("All config: {:#?}", config_all);
                     tracing::info!("Current config: {:#?}", config);
-                    exit(1);
+                    std::process::exit(1);
                 }
             }
         },

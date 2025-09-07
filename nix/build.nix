@@ -41,6 +41,7 @@ rec {
     cargoBuildCommand = "cargo build --profile release --locked";
     cargoTestCommand = "";
     cargoCheckCommand = "";
+    cargoCheckExtraArgs = "";
     cargoExtraArgs = "";
 
     nativeBuildInputs = [
@@ -66,11 +67,33 @@ rec {
       pname = "hyprshell-release";
     }
   );
+  cargoFullArtifacts = craneLib.buildDepsOnly (
+    commonArgs
+    // {
+      mkDummySrc = craneLib.mkDummySrc {
+        inherit stdenv;
+        src = craneLib.cleanCargoSource ../.;
+      };
+      pname = "hyprshell-full-release";
+      doCheck = true;
+      cargoBuildCommand = "cargo build --profile release --locked --all-targets --all-features";
+      cargoCheckCommand = "cargo check --release --locked --all-targets --all-features";
+      cargoTestCommand = "cargo test --release --locked --all-targets --all-features";
+    }
+  );
 
   commonArgsCachedRelease = (
     commonArgs
     // {
-      inherit cargoArtifacts meta postInstall;
+      inherit cargoArtifacts meta;
+    }
+  );
+
+  commonArgsFullCachedRelease = (
+    commonArgs
+    // {
+      inherit meta;
+      cargoArtifacts = cargoFullArtifacts;
     }
   );
 }

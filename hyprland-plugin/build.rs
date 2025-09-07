@@ -45,13 +45,13 @@ fn combine() -> PathBuf {
 
     let cpp_files = read_dir(srcs_dir)
         .expect("Failed to read srcs dir")
-        .filter_map(|entry| entry.ok())
-        .filter(|entry| entry.path().extension().map_or(false, |ext| ext == "cpp"));
+        .filter_map(Result::ok)
+        .filter(|entry| entry.path().extension().is_some_and(|ext| ext == "cpp"));
     let header_files = read_dir(srcs_dir)
         .expect("Failed to read srcs dir")
-        .filter_map(|entry| entry.ok())
+        .filter_map(Result::ok)
         .filter(|entry| {
-            entry.path().extension().map_or(false, |ext| ext == "h")
+            entry.path().extension().is_some_and(|ext| ext == "h")
                 && entry.path().file_name() != Some("defs-test.h".as_ref())
         });
 

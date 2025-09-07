@@ -23,6 +23,7 @@ pub struct SortableLaunchOption {
     pub details: Box<str>,
     pub details_long: Option<Box<str>>,
     pub score: u64,
+    pub grayed: bool,
     pub iden: Identifier,
     pub details_menu: Vec<DetailsMenuItem>,
 }

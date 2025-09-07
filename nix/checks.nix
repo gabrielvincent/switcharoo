@@ -11,24 +11,22 @@ let
 in
 rec {
   hyprshell-config-check = craneLib.buildPackage (
-    buildLib.commonArgsCachedRelease
+    buildLib.commonArgsFullCachedRelease
     // {
       cargoExtraArgs = "--features config_check";
-      postInstall = buildLib.postInstall;
     }
   );
   hyprshell-test = craneLib.cargoNextest (
-    buildLib.commonArgsCachedRelease
+    buildLib.commonArgsFullCachedRelease
     // {
       doCheck = true;
-      cargoNextestExtraArgs = "--workspace";
+      cargoNextestExtraArgs = "--all-targets --all-features -p hyprshell-config-lib -p hyprshell-core-lib -p hyprshell-exec-lib -p hyprshell-launcher-lib -p hyprshell-windows-lib -p hyprshell-hyprland-plugin";
     }
   );
   hyprshell-clippy = craneLib.cargoClippy (
-    buildLib.commonArgsCachedRelease
+    buildLib.commonArgsFullCachedRelease
     // {
-      buildPhaseCargoCommand = "cargo clippyy"; # no release check
-      cargoClippyExtraArgs = "--all-targets -- --deny warnings";
+      cargoClippyExtraArgs = "--all-targets --all-features  -p hyprshell-config-lib -p hyprshell-core-lib -p hyprshell-exec-lib -p hyprshell-launcher-lib -p hyprshell-windows-lib -p hyprshell-hyprland-plugin -- --deny warnings";
     }
   );
   hyprshell-fmt = craneLib.cargoFmt buildLib.commonArgs;
@@ -94,7 +92,7 @@ rec {
       mkdir "$out"
     '';
   check-all-feature-combinations = craneLib.mkCargoDerivation (
-    buildLib.commonArgsCachedRelease
+    buildLib.commonArgsFullCachedRelease
     // {
       pnameSuffix = "-check-all-feature-combinations";
       nativeBuildInputs = [
@@ -108,7 +106,7 @@ rec {
 
         # Define the features as an array
         # features=$(cargo metadata --format-version 1 --no-deps | ${pkgs.jq}/bin/jq -r '.packages[4].features | keys[]')
-        declare -a features=("generate_config_command" "config_check" "launcher_calc" "debug_command")
+        declare -a features=("generate_config_command" "config_check" "launcher_calc" "debug_command" "json5_config")
 
         # Get the total number of features
         num_features=''${#features[@]}

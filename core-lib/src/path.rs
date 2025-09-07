@@ -14,7 +14,7 @@ pub fn get_default_config_path() -> PathBuf {
         return path;
     }
 
-    path.set_extension("rom");
+    path.set_extension("ron");
     if path.exists() {
         trace!("Found config file at {path:?}");
         return path;

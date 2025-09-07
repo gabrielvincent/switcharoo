@@ -51,6 +51,7 @@ impl SortableLaunchOption {
                 PluginNames::Applications,
                 Box::from(entry.source.to_string_lossy()),
             ),
+            grayed: false,
             details_menu: if show_actions_submenu {
                 entry
                     .other
