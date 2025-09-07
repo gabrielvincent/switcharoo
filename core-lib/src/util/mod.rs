@@ -54,7 +54,7 @@ pub fn explain_config(config_path: &Path) {
             return;
         }
     };
-    let info = config_lib::explain(&config, config_path);
+    let info = config_lib::explain(&config, config_path, true);
     println!("{info}");
 
     if daemon_running() {

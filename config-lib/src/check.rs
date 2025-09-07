@@ -65,3 +65,106 @@ pub fn check(config: &Config) -> anyhow::Result<()> {
 
     Ok(())
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::structs::*;
+
+    fn full() -> Config {
+        Config {
+            windows: Some(Windows {
+                overview: Some(Overview::default()),
+                switch: Some(Switch::default()),
+                ..Default::default()
+            }),
+            ..Default::default()
+        }
+    }
+
+    #[test]
+    fn test_valid_config() {
+        let config = full();
+        assert!(check(&config).is_ok());
+    }
+
+    #[test]
+    fn test_invalid_scale() {
+        let mut config = full();
+        config.windows.as_mut().unwrap().scale = 20.0;
+        assert!(check(&config).is_err());
+        config.windows.as_mut().unwrap().scale = 0.0;
+        assert!(check(&config).is_err());
+    }
+
+    #[test]
+    fn test_same_modifier() {
+        let mut config = full();
+        let overview = config.windows.as_mut().unwrap().overview.as_mut().unwrap();
+        overview.launcher.launch_modifier = overview.modifier.clone();
+        assert!(check(&config).is_err());
+    }
+
+    #[test]
+    fn test_invalid_key() {
+        let mut config = full();
+        let overview = config.windows.as_mut().unwrap().overview.as_mut().unwrap();
+        overview.key = Box::from("super");
+        assert!(check(&config).is_err());
+    }
+
+    #[test]
+    fn test_duplicate_engine_key() {
+        let mut config = full();
+        let launcher = &mut config
+            .windows
+            .as_mut()
+            .unwrap()
+            .overview
+            .as_mut()
+            .unwrap()
+            .launcher;
+        if let Some(ws) = launcher.plugins.websearch.as_mut() {
+            ws.engines.push(SearchEngine {
+                key: 'g',
+                name: Box::from("Google2"),
+                url: Box::from("https://google2.com"),
+            });
+        }
+        assert!(check(&config).is_err());
+    }
+
+    #[test]
+    fn test_empty_engine_url() {
+        let mut config = full();
+        let launcher = &mut config
+            .windows
+            .as_mut()
+            .unwrap()
+            .overview
+            .as_mut()
+            .unwrap()
+            .launcher;
+        if let Some(ws) = launcher.plugins.websearch.as_mut() {
+            ws.engines[0].url = Box::from("");
+        }
+        assert!(check(&config).is_err());
+    }
+
+    #[test]
+    fn test_empty_engine_name() {
+        let mut config = full();
+        let launcher = &mut config
+            .windows
+            .as_mut()
+            .unwrap()
+            .overview
+            .as_mut()
+            .unwrap()
+            .launcher;
+        if let Some(ws) = launcher.plugins.websearch.as_mut() {
+            ws.engines[0].name = Box::from("");
+        }
+        assert!(check(&config).is_err());
+    }
+}

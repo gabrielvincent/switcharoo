@@ -9,39 +9,45 @@ const GREEN: &str = "\x1b[32m";
 const RESET: &str = "\x1b[0m";
 
 #[must_use]
-pub fn explain(config: &Config, config_path: &Path) -> String {
+pub fn explain(config: &Config, config_path: &Path, enable_color: bool) -> String {
+    let (bold, italic, blue, green, reset) = if enable_color {
+        (BOLD, ITALIC, BLUE, GREEN, RESET)
+    } else {
+        ("", "", "", "", "")
+    };
+
     let config_path_display = config_path.display();
     let mut builder = format!(
-        "{BOLD}{GREEN}Config is valid{RESET} ({config_path_display})\n{BOLD}Explanation{RESET} ({BLUE}blue{RESET} are keys, {BOLD}{BLUE}bold blue{RESET} keys can be configured in config):{RESET}\n",
+        "{bold}{green}Config is valid{reset} ({config_path_display})\n{bold}Explanation{reset} ({blue}blue{reset} are keys, {bold}{blue}bold blue{reset} keys can be configured in config):{reset}\n",
     );
 
     if let Some(windows) = &config.windows {
         if let Some(overview) = &windows.overview {
             let _ = builder.write_str(&format!(
-                "Use {BOLD}{BLUE}{}{RESET} + {BOLD}{BLUE}{}{RESET} to open the Overview. Use {BLUE}tab{RESET} and {BLUE}grave{RESET} / {BLUE}shift{RESET} + {BLUE}tab{RESET} to select a different window, press {BLUE}return{RESET} to switch\n\
-                You can also use the {BLUE}arrow keys{RESET} to navigate the workspaces. Use {BLUE}Esc{RESET} to close the overview.\n",
+                "Use {bold}{blue}{}{reset} + {bold}{blue}{}{reset} to open the Overview. Use {blue}tab{reset} and {blue}grave{reset} / {blue}shift{reset} + {blue}tab{reset} to select a different window, press {blue}return{reset} to switch\n\
+                You can also use the {blue}arrow keys{reset} to navigate the workspaces. Use {blue}Esc{reset} to close the overview.\n",
                 overview.modifier,
                 overview.key,
             ));
             let _ = builder.write_str(&format!(
-                "After opening the Overview the {BOLD}Launcher{RESET} is available:\n"
+                "After opening the Overview the {bold}Launcher{reset} is available:\n"
             ));
             if let Some(_applications) = overview.launcher.plugins.applications.as_ref() {
-                let _ = builder.write_str(&format!("\t- Start typing to search through applications (sorted by how often they were opened). Press {BLUE}return{RESET} to launch the first app, use {BLUE}Ctrl{RESET} + {BLUE}1{RESET}/{BLUE}2{RESET}/{BLUE}3{RESET}/... to open the second, third, etc.\n"));
+                let _ = builder.write_str(&format!("\t- Start typing to search through applications (sorted by how often they were opened). Press {blue}return{reset} to launch the first app, use {blue}Ctrl{reset} + {blue}1{reset}/{blue}2{reset}/{blue}3{reset}/... to open the second, third, etc.\n"));
             }
             if overview.launcher.plugins.terminal.is_some() {
                 let _ = builder.write_str(&format!(
-                    "\t- Press {BLUE}Ctrl{RESET} + {BLUE}t{RESET} to run the typed command in a terminal.\n"
+                    "\t- Press {blue}Ctrl{reset} + {blue}t{reset} to run the typed command in a terminal.\n"
                 ));
             }
             if overview.launcher.plugins.shell.is_some() {
                 let _ = builder.write_str(&format!(
-                    "\t- Press {BLUE}Ctrl{RESET} + {BLUE}r{RESET} to run the typed command in the background.\n",
+                    "\t- Press {blue}Ctrl{reset} + {blue}r{reset} to run the typed command in the background.\n",
                 ));
             }
             if let Some(engines) = &overview.launcher.plugins.websearch {
-                let _ =    builder.write_str(&format!("\t- Press {BLUE}Ctrl{RESET} + {BOLD}{BLUE}<key>{RESET} to search the typed text in any of the configured SearchEngines: {}.\n",
-                                          engines.engines.iter().map(|e| e.name.to_string()).collect::<Vec<_>>().join(", ")));
+                let _ =    builder.write_str(&format!("\t- Press {blue}Ctrl{reset} + {bold}{blue}<key>{reset} to search the typed text in any of the configured SearchEngines: {}.\n",
+                                                      engines.engines.iter().map(|e| e.name.to_string()).collect::<Vec<_>>().join(", ")));
             }
             if overview.launcher.plugins.calc.is_some() {
                 let _ =   builder.write_str(
@@ -54,7 +60,7 @@ pub fn explain(config: &Config, config_path: &Path) -> String {
                 );
             }
         } else {
-            let _ = builder.write_str(&format!("{ITALIC}<Overview move disabled>{RESET}\n"));
+            let _ = builder.write_str(&format!("{italic}<Overview move disabled>{reset}\n"));
         }
     }
 
@@ -63,15 +69,123 @@ pub fn explain(config: &Config, config_path: &Path) -> String {
     if let Some(windows) = &config.windows {
         if let Some(switch) = &windows.switch {
             let _ = builder.write_str(&format!(
-                "Press {BOLD}{BLUE}{}{RESET} + {BLUE}tab{RESET} and hold {BOLD}{BLUE}{}{RESET} to view recently used applications. Press {BLUE}tab{RESET} and {BLUE}grave{RESET} / {BLUE}shift{RESET} + {BLUE}tab{RESET} to select a different window, release {BOLD}{BLUE}{}{RESET} to close the window.\n",
+                "Press {bold}{blue}{}{reset} + {blue}tab{reset} and hold {bold}{blue}{}{reset} to view recently used applications. Press {blue}tab{reset} and {blue}grave{reset} / {blue}shift{reset} + {blue}tab{reset} to select a different window, release {bold}{blue}{}{reset} to close the window.\n",
                 switch.modifier,
                 switch.modifier,
                 switch.modifier,
             ));
         } else {
-            let _ = builder.write_str(&format!("{ITALIC}<Switch mode disabled>{RESET}\n"));
+            let _ = builder.write_str(&format!("{italic}<Switch mode disabled>{reset}\n"));
         }
     }
 
     builder
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::structs::*;
+    use std::path::PathBuf;
+
+    fn create_test_config() -> Config {
+        Config {
+            windows: Some(Windows {
+                overview: Some(Overview::default()),
+                switch: Some(Switch::default()),
+                ..Default::default()
+            }),
+            ..Default::default()
+        }
+    }
+
+    #[test]
+    fn test_explain_with_overview() {
+        const CONFIG: &str = r#"Config is valid (/test/config.ron)
+Explanation (blue are keys, bold blue keys can be configured in config):
+Use Super + super_l to open the Overview. Use tab and grave / shift + tab to select a different window, press return to switch
+You can also use the arrow keys to navigate the workspaces. Use Esc to close the overview.
+After opening the Overview the Launcher is available:
+	- Start typing to search through applications (sorted by how often they were opened). Press return to launch the first app, use Ctrl + 1/2/3/... to open the second, third, etc.
+	- Press Ctrl + t to run the typed command in a terminal.
+	- Press Ctrl + <key> to search the typed text in any of the configured SearchEngines: Google, Wikipedia.
+	- Typing a mathematical expression will calculate it and display the result in the launcher.
+	- Paths (starting with ~ or /) can be open in default file-manager.
+
+Press Alt + tab and hold Alt to view recently used applications. Press tab and grave / shift + tab to select a different window, release Alt to close the window.
+"#;
+        let config = create_test_config();
+        let path = PathBuf::from("/test/config.ron");
+        let result = explain(&config, &path, false);
+        assert_eq!(result, CONFIG);
+    }
+
+    #[test]
+    fn test_explain_without_overview() {
+        const CONFIG: &str = r#"Config is valid (/test/config.ron)
+Explanation (blue are keys, bold blue keys can be configured in config):
+<Overview move disabled>
+
+Press Alt + tab and hold Alt to view recently used applications. Press tab and grave / shift + tab to select a different window, release Alt to close the window.
+"#;
+        let mut config = create_test_config();
+        config.windows.as_mut().unwrap().overview = None;
+        let path = PathBuf::from("/test/config.ron");
+        let result = explain(&config, &path, false);
+        assert_eq!(result, CONFIG);
+    }
+
+    #[test]
+    fn test_explain_without_switch() {
+        const CONFIG: &str = r#"Config is valid (/test/config.ron)
+Explanation (blue are keys, bold blue keys can be configured in config):
+Use Super + super_l to open the Overview. Use tab and grave / shift + tab to select a different window, press return to switch
+You can also use the arrow keys to navigate the workspaces. Use Esc to close the overview.
+After opening the Overview the Launcher is available:
+	- Start typing to search through applications (sorted by how often they were opened). Press return to launch the first app, use Ctrl + 1/2/3/... to open the second, third, etc.
+	- Press Ctrl + t to run the typed command in a terminal.
+	- Press Ctrl + <key> to search the typed text in any of the configured SearchEngines: Google, Wikipedia.
+	- Typing a mathematical expression will calculate it and display the result in the launcher.
+	- Paths (starting with ~ or /) can be open in default file-manager.
+
+<Switch mode disabled>
+"#;
+        let mut config = create_test_config();
+        config.windows.as_mut().unwrap().switch = None;
+        let path = PathBuf::from("/test/config.ron");
+        let result = explain(&config, &path, false);
+        assert_eq!(result, CONFIG);
+    }
+
+    #[test]
+    fn test_explain_without_plugins() {
+        const CONFIG: &str = r#"Config is valid (/test/config.ron)
+Explanation (blue are keys, bold blue keys can be configured in config):
+Use Super + super_l to open the Overview. Use tab and grave / shift + tab to select a different window, press return to switch
+You can also use the arrow keys to navigate the workspaces. Use Esc to close the overview.
+After opening the Overview the Launcher is available:
+
+Press Alt + tab and hold Alt to view recently used applications. Press tab and grave / shift + tab to select a different window, release Alt to close the window.
+"#;
+        let mut config = create_test_config();
+        config
+            .windows
+            .as_mut()
+            .unwrap()
+            .overview
+            .as_mut()
+            .unwrap()
+            .launcher
+            .plugins = Plugins {
+            applications: None,
+            terminal: None,
+            shell: None,
+            websearch: None,
+            calc: None,
+            path: None,
+        };
+        let path = PathBuf::from("/test/config.ron");
+        let result = explain(&config, &path, false);
+        assert_eq!(result, CONFIG);
+    }
 }
