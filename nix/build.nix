@@ -86,7 +86,7 @@ rec {
   commonArgsCachedRelease = (
     commonArgs
     // {
-      inherit cargoArtifacts;
+      inherit cargoArtifacts postInstall;
     }
   );
 
