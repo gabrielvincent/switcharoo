@@ -1,10 +1,12 @@
+#![allow(clippy::print_stderr, clippy::print_stdout)]
+
 use crate::plugins::get_sortable_launch_options;
 use crate::reload_applications_desktop_entries_map;
 use config_lib::Plugins;
 use core_lib::WarnWithDetails;
 use core_lib::default::reload_default_files;
 use std::path::Path;
-use tracing::{debug, info};
+use tracing::debug;
 
 pub fn get_matches(plugins: &Plugins, text: &str, all_items: bool, max_items: u8, data_dir: &Path) {
     reload_default_files().warn_details("Failed to reload default files");
@@ -12,7 +14,7 @@ pub fn get_matches(plugins: &Plugins, text: &str, all_items: bool, max_items: u8
         .warn_details("Failed to reload applications desktop entries map");
     debug!("text: {text}");
     let options = get_sortable_launch_options(plugins, text, data_dir);
-    info!("{} options returned", options.len());
+    println!("{} options returned", options.len());
     let options = if all_items {
         options
     } else {
@@ -20,7 +22,7 @@ pub fn get_matches(plugins: &Plugins, text: &str, all_items: bool, max_items: u8
         options.into_iter().take(max_items as usize).collect()
     };
     for option in options {
-        info!(
+        println!(
             "{}: {}; {} desktop actions",
             option.name,
             option.score,

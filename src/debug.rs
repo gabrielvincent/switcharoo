@@ -17,10 +17,10 @@ pub fn check_class(class: Option<String>) -> anyhow::Result<()> {
     debug!("prepared desktop files and icon map");
 
     if let Some(class) = class {
-        debug!("searching for {class}");
+        println!("searching for {class}");
         check_icon(&class);
     } else {
-        debug!("no class provided, iterating over all clients");
+        println!("no class provided, iterating over all clients");
         for client in exec_lib::get_clients() {
             let class = client.class;
             debug!("checking {class}");

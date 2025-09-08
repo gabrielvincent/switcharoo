@@ -1,10 +1,16 @@
-use crate::{get_config_dirs, get_config_home, get_data_dirs};
+use crate::{get_config_dirs, get_config_home, get_data_dirs, get_data_home};
 use std::fs::DirEntry;
 use tracing::{trace, warn};
 
 pub fn collect_desktop_files() -> Vec<DirEntry> {
     let mut res = Vec::new();
-    for dir in get_data_dirs() {
+    let mut dirs = Vec::new();
+    dirs.push(get_data_home().join("applications"));
+    get_data_dirs()
+        .iter()
+        .map(|d| d.join("applications"))
+        .for_each(|d| dirs.push(d));
+    for dir in dirs {
         if !dir.exists() {
             continue;
         }
@@ -32,6 +38,11 @@ pub fn collect_mime_files() -> Vec<DirEntry> {
     // ensure correct order
     dirs.push(get_config_home());
     dirs.append(&mut get_config_dirs());
+    dirs.push(get_data_home().join("applications"));
+    get_data_dirs()
+        .iter()
+        .map(|d| d.join("applications"))
+        .for_each(|d| dirs.push(d));
     for dir in dirs {
         if !dir.exists() {
             continue;

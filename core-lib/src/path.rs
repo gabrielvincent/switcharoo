@@ -1,6 +1,6 @@
 use std::env;
 use std::path::PathBuf;
-use tracing::{trace, warn};
+use tracing::trace;
 
 pub fn get_default_config_path() -> PathBuf {
     let mut path = get_config_home();
@@ -74,6 +74,9 @@ pub fn get_default_cache_dir() -> PathBuf {
 
 /// # Panics
 /// if neither `XDG_DATA_HOME` nor HOME is set
+///
+/// returns `XDG_DATA_HOME` or `$HOME/.local/share`
+#[must_use]
 pub fn get_data_home() -> PathBuf {
     env::var_os("XDG_DATA_HOME")
         .map(PathBuf::from)
@@ -86,6 +89,9 @@ pub fn get_data_home() -> PathBuf {
 
 /// # Panics
 /// if neither `XDG_CACHE_HOME` nor HOME is set
+///
+/// Returns `XDG_CACHE_HOME` or `$HOME/.cache`
+#[must_use]
 pub fn get_cache_home() -> PathBuf {
     env::var_os("XDG_CACHE_HOME")
         .map(PathBuf::from)
@@ -98,6 +104,9 @@ pub fn get_cache_home() -> PathBuf {
 
 /// # Panics
 /// if neither `XDG_CONFIG_HOME` nor HOME is set
+///
+/// Returns `XDG_CONFIG_HOME` or `$HOME/.config`
+#[must_use]
 pub fn get_config_home() -> PathBuf {
     env::var_os("XDG_CONFIG_HOME")
         .map(PathBuf::from)
@@ -108,6 +117,7 @@ pub fn get_config_home() -> PathBuf {
         .expect("Failed to get config dir (XDG_CONFIG_HOME or HOME not set)")
 }
 
+/// Returns `XDG_CONFIG_DIRS` or `/etc/xdg/`
 #[must_use]
 pub fn get_config_dirs() -> Vec<PathBuf> {
     env::var_os("XDG_CONFIG_DIRS").map_or_else(
@@ -116,9 +126,10 @@ pub fn get_config_dirs() -> Vec<PathBuf> {
     )
 }
 
+/// Returns `XDG_DATA_DIRS` or `/usr/local/share` and `/usr/share`
 #[must_use]
 pub fn get_data_dirs() -> Vec<PathBuf> {
-    let mut dirs = env::var_os("XDG_DATA_DIRS").map_or_else(
+    env::var_os("XDG_DATA_DIRS").map_or_else(
         || {
             vec![
                 PathBuf::from("/usr/local/share"),
@@ -126,23 +137,5 @@ pub fn get_data_dirs() -> Vec<PathBuf> {
             ]
         },
         |val| env::split_paths(&val).collect(),
-    );
-
-    if let Some(data_home) = env::var_os("XDG_DATA_HOME").map(PathBuf::from).map_or_else(
-        || {
-            env::var_os("HOME")
-                .map(|p| PathBuf::from(p).join(".local/share"))
-                .or_else(|| {
-                    warn!("No XDG_DATA_HOME and HOME environment variable found");
-                    None
-                })
-        },
-        Some,
-    ) {
-        dirs.push(data_home);
-    }
-
-    dirs.into_iter()
-        .map(|dir| dir.join("applications"))
-        .collect()
+    )
 }
