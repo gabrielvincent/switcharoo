@@ -209,13 +209,18 @@ fn main() -> anyhow::Result<()> {
                 );
             }
         },
-        cli::Command::Completions { shell, base_path } => {
+        cli::Command::Completions {
+            shell,
+            base_path,
+            delete,
+        } => {
             if let Some(shell) = shell {
-                completions::generate(&shell, base_path)
+                completions::generate(&shell, base_path, delete)
                     .context("Failed to generate completions")?;
             } else {
                 for shell in ["bash", "fish", "zsh"] {
-                    completions::generate(shell, None).context("Failed to generate completions")?;
+                    completions::generate(shell, None, delete)
+                        .context("Failed to generate completions")?;
                 }
             }
         }

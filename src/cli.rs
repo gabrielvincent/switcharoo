@@ -87,6 +87,10 @@ pub enum Command {
         /// Zsh Default: `/usr/share/zsh/site-functions`
         #[arg(long, short = 'p')]
         base_path: Option<PathBuf>,
+
+        /// Delete the generated completion files
+        #[arg(short = 'd', long, default_value_t = false)]
+        delete: bool,
     },
 }
 
