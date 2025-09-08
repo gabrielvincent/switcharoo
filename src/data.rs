@@ -24,6 +24,11 @@ pub fn launch_history(
     debug!("showing history for the last {run_cache_weeks} weeks");
 
     let runs = launcher_lib::get_applications_stored_runs(run_cache_weeks, data_dir);
+    if runs.is_empty() {
+        println!("No runs found");
+        return;
+    }
+
     let mut sorted = runs.into_iter().collect::<Vec<_>>();
     sorted.sort_by(|a, b| b.1.cmp(&a.1));
     for (path, run) in sorted {
