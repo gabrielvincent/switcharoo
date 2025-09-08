@@ -103,6 +103,7 @@ pub struct WindowsGlobal {
     pub switch: Option<WindowsSwitchData>,
 }
 
+#[allow(clippy::cognitive_complexity)]
 fn activate(
     app: &Application,
     config_path: &Path,

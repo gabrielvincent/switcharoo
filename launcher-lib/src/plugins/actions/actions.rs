@@ -1,5 +1,7 @@
 #![allow(clippy::unnecessary_wraps)]
 
+#[cfg(not(debug_assertions))]
+use anyhow::Context;
 use anyhow::Result;
 use tracing::debug;
 
