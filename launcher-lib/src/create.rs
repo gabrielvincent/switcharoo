@@ -15,13 +15,11 @@ use gtk::{Orientation, glib};
 use gtk4_layer_shell::{Edge, Layer, LayerShell};
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
-use tracing::{debug, debug_span, trace};
+use tracing::{debug, debug_span};
 
 pub fn create_windows_overview_launcher_window(
     app: &Application,
     launcher: &Launcher,
-    // open_modifier: Modifier,
-    // open_key: &str,
     data_dir: &Path,
     event_sender: &Sender<TransferType>,
 ) -> anyhow::Result<LauncherData> {
@@ -130,32 +128,10 @@ fn launcher_entry_text_change(text: String, event_sender: &Sender<TransferType>)
         .warn_details("unable to send");
 }
 
-#[allow(unused)]
-// TODO this doesnt work if key is not a modifier (tab instead of super_l)
-// instead handle close with esc and close with mod again in plugin
-fn handle_release(
-    key: Key,
-    modifier: Modifier,
-    // open_key: &str,
-    // mt: ModifierType,
-    event_sender: &Sender<TransferType>,
-) {
-    if ((key == Key::Alt_L || key == Key::Alt_R) && modifier == Modifier::Alt)
-        || ((key == Key::Control_L || key == Key::Control_R) && modifier == Modifier::Ctrl)
-        || ((key == Key::Super_L || key == Key::Super_R) && modifier == Modifier::Super)
-    {
-        trace!("Modifier key released: {key:?}");
-        event_sender
-            .send_blocking(TransferType::Exit)
-            .warn_details("unable to send");
-    }
-}
-
 #[allow(clippy::too_many_arguments, clippy::too_many_lines)]
 fn handle_key(
     entry: &Entry,
     key: Key,
-    // modifier: Modifier,
     modt: ModifierType,
     plugin_keys: &[Key],
     launch_modifier: Modifier,

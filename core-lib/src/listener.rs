@@ -93,11 +93,11 @@ pub fn hyprshell_config_block(file_path: &Path) -> anyhow::Result<()> {
         Config::default(),
     )
     .context("Failed to create watcher")?;
-    debug!("Starting hyprshell config reload listener");
+    debug!("Starting hyprshell config reload blocker");
 
     watcher
         .watch(file_path.as_ref(), RecursiveMode::NonRecursive)
-        .context("Failed to start hyprshell config reload listener")?;
+        .context("Failed to start hyprshell config reload blocker")?;
     rx.recv().warn_details("Failed to receive reload signal");
     Ok(())
 }

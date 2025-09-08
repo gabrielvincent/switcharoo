@@ -14,13 +14,8 @@ PluginDescriptionInfo init(HANDLE handle) {
         throw std::runtime_error("[Hyprshell Plugin] Version mismatch");
     }
 
+    // ignore that this can return XKB_KEY_NoSymbol, it is only used to check if keysym equals
     OVERVIEW_KEY = xkb_keysym_from_name(HYPRSHELL_OVERVIEW_KEY, XKB_KEYSYM_CASE_INSENSITIVE);
-    if (OVERVIEW_KEY == XKB_KEY_NoSymbol) {
-        HyprlandAPI::addNotification(
-            PHANDLE, std::string("[Hyprshell Plugin] Invalid overview key ") + HYPRSHELL_OVERVIEW_KEY, RED, 5000);
-        throw std::runtime_error("[Hyprshell Plugin] Invalid overview key");
-    }
-
     if constexpr (HYPRSHELL_PRINT_DEBUG == 1) {
         const auto info = std::string("Config: ") +
                           HYPRSHELL_OVERVIEW_KEY + ", " +

@@ -27,7 +27,7 @@ use std::rc::Rc;
 use std::sync::{Mutex, OnceLock};
 use std::time::Duration;
 use std::{env, process, thread};
-use tracing::{debug, debug_span, error, info, trace};
+use tracing::{debug, debug_span, error, info, trace, warn};
 use windows_lib::{
     WindowsOverviewData, WindowsSwitchData, create_windows_overview_window,
     create_windows_switch_window,
@@ -153,9 +153,24 @@ fn activate(
                 error!("Failed to block config: {err:?}",);
                 process::exit(1);
             }
+            info!("Trying to rerun application after config reload");
             return; // return needed to exit the application
         }
     };
+
+    // TODO remove in future if more is available
+    if config.windows.is_none()
+        || matches!(&config.windows, Some(windows) if windows.overview.is_none() && windows.switch.is_none())
+    {
+        warn!("Nothing is enabled in the config");
+        toast("Nothing is enabled in the config");
+        if let Err(err) = hyprshell_config_block(config_path) {
+            error!("Failed to block config: {err:?}",);
+            process::exit(1);
+        }
+        info!("Trying to rerun application after config reload");
+        return; // return needed to exit the application
+    }
 
     if let Err(err) = configure_wm(&config) {
         error!("Failed to create keybinds: {err:?}");
@@ -164,6 +179,7 @@ fn activate(
             error!("Failed to block config: {err:?}");
             process::exit(1);
         }
+        info!("Trying to rerun application after config reload");
         return; // return needed to exit the application
     }
 
@@ -176,12 +192,14 @@ fn activate(
                 error!("Failed to block config: {err:?}");
                 process::exit(1);
             }
+            info!("Trying to rerun application after config reload");
             return; // return needed to exit the application
         }
     };
 
     glib::spawn_future_local(async move {
         event_handler(globals, event_receiver, event_sender).await;
+        info!("Application exited, restarting");
     });
 
     info!("Application initialized");
@@ -205,8 +223,6 @@ fn create_windows(
             let launcher_data = create_windows_overview_launcher_window(
                 app,
                 &overview.launcher,
-                // overview.modifier,
-                // &overview.key,
                 data_dir,
                 &event_sender,
             )

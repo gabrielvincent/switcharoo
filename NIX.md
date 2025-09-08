@@ -125,4 +125,25 @@ in {
 
 ## Without Flakes with Home-manager
 
-https://github.com/nix-community/home-manager/pull/7409
+`./user.nix`:
+
+All the settings are optional and can be found in the [module.nix](./nix/module.nix)
+
+Everything is disabled by default, so you need to enable it (even settings.windows if settings.windows.overview is enabled).
+
+```nix
+{ inputs, ... } : {
+  services.hyprshell = {
+    enable = true;
+    systemd.args = "-v";
+    settings = {
+      windows = {
+        overview = {
+        };
+        switch = {
+        };
+      };
+    };
+  };
+}
+```

@@ -58,11 +58,17 @@ pub fn configure(dir: &TempDir, config: &PluginConfig) -> anyhow::Result<()> {
         ("$HYPRSHELL_SOCKET_PATH$", &path),
         (
             "$HYPRSHELL_SWTICH_XKB_MOD_L$",
-            &format!("{}_L", config.xkb_key_switch_mod.as_deref().unwrap_or("")),
+            &config
+                .xkb_key_switch_mod
+                .as_deref()
+                .map_or_else(|| "-1".to_string(), |m| format!("{m}_L")),
         ),
         (
             "$HYPRSHELL_SWTICH_XKB_MOD_R$",
-            &format!("{}_R", config.xkb_key_switch_mod.as_deref().unwrap_or("")),
+            &config
+                .xkb_key_switch_mod
+                .as_deref()
+                .map_or_else(|| "-1".to_string(), |m| format!("{m}_R")),
         ),
         (
             "$HYPRSHELL_OVERVIEW_MOD$",
