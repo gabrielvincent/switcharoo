@@ -52,6 +52,7 @@ pub enum PluginNames {
     WebSearch,
     Calc,
     Path,
+    Actions,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash, Serialize, Deserialize)]

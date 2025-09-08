@@ -1,4 +1,4 @@
-use crate::plugins::{Identifier, PluginNames, StaticLaunchOption};
+use crate::plugins::{Identifier, PluginNames, PluginReturn, StaticLaunchOption};
 use config_lib::SearchEngine;
 use core_lib::WarnWithDetails;
 use core_lib::default::get_default_desktop_file;
@@ -30,10 +30,12 @@ pub fn get_static_options(matches: &mut Vec<StaticLaunchOption>, config: &[Searc
     trace!("Added {count} static web search options");
 }
 
-pub fn launch_option(iden: Option<&str>, text: &str) -> bool {
+pub fn launch_option(iden: Option<&str>, text: &str) -> PluginReturn {
     if text.is_empty() {
         debug!("No text to search for");
-        return false;
+        return PluginReturn {
+            show_animation: false,
+        };
     }
     if let Some(iden) = iden {
         let url = iden.replace("{}", text);
@@ -62,7 +64,9 @@ pub fn launch_option(iden: Option<&str>, text: &str) -> bool {
             trace!("not class to browser available");
         }
     }
-    true
+    PluginReturn {
+        show_animation: true,
+    }
 }
 
 pub fn get_chars(config: &[SearchEngine]) -> Vec<Key> {

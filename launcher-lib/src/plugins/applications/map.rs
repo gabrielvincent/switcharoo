@@ -13,6 +13,7 @@ pub struct DesktopEntry {
     pub exec_search: Box<str>,
     pub exec: Box<str>,
     pub exec_path: Option<Box<Path>>,
+    /// if launcher text exactly matches this it will be shown (use for flatpak / appimage / ...)
     pub type_search: &'static str,
     pub terminal: bool,
     pub source: Box<Path>,

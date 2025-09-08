@@ -1,5 +1,6 @@
 use config_lib::Plugins;
 use gtk::gdk::Key;
+use std::env;
 use std::path::Path;
 use tracing::debug_span;
 
@@ -8,6 +9,7 @@ mod search;
 mod shell;
 mod terminal;
 
+mod actions;
 #[cfg(feature = "calc")]
 mod calc;
 mod path;
@@ -22,6 +24,7 @@ pub struct SortableLaunchOption {
     pub icon: Option<Box<Path>>,
     pub details: Box<str>,
     pub details_long: Option<Box<str>>,
+    /// Higher is better
     pub score: u64,
     pub grayed: bool,
     pub iden: Identifier,
@@ -74,6 +77,10 @@ pub fn get_sortable_launch_options(
     if plugins.path.is_some() {
         debug_span!("path").in_scope(|| path::get_path_options(&mut matches, text));
     }
+    // TODO add options in config to enable / disable them
+    if cfg!(debug_assertions) || env::var("HYPRSHELL_EXPERIMENTAL").is_ok() {
+        debug_span!("actions").in_scope(|| actions::get_actions_options(&mut matches, text));
+    }
 
     // sort in reverse
     matches.sort_by(|a, b| b.score.cmp(&a.score));
@@ -106,12 +113,16 @@ pub fn get_static_launch_options(
     matches
 }
 
+pub struct PluginReturn {
+    pub show_animation: bool,
+}
+
 pub fn launch(
     iden: &Identifier,
     text: &str,
     default_terminal: Option<&str>,
     data_dir: &Path,
-) -> bool {
+) -> PluginReturn {
     let _span = debug_span!("launch_plugin").entered();
 
     match iden.plugin {
@@ -138,7 +149,12 @@ pub fn launch(
             debug_span!("calc").in_scope(|| calc::copy_result(iden.data.as_deref()));
             #[cfg(not(feature = "calc"))]
             tracing::warn!("calc plugin is not enabled");
-            false
+            PluginReturn {
+                show_animation: false,
+            }
+        }
+        PluginNames::Actions => {
+            debug_span!("actions").in_scope(|| actions::run_action(iden.data.as_deref()))
         }
     }
 }

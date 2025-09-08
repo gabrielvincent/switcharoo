@@ -1,4 +1,4 @@
-use crate::plugins::{Identifier, PluginNames, StaticLaunchOption};
+use crate::plugins::{Identifier, PluginNames, PluginReturn, StaticLaunchOption};
 use core_lib::WarnWithDetails;
 use exec_lib::run::run_program;
 use gtk::gdk::Key;
@@ -23,10 +23,12 @@ pub fn get_static_options(matches: &mut Vec<StaticLaunchOption>, default_termina
     trace!("Added static terminal option");
 }
 
-pub fn launch_option(text: &str, default_terminal: Option<&str>) -> bool {
+pub fn launch_option(text: &str, default_terminal: Option<&str>) -> PluginReturn {
     if text.is_empty() {
         debug!("No text to run in terminal");
-        return false;
+        return PluginReturn {
+            show_animation: false,
+        };
     }
     run_program(
         // exec shell to prevent needing 2 exits
@@ -37,7 +39,9 @@ pub fn launch_option(text: &str, default_terminal: Option<&str>) -> bool {
         default_terminal,
     )
     .warn_details("Failed to run program");
-    true
+    PluginReturn {
+        show_animation: true,
+    }
 }
 
 pub fn get_chars() -> Vec<Key> {

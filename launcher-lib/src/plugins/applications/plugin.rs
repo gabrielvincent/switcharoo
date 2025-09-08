@@ -1,6 +1,8 @@
 use crate::plugins::applications::data::{get_stored_runs, save_run};
 use crate::plugins::applications::map::{DesktopEntry, get_all_desktop_entries};
-use crate::plugins::{DetailsMenuItem, Identifier, PluginNames, SortableLaunchOption};
+use crate::plugins::{
+    DetailsMenuItem, Identifier, PluginNames, PluginReturn, SortableLaunchOption,
+};
 use core_lib::{ExecType, WarnWithDetails, analyse_exec};
 use exec_lib::run::run_program;
 use std::collections::HashMap;
@@ -184,7 +186,7 @@ pub fn launch_option(
     data_additional: Option<&str>,
     default_terminal: Option<&str>,
     data_dir: &Path,
-) -> bool {
+) -> PluginReturn {
     let entries = get_all_desktop_entries();
     if let Some(data) = data {
         let entry = entries
@@ -200,7 +202,9 @@ pub fn launch_option(
                         "Failed to find action {:?} in entry {:?}",
                         &section, entry.name
                     );
-                    return false;
+                    return PluginReturn {
+                        show_animation: false,
+                    };
                 }
             } else {
                 entry.exec.clone()
@@ -214,10 +218,14 @@ pub fn launch_option(
             .warn_details("Failed to run program");
             trace!("Saving run: {:?}", entry.source);
             save_run(&entry.source, data_dir).warn_details("Failed to cache run");
-            return true;
+            return PluginReturn {
+                show_animation: true,
+            };
         }
         warn!("Failed to find entry for {data:?}|{data_additional:?}");
     }
     drop(entries);
-    false
+    PluginReturn {
+        show_animation: false,
+    }
 }

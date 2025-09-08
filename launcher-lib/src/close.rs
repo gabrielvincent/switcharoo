@@ -1,3 +1,4 @@
+use crate::plugins::PluginReturn;
 use crate::{LauncherData, plugins};
 use core_lib::transfer::Identifier;
 use gtk::prelude::*;
@@ -43,13 +44,13 @@ fn close_launcher(data: &LauncherData, iden: &Identifier) {
     let _span = span.enter();
     let instant = Instant::now();
 
-    let animate = plugins::launch(
+    let PluginReturn { show_animation } = plugins::launch(
         iden,
         &data.entry.text(),
         data.config.default_terminal.as_deref(),
         &data.config.data_dir,
     );
-    if animate {
+    if show_animation {
         trace!(
             "starting timeout({ANIMATE_LAUNCH_MS}ms) animation after {:?} time",
             instant.elapsed()

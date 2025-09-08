@@ -59,6 +59,12 @@ pub fn explain(config: &Config, config_path: &Path, enable_color: bool) -> Strin
                     "\t- Paths (starting with ~ or /) can be open in default file-manager.\n",
                 );
             }
+            // TODO add action explain
+            // if overview.launcher.plugins.actions.is_some() {
+            //     let _ = builder.write_str(
+            //         "\t- Type Reboot/Shutdown/etc. to perform system actions. Type `actions` to see all available ones \n",
+            //     );
+            // }
         } else {
             let _ = builder.write_str(&format!("{italic}<Overview move disabled>{reset}\n"));
         }

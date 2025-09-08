@@ -1,4 +1,4 @@
-use crate::plugins::{Identifier, PluginNames, SortableLaunchOption};
+use crate::plugins::{Identifier, PluginNames, PluginReturn, SortableLaunchOption};
 use core_lib::WarnWithDetails;
 use core_lib::default::get_default_desktop_file;
 use exec_lib::run::run_program;
@@ -30,10 +30,12 @@ pub fn get_path_options(matches: &mut Vec<SortableLaunchOption>, text: &str) {
     }
 }
 
-pub fn launch_option(text: &str) -> bool {
+pub fn launch_option(text: &str) -> PluginReturn {
     if text.is_empty() {
         debug!("No text to search for");
-        return false;
+        return PluginReturn {
+            show_animation: false,
+        };
     }
 
     debug!("Opening folder: {}", text);
@@ -52,7 +54,9 @@ pub fn launch_option(text: &str) -> bool {
     };
     debug!("Launching file-manger: {}", cmdline);
     run_program(&cmdline, None, false, None).warn_details("Failed to run program");
-    true
+    PluginReturn {
+        show_animation: true,
+    }
 }
 
 pub struct FilemanagerData {
