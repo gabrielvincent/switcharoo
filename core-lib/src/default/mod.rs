@@ -8,40 +8,42 @@ use std::sync::{OnceLock, RwLock, RwLockReadGuard};
 use std::{env, thread};
 use tracing::{debug, debug_span, trace, warn};
 
-fn get_desktop_files() -> &'static RwLock<Vec<(DirEntry, IniFileOwned)>> {
+fn get_desktop_files_from_cache() -> &'static RwLock<Vec<(DirEntry, IniFileOwned)>> {
     static MAP_LOCK: OnceLock<RwLock<Vec<(DirEntry, IniFileOwned)>>> = OnceLock::new();
     MAP_LOCK.get_or_init(|| RwLock::new(Vec::default()))
 }
-fn get_mime_files() -> &'static RwLock<Vec<(DirEntry, IniFileOwned)>> {
+fn get_mime_files_from_cache() -> &'static RwLock<Vec<(DirEntry, IniFileOwned)>> {
     static MAP_LOCK: OnceLock<RwLock<Vec<(DirEntry, IniFileOwned)>>> = OnceLock::new();
     MAP_LOCK.get_or_init(|| RwLock::new(Vec::default()))
 }
-fn get_icons() -> &'static RwLock<BTreeSet<Box<str>>> {
+fn get_icons_from_cache() -> &'static RwLock<BTreeSet<Box<str>>> {
     static MAP_LOCK: OnceLock<RwLock<BTreeSet<Box<str>>>> = OnceLock::new();
     MAP_LOCK.get_or_init(|| RwLock::new(BTreeSet::default()))
 }
 
 pub fn get_all_desktop_files<'a>()
 -> anyhow::Result<RwLockReadGuard<'a, Vec<(DirEntry, IniFileOwned)>>> {
-    get_desktop_files()
+    get_desktop_files_from_cache()
         .read()
         .map_err(|_| anyhow::anyhow!("Failed to lock desktop files mutex"))
 }
+
 pub fn get_all_mime_files<'a>() -> anyhow::Result<RwLockReadGuard<'a, Vec<(DirEntry, IniFileOwned)>>>
 {
-    get_mime_files()
+    get_mime_files_from_cache()
         .read()
         .map_err(|_| anyhow::anyhow!("Failed to lock desktop files mutex"))
 }
+
 pub fn get_all_icons<'a>() -> anyhow::Result<RwLockReadGuard<'a, BTreeSet<Box<str>>>> {
-    get_icons()
+    get_icons_from_cache()
         .read()
         .map_err(|_| anyhow::anyhow!("Failed to lock icon map"))
 }
 
 #[must_use]
 pub fn theme_has_icon_name(name: &str) -> bool {
-    get_icons()
+    get_icons_from_cache()
         .read()
         .map(|map| map.contains(&Box::from(name)))
         .unwrap_or(false)
@@ -51,8 +53,8 @@ pub fn get_default_desktop_file<F, R>(mime: &str, r#fn: F) -> Option<R>
 where
     F: FnOnce(&(DirEntry, IniFileOwned)) -> Option<R>,
 {
-    let mime_apps = get_mime_files().read().ok()?;
-    let desktop_files = get_desktop_files().read().ok()?;
+    let mime_apps = get_mime_files_from_cache().read().ok()?;
+    let desktop_files = get_desktop_files_from_cache().read().ok()?;
 
     for (_, ini) in mime_apps.iter() {
         if let Some(ini) = ini
@@ -102,12 +104,12 @@ pub fn reload_default_files() -> anyhow::Result<()> {
     }
     trace!("Collected all mime files");
 
-    let mut desktop_files = get_desktop_files()
+    let mut desktop_files = get_desktop_files_from_cache()
         .write()
         .map_err(|_| anyhow::anyhow!("Failed to lock desktop files global data mutex"))?;
     *desktop_files = desktop_files_data;
     drop(desktop_files);
-    let mut mime_files = get_mime_files()
+    let mut mime_files = get_mime_files_from_cache()
         .write()
         .map_err(|_| anyhow::anyhow!("Failed to lock mime files global data mutex"))?;
     *mime_files = mime_files_data;
@@ -123,7 +125,7 @@ pub fn reload_available_icons(
     let span = debug_span!("reload_icons");
     let _span = span.enter();
 
-    let Ok(mut map) = get_icons().write() else {
+    let Ok(mut map) = get_icons_from_cache().write() else {
         bail!("Failed to lock global data mutex");
     };
     debug!("found {} icons from theme", icon_names.len());
@@ -145,7 +147,7 @@ pub fn reload_available_icons(
                             "found {} icons from filesystem in {path:?} paths (in background)",
                             paths.len()
                         );
-                        let Ok(mut map) = get_icons().write() else {
+                        let Ok(mut map) = get_icons_from_cache().write() else {
                             warn!("Failed to lock global data mutex");
                             return;
                         };
@@ -158,7 +160,7 @@ pub fn reload_available_icons(
                         "found {} icons from filesystem in {path:?} paths",
                         paths.len()
                     );
-                    let Ok(mut map) = get_icons().write() else {
+                    let Ok(mut map) = get_icons_from_cache().write() else {
                         bail!("Failed to lock global data mutex");
                     };
                     map.extend(paths);
