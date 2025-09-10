@@ -17,12 +17,13 @@ pub fn configure_wm(config: &Config) -> anyhow::Result<()> {
             warn!("Failed to load hyprland plugin: {err:?}");
             info!("Falling back to default keybinds");
             apply_binds(config)?;
+            layerrules(config);
         }
     } else {
         apply_binds(config)?;
+        layerrules(config);
     }
 
-    layerrules(config);
     Ok(())
 }
 

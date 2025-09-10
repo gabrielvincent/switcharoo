@@ -47,6 +47,9 @@ pub fn start(
     let cache_dir = Rc::new(cache_dir);
 
     util::preactivate().context("Failed to preactivate GTK and reload icons")?;
+    exec_lib::reload_hyprland_config()
+        .context("Failed to reload hyprland config")
+        .warn_details("unable to reload hyprland config");
 
     let (event_sender, event_receiver) = async_channel::unbounded();
 
@@ -115,11 +118,6 @@ fn activate(
 ) {
     let _span = debug_span!("activate").entered();
     apply_css(css_path).warn_details("Failed to apply CSS");
-
-    exec_lib::reload_hyprland_config()
-        .context("Failed to reload hyprland config")
-        .warn_details("unable to reload hyprland config");
-
     match check_new_version(cache_dir) {
         Err(err) => {
             debug!("Unable to compare previous to current version.\n{err:?}");
