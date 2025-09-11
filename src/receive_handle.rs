@@ -55,12 +55,16 @@ fn open_overview(global: &mut Globals, event_sender: &Sender<TransferType>) {
                     .as_ref()
                     .is_some_and(windows_lib::switch_already_open)
             {
+                trace!("Opening overview");
                 windows_lib::open_overview(overview, event_sender)
                     .warn_details("Failed to open overview window");
+                trace!("Opening launcher");
                 launcher_lib::open_launcher(launcher);
+                trace!("Updating Launcher");
                 launcher_lib::update_launcher(launcher, "", event_sender);
 
                 // update desktop data in background
+                trace!("Reloading desktop data");
                 gio::spawn_blocking(util::reload_desktop_data);
             } else {
                 debug!("Overview or Switch already open, closing");

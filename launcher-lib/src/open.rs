@@ -20,7 +20,7 @@ pub fn open_launcher(data: &LauncherData) {
     data.entry.set_text("");
     data.window.set_keyboard_mode(KeyboardMode::Exclusive);
     let window = data.window.clone();
-    glib::idle_add_local(move || {
+    glib::timeout_add_local(std::time::Duration::from_millis(300), move || {
         window.set_keyboard_mode(KeyboardMode::OnDemand);
         glib::ControlFlow::Break
     });

@@ -62,15 +62,28 @@ pub fn start(
         socket_handler(&event_sender_2);
     });
 
+    let wayland_socket_index = env::var("WAYLAND_DISPLAY")
+        .ok()
+        .and_then(|s| s.split('-').last()?.parse::<i32>().ok())
+        .unwrap_or(1);
+
     info!("Starting gui loop");
     loop {
         #[cfg(debug_assertions)]
         let application = Application::builder()
-            .application_id(core_lib::APPLICATION_TEST_ID.to_string())
+            .application_id(format!(
+                "{}-test-{}",
+                core_lib::APPLICATION_ID.to_string(),
+                wayland_socket_index
+            ))
             .build();
         #[cfg(not(debug_assertions))]
         let application = Application::builder()
-            .application_id(core_lib::APPLICATION_ID.to_string())
+            .application_id(format!(
+                "{}-{}",
+                core_lib::APPLICATION_ID.to_string(),
+                wayland_socket_index
+            ))
             .build();
         debug!("Application created");
 
@@ -91,7 +104,8 @@ pub fn start(
                 event_receiver.clone(),
             );
         });
-        application.run_with_args::<String>(&[]);
+        let exit = application.run_with_args::<String>(&[]);
+        debug!("Application exited with code {exit:?}");
     }
 }
 

@@ -66,11 +66,6 @@ fn get_prev_follow_mouse() -> &'static Mutex<Option<String>> {
     PREV_FOLLOW_MOUSE.get_or_init(|| Mutex::new(None))
 }
 
-fn get_gestures_enabled() -> &'static Mutex<Option<bool>> {
-    static GESTURES_ENABLED: OnceLock<Mutex<Option<bool>>> = OnceLock::new();
-    GESTURES_ENABLED.get_or_init(|| Mutex::new(None))
-}
-
 pub fn set_remain_focused() -> anyhow::Result<()> {
     let mut lock = get_prev_follow_mouse()
         .lock()
@@ -84,22 +79,6 @@ pub fn set_remain_focused() -> anyhow::Result<()> {
     drop(lock);
     Keyword::set("input:follow_mouse", "3").context("keyword failed")?;
     trace!("Set follow_mouse to 3");
-
-    let mut lock = get_gestures_enabled()
-        .lock()
-        .map_err(|e| anyhow::anyhow!("unable to lock get_gestures_enabled mutex: {e:?}"))?;
-    if lock.is_none() {
-        let gestures_enabled =
-            Keyword::get("gestures:workspace_swipe").context("keyword failed")?;
-        trace!(
-            "Storing previous gestures_enabled value: {}",
-            gestures_enabled.value
-        );
-        *lock = Some(gestures_enabled.value.to_string() == "1");
-    }
-    drop(lock);
-    Keyword::set("gestures:workspace_swipe", "0").context("keyword failed")?;
-    trace!("Set gestures:workspace_swipe to 0");
     Ok(())
 }
 
@@ -114,18 +93,6 @@ pub fn reset_remain_focused() -> anyhow::Result<()> {
         trace!("No previous follow_mouse value stored, skipping reset");
     }
     drop(follow);
-
-    let gestures_enabled = get_gestures_enabled()
-        .lock()
-        .map_err(|e| anyhow::anyhow!("unable to lock get_gestures_enabled mutex: {e:?}"))?;
-    if let Some(enabled) = gestures_enabled.as_ref() {
-        Keyword::set("gestures:workspace_swipe", if *enabled { "1" } else { "0" })
-            .context("keyword failed")?;
-        trace!("Restored previous gestures:workspace_swipe value: {enabled}");
-    } else {
-        trace!("No previous gestures:workspace_swipe value stored, skipping reset");
-    }
-    drop(gestures_enabled);
     Ok(())
 }
 

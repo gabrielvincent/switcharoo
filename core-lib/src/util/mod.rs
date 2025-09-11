@@ -8,23 +8,23 @@ pub use exec::*;
 pub use helpers::*;
 pub use path::*;
 use std::env::{var, var_os};
-use std::path::Path;
+use std::os::unix::net::UnixStream;
+use std::path::{Path, PathBuf};
+use tracing::debug;
 
 #[must_use]
-pub fn get_daemon_socket_path_buff() -> std::path::PathBuf {
+pub fn get_daemon_socket_path_buff() -> PathBuf {
     #[allow(clippy::option_if_let_else)]
     let mut buf = if let Some(runtime_path) = var_os("XDG_RUNTIME_DIR") {
         if let Some(instance) = var_os("HYPRLAND_INSTANCE_SIGNATURE") {
-            std::path::PathBuf::from(runtime_path)
-                .join("hypr")
-                .join(instance)
+            PathBuf::from(runtime_path).join("hypr").join(instance)
         } else {
-            std::path::PathBuf::from(runtime_path)
+            PathBuf::from(runtime_path)
         }
     } else if let Ok(uid) = var("UID") {
-        std::path::PathBuf::from("/run/user/".to_owned() + &uid)
+        PathBuf::from("/run/user/".to_owned() + &uid)
     } else {
-        std::path::PathBuf::from("/tmp")
+        PathBuf::from("/tmp")
     };
     buf.push("hyprshell.sock");
     buf
@@ -34,10 +34,10 @@ pub fn daemon_running() -> bool {
     // check if socket exists and socket is open
     let buf = get_daemon_socket_path_buff();
     if buf.exists() {
-        tracing::debug!("Checking if daemon is running");
-        std::os::unix::net::UnixStream::connect(buf).is_ok()
+        debug!("Checking if daemon is running on {}", buf.display());
+        UnixStream::connect(buf).is_ok()
     } else {
-        tracing::debug!("Daemon not running");
+        debug!("Daemon not running");
         false
     }
 }
