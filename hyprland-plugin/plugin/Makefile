@@ -1,7 +1,7 @@
 .PHONY: all clean combine prepare-combined copy-defs build build-combined
 
 SRCS_DIR = ./src
-SRCS = key-press.cpp layer-change.cpp init.cpp exit.cpp main.cpp send.cpp mouse-button.cpp
+SRCS = key-press.cpp layer-change.cpp init.cpp exit.cpp main.cpp send.cpp mouse-button.cpp keyboard-focus.cpp
 PREPAREDIR = out
 OUTNAME = hyprshell.so
 TARGET = $(OUTNAME)
@@ -42,7 +42,6 @@ build-combined: prepare-combined
 test-combined: build-combined
 # Run Hyprland in dev mode with the compiled plugin
 	Hyprland --config ./test-hyprland.conf
-	
 
 clean:
 	rm -f $(TARGET)

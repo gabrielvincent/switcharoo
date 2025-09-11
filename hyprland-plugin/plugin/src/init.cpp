@@ -29,8 +29,9 @@ PluginDescriptionInfo init(HANDLE handle) {
     // clang-format off
     static auto P1 = HyprlandAPI::registerCallbackDynamic(PHANDLE, "openLayer",[&](void*, SCallbackInfo&, const std::any &data) { onOpenLayerChange(std::any_cast<PHLLS>(data), true); });
     static auto P2 = HyprlandAPI::registerCallbackDynamic(PHANDLE, "closeLayer",[&](void*, SCallbackInfo&, const std::any &data) { onOpenLayerChange(std::any_cast<PHLLS>(data), false); });
-    static auto P3 = HyprlandAPI::registerCallbackDynamic(PHANDLE, "keyPress",[&](void*, SCallbackInfo&, const std::any &data) { onKeyPress(std::any_cast<std::unordered_map<std::string, std::any>>(data)); });
+    static auto P3 = HyprlandAPI::registerCallbackDynamic(PHANDLE, "keyPress",[&](void*, SCallbackInfo& info, const std::any &data) { onKeyPress(std::any_cast<std::unordered_map<std::string, std::any>>(data), info); });
     static auto P4 = HyprlandAPI::registerCallbackDynamic(PHANDLE, "mouseButton",[&](void*, SCallbackInfo&, const std::any &data) { onMouseButton(std::any_cast<IPointer::SButtonEvent>(data)); });
+    static auto P5 = HyprlandAPI::registerCallbackDynamic(PHANDLE, "keyboardFocus",[&](void*, SCallbackInfo&, const std::any &data) { onKeyboardFocus(std::any_cast<SP<CWLSurfaceResource>>(data)); });
     // clang-format on
 
     const std::string name = HYPRSHELL_PLUGIN_NAME;

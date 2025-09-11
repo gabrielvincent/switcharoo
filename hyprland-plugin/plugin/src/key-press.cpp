@@ -10,7 +10,7 @@
 // modifier must pre pressed and released without any other keys pressed in between
 bool last_press_was_mod_press = false;
 
-void onKeyPress(const std::unordered_map<std::string, std::any> &data) {
+void onKeyPress(const std::unordered_map<std::string, std::any> &data, SCallbackInfo &info) {
     const auto keyboardIt = data.find("keyboard");
     const auto eventIt = data.find("event");
 
@@ -60,6 +60,7 @@ void onKeyPress(const std::unordered_map<std::string, std::any> &data) {
                     if constexpr (HYPRSHELL_PRINT_DEBUG == 1) {
                         HyprlandAPI::addNotification(PHANDLE, "[Hyprshell Plugin] mod pressed", GREEN, 2000);
                     }
+                    info.cancelled = true;
                     sendStringToHyprshellSocket(HYPRSHELL_OPEN_OVERVIEW);
                 } else {
                     // between pressing and releasing the mod key, there must be
@@ -78,6 +79,7 @@ void onKeyPress(const std::unordered_map<std::string, std::any> &data) {
                     if constexpr (HYPRSHELL_PRINT_DEBUG == 1) {
                         HyprlandAPI::addNotification(PHANDLE, "[Hyprshell Plugin] mod + overview pressed", GREEN, 2000);
                     }
+                    info.cancelled = true;
                     sendStringToHyprshellSocket(HYPRSHELL_OPEN_OVERVIEW);
                 }
             }
@@ -97,6 +99,7 @@ void onKeyPress(const std::unordered_map<std::string, std::any> &data) {
                         HyprlandAPI::addNotification(PHANDLE, "[Hyprshell Plugin] switch open (tab) pressed", GREEN,
                                                      2000);
                     }
+                    info.cancelled = true;
                     sendStringToHyprshellSocket(HYPRSHELL_OPEN_SWITCH);
                 }
             }
@@ -109,6 +112,7 @@ void onKeyPress(const std::unordered_map<std::string, std::any> &data) {
                         HyprlandAPI::addNotification(PHANDLE, "[Hyprshell Plugin] switch open (shift + tab) pressed",
                                                      GREEN, 2000);
                     }
+                    info.cancelled = true;
                     sendStringToHyprshellSocket(HYPRSHELL_OPEN_SWITCH_REVERSE);
                 }
             }
@@ -121,6 +125,7 @@ void onKeyPress(const std::unordered_map<std::string, std::any> &data) {
                         HyprlandAPI::addNotification(PHANDLE, "[Hyprshell Plugin] switch open (grave) pressed", GREEN,
                                                      2000);
                     }
+                    info.cancelled = true;
                     sendStringToHyprshellSocket(HYPRSHELL_OPEN_SWITCH_REVERSE);
                 }
             }
