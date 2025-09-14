@@ -5,7 +5,7 @@ use anyhow::Context;
 use async_channel::Sender;
 use core_lib::transfer::{CloseOverviewConfig, TransferType, WindowsOverride};
 use core_lib::{ClientData, ClientId, WarnWithDetails};
-use exec_lib::set_remain_focused;
+use exec_lib::set_no_follow_mouse;
 use gtk::gdk::Cursor;
 use gtk::prelude::*;
 use gtk::{Button, Fixed, Frame, Image, Label, Overflow, Overlay, pango};
@@ -27,7 +27,7 @@ pub fn open_overview(
     event_sender: &Sender<TransferType>,
 ) -> anyhow::Result<()> {
     let _span = debug_span!("open_overview").entered();
-    set_remain_focused().warn_details("Failed to set set_remain_focused");
+    set_no_follow_mouse().warn_details("Failed to set set_remain_focused");
 
     let (clients_data, active) = collect_data(&SortConfig {
         filter_current_monitor: data.config.filter_current_monitor,

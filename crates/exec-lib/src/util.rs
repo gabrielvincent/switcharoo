@@ -66,23 +66,13 @@ fn get_prev_follow_mouse() -> &'static Mutex<Option<String>> {
     PREV_FOLLOW_MOUSE.get_or_init(|| Mutex::new(None))
 }
 
-pub fn set_remain_focused() -> anyhow::Result<()> {
-    let mut lock = get_prev_follow_mouse()
-        .lock()
-        .map_err(|e| anyhow::anyhow!("unable to lock get_prev_follow_mouse mutex: {e:?}"))?;
-    // only set once
-    if lock.is_none() {
-        let follow = Keyword::get("input:follow_mouse").context("keyword failed")?;
-        trace!("Storing previous follow_mouse value: {}", follow.value);
-        *lock = Some(follow.value.to_string());
-    }
-    drop(lock);
+pub fn set_no_follow_mouse() -> anyhow::Result<()> {
     Keyword::set("input:follow_mouse", "3").context("keyword failed")?;
     trace!("Set follow_mouse to 3");
     Ok(())
 }
 
-pub fn reset_remain_focused() -> anyhow::Result<()> {
+pub fn reset_no_follow_mouse() -> anyhow::Result<()> {
     let follow = get_prev_follow_mouse()
         .lock()
         .map_err(|e| anyhow::anyhow!("unable to lock get_prev_follow_mouse mutex: {e:?}"))?;
@@ -93,6 +83,17 @@ pub fn reset_remain_focused() -> anyhow::Result<()> {
         trace!("No previous follow_mouse value stored, skipping reset");
     }
     drop(follow);
+    Ok(())
+}
+
+pub fn set_follow_mouse_default() -> anyhow::Result<()> {
+    let mut lock = get_prev_follow_mouse()
+        .lock()
+        .map_err(|e| anyhow::anyhow!("unable to lock get_prev_follow_mouse mutex: {e:?}"))?;
+    let follow = Keyword::get("input:follow_mouse").context("keyword failed")?;
+    trace!("Storing previous follow_mouse value: {}", follow.value);
+    *lock = Some(follow.value.to_string());
+    drop(lock);
     Ok(())
 }
 

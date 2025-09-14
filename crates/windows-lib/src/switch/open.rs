@@ -5,7 +5,7 @@ use crate::next::find_next;
 use anyhow::Context;
 use core_lib::transfer::{Direction, OpenSwitch};
 use core_lib::{ClientData, ClientId, WarnWithDetails};
-use exec_lib::{get_current_monitor, set_remain_focused};
+use exec_lib::{get_current_monitor, set_no_follow_mouse};
 use gtk::gdk::Cursor;
 use gtk::prelude::*;
 use gtk::{Button, Fixed, Frame, Image, Label, Overflow, Overlay, pango};
@@ -24,7 +24,7 @@ pub fn switch_already_open(data: &WindowsSwitchData) -> bool {
 #[allow(clippy::too_many_lines)]
 pub fn open_switch(data: &mut WindowsSwitchData, config: &OpenSwitch) -> anyhow::Result<()> {
     let _span = debug_span!("open_switch").entered();
-    set_remain_focused().warn_details("Failed to set set_remain_focused");
+    set_no_follow_mouse().warn_details("Failed to set set_remain_focused");
 
     let (clients_data, active_prev) = collect_data(&SortConfig {
         filter_current_monitor: data.config.filter_current_monitor,

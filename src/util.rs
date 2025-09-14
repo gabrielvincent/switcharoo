@@ -65,7 +65,7 @@ fn handle_sigterm() {
     thread::spawn(move || {
         if let Some(sig) = signals.forever().next() {
             info!("Received sig: {sig}, exiting gracefully");
-            exec_lib::reset_remain_focused()
+            exec_lib::reset_no_follow_mouse()
                 .warn_details("Failed to reset follow mouse on SIGTERM");
             if let Err(err) = exec_lib::plugin::unload() {
                 warn!("Failed to unload plugin: {err:?}",);

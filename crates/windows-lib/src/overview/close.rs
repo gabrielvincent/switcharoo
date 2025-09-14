@@ -2,7 +2,7 @@ use crate::global::WindowsOverviewData;
 use core_lib::transfer::WindowsOverride;
 use core_lib::{FindByFirst, WarnWithDetails};
 use exec_lib::switch::{switch_client, switch_workspace};
-use exec_lib::{reset_remain_focused, to_client_address};
+use exec_lib::{reset_no_follow_mouse, to_client_address};
 use gtk::glib;
 use gtk::prelude::*;
 use tracing::{debug, debug_span, trace};
@@ -14,7 +14,7 @@ pub fn overview_already_hidden(data: &WindowsOverviewData) -> bool {
 
 pub fn close_overview(data: &mut WindowsOverviewData, ids: Option<Option<WindowsOverride>>) {
     let _span = debug_span!("close_overview").entered();
-    reset_remain_focused().warn_details("Failed to reset follow mouse");
+    reset_no_follow_mouse().warn_details("Failed to reset follow mouse");
 
     for (window, monitor_data) in &mut data.window_list.iter_mut() {
         while let Some(child) = monitor_data.workspaces_flow.first_child() {

@@ -125,6 +125,7 @@ fn activate(
 ) {
     let _span = debug_span!("activate").entered();
     apply_css(css_path).warn_details("Failed to apply CSS");
+    exec_lib::set_follow_mouse_default().warn_details("Failed to set set_remain_focused default");
     match check_new_version(cache_dir) {
         Err(err) => {
             debug!("Unable to compare previous to current version.\n{err:?}");
