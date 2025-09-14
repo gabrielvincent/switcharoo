@@ -7,6 +7,7 @@ use smart_default::SmartDefault;
 #[serde(deny_unknown_fields)]
 pub struct Config {
     #[default = true]
+    /// TODO remove next update
     pub layerrules: bool,
     #[default = "ctrl+shift+alt, h"]
     pub kill_bind: Box<str>,

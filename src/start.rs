@@ -72,17 +72,10 @@ pub fn start(
         #[cfg(debug_assertions)]
         let application = Application::builder()
             .application_id(format!(
-                "{}-test-{}",
+                "{}-test-{}{}",
                 core_lib::APPLICATION_ID.to_string(),
-                wayland_socket_index
-            ))
-            .build();
-        #[cfg(not(debug_assertions))]
-        let application = Application::builder()
-            .application_id(format!(
-                "{}-{}",
-                core_lib::APPLICATION_ID.to_string(),
-                wayland_socket_index
+                wayland_socket_index,
+                if cfg!(debug_assertions) { "-test" } else { "" }
             ))
             .build();
         debug!("Application created");

@@ -17,13 +17,13 @@ pub fn configure_wm(config: &Config) -> anyhow::Result<()> {
             warn!("Failed to load hyprland plugin: {err:?}");
             info!("Falling back to default keybinds");
             apply_binds(config)?;
-            layerrules(config);
         }
     } else {
         apply_binds(config)?;
-        layerrules(config);
     }
 
+    // TODO apply layerrules in plugin
+    apply_layerrules().warn_details("Failed to apply layerrules");
     Ok(())
 }
 
@@ -47,10 +47,4 @@ fn apply_binds(config: &Config) -> anyhow::Result<()> {
         }
     }
     Ok(())
-}
-
-fn layerrules(config: &Config) {
-    if config.layerrules {
-        apply_layerrules().warn_details("Failed to apply layerrules");
-    }
 }

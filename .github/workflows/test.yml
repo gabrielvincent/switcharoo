@@ -22,7 +22,7 @@ jobs:
       - uses: cachix/cachix-action@v16
         with:
           name: hyprshell-dev
-          pushFilter: "^(?!.*hyprshell-full-deps)"
+          pathsToPush: "/store/nix/.*hyprshell-full-deps.*"
           authToken: ${{ secrets.CACHIX_AUTH_TOKEN_DEV }}
       - name: Run Nix Flake Build deps
         run: nix build '.#checks.x86_64-linux.hyprshell-build-deps' -L
