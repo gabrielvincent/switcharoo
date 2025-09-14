@@ -167,13 +167,26 @@ pub enum DebugCommand {
 #[derive(Subcommand, Debug, Clone)]
 pub enum DefaultApplicationsCommand {
     /// Get default app for mimetype
-    Get { mime: String },
+    Get {
+        /// for example `image/png` of `x-scheme-handler/https`
+        mime: String,
+    },
 
     /// Sets a default app for a mimetype (if one already exists, it is replaced)
-    Set { mime: String, value: String },
+    Set {
+        /// for example `image/png` of `x-scheme-handler/https`
+        mime: String,
+        /// Name of a desktop file (with .desktop extension)
+        value: String,
+    },
 
     /// Add an association app for mimetype (if one already exists, this one is placed before)
-    Add { mime: String, value: String },
+    Add {
+        /// for example `image/png` of `x-scheme-handler/https`
+        mime: String,
+        /// Name of a desktop file (with .desktop extension)
+        value: String,
+    },
 
     /// List default apps for all mimetypes
     List {

@@ -91,7 +91,13 @@ fn open_switch(global: &mut Globals, config: &OpenSwitch) {
                 windows_lib::open_switch(switch, config)
                     .warn_details("Failed to open switch window");
             } else {
-                debug!("Switch or Overview already open");
+                debug!("Switch or Overview already open, converting to SwitchSwitch");
+                windows_lib::update_switch(
+                    switch,
+                    &SwitchSwitchConfig {
+                        reverse: config.reverse,
+                    },
+                );
             }
         } else {
             warn!("Window switch not active");

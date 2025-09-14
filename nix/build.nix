@@ -16,7 +16,7 @@ rec {
     platforms = pkgs.hyprland.meta.platforms;
   };
   stdenv = p: p.stdenv;
-  postInstall = ''
+  wrapProgram = ''
     wrapProgram $out/bin/hyprshell \
       --prefix PATH : ${pkgs.lib.makeBinPath [ pkgs.gcc ]} \
       --prefix CPATH : ${
@@ -49,7 +49,6 @@ rec {
       pkgs.pkg-config
       pkgs.wrapGAppsHook4
       pkgs.makeBinaryWrapper
-      #      pkgs.makeWrapper
     ];
 
     buildInputs = [
@@ -80,13 +79,6 @@ rec {
       cargoBuildCommand = "cargo build --profile dev --locked --all-targets --all-features";
       cargoCheckCommand = "cargo check --profile dev --locked --all-targets --all-features";
       cargoTestCommand = "cargo test --profile dev --locked --all-targets --all-features";
-    }
-  );
-
-  commonArgsCachedRelease = (
-    commonArgs
-    // {
-      inherit cargoArtifacts postInstall;
     }
   );
 

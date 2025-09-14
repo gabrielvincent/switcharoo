@@ -95,7 +95,7 @@ jobs:
         with:
           github_access_token: ${{ secrets.GITHUB_TOKEN }}
           extra_nix_config: "download-buffer-size = 5368709120"
-      - uses: cachix/cachix-action@v14
+      - uses: cachix/cachix-action@v16
         with:
           name: hyprshell
           extraPullNames: hyprshell-dev
