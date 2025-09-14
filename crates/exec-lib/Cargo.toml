@@ -17,7 +17,7 @@ core-lib.workspace = true
 config-lib.workspace = true
 hyprland-plugin.workspace = true
 semver.workspace = true
-hyprland = { package = "hyprshell-hyprland", path = "../hyprland-rs", features = ["async-lite", "dispatch", "keyword", "data", "listener", "ctl", "config"], default-features = false, version = "=4.6.3" }
+hyprland = { package = "hyprshell-hyprland", path = "../../dep-crates/hyprland-rs", features = ["async-lite", "dispatch", "keyword", "data", "listener", "ctl", "config"], default-features = false, version = "=4.6.3" }
 
 [lints]
 workspace = true

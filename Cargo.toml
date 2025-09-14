@@ -40,8 +40,7 @@ config_check = ["config-lib/no-default-config-values"]
 
 
 [workspace]
-members = ["exec-lib", "core-lib", "windows-lib", "launcher-lib", "config-lib", "hyprland-plugin", "hyprland-rs", "hyprland-rs/hyprland-macros"]
-exclude = ["test-global"]
+members = ["crates/exec-lib", "crates/core-lib", "crates/windows-lib", "crates/launcher-lib", "crates/config-lib", "crates/hyprland-plugin", "dep-crates/hyprland-rs", "dep-crates/hyprland-rs/hyprland-macros"]
 
 [workspace.package]
 version = "4.6.3"
@@ -64,12 +63,12 @@ semver = { version = "1.0.26" }
 gtk = { version = "0.10.0", package = "gtk4", default-features = false, features = ["v4_14"] }
 gtk4-layer-shell = { version = "0.6.3" }
 
-config-lib = { path = "config-lib", package = "hyprshell-config-lib", version = "=4.6.3" }
-core-lib = { path = "core-lib", package = "hyprshell-core-lib", version = "=4.6.3" }
-exec-lib = { path = "exec-lib", package = "hyprshell-exec-lib", version = "=4.6.3" }
-windows-lib = { path = "windows-lib", package = "hyprshell-windows-lib", version = "=4.6.3" }
-launcher-lib = { path = "launcher-lib", package = "hyprshell-launcher-lib", version = "=4.6.3" }
-hyprland-plugin = { path = "hyprland-plugin", package = "hyprshell-hyprland-plugin", version = "=4.6.3" }
+config-lib = { path = "crates/config-lib", package = "hyprshell-config-lib", version = "=4.6.3" }
+core-lib = { path = "crates/core-lib", package = "hyprshell-core-lib", version = "=4.6.3" }
+exec-lib = { path = "crates/exec-lib", package = "hyprshell-exec-lib", version = "=4.6.3" }
+windows-lib = { path = "crates/windows-lib", package = "hyprshell-windows-lib", version = "=4.6.3" }
+launcher-lib = { path = "crates/launcher-lib", package = "hyprshell-launcher-lib", version = "=4.6.3" }
+hyprland-plugin = { path = "crates/hyprland-plugin", package = "hyprshell-hyprland-plugin", version = "=4.6.3" }
 
 [lints]
 workspace = true

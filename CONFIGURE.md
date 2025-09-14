@@ -9,7 +9,7 @@ To generate a default config file with all possible options set, run the followi
 hyprshell config generate
 ```
 
-In case this documentation is outdated, or you understand rust, look at the [struct definition](config-lib/src/structs.rs) for the most up-to-date information.
+In case this documentation is outdated, or you understand rust, look at the [struct definition](crates/config-lib/src/structs.rs) for the most up-to-date information.
 
 The default values for these configs, which are also the values that get used when generating the config, are located in the code directly above the value definition (`#[default ... ]`).
 
@@ -45,7 +45,7 @@ This mode displays the windows in a downscaled view of the screen. It also shows
 
 ## Launcher
 
-- **default_terminal:**_[string]_ Defined the name of the default terminal to use. This value is optional, if unset a list of [default terminals](./core-lib/src/util/const.rs) is used to find a default terminal.
+- **default_terminal:**_[string]_ Defined the name of the default terminal to use. This value is optional, if unset a list of [default terminals](crates/core-lib/src/util/const.rs) is used to find a default terminal.
   This is used to launch programs like micro from the launcher that need to be run in a terminal.
   This terminal is also used by the `terminal` plugin to run the typed command in a terminal.
 - **launch_modifier:**_[string]_ Sets the modifier used to launch apps in the launcher by pressing `<Mod> + 1` to open second, `<Mod> + t` to run in terminal, etc. This MUST be one of these modifiers: `alt, ctrl, super`.
@@ -98,7 +98,7 @@ hyprshell config generate
 GTK only supports a subset of CSS, so not all CSS properties will work. The supported properties are listed in the [GTK documentation](https://docs.gtk.org/gtk4/css-overview.html).
 
 The override file contains many empty classes that can be used to configure padding, fonts, etc.
-These settings will take priority over the default values set by the application itself. The application defaults can be found in the CSS files inside the codebase (for example, [this one](src/default_styles.css) or [that one](./windows-lib/src/styles.css)).
+These settings will take priority over the default values set by the application itself. The application defaults can be found in the CSS files inside the codebase (for example, [this one](src/default_styles.css) or [that one](crates/windows-lib/src/styles.css)).
 
 If you want to change colors borders, etc. you can edit the CSS variables in the `:root {}` section.
 These styles are automatically used everywhere in the application, so you don't have to set them for every class.
