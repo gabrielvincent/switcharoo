@@ -69,7 +69,6 @@ pub fn start(
 
     info!("Starting gui loop");
     loop {
-        #[cfg(debug_assertions)]
         let application = Application::builder()
             .application_id(format!(
                 "{}-test-{}{}",

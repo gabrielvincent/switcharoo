@@ -1,5 +1,4 @@
 {
-  self,
   craneLib,
   pkgs,
 }:
@@ -16,18 +15,10 @@ rec {
     platforms = pkgs.hyprland.meta.platforms;
   };
   stdenv = p: p.stdenv;
-  wrapProgram = ''
+  wrapWithGcc = ''
     wrapProgram $out/bin/hyprshell \
       --prefix PATH : ${pkgs.lib.makeBinPath [ pkgs.gcc ]} \
-      --prefix CPATH : ${
-        pkgs.lib.makeIncludePath (
-          pkgs.hyprland.buildInputs
-          ++ [
-            pkgs.hyprland
-            pkgs.pixman
-          ]
-        )
-      }
+      --prefix CPATH : ${pkgs.lib.makeIncludePath ([ pkgs.pixman ])}
   '';
   commonArgs = {
     inherit
@@ -57,7 +48,7 @@ rec {
     ];
   };
 
-  cargoArtifacts = craneLib.buildDepsOnly (
+  cargoReleaseArtifacts = craneLib.buildDepsOnly (
     commonArgs
     // {
       mkDummySrc = craneLib.mkDummySrc {
@@ -81,7 +72,6 @@ rec {
       cargoTestCommand = "cargo test --profile dev --locked --all-targets --all-features";
     }
   );
-
   commonArgsFullCached = (
     commonArgs
     // {

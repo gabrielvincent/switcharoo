@@ -29,24 +29,19 @@
         { pkgs, self', ... }:
         let
           craneLib = crane.mkLib pkgs;
-          buildLib = import ./nix/build.nix { inherit craneLib pkgs self; };
+          buildLib = import ./nix/build.nix { inherit craneLib pkgs; };
         in
         {
           formatter = pkgs.nixfmt-tree;
           packages = rec {
-            hyprshell = craneLib.buildPackage (
+            hyprshell-no-hyprland-wrap = craneLib.buildPackage (
               buildLib.commonArgs
               // {
-                cargoArtifacts = buildLib.cargoArtifacts;
-                postInstall = buildLib.wrapProgram;
+                cargoArtifacts = buildLib.cargoReleaseArtifacts;
+                postInstall = buildLib.wrapWithGcc;
               }
             );
-            hyprshell-no-wrap = craneLib.buildPackage (
-              buildLib.commonArgs
-              // {
-                cargoArtifacts = buildLib.cargoArtifacts;
-              }
-            );
+            hyprshell = self.helpers.wrap-hyprshell pkgs.hyprland pkgs;
             default = hyprshell;
           };
           checks = import ./nix/checks.nix {
@@ -70,6 +65,25 @@
         homeModules = rec {
           hyprshell = import ./nix/module.nix self;
           default = hyprshell;
+        };
+        helpers = {
+          wrap-hyprshell =
+            hyprland: pkgs:
+            pkgs.runCommand "hyprshell" { buildInputs = [ pkgs.makeBinaryWrapper ]; } ''
+              mkdir -p $out/bin
+              cp ${
+                self.packages.${pkgs.stdenv.hostPlatform.system}.hyprshell-no-hyprland-wrap
+              }/bin/hyprshell $out/bin/hyprshell
+              wrapProgram $out/bin/hyprshell \
+                --prefix CPATH : ${
+                  pkgs.lib.makeIncludePath (
+                    hyprland.buildInputs
+                    ++ [
+                      hyprland
+                    ]
+                  )
+                }
+            '';
         };
       };
     };
