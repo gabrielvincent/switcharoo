@@ -69,21 +69,27 @@
         helpers = {
           wrap-hyprshell =
             hyprland: pkgs:
-            pkgs.runCommand "hyprshell" { buildInputs = [ pkgs.makeBinaryWrapper ]; } ''
-              mkdir -p $out/bin
-              cp ${
-                self.packages.${pkgs.stdenv.hostPlatform.system}.hyprshell-no-hyprland-wrap
-              }/bin/hyprshell $out/bin/hyprshell
-              wrapProgram $out/bin/hyprshell \
-                --prefix CPATH : ${
-                  pkgs.lib.makeIncludePath (
-                    hyprland.buildInputs
-                    ++ [
-                      hyprland
-                    ]
-                  )
-                }
-            '';
+            pkgs.runCommand "hyprshell"
+              {
+                buildInputs = [ pkgs.makeBinaryWrapper ];
+                # TODO doesnt work, getExe still complains
+                meta = import ./nix/meta.nix { inherit pkgs; };
+              }
+              ''
+                mkdir -p $out/bin
+                cp ${
+                  self.packages.${pkgs.stdenv.hostPlatform.system}.hyprshell-no-hyprland-wrap
+                }/bin/hyprshell $out/bin/hyprshell
+                wrapProgram $out/bin/hyprshell \
+                  --prefix CPATH : ${
+                    pkgs.lib.makeIncludePath (
+                      hyprland.buildInputs
+                      ++ [
+                        hyprland
+                      ]
+                    )
+                  }
+              '';
         };
       };
     };
