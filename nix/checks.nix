@@ -34,7 +34,7 @@ rec {
     }
   );
   hyprshell-fmt = craneLib.cargoFmt buildLib.commonArgs;
-  check-nix-configs =
+  hyprshell-check-nix-configs =
     let
       base-modules = [
         self.homeModules.hyprshell
@@ -61,7 +61,7 @@ rec {
         ];
       };
     in
-    pkgs.runCommand "check-nix-configs" { } ''
+    pkgs.runCommand "hyprshell-check-nix-configs" { } ''
       set -euo pipefail
 
       TMP=$(mktemp -d)
@@ -95,7 +95,7 @@ rec {
 
       mkdir "$out"
     '';
-  check-all-feature-combinations = craneLib.mkCargoDerivation (
+  hyprshell-check-all-feature-combinations = craneLib.mkCargoDerivation (
     buildLib.commonArgsFullCached
     // {
       pnameSuffix = "-check-all-feature-combinations";

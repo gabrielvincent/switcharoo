@@ -64,7 +64,7 @@ pub fn start(
 
     let wayland_socket_index = env::var("WAYLAND_DISPLAY")
         .ok()
-        .and_then(|s| s.split('-').last()?.parse::<i32>().ok())
+        .and_then(|s| s.split('-').next_back()?.parse::<i32>().ok())
         .unwrap_or(1);
 
     info!("Starting gui loop");
@@ -73,7 +73,7 @@ pub fn start(
         let application = Application::builder()
             .application_id(format!(
                 "{}-test-{}{}",
-                core_lib::APPLICATION_ID.to_string(),
+                core_lib::APPLICATION_ID,
                 wayland_socket_index,
                 if cfg!(debug_assertions) { "-test" } else { "" }
             ))

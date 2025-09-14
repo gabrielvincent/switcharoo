@@ -32,7 +32,7 @@ case "$1" in
         nix build '.#checks.x86_64-linux.hyprshell-config-check' -L
         ;;
     "clippy")
-        cargo clippy --profile dev --all-targets --all-features -p hyprshell-config-lib -p hyprshell-core-lib -p hyprshell-exec-lib -p hyprshell-launcher-lib -p hyprshell-windows-lib -p hyprshell-hyprland-plugin -- --deny warnings
+        cargo clippy --profile dev --all-targets --all-features -p hyprshell -p hyprshell-config-lib -p hyprshell-core-lib -p hyprshell-exec-lib -p hyprshell-launcher-lib -p hyprshell-windows-lib -p hyprshell-hyprland-plugin -- --deny warnings
         ;;
     "clippy-nix")
         nix build '.#checks.x86_64-linux.hyprshell-clippy' -L
@@ -44,22 +44,22 @@ case "$1" in
         nix build '.#checks.x86_64-linux.hyprshell-fmt' -L
         ;;
     "test")
-        cargo nextest run --cargo-profile dev --all-targets --all-features -p hyprshell-config-lib -p hyprshell-core-lib -p hyprshell-exec-lib -p hyprshell-launcher-lib -p hyprshell-windows-lib -p hyprshell-hyprland-plugin
+        cargo nextest run --cargo-profile dev --all-targets --all-features -p hyprshell -p hyprshell-config-lib -p hyprshell-core-lib -p hyprshell-exec-lib -p hyprshell-launcher-lib -p hyprshell-windows-lib -p hyprshell-hyprland-plugin
         ;;
     "test-nix")
         nix build '.#checks.x86_64-linux.hyprshell-test' -L
         ;;
     "check-nix-configs")
-        nix build '.#checks.x86_64-linux.check-nix-configs' -L
+        nix build '.#checks.x86_64-linux.hyprshell-check-nix-configs' -L
         ;;
     "check-features")
-        nix build '.#checks.x86_64-linux.check-all-feature-combinations' -L
+        nix build '.#checks.x86_64-linux.hyprshell-check-all-feature-combinations' -L
         ;;
     "all")
         cargo build --profile dev --locked && \
-        cargo clippy --profile dev --all-targets --all-features -p hyprshell-config-lib -p hyprshell-core-lib -p hyprshell-exec-lib -p hyprshell-launcher-lib -p hyprshell-windows-lib -p hyprshell-hyprland-plugin -- --deny warnings && \
+        cargo clippy --profile dev --all-targets --all-features -p hyprshell -p hyprshell-config-lib -p hyprshell-core-lib -p hyprshell-exec-lib -p hyprshell-launcher-lib -p hyprshell-windows-lib -p hyprshell-hyprland-plugin -- --deny warnings && \
         cargo fmt -- --check && \
-        cargo nextest run --cargo-profile dev --all-targets --all-features -p hyprshell-config-lib -p hyprshell-core-lib -p hyprshell-exec-lib -p hyprshell-launcher-lib -p hyprshell-windows-lib -p hyprshell-hyprland-plugin
+        cargo nextest run --cargo-profile dev --all-targets --all-features -p hyprshell -p hyprshell-config-lib -p hyprshell-core-lib -p hyprshell-exec-lib -p hyprshell-launcher-lib -p hyprshell-windows-lib -p hyprshell-hyprland-plugin
         ;;
     "all-nix")
         nix build '.#checks.x86_64-linux.hyprshell-config-check' -L && \

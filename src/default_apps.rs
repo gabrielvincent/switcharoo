@@ -30,7 +30,7 @@ pub fn get(mime: &str) -> anyhow::Result<()> {
         }
     }
     if mimes.is_empty() {
-        println!("No default application found for {mime}")
+        println!("No default application found for {mime}");
     } else {
         for (value, path) in mimes {
             println!("{mime}: {value} [{path}]");
