@@ -30,6 +30,11 @@ pub const WEB_SEARCH_ENGINES: &[(&str, fn() -> SearchEngine)] = &[
         name: "Google".into(),
         key: 'g',
     }),
+    ("Startpage", || SearchEngine {
+        url: "https://www.startpage.com/sp/search?query={}".into(),
+        name: "Startpage".into(),
+        key: 's',
+    }),
     ("DuckDuckGo", || SearchEngine {
         url: "https://duckduckgo.com/?q={}".into(),
         name: "DuckDuckGo".into(),

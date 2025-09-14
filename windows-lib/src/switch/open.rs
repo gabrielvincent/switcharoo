@@ -24,7 +24,7 @@ pub fn switch_already_open(data: &WindowsSwitchData) -> bool {
 #[allow(clippy::too_many_lines)]
 pub fn open_switch(data: &mut WindowsSwitchData, config: &OpenSwitch) -> anyhow::Result<()> {
     let _span = debug_span!("open_switch").entered();
-    set_remain_focused().warn_details("Failed to set no follow mouse");
+    set_remain_focused().warn_details("Failed to set set_remain_focused");
 
     let (clients_data, active_prev) = collect_data(&SortConfig {
         filter_current_monitor: data.config.filter_current_monitor,

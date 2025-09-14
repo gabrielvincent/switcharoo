@@ -56,7 +56,6 @@ pub fn create_windows_switch_window(
     window.init_layer_shell();
     window.set_namespace(Some(SWITCH_NAMESPACE));
     window.set_layer(Layer::Top);
-    window.set_can_focus(false);
     // we only have one window, so we can do this
     // we also don't use gtk::Popover which doesnt work with exclusive mode
     window.set_keyboard_mode(KeyboardMode::Exclusive);

@@ -15,7 +15,6 @@ jobs:
       - uses: cachix/install-nix-action@7be5dee1421f63d07e71ce6e0a9f8a4b07c2a487 # v31.6.1
         with:
           github_access_token: ${{ secrets.GITHUB_TOKEN }}
-          extra_nix_config: "download-buffer-size = 1048576000"
       - name: Update flake
         run: |
           git fetch
