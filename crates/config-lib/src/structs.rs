@@ -6,11 +6,6 @@ use smart_default::SmartDefault;
 #[cfg_attr(not(feature = "no-default-config-values"), serde(default))]
 #[serde(deny_unknown_fields)]
 pub struct Config {
-    #[default = true]
-    /// TODO remove next update
-    pub layerrules: bool,
-    #[default = "ctrl+shift+alt, h"]
-    pub kill_bind: Box<str>,
     #[cfg_attr(
         not(feature = "no-default-config-values"),
         default(Some(crate::CURRENT_CONFIG_VERSION))
@@ -71,6 +66,7 @@ pub struct Launcher {
         websearch: Some(WebSearchConfig::default()),
         calc: Some(EmptyConfig::default()),
         path: Some(EmptyConfig::default()),
+        actions: Some(ActionsPluginConfig::default()),
     })]
     pub plugins: Plugins,
 }
@@ -86,6 +82,7 @@ pub struct Plugins {
     pub websearch: Option<WebSearchConfig>,
     pub calc: Option<EmptyConfig>,
     pub path: Option<EmptyConfig>,
+    pub actions: Option<ActionsPluginConfig>,
 }
 
 #[derive(SmartDefault, Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]
@@ -96,13 +93,55 @@ pub struct EmptyConfig {}
 #[derive(SmartDefault, Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]
 #[cfg_attr(not(feature = "no-default-config-values"), serde(default))]
 #[serde(deny_unknown_fields)]
+pub struct ActionsPluginConfig(
+    #[default(vec![
+        ActionsPluginAction::LockScreen,
+        ActionsPluginAction::Hibernate,
+        ActionsPluginAction::Logout,
+        ActionsPluginAction::Reboot,
+        ActionsPluginAction::Shutdown,
+        ActionsPluginAction::Suspend,
+        ActionsPluginAction::Custom(ActionsPluginActionCustom {
+            names: vec!["Kill".into(), "Stop".into()],
+            details: "Kill or stop a process by name".into(),
+            command: "pkill \"{}\" && notify-send hyprshell \"stopped {}\"".into(),
+            icon: "remove".into(),
+        }),
+    ])]
+    pub Vec<ActionsPluginAction>,
+);
+
+#[derive(SmartDefault, Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]
+#[cfg_attr(not(feature = "no-default-config-values"), serde(default))]
+#[serde(deny_unknown_fields)]
 pub struct ApplicationsPluginConfig {
-    #[default = 4]
+    #[default = 8]
     pub run_cache_weeks: u8,
     #[default = true]
     pub show_execs: bool,
     #[default = true]
     pub show_actions_submenu: bool,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum ActionsPluginAction {
+    LockScreen,
+    Hibernate,
+    Logout,
+    Reboot,
+    Shutdown,
+    Suspend,
+    Custom(ActionsPluginActionCustom),
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]
+#[serde(deny_unknown_fields)]
+pub struct ActionsPluginActionCustom {
+    pub names: Vec<Box<str>>,
+    pub details: Box<str>,
+    pub command: Box<str>,
+    pub icon: Box<str>,
 }
 
 #[derive(SmartDefault, Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]
@@ -141,7 +180,7 @@ pub struct Switch {
     pub switch_workspaces: bool,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize, Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]
 #[serde(rename_all = "snake_case")]
 pub enum FilterBy {
     SameClass,

@@ -59,12 +59,11 @@ pub fn explain(config: &Config, config_path: &Path, enable_color: bool) -> Strin
                     "\t- Paths (starting with ~ or /) can be open in default file-manager.\n",
                 );
             }
-            // TODO add action explain
-            // if overview.launcher.plugins.actions.is_some() {
-            //     let _ = builder.write_str(
-            //         "\t- Type Reboot/Shutdown/etc. to perform system actions. Type `actions` to see all available ones \n",
-            //     );
-            // }
+            if overview.launcher.plugins.actions.is_some() {
+                let _ = builder.write_str(
+                    "\t- Type Reboot/Shutdown/etc. to run corresponding commands. Type `actions` to see all available ones.\n",
+                );
+            }
         } else {
             let _ = builder.write_str(&format!("{italic}<Overview move disabled>{reset}\n"));
         }
@@ -117,6 +116,7 @@ After opening the Overview the Launcher is available:
 	- Press Ctrl + <key> to search the typed text in any of the configured SearchEngines: Google, Wikipedia.
 	- Typing a mathematical expression will calculate it and display the result in the launcher.
 	- Paths (starting with ~ or /) can be open in default file-manager.
+	- Type Reboot/Shutdown/etc. to run corresponding commands. Type `actions` to see all available ones.
 
 Press Alt + tab and hold Alt to view recently used applications. Press tab and grave / shift + tab to select a different window, release Alt to close the window.
 ";
@@ -153,6 +153,7 @@ After opening the Overview the Launcher is available:
 	- Press Ctrl + <key> to search the typed text in any of the configured SearchEngines: Google, Wikipedia.
 	- Typing a mathematical expression will calculate it and display the result in the launcher.
 	- Paths (starting with ~ or /) can be open in default file-manager.
+	- Type Reboot/Shutdown/etc. to run corresponding commands. Type `actions` to see all available ones.
 
 <Switch mode disabled>
 ";
@@ -189,6 +190,7 @@ Press Alt + tab and hold Alt to view recently used applications. Press tab and g
             websearch: None,
             calc: None,
             path: None,
+            actions: None,
         };
         let path = PathBuf::from("/test/config.ron");
         let result = explain(&config, &path, false);

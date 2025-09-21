@@ -129,7 +129,7 @@ fn activate(
         Err(err) => {
             debug!("Unable to compare previous to current version.\n{err:?}");
         }
-        Ok(Ordering::Greater) => {
+        Ok((Ordering::Greater, no_patch)) => {
             info_toast(
                 &format!(
                     "Hyprshell was updated to a new version ({})",
@@ -137,12 +137,14 @@ fn activate(
                 ),
                 Duration::from_secs(5),
             );
-            info_toast(NEW_VERSION_INFO, Duration::from_secs(10));
+            if no_patch {
+                info_toast(NEW_VERSION_INFO, Duration::from_secs(10));
+            }
         }
-        Ok(Ordering::Less) => {
+        Ok((Ordering::Less, _)) => {
             toast("Hyprshell was downgraded, downgrading config must be done manually if needed");
         }
-        Ok(Ordering::Equal) => {
+        Ok((Ordering::Equal, _)) => {
             debug!("Hyprshell is up to date");
         }
     }

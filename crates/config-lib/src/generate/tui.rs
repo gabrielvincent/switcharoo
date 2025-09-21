@@ -8,10 +8,11 @@ use inquire::{Confirm, MultiSelect, Select, Text};
 
 pub mod configurable_launcher_plugins {
     pub const APPLICATIONS: &str = "Open Applications";
-    pub const SHELL: &str = "Run in shell";
-    pub const TERMINAL: &str = "Run in terminal";
-    pub const WEB_SEARCH: &str = "Web search";
-    pub const CALC: &str = "Calculator";
+    pub const SHELL: &str = "Run command in shell";
+    pub const TERMINAL: &str = "Run command in terminal";
+    pub const WEB_SEARCH: &str = "Search the web (Google, DuckDuckGo, etc.)";
+    pub const CALC: &str = "Evaluate Math expressions";
+    pub const ACTIONS: &str = "Run actions (restart, hibernate, custom, etc.)";
 
     pub const ALL: &[&str] = &[
         APPLICATIONS,
@@ -20,6 +21,7 @@ pub mod configurable_launcher_plugins {
         WEB_SEARCH,
         #[cfg(feature = "launcher_calc_plugin")]
         CALC,
+        ACTIONS,
     ];
 }
 
@@ -107,7 +109,7 @@ pub fn prompt_config() -> anyhow::Result<(ConfigData, StyleData)> {
     let launcher = if open_overview.is_some() {
         let default_terminal = Text::new("Default Terminal")
                 .with_autocomplete(StringAutoCompleter::from(vec!["alacritty", "kitty", "wezterm", "gnome-terminal"]))
-                .with_help_message("used to open terminal applications (htop), leave empty to chose from installed terminals]\n[Any valid binary name found in path can be typed in]\n[↑↓ to move, tab to autocomplete, enter to submit")
+                .with_help_message("used to open terminal applications (htop), leave empty to automatically chose from installed terminals]\n[Any valid binary name found in path can be typed in]\n[↑↓ to move, tab to autocomplete, enter to submit")
                 .prompt()
                 .map_or(None, |term| if term.trim().is_empty() { None } else { Some(term.into_boxed_str()) });
 
@@ -127,7 +129,7 @@ pub fn prompt_config() -> anyhow::Result<(ConfigData, StyleData)> {
             let formatter: MultiOptionFormatter<'_, &str> =
                 &|a| format!("{} engines active", a.len());
             MultiSelect::new(
-                "SearchEngines for launcher",
+                "SearchEngines for web search plugin in launcher",
                 WEB_SEARCH_ENGINES.iter().map(|(name, _)| *name).collect(),
             )
             .with_formatter(formatter)

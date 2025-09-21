@@ -15,10 +15,6 @@ The default values for these configs, which are also the values that get used wh
 
 ## Config Options
 
-- **layerrules:**_[boolean]_ [not used anymore, layerrules are always applied] layerrules are used in hyprland to configure animations modal-view, etc.
-  They are currently used in [this part of the code](src/keybinds.rs) to disable the default animations and dim the background around the launcher.
-- **kill_bind:**_[string]_ Keybinding to kill the hyprshell daemon. It can be used if the overview or switch mode is stuck or if the program crashed and the submap wasn't reset.
-  It must be a valid keybinding like `super+alt, q` or `ctrl+alt, k`. By default, this is set to `ctrl+shift+alt, h`.
 - **version:**_[number]_ The version of the config file. Will be used for the migrator in the future.
 - **windows:**_[Windows]_ Configuration for the different windows like overview, switch and launcher (optional).
 
@@ -58,19 +54,34 @@ This mode displays the windows in a downscaled view of the screen. It also shows
 
 ### Plugins
 
-- **Applications:** Show installed applications in the launcher, filed by the input, sorted by how often they are used. The following options can be provided:
+- **applications:** Show installed applications in the launcher, filed by the input, sorted by how often they are used. The following options can be provided:
     - **run_cache_weeks:**_[u8]_ How many weeks to cache the run history. This is used to sort the applications by how often they are used.
     - **show_execs:**_[boolean]_ Show the exec line from the Desktop file. In the case of Flatpaks and PWAs these get shortened to the name of the app.
       The full exec can still be seen in the tooltip.
     - **show_actions_submenu:**_[boolean]_ Show a dropdown menu with all the desktop actions specified in the `.desktop` files of the applications, like `new private window`, etc.
-- **Terminal:** Open a terminal and run the typed command in it. The terminal is defined in the `default_terminal` config option. This plugin doesn't accept any options.
-- **Shell:** Run the typed command in a shell (in the background). This plugin doesn't accept any options.
-- **WebSearch:** Allows searching for the typed query in a web browser.
+- **terminal:** Open a terminal and run the typed command in it. The terminal is defined in the `default_terminal` config option. This plugin doesn't accept any options.
+- **shell:** Run the typed command in a shell (in the background). This plugin doesn't accept any options.
+- **webSearch:** Allows searching for the typed query in a web browser.
     - **engines:**_[List<WebSearchEngine>]_ A list of search engines to use. Each search engine is defined by the following properties.
         - **url:**_[string]_ URL to open in the browser. This must include a `{}` to replace with the searched text (like `https://www.google.com/search?q={}`).
         - **name:**_[string]_ Name of the search engine. This is used to show the name in the launcher.
         - **key:**_[string]_ Key to use to select this search engine. This is used to register the keybinding to select the search engine without clicking on it.
-- **Calc:** Calculates any mathematical expression typed into the launcher. This plugin doesn't accept any options.
+- **calc:** Calculates any mathematical expression typed into the launcher. This plugin doesn't accept any options.
+- **path** Opens the selected path in the default file manager (see [Debugging](./DEBUG.md) to check default). This plugin doesn't accept any options.
+- **actions** Runs the specified action like reboot, hibernate, etc. Custom actions can also be specified. This plugin takes in a list of actions to run, either predefined of custom ones.
+    - **lock_screen** Locks the screen.
+    - **hibernate** Hibernates the system (copys the RAM to disk and powers off).
+    - **logout** Logs out the user.
+    - **reboot** Reboots the system.
+    - **shutdown** Shuts down the system.
+    - **suspend** Suspends the system.
+    - **custom** A list of custom actions to run. Each action is defined by the following properties.
+        - **names:**_[List<string>]_ List of names to use for the action, like `["poweroff", "shutdown"]`.
+        - **details:**_[string]_ Details about the action. This is used to show the details in the launcher.
+        - **command:**_[string]_ Command to run when the action is selected. (example: `command: "sudo shutdown -h now"`).
+          can include `{}` which is replaced with the content of the text in the launcher (without the name of the action).
+          Typing `kill 100` and running the action kill with a name `kill` would replace `{}` with `100`.
+        - **icon:**_[string]_ Icon to show in the launcher.
 
 ### Switch
 

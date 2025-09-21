@@ -92,7 +92,9 @@ fn get_icon_data() -> (Vec<String>, Vec<PathBuf>) {
     (gtk_icons, search_path)
 }
 
-pub fn check_new_version(cache_dir: &Path) -> anyhow::Result<Ordering> {
+/// Checks if the current version is newer than the cached version.
+/// If a mayor of minor update is detected, true is returned as second value.
+pub fn check_new_version(cache_dir: &Path) -> anyhow::Result<(Ordering, bool)> {
     let version_file = cache_dir.join("version.txt");
     let current_version = env!("CARGO_PKG_VERSION");
     let current_version =
@@ -107,12 +109,17 @@ pub fn check_new_version(cache_dir: &Path) -> anyhow::Result<Ordering> {
         );
         write(&version_file, current_version.to_string().as_bytes())
             .context("Failed to write current version to file")?;
-        Ok(current_version.cmp(&cached_version))
+        Ok((
+            current_version.cmp(&cached_version),
+            current_version.major > cached_version.major
+                || (current_version.major == cached_version.major
+                    && current_version.minor > cached_version.minor),
+        ))
     } else {
         std::fs::create_dir_all(cache_dir).context("Failed to create cache directory")?;
         let mut file = File::create(&version_file).context("Failed to create version file")?;
         file.write_all(current_version.to_string().as_bytes())
             .context("Failed to write current version to file")?;
-        Ok(Ordering::Greater)
+        Ok((Ordering::Greater, true))
     }
 }

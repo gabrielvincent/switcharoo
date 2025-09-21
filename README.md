@@ -16,7 +16,7 @@ The application also includes a launcher for running applications, doing calcula
 - **Customizable Keybindings**: Define your own keybindings for window switching and GUI interactions.
 - **Config**: Interactive [config file](./CONFIGURE.md) generation for easy setup.
 - **Launcher Integration**: Launch applications directly from the GUI, sorted by usage frequency.
-- **Launcher Plugins**: Different plugins like Web search or calculations can be enabled.
+- **Launcher Plugins**: Different plugins like Web search, actions or calculations can be enabled.
 - **Theming**: Customize the GUI appearance (gtk4) using [CSS](./CONFIGURE.md).
 - **Dynamic Configuration**: Automatically reloads configuration/style changes without restarting the application.
 - **Debug command**: Many [Commands](DEBUG.md) to debug desktop files, icons and default applications.
@@ -109,6 +109,7 @@ Debug commands are provided to help troubleshoot desktop files, icons, default a
 - `HYPRSHELL_LOG_MODULE_PATH`: Add the module path to each log message. (use with -vv)
 - `HYPRSHELL_NO_USE_PLUGIN`: Disable the use of the hyprland plugin to capture switch mode events.
 - `HYPRSHELL_EXPERIMENTAL`: Enables experimental features (grep through the source code for `"HYPRSHELL_EXPERIMENTAL"` to see them)
+- `HYPRSHELL_RUN_ACTIONS_IN_DEBUG`: Run actions from launcher plugin in debug mode
 
 ### Feature Flags
 

@@ -75,7 +75,7 @@ hyprshell debug default-applications add "text/plain" "org.gnome.gedit.desktop"
 List default applications for all mime types.
 
 ```bash
-# List default apps for mime types used by Hyprshell
+# List default apps for mime types used by Hyprshell (browser: x-scheme-handler/https, file manager: inode/director)
 hyprshell debug default-applications list
 ```
 

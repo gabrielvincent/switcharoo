@@ -1,18 +1,16 @@
 use config_lib::Plugins;
 use gtk::gdk::Key;
-use std::env;
 use std::path::Path;
 use tracing::debug_span;
 
-mod applications;
-mod search;
-mod shell;
-mod terminal;
-
 mod actions;
+mod applications;
 #[cfg(feature = "calc")]
 mod calc;
 mod path;
+mod search;
+mod shell;
+mod terminal;
 
 pub use applications::get_stored_runs as get_applications_stored_runs;
 pub use applications::reload_desktop_entries_map as reload_applications_desktop_entries_map;
@@ -77,9 +75,9 @@ pub fn get_sortable_launch_options(
     if plugins.path.is_some() {
         debug_span!("path").in_scope(|| path::get_path_options(&mut matches, text));
     }
-    // TODO add options in config to enable / disable them
-    if cfg!(debug_assertions) || env::var("HYPRSHELL_EXPERIMENTAL").is_ok() {
-        debug_span!("actions").in_scope(|| actions::get_actions_options(&mut matches, text));
+    if let Some(config) = plugins.actions.as_ref() {
+        debug_span!("actions")
+            .in_scope(|| actions::get_actions_options(&mut matches, text, config));
     }
 
     // sort in reverse

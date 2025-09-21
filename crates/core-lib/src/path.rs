@@ -8,13 +8,13 @@ pub fn get_default_config_path() -> PathBuf {
     path.push("hyprshell.debug/");
     #[cfg(not(debug_assertions))]
     path.push("hyprshell/");
-    path.push("config.toml");
+    path.push("config.ron");
     if path.exists() {
         trace!("Found config file at {path:?}");
         return path;
     }
 
-    path.set_extension("ron");
+    path.set_extension("toml");
     if path.exists() {
         trace!("Found config file at {path:?}");
         return path;
@@ -35,7 +35,7 @@ pub fn get_default_config_path() -> PathBuf {
         }
     }
 
-    path.set_extension("toml");
+    path.set_extension("ron");
     path
 }
 

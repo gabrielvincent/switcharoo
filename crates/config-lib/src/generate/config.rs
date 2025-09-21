@@ -1,8 +1,8 @@
 use crate::generate::tui::{WEB_SEARCH_ENGINES, configurable_launcher_plugins};
 use crate::structs::{Switch, Windows};
 use crate::{
-    ApplicationsPluginConfig, Config, EmptyConfig, Launcher, Modifier, Overview, Plugins,
-    WebSearchConfig,
+    ActionsPluginConfig, ApplicationsPluginConfig, Config, EmptyConfig, Launcher, Modifier,
+    Overview, Plugins, WebSearchConfig,
 };
 use std::path::Path;
 
@@ -109,6 +109,11 @@ pub fn generate_config(data: ConfigData) -> Config {
                                 .find(|pl| pl.as_ref().eq(configurable_launcher_plugins::CALC))
                                 .map(|_| EmptyConfig::default()),
                             path: Some(EmptyConfig::default()),
+                            actions: data
+                                .launcher_plugins
+                                .iter()
+                                .find(|pl| pl.as_ref().eq(configurable_launcher_plugins::ACTIONS))
+                                .map(|_| ActionsPluginConfig::default()),
                         },
                         ..Default::default()
                     },

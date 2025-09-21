@@ -242,13 +242,14 @@ fn check_features() {
 
 fn check_env() {
     tracing::debug!(
-        "ENV: HYPRSHELL_NO_LISTENERS: {}, HYPRSHELL_NO_ALL_ICONS: {}, HYPRSHELL_RELOAD_TIMEOUT: {}, HYPRSHELL_LOG_MODULE_PATH: {}, HYPRSHELL_NO_USE_PLUGIN: {}, HYPRSHELL_EXPERIMENTAL: {}",
+        "ENV: HYPRSHELL_NO_LISTENERS: {}, HYPRSHELL_NO_ALL_ICONS: {}, HYPRSHELL_RELOAD_TIMEOUT: {}, HYPRSHELL_LOG_MODULE_PATH: {}, HYPRSHELL_NO_USE_PLUGIN: {}, HYPRSHELL_EXPERIMENTAL: {}, HYPRSHELL_RUN_ACTIONS_IN_DEBUG: {}",
         env::var("HYPRSHELL_NO_LISTENERS").unwrap_or_else(|_| "-None-".to_string()),
         env::var("HYPRSHELL_NO_ALL_ICONS").unwrap_or_else(|_| "-None-".to_string()),
         env::var("HYPRSHELL_RELOAD_TIMEOUT").unwrap_or_else(|_| "-None-".to_string()),
         env::var("HYPRSHELL_LOG_MODULE_PATH").unwrap_or_else(|_| "-None-".to_string()),
         env::var("HYPRSHELL_NO_USE_PLUGIN").unwrap_or_else(|_| "-None-".to_string()),
         env::var("HYPRSHELL_EXPERIMENTAL").unwrap_or_else(|_| "-None-".to_string()),
+        env::var("HYPRSHELL_RUN_ACTIONS_IN_DEBUG").unwrap_or_else(|_| "-None-".to_string()),
     );
     let os_name = fs::read_to_string("/etc/os-release")
         .ok()

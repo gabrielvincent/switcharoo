@@ -2,7 +2,6 @@
 
 use crate::util;
 use anyhow::Context;
-use config_lib::ApplicationsPluginConfig;
 use core_lib::{IniFile, default};
 use std::fs;
 use std::path::Path;
@@ -93,19 +92,7 @@ pub fn search(text: &str, all: bool, config_path: &Path, data_dir: &Path) {
         .and_then(|c| c.windows)
         .and_then(|w| w.overview)
         .map_or_else(
-            || {
-                (
-                    config_lib::Plugins {
-                        applications: Some(ApplicationsPluginConfig::default()),
-                        shell: None,
-                        terminal: None,
-                        websearch: None,
-                        calc: None,
-                        path: None,
-                    },
-                    5,
-                )
-            },
+            || (config_lib::Launcher::default().plugins, 5),
             |o| (o.launcher.plugins, o.launcher.max_items),
         );
     launcher_lib::debug::get_matches(&plugins, text, all, max_items, data_dir);

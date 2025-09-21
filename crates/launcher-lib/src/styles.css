@@ -103,6 +103,11 @@
     background: var(--bg-color, rgba(20, 20, 20, 0.9));
 }
 
+.launcher-plugin-key {
+    font-size: 0.9rem;
+    font-family: monospace;
+}
+
 .launcher-plugin-inner:hover {
     background: var(--bg-color-hover, rgba(40, 40, 50, 1));
 }

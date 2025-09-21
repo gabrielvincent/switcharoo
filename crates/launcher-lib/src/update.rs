@@ -81,7 +81,7 @@ fn create_static_plugin_box(
     let hbox = gtk::Box::builder()
         .orientation(Orientation::Horizontal)
         .css_classes(["launcher-plugin-inner"])
-        .spacing(6)
+        .spacing(10)
         .build();
 
     if let Some(icon) = opt.icon.clone() {
@@ -111,7 +111,7 @@ fn create_static_plugin_box(
         .halign(Align::Center)
         .valign(Align::End)
         .ellipsize(EllipsizeMode::End)
-        .css_classes(["launcher-key"])
+        .css_classes(["launcher-plugin-key"])
         .label(format!("{launch_modifier} + {}", opt.key))
         .build();
     vbox.append(&exec);

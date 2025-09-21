@@ -1,3 +1,4 @@
+use crate::migrate::m2t3;
 use serde::Deserialize;
 use smart_default::SmartDefault;
 use std::fmt::Display;
@@ -72,7 +73,7 @@ pub(super) struct Launcher {
     #[allow(dead_code)]
     #[default = 400]
     pub(super) animate_launch_ms: u64,
-    #[default(crate::Plugins{
+    #[default(m2t3::Plugins{
         applications: Some(crate::ApplicationsPluginConfig::default()),
         terminal: Some(crate::EmptyConfig::default()),
         shell: None,
@@ -80,7 +81,7 @@ pub(super) struct Launcher {
         calc: Some(crate::EmptyConfig::default()),
         path: Some(crate::EmptyConfig::default()),
     })]
-    pub(super) plugins: crate::Plugins,
+    pub(super) plugins: m2t3::Plugins,
 }
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Deserialize)]
