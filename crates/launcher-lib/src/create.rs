@@ -187,20 +187,20 @@ fn handle_key(
                 .warn_details("unable to send");
             Propagation::Stop
         }
-        (_, Key::Up) => {
+        (true, Key::h) => {
             event_sender
                 .send_blocking(TransferType::SwitchOverview(SwitchOverviewConfig {
                     workspace: true,
-                    direction: Direction::Up,
+                    direction: Direction::Left,
                 }))
                 .warn_details("unable to send");
             Propagation::Stop
         }
-        (_, Key::Down) => {
+        (true, Key::l) => {
             event_sender
                 .send_blocking(TransferType::SwitchOverview(SwitchOverviewConfig {
                     workspace: true,
-                    direction: Direction::Down,
+                    direction: Direction::Right,
                 }))
                 .warn_details("unable to send");
             Propagation::Stop
@@ -227,6 +227,24 @@ fn handle_key(
                 .send_blocking(TransferType::SwitchOverview(SwitchOverviewConfig {
                     workspace: true,
                     direction: Direction::Right,
+                }))
+                .warn_details("unable to send");
+            Propagation::Stop
+        }
+        (_, Key::Up) | (true, Key::k) => {
+            event_sender
+                .send_blocking(TransferType::SwitchOverview(SwitchOverviewConfig {
+                    workspace: true,
+                    direction: Direction::Up,
+                }))
+                .warn_details("unable to send");
+            Propagation::Stop
+        }
+        (_, Key::Down) | (true, Key::j) => {
+            event_sender
+                .send_blocking(TransferType::SwitchOverview(SwitchOverviewConfig {
+                    workspace: true,
+                    direction: Direction::Down,
                 }))
                 .warn_details("unable to send");
             Propagation::Stop

@@ -105,7 +105,7 @@ fn get_action(action: &config_lib::ActionsPluginAction) -> Action {
         config_lib::ActionsPluginAction::Logout => Action {
             names: vec![Box::from("Log Out")],
             details: Box::from("Log out of the session"),
-            command: Box::from("loginctl terminate-user $USER"),
+            command: Box::from("loginctl terminate-session self"),
             icon: PathBuf::from("system-log-out").into_boxed_path(),
         },
         config_lib::ActionsPluginAction::Reboot => Action {
