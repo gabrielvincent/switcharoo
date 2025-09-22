@@ -93,7 +93,7 @@ pub struct EmptyConfig {}
 #[derive(SmartDefault, Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]
 #[cfg_attr(not(feature = "no-default-config-values"), serde(default))]
 #[serde(deny_unknown_fields)]
-pub struct ActionsPluginConfig(
+pub struct ActionsPluginConfig {
     #[default(vec![
         ActionsPluginAction::LockScreen,
         ActionsPluginAction::Hibernate,
@@ -108,8 +108,8 @@ pub struct ActionsPluginConfig(
             icon: "remove".into(),
         }),
     ])]
-    pub Vec<ActionsPluginAction>,
-);
+    pub actions: Vec<ActionsPluginAction>,
+}
 
 #[derive(SmartDefault, Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]
 #[cfg_attr(not(feature = "no-default-config-values"), serde(default))]

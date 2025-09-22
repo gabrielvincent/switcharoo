@@ -67,21 +67,22 @@ This mode displays the windows in a downscaled view of the screen. It also shows
         - **name:**_[string]_ Name of the search engine. This is used to show the name in the launcher.
         - **key:**_[string]_ Key to use to select this search engine. This is used to register the keybinding to select the search engine without clicking on it.
 - **calc:** Calculates any mathematical expression typed into the launcher. This plugin doesn't accept any options.
-- **path** Opens the selected path in the default file manager (see [Debugging](./DEBUG.md) to check default). This plugin doesn't accept any options.
-- **actions** Runs the specified action like reboot, hibernate, etc. Custom actions can also be specified. This plugin takes in a list of actions to run, either predefined of custom ones.
-    - **lock_screen** Locks the screen.
-    - **hibernate** Hibernates the system (copys the RAM to disk and powers off).
-    - **logout** Logs out the user.
-    - **reboot** Reboots the system.
-    - **shutdown** Shuts down the system.
-    - **suspend** Suspends the system.
-    - **custom** A list of custom actions to run. Each action is defined by the following properties.
-        - **names:**_[List<string>]_ List of names to use for the action, like `["poweroff", "shutdown"]`.
-        - **details:**_[string]_ Details about the action. This is used to show the details in the launcher.
-        - **command:**_[string]_ Command to run when the action is selected. (example: `command: "sudo shutdown -h now"`).
-          can include `{}` which is replaced with the content of the text in the launcher (without the name of the action).
-          Typing `kill 100` and running the action kill with a name `kill` would replace `{}` with `100`.
-        - **icon:**_[string]_ Icon to show in the launcher.
+- **path:** Opens the selected path in the default file manager (see [Debugging](./DEBUG.md) to check default). This plugin doesn't accept any options.
+- **actions:** Runs the specified action like reboot, hibernate, etc. Custom actions can also be specified.
+    - **actions:**_[List<Action>]_ A list of actions to display in the launcher. Actions can be one of the following predefined actions or a custom action.
+        - **lock_screen** Locks the screen.
+        - **hibernate** Hibernates the system (copys the RAM to disk and powers off).
+        - **logout** Logs out the user.
+        - **reboot** Reboots the system.
+        - **shutdown** Shuts down the system.
+        - **suspend** Suspends the system.
+        - **custom** A list of custom actions to run. Each action is defined by the following properties.
+            - **names:**_[List<string>]_ List of names to use for the action, like `["poweroff", "shutdown"]`.
+            - **details:**_[string]_ Details about the action. This is used to show the details in the launcher.
+            - **command:**_[string]_ Command to run when the action is selected. (example: `command: "sudo shutdown -h now"`).
+              can include `{}` which is replaced with the content of the text in the launcher (without the name of the action).
+              Typing `kill 100` and running the action kill with a name `kill` would replace `{}` with `100`.
+            - **icon:**_[string]_ Icon to show in the launcher.
 
 ### Switch
 

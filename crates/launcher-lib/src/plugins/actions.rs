@@ -21,7 +21,11 @@ pub fn get_actions_options(
     }
     let lower_text = text.to_ascii_lowercase();
 
-    let actions = config.0.iter().map(get_action).collect::<Vec<Action>>();
+    let actions = config
+        .actions
+        .iter()
+        .map(get_action)
+        .collect::<Vec<Action>>();
 
     for action in actions {
         if action.names.iter().any(|name| {

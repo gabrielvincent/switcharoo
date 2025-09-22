@@ -78,9 +78,6 @@ in
     };
 
     settings = {
-      layerrules = mkOpt "Enable layer rules" bool true;
-      kill_bind = mkOpt "Key to kill hyprshell if it is stuck" str "ctrl+shift+alt, h";
-
       windows = {
         enable = lib.mkEnableOption "Enable windows (overview, switch)";
         scale = mkOpt "Scale" float 8.5 // {
@@ -116,7 +113,7 @@ in
             plugins = {
               applications = {
                 enable = mkOpt "Open applications" bool true;
-                run_cache_weeks = mkOpt "Run Cache weeks" int 4;
+                run_cache_weeks = mkOpt "Run Cache weeks" int 8;
                 show_execs = mkOpt "Show execs" bool true;
                 show_actions_submenu = mkOpt "Show actions submenu" bool true;
               };
@@ -157,6 +154,61 @@ in
               };
               path = {
                 enable = mkOpt "Open in File manager" bool true;
+              };
+              actions = {
+                enable = mkOpt "Run action" bool true;
+                actions =
+                  mkOpt "Actions"
+                    (listOf (
+                      either
+                        (enum [
+                          "lock_screen"
+                          "hibernate"
+                          "logout"
+                          "reboot"
+                          "shutdown"
+                          "suspend"
+                        ])
+                        (submodule {
+                          options = {
+                            custom = lib.mkOption {
+                              description = "Custom action object";
+                              type = submodule {
+                                options = {
+                                  names = lib.mkOption {
+                                    description = "Names for the action";
+                                    type = listOf str;
+                                    default = [ ];
+                                  };
+                                  details = mkOpt "Details about the action" str null;
+                                  command = mkOpt "Command to run" str null;
+                                  icon = mkOpt "Icon name" str null;
+                                };
+                              };
+                              default = { };
+                            };
+                          };
+                        })
+                    ))
+                    [
+                      "lock_screen"
+                      "hibernate"
+                      "logout"
+                      "reboot"
+                      "shutdown"
+                      "suspend"
+                      {
+                        custom = {
+                          names = [
+                            "Kill"
+                            "Stop"
+                          ];
+                          details = "Kill or stop a process by name";
+                          command = "pkill \"{}\" && notify-send hyprshell \"stopped {}\"";
+                          icon = "remove";
+                        };
+                      }
+                    ];
               };
             };
           };
