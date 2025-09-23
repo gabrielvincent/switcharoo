@@ -208,6 +208,16 @@ in
                           icon = "remove";
                         };
                       }
+                      {
+                        custom = {
+                          names = [
+                            "Reload Hyprshell"
+                          ];
+                          details = "Reload Hyprshell";
+                          command = "sleep 1; hyprshell socat '\"Restart\"'";
+                          icon = "system-restart";
+                        };
+                      }
                     ];
               };
             };
