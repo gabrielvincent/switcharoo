@@ -79,6 +79,9 @@ jobs:
           git push origin HEAD:hyprshell
           
           gh release edit ${{ github.ref_name }} --latest --draft=false --title "hyprshell ${{ github.ref_name }}"
+
+          cargo build --release --target x86_64-unknown-linux-gnu
+          gh release upload ${{ github.ref_name }} "target/x86_64-unknown-linux-gnu/release/hyprshell#hyprshell-x86_64-unknown-linux-gnu"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Publish AUR package
@@ -103,3 +106,4 @@ jobs:
           authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
       - name: Run Nix Flake Check build
         run: nix build '.#packages.x86_64-linux.hyprshell' -L
+

@@ -40,22 +40,20 @@ pub fn get_actions_options(
                     name.to_ascii_lowercase().contains(&lower_text)
                         || lower_text.contains(&name.to_ascii_lowercase())
                 })
-                .unwrap_or(&action.names[0])
-                .to_ascii_lowercase()
-                .into_boxed_str();
-            let match_type = if name.to_ascii_lowercase().starts_with(&lower_text)
-                || lower_text.contains(&name.to_ascii_lowercase())
-            {
-                "Exact"
-            } else {
-                "Partial"
-            };
+                .unwrap_or(&action.names[0]);
+            let name_lower = name.to_ascii_lowercase();
+            let match_type =
+                if name_lower.starts_with(&lower_text) || lower_text.contains(&name_lower) {
+                    "Exact"
+                } else {
+                    "Partial"
+                };
             let mut command = action.command.clone();
             if command.contains("{}") {
                 trace!(
-                    "Action command contains '{{}}', replacing <{text}> with stripped ({name}) text"
+                    "Action command contains '{{}}', replacing <{text}> with stripped ({name_lower}) text"
                 );
-                let stripped_text = text.trim_start_matches(&*name).trim();
+                let stripped_text = text.trim_start_matches(&*name_lower).trim();
                 command = Box::from(command.replace("{}", stripped_text));
             }
             trace!("Added action option: {} ({})", command, match_type);
@@ -107,7 +105,7 @@ fn get_action(action: &config_lib::ActionsPluginAction) -> Action {
             icon: PathBuf::from("system-hibernate").into_boxed_path(),
         },
         config_lib::ActionsPluginAction::Logout => Action {
-            names: vec![Box::from("Log Out")],
+            names: vec![Box::from("Log Out"), Box::from("Logout")],
             details: Box::from("Log out of the session"),
             command: Box::from("loginctl terminate-session self"),
             icon: PathBuf::from("system-log-out").into_boxed_path(),

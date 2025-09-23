@@ -82,7 +82,7 @@ This mode displays the windows in a downscaled view of the screen. It also shows
             - **command:**_[string]_ Command to run when the action is selected. (example: `command: "sudo shutdown -h now"`).
               can include `{}` which is replaced with the content of the text in the launcher (without the name of the action).
               Typing `kill 100` and running the action kill with a name `kill` would replace `{}` with `100`.
-            - **icon:**_[string]_ Icon to show in the launcher.
+            - **icon:**_[string]_ Icon to show in the launcher. (you can find icons using the `hyprshell debug list-icons` command)
 
 ### Switch
 

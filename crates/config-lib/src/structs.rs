@@ -107,6 +107,12 @@ pub struct ActionsPluginConfig {
             command: "pkill \"{}\" && notify-send hyprshell \"stopped {}\"".into(),
             icon: "remove".into(),
         }),
+        ActionsPluginAction::Custom(ActionsPluginActionCustom {
+            names: vec!["Reload Hyprshell".into()],
+            details: "Reload Hyprshell".into(),
+            command: "sleep 1; hyprshell socat '\"Restart\"'".into(),
+            icon: "system-restart".into(),
+        }),
     ])]
     pub actions: Vec<ActionsPluginAction>,
 }
