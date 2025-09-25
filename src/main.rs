@@ -65,6 +65,8 @@ fn main() -> anyhow::Result<()> {
             }
             exec_lib::check_version()
                 .warn_details("Unable to check hyprland version, continuing anyway");
+            clipboard_lib::test_clipboard::test_clipboard();
+
             start::start(
                 config_path.unwrap_or_else(get_default_config_path),
                 css_file.unwrap_or_else(get_default_css_path),

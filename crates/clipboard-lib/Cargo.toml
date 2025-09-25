@@ -1,0 +1,21 @@
+[package]
+name = "hyprshell-clipboard-lib"
+documentation = "https://docs.rs/hyprshell-clipboard-lib"
+version = "4.7.0"
+description = "A library monitoring and storing clipboard contents"
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+keywords.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+anyhow.workspace = true
+tracing.workspace = true
+wl_clipboard = { package = "hyprshell-wl-clipboard-rs", path = "../../dep-crates/wl-clipboard-rs", version = "=4.7.0" }
+
+
+
+[lints]
+workspace = true

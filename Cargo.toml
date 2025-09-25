@@ -1,3 +1,35 @@
+[workspace]
+members = ["crates/exec-lib", "crates/core-lib", "crates/windows-lib", "crates/launcher-lib", "crates/config-lib", "crates/hyprland-plugin", "crates/clipboard-lib", "dep-crates/hyprland-rs", "dep-crates/hyprland-rs/hyprland-macros", "dep-crates/wl-clipboard-rs"]
+
+[workspace.package]
+version = "4.7.0"
+description = "A modern GTK4-based window switcher and application launcher for Hyprland"
+license = "MIT"
+authors = ["h3rmt"]
+keywords = ["hyprland"]
+repository = "https://github.com/h3rmt/hyprshell/"
+rust-version = "1.87.0"
+edition = "2024"
+
+[workspace.dependencies]
+anyhow = { version = "1.0.99" }
+tracing = { version = "0.1.41" }
+serde_json = { version = "1.0.143" }
+serde = { version = "1.0.219", features = ["derive"] }
+async-channel = { version = "2.5.0", default-features = true }
+semver = { version = "1.0.26" }
+
+gtk = { version = "0.10.0", package = "gtk4", default-features = false, features = ["v4_14"] }
+gtk4-layer-shell = { version = "0.6.3" }
+
+config-lib = { path = "crates/config-lib", package = "hyprshell-config-lib", version = "=4.7.0" }
+core-lib = { path = "crates/core-lib", package = "hyprshell-core-lib", version = "=4.7.0" }
+exec-lib = { path = "crates/exec-lib", package = "hyprshell-exec-lib", version = "=4.7.0" }
+clipboard-lib = { path = "crates/clipboard-lib", package = "hyprshell-clipboard-lib", version = "=4.7.0" }
+windows-lib = { path = "crates/windows-lib", package = "hyprshell-windows-lib", version = "=4.7.0" }
+launcher-lib = { path = "crates/launcher-lib", package = "hyprshell-launcher-lib", version = "=4.7.0" }
+hyprland-plugin = { path = "crates/hyprland-plugin", package = "hyprshell-hyprland-plugin", version = "=4.7.0" }
+
 [package]
 name = "hyprshell"
 readme = "README.md"
@@ -29,6 +61,7 @@ core-lib.workspace = true
 exec-lib.workspace = true
 windows-lib.workspace = true
 launcher-lib.workspace = true
+clipboard-lib.workspace = true
 
 [features]
 default = ["json5_config", "generate_config_command", "launcher_calc", "debug_command"]
@@ -39,44 +72,14 @@ debug_command = []
 config_check = ["config-lib/no-default-config-values"]
 
 
-[workspace]
-members = ["crates/exec-lib", "crates/core-lib", "crates/windows-lib", "crates/launcher-lib", "crates/config-lib", "crates/hyprland-plugin", "dep-crates/hyprland-rs", "dep-crates/hyprland-rs/hyprland-macros"]
-
-[workspace.package]
-version = "4.7.0"
-description = "A modern GTK4-based window switcher and application launcher for Hyprland"
-license = "MIT"
-authors = ["h3rmt"]
-keywords = ["hyprland"]
-repository = "https://github.com/h3rmt/hyprshell/"
-rust-version = "1.87.0"
-edition = "2024"
-
-[workspace.dependencies]
-anyhow = { version = "1.0.99" }
-tracing = { version = "0.1.41" }
-serde_json = { version = "1.0.143" }
-serde = { version = "1.0.219", features = ["derive"] }
-async-channel = { version = "2.5.0", default-features = true }
-semver = { version = "1.0.26" }
-
-gtk = { version = "0.10.0", package = "gtk4", default-features = false, features = ["v4_14"] }
-gtk4-layer-shell = { version = "0.6.3" }
-
-config-lib = { path = "crates/config-lib", package = "hyprshell-config-lib", version = "=4.7.0" }
-core-lib = { path = "crates/core-lib", package = "hyprshell-core-lib", version = "=4.7.0" }
-exec-lib = { path = "crates/exec-lib", package = "hyprshell-exec-lib", version = "=4.7.0" }
-windows-lib = { path = "crates/windows-lib", package = "hyprshell-windows-lib", version = "=4.7.0" }
-launcher-lib = { path = "crates/launcher-lib", package = "hyprshell-launcher-lib", version = "=4.7.0" }
-hyprland-plugin = { path = "crates/hyprland-plugin", package = "hyprshell-hyprland-plugin", version = "=4.7.0" }
-
-[lints]
-workspace = true
-
 [profile.release]
 strip = "debuginfo"
 lto = true
+
 opt-level = 3
+
+[lints]
+workspace = true
 
 [workspace.lints.clippy]
 all = { level = "warn", priority = -1 }

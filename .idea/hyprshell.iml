@@ -14,6 +14,9 @@
       <sourceFolder url="file://$MODULE_DIR$/dep-crates/hyprland-rs/examples" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/dep-crates/hyprland-rs/hyprland-macros/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/dep-crates/hyprland-rs/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/clipboard-lib/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/dep-crates/wl-clipboard-rs/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/dep-crates/wl-clipboard-rs/wl-clipboard-rs-tools/src" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/config" />
       <excludeFolder url="file://$MODULE_DIR$/gui-lib/target" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
