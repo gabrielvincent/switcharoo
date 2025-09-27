@@ -6,32 +6,23 @@ use std::fs::File;
 use std::io::{BufWriter, Cursor, Read, Write};
 use std::sync::OnceLock;
 use tracing::{debug, trace};
-use wl_clipboard::paste::{Seat, get_all_contents_channel};
+use wl_clipboard::paste::{Data, Seat, get_all_contents_callback};
 use wl_clipboard::utils::is_text;
 
 /// # Panics
 pub fn test_clipboard() {
-    // let rx = get_all_contents_channel(Seat::Unspecified, Some(Box::new(filer_mime))).unwrap();
-    get_all_contents_channel(Seat::Unspecified, Box::new(handle_values)).unwrap();
-    get_all_contents_channel(Seat::Unspecified, Box::new(handle_values)).unwrap();
+    let handle = get_all_contents_callback(Seat::Unspecified, Box::new(handle_values)).unwrap();
+    handle.join();
 }
 
-fn handle_values(
-    val: Result<
-        (
-            HashSet<String>,
-            &mut (dyn FnMut(String) -> Result<Vec<u8>, wl_clipboard::paste::Error> + Send),
-        ),
-        wl_clipboard::paste::Error,
-    >,
-) -> bool {
-    let Ok((mut mimes, mut load)) = val else {
+fn handle_values(val: Data) -> bool {
+    let Ok((mut mimes, load)) = val else {
         return false;
     };
-    let Some((pref_mime)) = get_preferred_mime(&mimes) else {
+    let Some(pref_mime) = get_preferred_mime(&mimes) else {
         return false;
     };
-    debug!("Prefered MIME type: {pref_mime}");
+    debug!("Preferred MIME type: {pref_mime}");
     let pref_data = load(pref_mime.clone()).unwrap();
     filer_mime(&mut mimes);
     let mut data = HashMap::new();
@@ -239,25 +230,25 @@ fn get_preferred_mime(mime_types: &HashSet<String>) -> Option<String> {
     for (index, mime) in priority.iter().enumerate() {
         if mime.ends_with("/*") {
             let prefix = &mime[..mime.len() - 1];
-            if let Some((mt)) = mime_types.iter().find(|(x)| x.starts_with(prefix)) {
+            if let Some(mt) = mime_types.iter().find(|x| x.starts_with(prefix)) {
                 trace!("Chosen MIME type: {mt:?} from prio({index}), by prefix {prefix}*");
-                return Some((mt.clone()));
+                return Some(mt.clone());
             }
-        } else if let Some((mt)) = mime_types.iter().find(|(x)| x == mime) {
+        } else if let Some(mt) = mime_types.iter().find(|x| x == mime) {
             trace!("Chosen MIME type: {mt:?} from prio({index}), by exact match {mime}");
-            return Some((mt.clone()));
+            return Some(mt.clone());
         }
     }
 
     // Fallback: first text
-    if let Some((mt)) = mime_types.iter().find(|(x)| is_text(x)) {
+    if let Some(mt) = mime_types.iter().find(|x| is_text(x)) {
         trace!("Chosen MIME type: {mt:?} from text fallback");
-        return Some((mt.clone()));
+        return Some(mt.clone());
     }
     // choose any
-    if let Some((mt)) = mime_types.iter().next() {
+    if let Some(mt) = mime_types.iter().next() {
         trace!("Chosen MIME type: {mt:?} from fallback",);
-        return Some((mt.clone()));
+        return Some(mt.clone());
     }
     None
 }

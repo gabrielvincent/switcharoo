@@ -6,6 +6,7 @@ use std::ffi::OsString;
 use std::io::Read;
 use std::os::fd::AsFd;
 use std::sync::mpsc;
+use std::thread::JoinHandle;
 use std::{io, thread};
 use wayland_client::globals::GlobalListContents;
 use wayland_client::protocol::wl_registry::WlRegistry;
@@ -74,7 +75,7 @@ struct State {
     common: common::State,
     // The value is the set of MIME types in the offer.
     // TODO: We never remove offers from here, even if we don't use them or after destroying them.
-    offers: HashMap<data_control::Offer, HashSet<String>>,
+    offers: HashMap<Offer, HashSet<String>>,
     got_primary_selection: bool,
 }
 
@@ -507,10 +508,11 @@ fn run_dispatch_loop(
     }
 }
 
-/// Asynchronously sends all clipboard contents through mpsc::channel.
+/// Asynchronously handle all clipboard contents with a callback.
 ///
-/// This function returns a mpsc::Receiver containing a HashMap of all offered MIME types and their
-/// corresponding clipboard contents.
+/// This function returns a JoinHandle to the background thread and accepts a callback that either receives an Ok variant containing a HashMap of all offered MIME types
+/// and a function to load the contents of a specific MIME type or Error if something went wrong.
+/// If the function returns true, the thread will exit.
 ///
 /// If `seat` is `None`, uses an unspecified seat (it depends on the order returned by the
 /// compositor). This is perfectly fine when only a single seat is present, so for most
@@ -520,79 +522,56 @@ fn run_dispatch_loop(
 ///
 /// ```no_run
 /// # extern crate wl_clipboard_rs;
-/// # fn foo() -> Result<(), Box<dyn std::error::Error>> {
-/// use wl_clipboard_rs::paste::{get_all_contents_channel, Error, MimeType, Seat};
+/// use wl_clipboard_rs::paste::get_all_contents_channel;
 ///
-/// fn filter_mime(mut mime_types: HashSet<String>) {
-///     mime_types.remove("text/html");
+/// fn handle_values(
+///     data: wl_clipboard_rs::paste::Data
+/// ) -> bool {
+///   let Ok((mut mimes, mut load)) = data else {
+///     return false;
+///   };
+///   if mimes.contains("text/html") {
+///     let data = load("text/html".to_string()).unwrap();
+///     println!("Got HTML data: {}", String::from_utf8_lossy(&data));
+///   }
+///   false
 /// }
 ///
-/// let result = get_all_contents_channel(Seat::Unspecified, Some(Box::new(filter_mime)));
-/// match result {
-///     Ok(rx) => {
-///         loop {
-///             match rx.recv() {
-///                 Ok(Ok(data)) => {
-///                     println!("Got all data in all mime types");
-///                     for (mime_type, data) in data {
-///                        println!("Got data of the {} MIME type", &mime_type);
-///                     }
-///                 }
-///                 Ok(Err(Error::NoSeats)) | Ok(Err(Error::ClipboardEmpty)) => {
-///                     // The clipboard is empty, nothing to worry about.
-///                 }
-///                 Ok(Err(err)) => Err(err)?, // other error getting clipboard data
-///                 Err(err) => Err(err)? // error receiving data
-///             }
-///         }
+/// fn foo() -> Result<(), Box<dyn std::error::Error>> {
+///   let result = get_all_contents_channel(Seat::Unspecified, Box::new(filter_mime));
+///   match result {
+///     Ok(handle) => {
+///         handle.join()
 ///     }
 ///     Err(Error::WaylandConnection) | Err(Error::WaylandCommunication) | Err(Error::MissingProtocol) => {
-///         // Error setting up channel
+///         // Error setting up listener
 ///     }
 ///     Err(err) => Err(err)?
+///   }
+///   Ok(())
 /// }
-/// # Ok(())
-/// # }
 /// ```
 #[inline]
-pub fn get_all_contents_channel(
+pub fn get_all_contents_callback(
     seat: Seat<'static>,
-    callback: Box<
-        dyn Fn(
-                Result<
-                    (
-                        HashSet<String>,
-                        &mut (dyn FnMut(String) -> Result<Vec<u8>, Error> + Send),
-                    ),
-                    Error,
-                >,
-            ) -> bool
-            + Send
-            + Sync
-            + 'static,
-    >,
-) -> Result<(), Error> {
-    get_all_contents_channel_internal(seat, callback, None)
+    callback: Box<dyn Fn(Data) -> bool + Send + Sync + 'static>,
+) -> Result<JoinHandle<()>, Error> {
+    get_all_contents_callback_internal(seat, callback, None)
 }
 
-pub(crate) fn get_all_contents_channel_internal(
+pub type Data<'a> = Result<
+    (
+        HashSet<String>,
+        &'a mut (dyn FnMut(String) -> Result<Vec<u8>, Error> + Send),
+    ),
+    Error,
+>;
+
+pub(crate) fn get_all_contents_callback_internal(
     seat: Seat<'static>,
-    callback: Box<
-        dyn Fn(
-                Result<
-                    (
-                        HashSet<String>,
-                        &mut (dyn FnMut(String) -> Result<Vec<u8>, Error> + Send),
-                    ),
-                    Error,
-                >,
-            ) -> bool
-            + Send
-            + Sync
-            + 'static,
-    >,
+    callback: Box<dyn Fn(Data) -> bool + Send + Sync + 'static>,
     socket_name: Option<OsString>,
-) -> Result<(), Error> {
+) -> Result<JoinHandle<()>, Error> {
     let (queue, mut common) = initialize(false, socket_name)?;
     for (seat, data) in &mut common.seats {
         let device = common
@@ -605,28 +584,15 @@ pub(crate) fn get_all_contents_channel_internal(
         offers: HashMap::new(),
         got_primary_selection: false,
     };
-    thread::spawn(move || run_all_dispatch_loop(queue, state, seat, callback));
-    Ok(())
+    let handle = thread::spawn(move || run_callback_dispatch_loop(queue, state, seat, callback));
+    Ok(handle)
 }
 
-fn run_all_dispatch_loop(
+fn run_callback_dispatch_loop(
     mut queue: EventQueue<State>,
     mut state: State,
     seat: Seat<'static>,
-    callback: Box<
-        dyn Fn(
-                Result<
-                    (
-                        HashSet<String>,
-                        &mut (dyn FnMut(String) -> Result<Vec<u8>, Error> + Send),
-                    ),
-                    Error,
-                >,
-            ) -> bool
-            + Send
-            + Sync
-            + 'static,
-    >,
+    callback: Box<dyn Fn(Data) -> bool + Send + Sync + 'static>,
 ) {
     loop {
         if let Err(err) = queue.blocking_dispatch(&mut state) {
@@ -660,23 +626,6 @@ fn run_all_dispatch_loop(
             }
         }
     }
-}
-
-fn load_mime(
-    mime: String,
-    offer: Offer,
-    mut queue: EventQueue<State>,
-    mut state: State,
-) -> Result<Vec<u8>, Error> {
-    let Ok((mut read, write)) = pipe() else {
-        return Err(Error::PipeCreation(io::Error::last_os_error()));
-    };
-    offer.receive(mime.clone(), write.as_fd());
-    drop(write);
-    let mut contents = Vec::new();
-    let _ = queue.roundtrip(&mut state);
-    let _ = read.read_to_end(&mut contents);
-    Ok(contents)
 }
 
 fn create_load_mime_fn<'a>(
