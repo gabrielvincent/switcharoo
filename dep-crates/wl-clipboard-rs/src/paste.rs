@@ -15,7 +15,9 @@ use wayland_client::{
 };
 
 use crate::common::{self, initialize};
-use crate::data_control::{self, impl_dispatch_device, impl_dispatch_manager, impl_dispatch_offer};
+use crate::data_control::{
+    self, impl_dispatch_device, impl_dispatch_manager, impl_dispatch_offer, Offer,
+};
 use crate::seat_data::SeatData;
 use crate::utils::is_text;
 
@@ -555,17 +557,42 @@ fn run_dispatch_loop(
 #[inline]
 pub fn get_all_contents_channel(
     seat: Seat<'static>,
-    filter: Option<Box<dyn Fn(&mut HashSet<String>) + Send + Sync + 'static>>,
-) -> Result<mpsc::Receiver<Result<HashMap<String, Vec<u8>>, Error>>, Error> {
-    get_all_contents_channel_internal(seat, filter, None)
+    callback: Box<
+        dyn Fn(
+                Result<
+                    (
+                        HashSet<String>,
+                        &mut (dyn FnMut(String) -> Result<Vec<u8>, Error> + Send),
+                    ),
+                    Error,
+                >,
+            ) -> bool
+            + Send
+            + Sync
+            + 'static,
+    >,
+) -> Result<(), Error> {
+    get_all_contents_channel_internal(seat, callback, None)
 }
 
 pub(crate) fn get_all_contents_channel_internal(
     seat: Seat<'static>,
-    filter: Option<Box<dyn Fn(&mut HashSet<String>) + Send + Sync + 'static>>,
+    callback: Box<
+        dyn Fn(
+                Result<
+                    (
+                        HashSet<String>,
+                        &mut (dyn FnMut(String) -> Result<Vec<u8>, Error> + Send),
+                    ),
+                    Error,
+                >,
+            ) -> bool
+            + Send
+            + Sync
+            + 'static,
+    >,
     socket_name: Option<OsString>,
-) -> Result<mpsc::Receiver<Result<HashMap<String, Vec<u8>>, Error>>, Error> {
-    let (sender, receiver) = mpsc::channel();
+) -> Result<(), Error> {
     let (queue, mut common) = initialize(false, socket_name)?;
     for (seat, data) in &mut common.seats {
         let device = common
@@ -578,28 +605,40 @@ pub(crate) fn get_all_contents_channel_internal(
         offers: HashMap::new(),
         got_primary_selection: false,
     };
-    thread::spawn(move || run_all_dispatch_loop(queue, state, seat, filter, sender));
-    Ok(receiver)
+    thread::spawn(move || run_all_dispatch_loop(queue, state, seat, callback));
+    Ok(())
 }
 
 fn run_all_dispatch_loop(
     mut queue: EventQueue<State>,
     mut state: State,
     seat: Seat<'static>,
-    filter: Option<Box<dyn Fn(&mut HashSet<String>) + Send + Sync + 'static>>,
-    sender: mpsc::Sender<Result<HashMap<String, Vec<u8>>, Error>>,
+    callback: Box<
+        dyn Fn(
+                Result<
+                    (
+                        HashSet<String>,
+                        &mut (dyn FnMut(String) -> Result<Vec<u8>, Error> + Send),
+                    ),
+                    Error,
+                >,
+            ) -> bool
+            + Send
+            + Sync
+            + 'static,
+    >,
 ) {
     loop {
         if let Err(err) = queue.blocking_dispatch(&mut state) {
-            if sender.send(Err(Error::WaylandCommunication(err))).is_err() {
-                return; // receiver closed
+            if callback(Err(Error::WaylandCommunication(err))) {
+                return;
             }
             continue;
         }
 
         let Some(seat_data) = get_seat(&mut state, seat) else {
-            if sender.send(Err(Error::NoSeats)).is_err() {
-                return; // receiver closed
+            if callback(Err(Error::NoSeats)) {
+                return;
             }
             continue;
         };
@@ -610,42 +649,51 @@ fn run_all_dispatch_loop(
         };
 
         // shouldn't happen
-        let Some(mut mime_types) = state.offers.remove(&offer) else {
+        let Some(mime_types) = state.offers.remove(&offer) else {
             continue;
         };
 
-        if let Some(ref filter) = filter {
-            filter(&mut mime_types);
-        }
-
-        let mut data: HashMap<String, Vec<u8>> = HashMap::new();
-        for mime in mime_types.into_iter() {
-            let Ok((mut read, write)) = pipe() else {
-                if sender
-                    .send(Err(Error::PipeCreation(io::Error::last_os_error())))
-                    .is_err()
-                {
-                    return; // receiver closed
-                }
-                continue;
-            };
-            offer.receive(mime.clone(), write.as_fd());
-            drop(write);
-            let mut contents = Vec::new();
-            let _ = queue.roundtrip(&mut state);
-            let _ = read.read_to_end(&mut contents);
-            data.insert(mime, contents);
-        }
-        if sender.send(Ok(data)).is_err() {
-            return; // receiver closed
-        }
-
-        if let Err(err) = queue.roundtrip(&mut state) {
-            if sender.send(Err(Error::WaylandCommunication(err))).is_err() {
-                return; // receiver closed
+        {
+            let mut load = create_load_mime_fn(offer.clone(), &mut queue, &mut state);
+            if callback(Ok((mime_types, &mut load))) {
+                return;
             }
-            continue;
         }
+    }
+}
+
+fn load_mime(
+    mime: String,
+    offer: Offer,
+    mut queue: EventQueue<State>,
+    mut state: State,
+) -> Result<Vec<u8>, Error> {
+    let Ok((mut read, write)) = pipe() else {
+        return Err(Error::PipeCreation(io::Error::last_os_error()));
+    };
+    offer.receive(mime.clone(), write.as_fd());
+    drop(write);
+    let mut contents = Vec::new();
+    let _ = queue.roundtrip(&mut state);
+    let _ = read.read_to_end(&mut contents);
+    Ok(contents)
+}
+
+fn create_load_mime_fn<'a>(
+    offer: Offer,
+    queue: &'a mut EventQueue<State>,
+    state: &'a mut State,
+) -> impl FnMut(String) -> Result<Vec<u8>, Error> + use<'a> {
+    move |mime: String| {
+        let Ok((mut read, write)) = pipe() else {
+            return Err(Error::PipeCreation(io::Error::last_os_error()));
+        };
+        offer.receive(mime.clone(), write.as_fd());
+        drop(write);
+        let mut contents = Vec::new();
+        let _ = queue.roundtrip(state);
+        let _ = read.read_to_end(&mut contents);
+        Ok(contents)
     }
 }
 
