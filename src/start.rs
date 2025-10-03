@@ -6,10 +6,11 @@ use crate::util::check_new_version;
 use anyhow::Context;
 use async_channel::{Receiver, Sender};
 use config_lib::Config;
-use core_lib::transfer::TransferType;
-use core_lib::{
-    WarnWithDetails, hyprshell_config_block, hyprshell_config_listener, hyprshell_css_listener,
+use core_lib::WarnWithDetails;
+use core_lib::listener::{
+    hyprshell_config_block, hyprshell_config_listener, hyprshell_css_listener,
 };
+use core_lib::transfer::TransferType;
 use exec_lib::listener::{hyprland_config_listener, monitor_listener};
 use exec_lib::{info_toast, toast};
 use gtk::gdk::Display;

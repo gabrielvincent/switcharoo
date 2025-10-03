@@ -1,4 +1,4 @@
-use crate::get_daemon_socket_path_buff;
+use crate::util::get_daemon_socket_path_buff;
 use anyhow::Context;
 use std::io::{BufRead, BufReader, Write};
 use std::os::unix::net::UnixStream;

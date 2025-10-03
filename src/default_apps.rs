@@ -3,7 +3,8 @@
 use crate::util;
 use anyhow::{Context, bail};
 use core_lib::default::get_all_mime_files;
-use core_lib::{IniFile, get_config_home};
+use core_lib::ini::IniFile;
+use core_lib::path::get_config_home;
 use std::collections::HashMap;
 use std::fs::{read_to_string, write};
 use tracing::{debug, warn};
@@ -40,7 +41,7 @@ pub fn get(mime: &str) -> anyhow::Result<()> {
 }
 
 pub fn set_default(mime: &str, value: &str) -> anyhow::Result<()> {
-    let desktop_files = core_lib::collect_desktop_files();
+    let desktop_files = core_lib::util::collect_desktop_files();
 
     // check if valid desktop file
     let file = desktop_files.iter().find(|f| f.file_name() == value);
@@ -71,7 +72,7 @@ pub fn set_default(mime: &str, value: &str) -> anyhow::Result<()> {
 }
 
 pub fn add_association(mime: &str, value: &str) -> anyhow::Result<()> {
-    let desktop_files = core_lib::collect_desktop_files();
+    let desktop_files = core_lib::util::collect_desktop_files();
 
     // check if valid desktop file
     let file = desktop_files.iter().find(|f| f.file_name() == value);
@@ -104,7 +105,7 @@ pub fn add_association(mime: &str, value: &str) -> anyhow::Result<()> {
 const USED_MIME_TYPES: &[&str] = &["x-scheme-handler/https", "inode/directory"];
 
 pub fn list(all: bool) {
-    let mime_files = core_lib::collect_mime_files();
+    let mime_files = core_lib::util::collect_mime_files();
 
     let mut mimes = HashMap::new();
     for file in mime_files {
@@ -154,8 +155,8 @@ pub fn list(all: bool) {
 }
 
 pub fn check() {
-    let mime_files = core_lib::collect_mime_files();
-    let desktop_files = core_lib::collect_desktop_files();
+    let mime_files = core_lib::util::collect_mime_files();
+    let desktop_files = core_lib::util::collect_desktop_files();
 
     let mut mime_files_map = HashMap::new();
     for file in mime_files {

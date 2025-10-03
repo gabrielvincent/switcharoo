@@ -2,7 +2,8 @@
 
 use crate::util;
 use anyhow::Context;
-use core_lib::{IniFile, default};
+use core_lib::default;
+use core_lib::ini::IniFile;
 use std::fs;
 use std::path::Path;
 use tracing::debug;
@@ -60,7 +61,7 @@ pub fn list_icons() -> anyhow::Result<()> {
 }
 
 pub fn list_desktop_files() {
-    let desktop_files = core_lib::collect_desktop_files();
+    let desktop_files = core_lib::util::collect_desktop_files();
     for file in desktop_files {
         let Ok(content) = fs::read_to_string(file.path()) else {
             eprintln!("Failed to read desktop file: {}", file.path().display());

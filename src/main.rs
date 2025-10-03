@@ -1,9 +1,10 @@
 use anyhow::{Context, bail};
 use clap::Parser;
-use core_lib::{
-    WarnWithDetails, daemon_running, get_default_cache_dir, get_default_config_path,
-    get_default_css_path, get_default_data_dir,
+use core_lib::WarnWithDetails;
+use core_lib::path::{
+    get_default_cache_dir, get_default_config_path, get_default_css_path, get_default_data_dir,
 };
+use core_lib::util::daemon_running;
 use std::{env, fs};
 
 mod cli;
@@ -65,7 +66,7 @@ fn main() -> anyhow::Result<()> {
             }
             exec_lib::check_version()
                 .warn_details("Unable to check hyprland version, continuing anyway");
-            clipboard_lib::test_clipboard::test_clipboard();
+            clipboard_lib::store::test_clipboard();
 
             start::start(
                 config_path.unwrap_or_else(get_default_config_path),
@@ -100,14 +101,17 @@ fn main() -> anyhow::Result<()> {
                         opts.css_file.as_ref(),
                         opts.data_dir.as_ref(),
                         opts.cache_dir.as_ref(),
-                        &core_lib::get_data_home(),
+                        &core_lib::path::get_data_home(),
                     )
                     .warn();
                 }
-                core_lib::explain_config(&config_path);
+                core_lib::util::explain_config(&config_path, true);
             }
             cli::ConfigCommand::Explain {} => {
-                core_lib::explain_config(&config_path.unwrap_or_else(get_default_config_path));
+                core_lib::util::explain_config(
+                    &config_path.unwrap_or_else(get_default_config_path),
+                    false,
+                );
             }
             cli::ConfigCommand::Check {} => {
                 if let Err(err) = config_lib::load_and_migrate_config(

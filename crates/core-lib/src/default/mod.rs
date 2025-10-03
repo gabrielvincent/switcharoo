@@ -1,5 +1,5 @@
 use crate::ini_owned::IniFileOwned;
-use crate::{collect_desktop_files, collect_mime_files};
+use crate::util::{collect_desktop_files, collect_mime_files};
 use anyhow::bail;
 use std::collections::BTreeSet;
 use std::fs::{DirEntry, read_dir, read_to_string};

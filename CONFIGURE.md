@@ -41,7 +41,7 @@ This mode displays the windows in a downscaled view of the screen. It also shows
 
 ## Launcher
 
-- **default_terminal:**_[string]_ Defined the name of the default terminal to use. This value is optional, if unset a list of [default terminals](crates/core-lib/src/util/const.rs) is used to find a default terminal.
+- **default_terminal:**_[string]_ Defined the name of the default terminal to use. This value is optional, if unset a list of [default terminals](crates/core-lib/src/const.rs) is used to find a default terminal.
   This is used to launch programs like micro from the launcher that need to be run in a terminal.
   This terminal is also used by the `terminal` plugin to run the typed command in a terminal.
 - **launch_modifier:**_[string]_ Sets the modifier used to launch apps in the launcher by pressing `<Mod> + 1` to open second, `<Mod> + t` to run in terminal, etc. This MUST be one of these modifiers: `alt, ctrl, super`.
