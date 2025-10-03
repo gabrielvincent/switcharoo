@@ -14,10 +14,11 @@ rust-version.workspace = true
 anyhow.workspace = true
 tracing.workspace = true
 core-lib.workspace = true
-#serde.workspace = true
+fast_image_resize = { version = "5.3.0", features = ["image"] }
 wl_clipboard = { package = "hyprshell-wl-clipboard-rs", path = "../../dep-crates/wl-clipboard-rs", version = "=4.7.0" }
 bincode = { version = "2.0.1", features = ["serde"] }
 image = { version = "0.25.8" }
+lz4_flex = { version = "0.11" }
 
 
 [lints]

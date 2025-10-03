@@ -10,6 +10,9 @@ use image::ImageReader;
 use std::collections::HashMap;
 use std::fs::File;
 use std::io::{BufWriter, Cursor, Write};
+use std::sync::Arc;
+use std::thread;
+use std::time::SystemTime;
 use tracing::{debug, trace, warn};
 use wl_clipboard::paste::{CallbackData, Seat, get_all_contents_callback};
 
@@ -23,6 +26,7 @@ fn handle_values(val: CallbackData) -> bool {
     let Ok((mut mimes, load)) = val else {
         return false;
     };
+    let now_start = SystemTime::now();
 
     filer_mimes(&mut mimes);
 
@@ -35,13 +39,15 @@ fn handle_values(val: CallbackData) -> bool {
 
     match pref_mime {
         Some(pref_mime) if pref_mime.starts_with("image/") => {
-            let pref_data = data.get(&pref_mime).unwrap();
-            let _ = compress_and_store_image(&pref_mime, pref_data);
+            let pref_data = data.get(&pref_mime).cloned().unwrap();
+            thread::spawn(|| {
+                let _ = compress_and_store_image(pref_data);
+            });
             // TODO
         }
         Some(pref_mime) => {
             let pref_data = data.get(&pref_mime).unwrap();
-            debug!("Data: {:?}", String::from_utf8_lossy(&pref_data));
+            trace!("Data: {:?}", String::from_utf8_lossy(&pref_data));
             // TODO
         }
         None => {
@@ -50,7 +56,7 @@ fn handle_values(val: CallbackData) -> bool {
     }
 
     let combined_size = data.values().map(Vec::len).sum::<usize>();
-    let data = compact(data);
+    let (data, contains_image) = compact(data, true);
     let compressed_combined_size = data
         .values()
         .filter_map(|dt| {
@@ -61,7 +67,7 @@ fn handle_values(val: CallbackData) -> bool {
             }
         })
         .sum::<usize>();
-    debug!(
+    trace!(
         "Combined size: {} bytes, compressed size {} bytes, storing {} aliased and {} data entries",
         combined_size,
         compressed_combined_size,
@@ -73,8 +79,13 @@ fn handle_values(val: CallbackData) -> bool {
             .count()
     );
 
-    if let Err(err) = store_binary(&data) {
+    if let Err(err) = store_binary(&data, !contains_image) {
         warn!("Failed to store clipboard data: {err}");
     }
+
+    debug!(
+        "Clipboard handling took {:?}",
+        now_start.elapsed().unwrap_or_default()
+    );
     false
 }

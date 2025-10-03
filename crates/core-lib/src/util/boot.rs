@@ -14,7 +14,7 @@ pub fn get_boot_id() -> &'static Option<String> {
     })
 }
 
-#[instrument(level = "debug", ret)]
+#[instrument(level = "debug", ret(level = "trace"))]
 fn load_boot_id() -> anyhow::Result<String> {
     let mut file = File::open("/proc/sys/kernel/random/boot_id")
         .context("Failed to open /proc/sys/kernel/random/boot_id")?;
