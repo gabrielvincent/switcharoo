@@ -1,1 +1,1 @@
-pub mod test_clipboard;
+pub mod store;

@@ -21,7 +21,5 @@ fn load_boot_id() -> anyhow::Result<String> {
     let mut contents = String::new();
     file.read_to_string(&mut contents)
         .context("Failed to read boot_id")?;
-    let contents = contents.trim().to_string();
-    trace!("Boot ID: {contents}");
-    Ok(contents)
+    Ok(contents.trim().to_string())
 }

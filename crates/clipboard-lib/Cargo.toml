@@ -13,6 +13,7 @@ rust-version.workspace = true
 [dependencies]
 anyhow.workspace = true
 tracing.workspace = true
+core-lib.workspace = true
 #serde.workspace = true
 wl_clipboard = { package = "hyprshell-wl-clipboard-rs", path = "../../dep-crates/wl-clipboard-rs", version = "=4.7.0" }
 bincode = { version = "2.0.1", features = ["serde"] }
