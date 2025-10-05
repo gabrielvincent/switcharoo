@@ -38,7 +38,7 @@
               buildLib.commonArgs
               // {
                 cargoArtifacts = buildLib.cargoReleaseArtifacts;
-                postInstall = buildLib.wrapWithGcc;
+                preFixup = buildLib.addWrapWithGccArgs;
               }
             );
             hyprshell = self.helpers.wrap-hyprshell pkgs.hyprland pkgs;
@@ -72,8 +72,6 @@
             pkgs.runCommand "hyprshell"
               {
                 buildInputs = [ pkgs.makeBinaryWrapper ];
-                # TODO doesnt work, getExe still complains
-                meta = import ./nix/meta.nix { inherit pkgs; };
               }
               ''
                 mkdir -p $out/bin

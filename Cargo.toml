@@ -75,7 +75,6 @@ config_check = ["config-lib/no-default-config-values"]
 [profile.release]
 strip = "debuginfo"
 lto = true
-
 opt-level = 3
 
 [lints]

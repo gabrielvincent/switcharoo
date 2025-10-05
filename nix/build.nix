@@ -9,10 +9,12 @@ rec {
   # no more filtering, excluded to many files
   src = ../.;
   stdenv = p: p.stdenv;
-  wrapWithGcc = ''
-    wrapProgram $out/bin/hyprshell \
-      --prefix PATH : ${pkgs.lib.makeBinPath [ pkgs.gcc ]} \
-      --prefix CPATH : ${pkgs.lib.makeIncludePath ([ pkgs.pixman ])}
+  # use in preFixup
+  addWrapWithGccArgs = ''
+    gappsWrapperArgs+=(
+       --prefix PATH : '${pkgs.lib.makeBinPath [ pkgs.gcc ]}'
+       --prefix CPATH : '${pkgs.lib.makeIncludePath ([ pkgs.pixman ])}'
+     )
   '';
   commonArgs = {
     inherit

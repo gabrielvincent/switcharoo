@@ -27,7 +27,7 @@ The application also includes a launcher for running applications, doing calcula
 
 ### From Source
 
-gtk4 and [gtk4-layer-shell](https://github.com/wmww/gtk4-layer-shell)[1.1.1] must be installed
+hyprland, gtk4 and [gtk4-layer-shell](https://github.com/wmww/gtk4-layer-shell)[1.1.1] must be installed
 
 ```bash
 cargo install hyprshell
@@ -35,17 +35,21 @@ cargo install hyprshell
 
 **hyprland-devel is needed for the hyprland headers (needed to build hyprland plugin)**
 Fedora: `sudo dnf install gtk4-layer-shell-devel gtk4-devel hyprland-devel`
-Arch: `sudo pacman -Sy gtk4-layer-shell gtk4`
+Arch: `sudo pacman -Sy gtk4-layer-shell gtk4 hyprland`
 
 Minimum required rustc version: `1.87.0`
 
-### Arch Linux
+### Arch Linux (AUR)
 
 ```bash
 paru -S hyprshell
 # or
 yay -S hyprshell
 ```
+
+### Binary pre-built packages (only for x86_64 and aarch64)
+
+Download from the [releases](https://github.com/h3rmt/hyprshell/releases) page.
 
 ### NixOS
 
