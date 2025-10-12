@@ -1,6 +1,7 @@
-use crate::store::util::get_storage_string;
-use anyhow::{Context, bail};
+use crate::store::util::get_current_storage_string;
+use anyhow::Context;
 use image::{ImageEncoder, ImageReader};
+use std::fs;
 use std::fs::File;
 use std::io::{BufWriter, Cursor};
 use tracing::trace;
@@ -24,10 +25,12 @@ pub fn compress_and_store_image(pref_data: Vec<u8>) -> anyhow::Result<()> {
     );
     let now = std::time::SystemTime::now();
 
+    #[allow(clippy::cast_sign_loss, clippy::cast_precision_loss)]
     let mut dst_image = Image::new(
         (img2.width() as f32 * (IMAGE_HEIGHT as f32 / img2.height() as f32)) as u32,
         IMAGE_HEIGHT,
-        img2.pixel_type().unwrap(),
+        img2.pixel_type()
+            .context("Failed to get pixel type for clipboard image")?,
     );
 
     let mut resizer = Resizer::new();
@@ -44,8 +47,8 @@ pub fn compress_and_store_image(pref_data: Vec<u8>) -> anyhow::Result<()> {
     );
 
     let storage_string =
-        get_storage_string().context("Failed to get storage string for clipboard image")?;
-    std::fs::create_dir_all("test-data/images").context("Failed to create image directory")?;
+        get_current_storage_string().context("Failed to get storage string for clipboard image")?;
+    fs::create_dir_all("test-data/images").context("Failed to create image directory")?;
     let mut file = File::create(format!("test-data/images/{storage_string}.png"))
         .context("Failed to create clipboard image file")?;
     {

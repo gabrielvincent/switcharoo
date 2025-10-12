@@ -122,4 +122,4 @@ Debug commands are provided to help troubleshoot desktop files, icons, default a
 - json5_config: Adds support for a toml config file.
 - launcher_calc: Adds support for the calc plugin in the launcher.
 - debug_command: Adds the `hyprshell debug` command to debug icons, desktop files, etc.
-- config_check: (used for ci tests) Adds a command to check if the loaded config is equal to the default config or the full config. Also diables loading of configs without all values.
+- ci_config_check: (used for ci tests) Adds a command to check if the loaded config is equal to the default config or the full config. Also diables loading of configs without all values.

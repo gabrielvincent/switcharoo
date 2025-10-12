@@ -17,9 +17,18 @@ core-lib.workspace = true
 fast_image_resize = { version = "5.3.0", features = ["image"] }
 wl_clipboard = { package = "hyprshell-wl-clipboard-rs", path = "../../dep-crates/wl-clipboard-rs", version = "=4.7.0" }
 bincode = { version = "2.0.1", features = ["serde"] }
-image = { version = "0.25.8" }
-lz4_flex = { version = "0.11" }
+image = { version = "0.25.8", features = ["png", "jpeg", "webp", "gif"], default-features = false }
+lz4_flex = { version = "0.11", optional = true }
+zstd = { version = "0.13.3", optional = true }
+secret-service = { version = "5.0.0", features = ["rt-tokio-crypto-rust"], default-features = false, optional = true }
+chacha20poly1305 = { version = "0.11.0-rc.1", optional = true }
+aes-gcm = { version = "0.11.0-rc.1", optional = true }
 
+[features]
+compress_lz4 = ["dep:lz4_flex"]
+compress_zstd = ["dep:zstd"]
+encrypt_chacha20poly1305 = ["dep:chacha20poly1305", "dep:secret-service"]
+encrypt_aes_gcm = ["dep:aes-gcm", "dep:secret-service"]
 
 [lints]
 workspace = true

@@ -141,8 +141,14 @@ mod tests {
     fn assert_config_matches_data(config: &Config, data: &ConfigData) {
         if let Some(windows) = &config.windows {
             if let Some(overview) = &windows.overview {
-                assert_eq!(overview.modifier, data.overview.as_ref().unwrap().0);
-                assert_eq!(overview.key, data.overview.as_ref().unwrap().1);
+                assert_eq!(
+                    overview.modifier,
+                    data.overview.as_ref().expect("config option missing").0
+                );
+                assert_eq!(
+                    overview.key,
+                    data.overview.as_ref().expect("config option missing").1
+                );
                 assert_eq!(overview.launcher.default_terminal, data.default_terminal);
 
                 let plugins = &overview.launcher.plugins;
@@ -178,7 +184,10 @@ mod tests {
                 );
             }
             if let Some(switch) = &windows.switch {
-                assert_eq!(switch.modifier, data.switch.0.unwrap());
+                assert_eq!(
+                    switch.modifier,
+                    data.switch.0.expect("config option missing")
+                );
                 assert_eq!(switch.switch_workspaces, data.switch.1);
             }
         }
@@ -195,8 +204,21 @@ mod tests {
         };
 
         let config = generate_config(data);
-        assert!(config.windows.as_ref().unwrap().overview.is_none());
-        assert!(config.windows.unwrap().switch.is_none());
+        assert!(
+            config
+                .windows
+                .as_ref()
+                .expect("config option missing")
+                .overview
+                .is_none()
+        );
+        assert!(
+            config
+                .windows
+                .expect("config option missing")
+                .switch
+                .is_none()
+        );
     }
 
     #[test]

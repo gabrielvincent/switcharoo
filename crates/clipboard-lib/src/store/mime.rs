@@ -48,7 +48,7 @@ pub fn filer_mimes(mime_types: &mut HashSet<String>) {
     // Retain only one image/ MIME type.
     let image_mime = MIME_TYPES_IMAGES_PRIO
         .iter()
-        .find(|preferred| mime_types.contains(&preferred.to_string()))
+        .find(|preferred| mime_types.contains(&(**preferred).to_string()))
         .map(|&preferred| preferred.to_string())
         .or_else(|| {
             mime_types

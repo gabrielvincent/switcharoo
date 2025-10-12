@@ -35,7 +35,7 @@ jobs:
       - name: install Rust stable
         uses: dtolnay/rust-toolchain@stable
       - name: Install gtk4-layer-shell
-        run: ./scripts/install-gtk4-layer-shell.sh
+        run: ./scripts/ci/install-gtk4-layer-shell.sh
       - name: Install cargo-workspaces
         run: |
           mkdir -p $HOME/.cargo/bin
@@ -75,12 +75,12 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Build binary for x86_64-unknown-linux-gnu
         run: |
-          ./scripts/build-x86.sh
+          ./scripts/ci/build-x86.sh
           gh release upload ${{ github.ref_name }} "target/x86_64-unknown-linux-gnu/release/hyprshell#hyprshell-x86_64-unknown-linux-gnu"
       - name: Build binary for aarch64-unknown-linux-gnu
         run: |
-          ./scripts/install-gtk4-layer-shell-aarch64.sh
-          ./scripts/build-aarch64.sh
+          ./scripts/ci/install-gtk4-layer-shell-aarch64.sh
+          ./scripts/ci/build-aarch64.sh
           gh release upload ${{ github.ref_name }} "target/aarch64-unknown-linux-gnu/release/hyprshell#hyprshell-aarch64-unknown-linux-gnu"
       - name: Publish AUR package
         uses: KSXGitHub/github-actions-deploy-aur@2ac5a4c1d7035885d46b10e3193393be8460b6f1 # v4.1.1

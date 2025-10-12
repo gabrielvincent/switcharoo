@@ -1,9 +1,10 @@
-mod compact;
-mod image;
 mod listen;
 mod mime;
-mod rw;
+mod save_image;
+mod save_map;
+mod save_text;
 pub(crate) mod util;
+mod write;
 
 pub use listen::test_clipboard;
-pub use rw::ClipboardDataType;
+pub use save_map::ClipboardDataType;

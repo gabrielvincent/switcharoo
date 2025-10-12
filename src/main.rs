@@ -6,6 +6,7 @@ use core_lib::path::{
 };
 use core_lib::util::daemon_running;
 use std::{env, fs};
+use tracing_subscriber::EnvFilter;
 
 mod cli;
 mod data;
@@ -36,6 +37,11 @@ fn main() -> anyhow::Result<()> {
             2.. => "trace",
         }
     };
+    let filter = EnvFilter::try_from_default_env().unwrap_or_else(|_| {
+        format!(
+            "hyprshell={level},config_lib={level},core_lib={level},exec_lib={level},launcher_lib={level},windows_lib={level},hyprland_plugin={level},hyprshell_clipboard_lib={level}"
+        ).into()}
+    );
     let subscriber = tracing_subscriber::fmt()
         .with_timer(tracing_subscriber::fmt::time::uptime())
         .with_target(
@@ -44,9 +50,7 @@ fn main() -> anyhow::Result<()> {
                 .and_then(|s| s.parse().ok())
                 .unwrap_or(false),
         )
-        .with_env_filter(format!(
-            "hyprshell={level},config_lib={level},core_lib={level},exec_lib={level},launcher_lib={level},windows_lib={level},hyprland_plugin={level}",
-        ))
+        .with_env_filter(filter)
         .finish();
     tracing::subscriber::set_global_default(subscriber)
         .unwrap_or_else(|e| tracing::warn!("Unable to initialize logging: {e}"));
@@ -122,7 +126,7 @@ fn main() -> anyhow::Result<()> {
                     std::process::exit(1);
                 }
             }
-            #[cfg(feature = "config_check")]
+            #[cfg(feature = "ci_config_check")]
             cli::ConfigCommand::CheckIfDefault {} => {
                 let config = config_lib::load_and_migrate_config(
                     &config_path.unwrap_or_else(get_default_config_path),
@@ -138,7 +142,7 @@ fn main() -> anyhow::Result<()> {
                     std::process::exit(1);
                 }
             }
-            #[cfg(feature = "config_check")]
+            #[cfg(feature = "ci_config_check")]
             cli::ConfigCommand::CheckIfFull {} => {
                 let config = config_lib::load_and_migrate_config(
                     &config_path.unwrap_or_else(get_default_config_path),

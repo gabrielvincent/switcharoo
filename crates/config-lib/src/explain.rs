@@ -149,7 +149,11 @@ Explanation (blue are keys, bold blue keys can be configured in config):
 Press Alt + tab and hold Alt to view recently used applications. Press tab and grave / shift + tab to select a different window, release Alt to close the window.
 ";
         let mut config = create_test_config();
-        config.windows.as_mut().unwrap().overview = None;
+        config
+            .windows
+            .as_mut()
+            .expect("config option missing")
+            .overview = None;
         let path = PathBuf::from("/test/config.ron");
         let result = explain(&config, &path, false);
         assert_eq!(result, CONFIG);
@@ -172,7 +176,11 @@ After opening the Overview the Launcher is available:
 <Switch mode disabled>
 ";
         let mut config = create_test_config();
-        config.windows.as_mut().unwrap().switch = None;
+        config
+            .windows
+            .as_mut()
+            .expect("config option missing")
+            .switch = None;
         let path = PathBuf::from("/test/config.ron");
         let result = explain(&config, &path, false);
         assert_eq!(result, CONFIG);
@@ -193,10 +201,10 @@ Press Alt + tab and hold Alt to view recently used applications. Press tab and g
         config
             .windows
             .as_mut()
-            .unwrap()
+            .expect("config option missing")
             .overview
             .as_mut()
-            .unwrap()
+            .expect("config option missing")
             .launcher
             .plugins = Plugins {
             applications: None,

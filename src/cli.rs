@@ -113,11 +113,11 @@ pub enum ConfigCommand {
     /// Explain how to use the program based on the config
     Explain {},
 
-    #[cfg(feature = "config_check")]
+    #[cfg(feature = "ci_config_check")]
     /// Check if the provided config is equal to the default config
     CheckIfDefault {},
 
-    #[cfg(feature = "config_check")]
+    #[cfg(feature = "ci_config_check")]
     /// Check if the provided config is equal to the fully enabled config
     CheckIfFull {},
 }

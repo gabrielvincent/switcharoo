@@ -69,7 +69,11 @@ json5_config = ["config-lib/json5_config"]
 generate_config_command = ["config-lib/generate_config"]
 launcher_calc = ["launcher-lib/calc", "config-lib/launcher_calc_plugin"]
 debug_command = []
-config_check = ["config-lib/no-default-config-values"]
+ci_config_check = ["config-lib/ci_no_default_config_values"]
+clipboard_compress_lz4 = ["clipboard-lib/compress_lz4"]
+clipboard_compress_zstd = ["clipboard-lib/compress_zstd"]
+clipboard_encrypt_chacha20poly1305 = ["clipboard-lib/encrypt_chacha20poly1305"]
+clipboard_encrypt_aes_gcm = ["clipboard-lib/encrypt_aes_gcm"]
 
 
 [profile.release]
@@ -84,6 +88,7 @@ workspace = true
 all = { level = "warn", priority = -1 }
 pedantic = { level = "warn", priority = -1 }
 nursery = { level = "warn", priority = -1 }
+unwrap_used = "deny"
 missing_errors_doc = "allow"
 cast_possible_truncation = "allow"
 # This is broken

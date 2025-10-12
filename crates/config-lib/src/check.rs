@@ -91,16 +91,30 @@ mod tests {
     #[test]
     fn test_invalid_scale() {
         let mut config = full();
-        config.windows.as_mut().unwrap().scale = 20.0;
+        config
+            .windows
+            .as_mut()
+            .expect("config option missing")
+            .scale = 20.0;
         assert!(check(&config).is_err());
-        config.windows.as_mut().unwrap().scale = 0.0;
+        config
+            .windows
+            .as_mut()
+            .expect("config option missing")
+            .scale = 0.0;
         assert!(check(&config).is_err());
     }
 
     #[test]
     fn test_same_modifier() {
         let mut config = full();
-        let overview = config.windows.as_mut().unwrap().overview.as_mut().unwrap();
+        let overview = config
+            .windows
+            .as_mut()
+            .expect("config option missing")
+            .overview
+            .as_mut()
+            .expect("config option missing");
         overview.launcher.launch_modifier = overview.modifier;
         assert!(check(&config).is_err());
     }
@@ -108,7 +122,13 @@ mod tests {
     #[test]
     fn test_invalid_key() {
         let mut config = full();
-        let overview = config.windows.as_mut().unwrap().overview.as_mut().unwrap();
+        let overview = config
+            .windows
+            .as_mut()
+            .expect("config option missing")
+            .overview
+            .as_mut()
+            .expect("config option missing");
         overview.key = Box::from("super");
         assert!(check(&config).is_err());
     }
@@ -119,10 +139,10 @@ mod tests {
         let launcher = &mut config
             .windows
             .as_mut()
-            .unwrap()
+            .expect("config option missing")
             .overview
             .as_mut()
-            .unwrap()
+            .expect("config option missing")
             .launcher;
         if let Some(ws) = launcher.plugins.websearch.as_mut() {
             ws.engines.push(SearchEngine {
@@ -140,10 +160,10 @@ mod tests {
         let launcher = &mut config
             .windows
             .as_mut()
-            .unwrap()
+            .expect("config option missing")
             .overview
             .as_mut()
-            .unwrap()
+            .expect("config option missing")
             .launcher;
         if let Some(ws) = launcher.plugins.websearch.as_mut() {
             ws.engines[0].url = Box::from("");
@@ -157,10 +177,10 @@ mod tests {
         let launcher = &mut config
             .windows
             .as_mut()
-            .unwrap()
+            .expect("config option missing")
             .overview
             .as_mut()
-            .unwrap()
+            .expect("config option missing")
             .launcher;
         if let Some(ws) = launcher.plugins.websearch.as_mut() {
             ws.engines[0].name = Box::from("");

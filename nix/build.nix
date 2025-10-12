@@ -57,10 +57,7 @@ rec {
   cargoFullArtifacts = craneLib.buildDepsOnly (
     commonArgs
     // {
-      mkDummySrc = craneLib.mkDummySrc {
-        inherit stdenv;
-        src = craneLib.cleanCargoSource ../.;
-      };
+      src = craneLib.cleanCargoSource ../.;
       pname = "hyprshell-full";
       doCheck = true;
       cargoBuildCommand = "cargo build --profile dev --locked --all-targets --all-features";

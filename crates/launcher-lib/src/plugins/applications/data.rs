@@ -16,8 +16,11 @@ pub fn save_run(desktop_file: &Path, data_dir: &Path) -> anyhow::Result<()> {
         from_reader(file).unwrap_or_else(|_| serde_json::json!({}))
     } else {
         // create the file and folder
-        std::fs::create_dir_all(file.parent().unwrap())
-            .context("Failed to create data directory")?;
+        std::fs::create_dir_all(
+            file.parent()
+                .context("failed to create directory for cache file")?,
+        )
+        .context("Failed to create data directory")?;
         serde_json::json!({})
     };
 

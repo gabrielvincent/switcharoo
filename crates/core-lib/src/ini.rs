@@ -236,30 +236,34 @@ key with spaces=value with spaces; and more values
         let ini = IniFile::from_str(content);
 
         assert_eq!(
-            ini.get_section("Section1").unwrap().get_first("key1"),
+            ini.get_section("Section1")
+                .expect("section missing")
+                .get_first("key1"),
             Some("value1")
         );
         assert_eq!(
-            ini.get_section("Section2").unwrap().get_first("foo"),
+            ini.get_section("Section2")
+                .expect("section missing")
+                .get_first("foo"),
             Some("bar")
         );
 
         assert!(ini.get_section("Empty Section").is_some());
         assert_ne!(
             ini.get_section("Section With Spaces")
-                .unwrap()
+                .expect("section missing")
                 .get_all("key with spaces"),
             Some(&vec!["value with spaces"])
         );
         assert_ne!(
             ini.get_section("Section With Spaces")
-                .unwrap()
+                .expect("section missing")
                 .get_all("key with spaces"),
             Some(&vec!["value with spaces"])
         );
         assert_eq!(
             ini.get_section("Section With Spaces")
-                .unwrap()
+                .expect("section missing")
                 .get_all("key with spaces"),
             Some(&vec!["value with spaces", "and more values"])
         );
@@ -267,7 +271,7 @@ key with spaces=value with spaces; and more values
         assert!(ini.get_section("NonExistent").is_none());
         assert_eq!(
             ini.get_section("Section1")
-                .unwrap()
+                .expect("section missing")
                 .get_first("nonexistent"),
             None
         );
@@ -284,7 +288,12 @@ key with spaces=value with spaces; and more values
     fn test_no_sections() {
         let content = "key=value";
         let ini = IniFile::from_str(content);
-        assert_eq!(ini.get_section("").unwrap().get_first("key"), Some("value"));
+        assert_eq!(
+            ini.get_section("")
+                .expect("section missing")
+                .get_first("key"),
+            Some("value")
+        );
     }
 
     #[test]
