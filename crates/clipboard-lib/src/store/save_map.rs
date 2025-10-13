@@ -1,3 +1,4 @@
+use crate::config::Config;
 use crate::store::util::get_current_storage_string;
 use crate::store::write::get_storage_writer;
 use anyhow::Context;
@@ -13,7 +14,7 @@ pub enum ClipboardDataType {
     Data(Vec<u8>),
 }
 
-pub fn compress_and_store_map(data: HashMap<String, Vec<u8>>) {
+pub fn compress_and_store_map(data: HashMap<String, Vec<u8>>, config: Config) {
     let combined_size = data.values().map(Vec::len).sum::<usize>();
     let (data, contains_image) = deduplicate_clipboard_entries(data, true);
     let compressed_combined_size = data
@@ -39,12 +40,16 @@ pub fn compress_and_store_map(data: HashMap<String, Vec<u8>>) {
     );
 
     // dont compress if contains image
-    if let Err(err) = store_map(&data, !contains_image) {
+    if let Err(err) = store_map(&data, config, !contains_image) {
         warn!("Failed to store clipboard data: {err}");
     }
 }
 
-fn store_map(data: &HashMap<Box<str>, ClipboardDataType>, compress: bool) -> anyhow::Result<()> {
+fn store_map(
+    data: &HashMap<Box<str>, ClipboardDataType>,
+    config: Config,
+    compress: bool,
+) -> anyhow::Result<()> {
     let storage_string =
         get_current_storage_string().context("Failed to get storage string for clipboard data")?;
     fs::create_dir_all("test-data/data").context("Failed to create data directory")?;
@@ -58,7 +63,7 @@ fn store_map(data: &HashMap<Box<str>, ClipboardDataType>, compress: bool) -> any
         .context("Failed to create clipboard data file")?;
 
     {
-        let mut write = get_storage_writer(&mut file, compress, true);
+        let mut write = get_storage_writer(&mut file, config, compress);
         bincode::encode_into_std_write(data, &mut write, bincode::config::standard())
             .context("Failed to encode clipboard data")?;
     }

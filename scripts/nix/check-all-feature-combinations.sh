@@ -38,11 +38,8 @@ test_feature_combinations() {
   echo "all features tested"
 }
 
+declare -a crypt_features=("clipboard_encrypt_chacha20poly1305" "clipboard_encrypt_aes_gcm" "clipboard_compress_zstd" "clipboard_compress_lz4")
+test_feature_combinations crypt_features
+
 declare -a features=("generate_config_command" "ci_config_check" "launcher_calc" "debug_command" "json5_config")
 test_feature_combinations features
-
-# Build with all valid combinations: one compress + one encrypt
-build_with_features "clipboard_compress_lz4,clipboard_encrypt_chacha20poly1305" "clipboard-combo-1"
-build_with_features "clipboard_compress_lz4,clipboard_encrypt_aes_gcm" "clipboard-combo-2"
-build_with_features "clipboard_compress_zstd,clipboard_encrypt_chacha20poly1305" "clipboard-combo-3"
-build_with_features "clipboard_compress_zstd,clipboard_encrypt_aes_gcm" "clipboard-combo-4"

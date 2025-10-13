@@ -1,3 +1,4 @@
+use crate::config::{Compression, Config, Encryption};
 use crate::store::mime::{filer_mimes, get_preferred_mime};
 use crate::store::save_image::compress_and_store_image;
 use crate::store::save_map::compress_and_store_map;
@@ -18,6 +19,27 @@ pub fn test_clipboard() {
 }
 
 fn handle_values(val: CallbackData) -> bool {
+    let mut config = Config {
+        encryption: Encryption::default(),
+        compression: Compression::default(),
+    };
+    #[cfg(feature = "compress_zstd")]
+    {
+        config.compression = Compression::Zstd(1);
+    }
+    #[cfg(feature = "encrypt_aes_gcm")]
+    {
+        config.encryption = Encryption::AesGcm;
+    }
+    #[cfg(feature = "compress_lz4")]
+    {
+        config.compression = Compression::Lz4;
+    }
+    #[cfg(feature = "encrypt_chacha20poly1305")]
+    {
+        config.encryption = Encryption::ChaCha20Poly1305;
+    }
+
     let (mut mimes, load) = match val {
         Ok(r) => r,
         Err(err) => {
@@ -52,8 +74,8 @@ fn handle_values(val: CallbackData) -> bool {
     } else {
         let pref_data = data.get(&pref_mime).expect("Preferred MIME type not found");
         let text = String::from_utf8_lossy(pref_data);
-        store_text(&text).warn_details("Failed to store clipboard text");
+        store_text(&text, config).warn_details("Failed to store clipboard text");
     }
-    thread::spawn(|| compress_and_store_map(data));
+    thread::spawn(move || compress_and_store_map(data, config));
     false
 }

@@ -18,7 +18,7 @@
 
 All the settings are optional and can be found in the [config](./CONFIGURE.md)
 
-This config enables overview and switch, but is not typesave like the flake home-manager config.
+This config enables overview and switch, but is not type-save like the flake home-manager config.
 
 ```nix
 { inputs, ... } : {

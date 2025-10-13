@@ -1,3 +1,4 @@
+use crate::config::Config;
 use crate::store::util::get_current_storage_string;
 use crate::store::write::get_storage_writer;
 use anyhow::Context;
@@ -6,7 +7,7 @@ use std::fs::File;
 use std::io::Write;
 use tracing::trace;
 
-pub fn store_text(text: &str) -> anyhow::Result<()> {
+pub fn store_text(text: &str, config: Config) -> anyhow::Result<()> {
     let compress = text.len() > 100;
     let storage_string =
         get_current_storage_string().context("Failed to get storage string for clipboard image")?;
@@ -17,7 +18,7 @@ pub fn store_text(text: &str) -> anyhow::Result<()> {
     ))
     .context("Failed to create clipboard image file")?;
     {
-        let mut write = get_storage_writer(&mut file, compress, true);
+        let mut write = get_storage_writer(&mut file, config, compress);
         write
             .write_all(text.as_bytes())
             .context("Failed to write text to clipboard")?;
