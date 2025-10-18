@@ -2,7 +2,7 @@ use crate::global::{WindowsSwitchConfig, WindowsSwitchData};
 use anyhow::Context;
 use async_channel::Sender;
 use config_lib::{FilterBy, Modifier, Switch, Windows};
-use core_lib::transfer::{SwitchSwitchConfig, TransferType};
+use core_lib::transfer::{Direction, SwitchSwitchConfig, TransferType};
 use core_lib::{HyprlandData, SWITCH_NAMESPACE, WarnWithDetails};
 use exec_lib::get_initial_active;
 use gtk::gdk::Key;
@@ -99,7 +99,7 @@ fn handle_key(key: Key, event_sender: &Sender<TransferType>) -> Propagation {
         Key::Tab => {
             event_sender
                 .send_blocking(TransferType::SwitchSwitch(SwitchSwitchConfig {
-                    reverse: false,
+                    direction: Direction::Right,
                 }))
                 .warn_details("unable to send");
             Propagation::Stop
@@ -107,7 +107,39 @@ fn handle_key(key: Key, event_sender: &Sender<TransferType>) -> Propagation {
         Key::ISO_Left_Tab | Key::grave | Key::dead_grave => {
             event_sender
                 .send_blocking(TransferType::SwitchSwitch(SwitchSwitchConfig {
-                    reverse: true,
+                    direction: Direction::Left,
+                }))
+                .warn_details("unable to send");
+            Propagation::Stop
+        }
+        Key::h | Key::Left => {
+            event_sender
+                .send_blocking(TransferType::SwitchSwitch(SwitchSwitchConfig {
+                    direction: Direction::Left,
+                }))
+                .warn_details("unable to send");
+            Propagation::Stop
+        }
+        Key::j | Key::Down => {
+            event_sender
+                .send_blocking(TransferType::SwitchSwitch(SwitchSwitchConfig {
+                    direction: Direction::Down,
+                }))
+                .warn_details("unable to send");
+            Propagation::Stop
+        }
+        Key::k | Key::Up => {
+            event_sender
+                .send_blocking(TransferType::SwitchSwitch(SwitchSwitchConfig {
+                    direction: Direction::Up,
+                }))
+                .warn_details("unable to send");
+            Propagation::Stop
+        }
+        Key::l | Key::Right => {
+            event_sender
+                .send_blocking(TransferType::SwitchSwitch(SwitchSwitchConfig {
+                    direction: Direction::Right,
                 }))
                 .warn_details("unable to send");
             Propagation::Stop
