@@ -1,0 +1,84 @@
+/* border around full expander row + items */
+.enable-frame > box {
+    padding: 4px;
+    border-radius: 18px;
+    border: 2px solid var(--border-color);
+}
+
+/* make hover for row rounded */
+.enable-frame > box > list > .activatable:hover {
+    border-radius: 18px;
+}
+
+/* remove background for row, increase font for title */
+.enable-frame > box > list {
+    background: transparent;
+    border-radius: 12px;
+    font-size: 1.4rem;
+    font-weight: 600;
+}
+
+/* remove background that interferes with rounden borders */
+.enable-frame > box > revealer > list {
+    background: unset;
+}
+
+/* disable hover effect on expanded row */
+.enable-frame > box > revealer > list > .activatable:hover {
+    background: unset;
+}
+
+/* some padding around the grid */
+.frame-row {
+    padding: 0.7rem;
+}
+
+/* set background color for the expander to bg color */
+.item-expander > box > revealer {
+    border-radius: 8px;
+    background-color: var(--popover-bg-color);
+}
+
+/* make it look like a button */
+.item-expander > box > list > .header {
+    border-radius: 8px;
+    /* yoinked from https://gitlab.gnome.org/GNOME/libadwaita/-/blob/main/src/stylesheet/widgets/_buttons.scss */
+    /* adjusts bg color the the same as the buttons */
+    background-color: color-mix(in srgb, currentColor 10%, transparent);
+}
+
+
+.footer {
+    padding: 6px 2px;
+}
+
+/* same style as `.enable-frame > box` to make row with switch look like expander */
+.bordered {
+    padding: 18px;
+    border-radius: 18px;
+    border: 2px solid var(--border-color);
+
+    font-size: 1.4rem;
+    font-weight: 600;
+}
+
+/* disabled style if calc plugin in not available */
+.disabled {
+    opacity: 0.5;
+    background: unset;
+}
+
+.changes-list {
+    padding: 8px;
+    border-radius: 12px;
+}
+
+.changes-list > row {
+    padding: 6px;
+}
+
+.changes-text {
+    padding: 16px;
+    border-radius: 12px;
+    border: 2px solid var(--border-color);
+}

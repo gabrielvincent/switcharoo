@@ -1,11 +1,11 @@
 use crate::global::{WindowsOverviewConfig, WindowsOverviewData, WindowsOverviewMonitorData};
+use adw::gtk::gdk::{Display, Monitor};
+use adw::gtk::prelude::*;
+use adw::gtk::{Application, ApplicationWindow, FlowBox, Orientation, Overlay, SelectionMode};
 use anyhow::Context;
 use config_lib::{FilterBy, Overview, Windows};
 use core_lib::{HyprlandData, OVERVIEW_NAMESPACE};
 use exec_lib::{get_initial_active, get_monitors};
-use gtk::gdk::{Display, Monitor};
-use gtk::prelude::*;
-use gtk::{Application, ApplicationWindow, FlowBox, Orientation, Overlay, SelectionMode};
 use gtk4_layer_shell::{Edge, KeyboardMode, Layer, LayerShell};
 use std::collections::HashMap;
 use tracing::{debug, debug_span};
@@ -70,6 +70,8 @@ pub fn create_windows_overview_window(
             }
         }
     }
+
+    let active = get_initial_active().context("unable to get initial active data")?;
     Ok(WindowsOverviewData {
         config: WindowsOverviewConfig {
             items_per_row: windows.items_per_row,
@@ -80,8 +82,8 @@ pub fn create_windows_overview_window(
             filter_same_class: overview.filter_by.contains(&FilterBy::SameClass),
         },
         window_list,
-        active: get_initial_active()?,
-        initial_active: get_initial_active()?,
+        active,
+        initial_active: active,
         hypr_data: HyprlandData::default(),
     })
 }

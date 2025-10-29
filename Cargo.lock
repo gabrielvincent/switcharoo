@@ -1467,13 +1467,14 @@ dependencies = [
  "async-channel",
  "clap",
  "clap_complete",
- "gtk4",
  "hyprshell-clipboard-lib",
+ "hyprshell-config-edit-lib",
  "hyprshell-config-lib",
  "hyprshell-core-lib",
  "hyprshell-exec-lib",
  "hyprshell-launcher-lib",
  "hyprshell-windows-lib",
+ "libadwaita",
  "semver",
  "signal-hook",
  "tracing",
@@ -1496,6 +1497,15 @@ dependencies = [
  "secret-service",
  "tracing",
  "zstd",
+]
+
+[[package]]
+name = "hyprshell-config-edit-lib"
+version = "4.7.0"
+dependencies = [
+ "hyprshell-config-lib",
+ "libadwaita",
+ "tracing",
 ]
 
 [[package]]
@@ -1584,11 +1594,11 @@ dependencies = [
  "async-channel",
  "calc",
  "chrono",
- "gtk4",
  "gtk4-layer-shell",
  "hyprshell-config-lib",
  "hyprshell-core-lib",
  "hyprshell-exec-lib",
+ "libadwaita",
  "serde_json",
  "tracing",
 ]
@@ -1599,11 +1609,11 @@ version = "4.7.0"
 dependencies = [
  "anyhow",
  "async-channel",
- "gtk4",
  "gtk4-layer-shell",
  "hyprshell-config-lib",
  "hyprshell-core-lib",
  "hyprshell-exec-lib",
+ "libadwaita",
  "regex",
  "tracing",
 ]
@@ -1881,6 +1891,37 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bbd2bcb4c963f2ddae06a2efc7e9f3591312473c50c6685e1f298068316e66fe"
 
 [[package]]
+name = "libadwaita"
+version = "0.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4df6715d1257bd8c093295b77a276ed129d73543b10304fec5829ced5d5b7c41"
+dependencies = [
+ "gdk4",
+ "gio",
+ "glib",
+ "gtk4",
+ "libadwaita-sys",
+ "libc",
+ "pango",
+]
+
+[[package]]
+name = "libadwaita-sys"
+version = "0.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fdf8950090cc180250cdb1ff859a39748feeda7a53a9f28ead3a17a14cc37ae2"
+dependencies = [
+ "gdk4-sys",
+ "gio-sys",
+ "glib-sys",
+ "gobject-sys",
+ "gtk4-sys",
+ "libc",
+ "pango-sys",
+ "system-deps",
+]
+
+[[package]]
 name = "libc"
 version = "0.2.174"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1893,7 +1934,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d7c4b02199fee7c5d21a5ae7d8cfa79a6ef5bb2fc834d6e9058e89c825efdc55"
 dependencies = [
  "cfg-if",
- "windows-link 0.2.0",
+ "windows-link 0.2.1",
 ]
 
 [[package]]
@@ -3610,9 +3651,9 @@ checksum = "5e6ad25900d524eaabdbbb96d20b4311e1e7ae1699af4fb28c17ae66c80d798a"
 
 [[package]]
 name = "windows-link"
-version = "0.2.0"
+version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "45e46c0661abb7180e7b9c281db115305d49ca1709ab8242adf09666d2173c65"
+checksum = "f0805222e57f7521d6a62e36fa9163bc891acd422f971defe97d64e70d0a4fe5"
 
 [[package]]
 name = "windows-result"

@@ -3,6 +3,12 @@ use crate::receive_handle::event_handler;
 use crate::socket::socket_handler;
 use crate::util;
 use crate::util::check_new_version;
+use adw::gtk::gdk::Display;
+use adw::gtk::prelude::*;
+use adw::gtk::{
+    Application, CssProvider, STYLE_PROVIDER_PRIORITY_USER, glib,
+    style_context_add_provider_for_display,
+};
 use anyhow::Context;
 use async_channel::{Receiver, Sender};
 use config_lib::Config;
@@ -13,12 +19,6 @@ use core_lib::listener::{
 use core_lib::transfer::TransferType;
 use exec_lib::listener::{hyprland_config_listener, monitor_listener};
 use exec_lib::{info_toast, toast};
-use gtk::gdk::Display;
-use gtk::prelude::*;
-use gtk::{
-    Application, CssProvider, STYLE_PROVIDER_PRIORITY_USER, glib,
-    style_context_add_provider_for_display,
-};
 use launcher_lib::{LauncherData, create_windows_overview_launcher_window};
 use std::any::Any;
 use std::cell::RefCell;
@@ -72,7 +72,7 @@ pub fn start(
     loop {
         let application = Application::builder()
             .application_id(format!(
-                "{}-test-{}{}",
+                "{}-{}{}",
                 core_lib::APPLICATION_ID,
                 wayland_socket_index,
                 if cfg!(debug_assertions) { "-test" } else { "" }
@@ -242,8 +242,10 @@ fn create_windows(
         }
         if let Some(switch) = &windows.switch {
             let switch_data = create_windows_switch_window(app, switch, windows, event_sender)
-                .context("failed to create overview window")?;
+                .context("failed to create switch window")?;
             windows_data.switch = Some(switch_data);
+        } else {
+            debug!("Windows switch disabled");
         }
         global.windows = Some(windows_data);
     } else {

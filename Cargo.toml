@@ -1,5 +1,5 @@
 [workspace]
-members = ["crates/exec-lib", "crates/core-lib", "crates/windows-lib", "crates/launcher-lib", "crates/config-lib", "crates/hyprland-plugin", "crates/clipboard-lib", "dep-crates/hyprland-rs", "dep-crates/hyprland-rs/hyprland-macros", "dep-crates/wl-clipboard-rs"]
+members = ["crates/exec-lib", "crates/core-lib", "crates/windows-lib", "crates/launcher-lib", "crates/config-lib", "crates/hyprland-plugin", "crates/clipboard-lib", "dep-crates/hyprland-rs", "dep-crates/hyprland-rs/hyprland-macros", "dep-crates/wl-clipboard-rs", "crates/config-edit-lib"]
 
 [workspace.package]
 version = "4.7.0"
@@ -19,7 +19,7 @@ serde = { version = "1.0.219", features = ["derive"] }
 async-channel = { version = "2.5.0", default-features = true }
 semver = { version = "1.0.26" }
 
-gtk = { version = "0.10.0", package = "gtk4", default-features = false, features = ["v4_14"] }
+adw = { version = "0.8.0", package = "libadwaita", features = ["v1_6", "gtk_v4_18"] }
 gtk4-layer-shell = { version = "0.6.3" }
 
 config-lib = { path = "crates/config-lib", package = "hyprshell-config-lib", version = "=4.7.0" }
@@ -29,6 +29,7 @@ clipboard-lib = { path = "crates/clipboard-lib", package = "hyprshell-clipboard-
 windows-lib = { path = "crates/windows-lib", package = "hyprshell-windows-lib", version = "=4.7.0" }
 launcher-lib = { path = "crates/launcher-lib", package = "hyprshell-launcher-lib", version = "=4.7.0" }
 hyprland-plugin = { path = "crates/hyprland-plugin", package = "hyprshell-hyprland-plugin", version = "=4.7.0" }
+config-edit-lib = { path = "crates/config-edit-lib", package = "hyprshell-config-edit-lib", version = "=4.7.0" }
 
 [package]
 name = "hyprshell"
@@ -48,7 +49,7 @@ exclude = [".idea/*", ".github/*"]
 [dependencies]
 anyhow.workspace = true
 tracing.workspace = true
-gtk.workspace = true
+adw.workspace = true
 async-channel.workspace = true
 semver.workspace = true
 clap = { version = "4.5.47", features = ["derive"] }
@@ -62,13 +63,14 @@ exec-lib.workspace = true
 windows-lib.workspace = true
 launcher-lib.workspace = true
 clipboard-lib.workspace = true
+config-edit-lib.workspace = true
 
 [features]
 default = ["json5_config", "generate_config_command", "launcher_calc", "debug_command", "clipboard_compress_lz4", "clipboard_compress_zstd", "clipboard_encrypt_chacha20poly1305", "clipboard_encrypt_aes_gcm"]
-slim = ["generate_config_command", "launcher_calc", "debug_command", "clipboard_compress_lz4"]
+slim = ["generate_config_command", "debug_command", "clipboard_compress_lz4"]
 json5_config = ["config-lib/json5_config"]
 generate_config_command = ["config-lib/generate_config"]
-launcher_calc = ["launcher-lib/calc", "config-lib/launcher_calc_plugin"]
+launcher_calc = ["launcher-lib/calc", "config-lib/launcher_calc_plugin", "config-edit-lib/launcher_calc_plugin"]
 debug_command = []
 ci_config_check = ["config-lib/ci_no_default_config_values"]
 clipboard_compress_lz4 = ["clipboard-lib/compress_lz4"]

@@ -39,7 +39,7 @@ fn main() -> anyhow::Result<()> {
     };
     let filter = EnvFilter::try_from_default_env().unwrap_or_else(|_| {
         format!(
-            "hyprshell={level},config_lib={level},core_lib={level},exec_lib={level},launcher_lib={level},windows_lib={level},hyprland_plugin={level},hyprshell_clipboard_lib={level}"
+            "hyprshell={level},config_lib={level},core_lib={level},exec_lib={level},launcher_lib={level},windows_lib={level},hyprland_plugin={level},hyprshell_clipboard_lib={level},hyprshell_config_edit_lib={level}"
         ).into()}
     );
     let subscriber = tracing_subscriber::fmt()
@@ -70,7 +70,7 @@ fn main() -> anyhow::Result<()> {
             }
             exec_lib::check_version()
                 .warn_details("Unable to check hyprland version, continuing anyway");
-            clipboard_lib::store::test_clipboard();
+            // clipboard_lib::store::test_clipboard();
 
             start::start(
                 config_path.unwrap_or_else(get_default_config_path),
@@ -79,8 +79,13 @@ fn main() -> anyhow::Result<()> {
                 cache_dir.unwrap_or_else(get_default_cache_dir),
             )?;
         }
-        #[cfg(feature = "generate_config_command")]
         cli::Command::Config { command } => match command {
+            cli::ConfigCommand::Edit {} => {
+                let config_path = config_path.unwrap_or_else(get_default_config_path);
+                let css_path = css_file.unwrap_or_else(get_default_css_path);
+                config_edit_lib::start(config_path, css_path);
+            }
+            #[cfg(feature = "generate_config_command")]
             cli::ConfigCommand::Generate { force, no_systemd } => {
                 use core_lib::Warn;
                 let config_path = config_path.unwrap_or_else(get_default_config_path);
@@ -99,7 +104,7 @@ fn main() -> anyhow::Result<()> {
                 tracing::trace!("Generated config: {:#?}", config);
                 config_lib::write_config(&config_path, &config, override_config).warn();
                 config_lib::generate::write_css(&css_path, &css_data, override_css).warn();
-                if !no_systemd {
+                if cfg!(debug_assertions) || no_systemd {
                     config_lib::generate::write_systemd_unit(
                         opts.config_file.as_ref(),
                         opts.css_file.as_ref(),
@@ -242,11 +247,15 @@ fn main() -> anyhow::Result<()> {
 
 fn check_features() {
     tracing::debug!(
-        "FEATURES: JSON5 support: {}, Config command: {}, Debug command: {}, Launcher calc: {}",
+        "FEATURES: json5_config: {}, generate_config_command: {}, debug_command: {}, launcher_calc: {}, clipboard_compress_lz4: {}, clipboard_compress_zstd: {}, clipboard_encrypt_chacha20poly1305: {}, clipboard_encrypt_aes_gcm: {}",
         cfg!(feature = "json5_config"),
         cfg!(feature = "generate_config_command"),
         cfg!(feature = "debug_command"),
         cfg!(feature = "launcher_calc"),
+        cfg!(feature = "clipboard_compress_lz4"),
+        cfg!(feature = "clipboard_compress_zstd"),
+        cfg!(feature = "clipboard_encrypt_chacha20poly1305"),
+        cfg!(feature = "clipboard_encrypt_aes_gcm"),
     );
 }
 
