@@ -78,7 +78,9 @@ fn launch_modifier(windows_box: &gtk::Box) -> DropDown {
         .build();
     mod_row.append(&Label::new(Some("Modifier")));
     let info_icon = gtk::Image::from_icon_name("dialog-information-symbolic");
-    info_icon.set_tooltip_text(Some("TODO"));
+    info_icon.set_tooltip_text(Some(
+        "The modifier used to select items in the launcher, pressing `<Mod> + 1` to open second entry, `<Mod> + t` to run in terminal, etc.",
+    ));
     info_icon.set_cursor(Cursor::from_name("help", None).as_ref());
     mod_row.append(&info_icon);
     // DO NOT CHANGE ORDER OF THESE ITEMS
@@ -96,7 +98,7 @@ fn width(windows_box: &gtk::Box) -> SpinButton {
         .build();
     width.append(&Label::new(Some("Width")));
     let info_icon = gtk::Image::from_icon_name("dialog-information-symbolic");
-    info_icon.set_tooltip_text(Some("TODO"));
+    info_icon.set_tooltip_text(Some("The width of the launcher in pixels"));
     info_icon.set_cursor(Cursor::from_name("help", None).as_ref());
     width.append(&info_icon);
     let ipr_spin = SpinButton::builder()
@@ -116,11 +118,13 @@ fn max_items(windows_box: &gtk::Box) -> SpinButton {
         .build();
     max_items.append(&Label::new(Some("Max items")));
     let info_icon = gtk::Image::from_icon_name("dialog-information-symbolic");
-    info_icon.set_tooltip_text(Some("TODO"));
+    info_icon.set_tooltip_text(Some(
+        "Sets the maximum number of items to show in the launcher.",
+    ));
     info_icon.set_cursor(Cursor::from_name("help", None).as_ref());
     max_items.append(&info_icon);
     let ipr_spin = SpinButton::builder()
-        .adjustment(&Adjustment::new(0.0, 0.0, 20.0, 1.0, 2.0, 0.0))
+        .adjustment(&Adjustment::new(0.0, 0.0, 10.0, 1.0, 2.0, 0.0))
         .hexpand(true)
         .digits(0)
         .build();
@@ -136,7 +140,7 @@ fn show_when_empty(windows_box: &gtk::Box) -> Switch {
         .build();
     hide_row.append(&Label::new(Some("Show when empty")));
     let info_icon = gtk::Image::from_icon_name("dialog-information-symbolic");
-    info_icon.set_tooltip_text(Some("TODO"));
+    info_icon.set_tooltip_text(Some("Show entries in the launcher when no text is entered"));
     info_icon.set_cursor(Cursor::from_name("help", None).as_ref());
     hide_row.append(&info_icon);
     let switch_box = gtk::Box::builder()
@@ -158,7 +162,7 @@ fn terminal(windows_box: &gtk::Box) -> (Switch, Entry) {
         .build();
     key_row.append(&Label::new(Some("Default terminal")));
     let info_icon = gtk::Image::from_icon_name("dialog-information-symbolic");
-    info_icon.set_tooltip_text(Some("TODO"));
+    info_icon.set_tooltip_text(Some("name/path of the default terminal to use. This value is optional, if unset a list of default terminals is used to find a default terminal. Will be used to launch terminal apps and by the terminal plugin"));
     info_icon.set_cursor(Cursor::from_name("help", None).as_ref());
     key_row.append(&info_icon);
     let dont_use_default_terminal = Switch::builder().valign(Align::Center).build();

@@ -1,4 +1,5 @@
 use crate::global::{LauncherConfig, LauncherData};
+use crate::plugins;
 use crate::plugins::get_static_options_chars;
 use adw::gtk::gdk::{Key, ModifierType};
 use adw::gtk::glib::{ControlFlow, Propagation};
@@ -100,6 +101,7 @@ pub fn create_windows_overview_launcher_window(
     debug!("Created launcher window ({})", window.id());
 
     launcher_entry_text_change(String::new(), event_sender);
+    plugins::init_calc_context();
 
     Ok(LauncherData {
         config: LauncherConfig {

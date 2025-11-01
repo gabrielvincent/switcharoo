@@ -54,7 +54,7 @@ fn scale(windows_box: &gtk::Box) -> SpinButton {
         .build();
     scale_row.append(&Label::new(Some("Scale")));
     let info_icon = gtk::Image::from_icon_name("dialog-information-symbolic");
-    info_icon.set_tooltip_text(Some("TODO"));
+    info_icon.set_tooltip_text(Some("The scale used to scale down the real dimension the windows displayed in the overview. Can be set from `0.0 < X > to 15.0`"));
     info_icon.set_cursor(Cursor::from_name("help", None).as_ref());
     scale_row.append(&info_icon);
     let scale_spin = SpinButton::builder()
@@ -74,7 +74,7 @@ fn items_per_row(windows_box: &gtk::Box) -> SpinButton {
         .build();
     ipr_row.append(&Label::new(Some("Items per row")));
     let info_icon = gtk::Image::from_icon_name("dialog-information-symbolic");
-    info_icon.set_tooltip_text(Some("TODO"));
+    info_icon.set_tooltip_text(Some("The number of workspaces or windows to show per row. If you have 6 workspaces open and set this to 3, you will see 2 rows of 3 workspaces"));
     info_icon.set_cursor(Cursor::from_name("help", None).as_ref());
     ipr_row.append(&info_icon);
     let ipr_spin = SpinButton::builder()

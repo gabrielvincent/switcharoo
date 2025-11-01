@@ -1,7 +1,5 @@
-use crate::structs::{GTKApplications, GTKPlugins};
-use crate::views::launcher::application_plugin::{
-    application_submenu, run_cache_weeks, show_execs,
-};
+use crate::structs::GTKPlugins;
+use crate::views::launcher::application_plugin::create_plugins_applications_view;
 use adw::gdk::Cursor;
 use adw::gtk::{Align, Label, Orientation, Switch};
 use adw::prelude::{BoxExt, ExpanderRowExt, WidgetExt};
@@ -80,7 +78,7 @@ pub fn plugins_rows(plugins: &ExpanderRow) -> GTKPlugins {
     }
 }
 
-pub fn create_plugins_terminal_view(row: &gtk::Box) -> Switch {
+fn create_plugins_terminal_view(row: &gtk::Box) -> Switch {
     let hide_row = gtk::Box::builder()
         .orientation(Orientation::Horizontal)
         .css_classes(["bordered"])
@@ -89,7 +87,7 @@ pub fn create_plugins_terminal_view(row: &gtk::Box) -> Switch {
         .build();
     hide_row.append(&Label::new(Some("Run in Terminal")));
     let info_icon = gtk::Image::from_icon_name("dialog-information-symbolic");
-    info_icon.set_tooltip_text(Some("TODO"));
+    info_icon.set_tooltip_text(Some("Open a terminal and run the typed command in it. The terminal is defined in the `default_terminal` config option. This plugin doesn't accept any options"));
     info_icon.set_cursor(Cursor::from_name("help", None).as_ref());
     hide_row.append(&info_icon);
     let switch_box = gtk::Box::builder()
@@ -105,7 +103,7 @@ pub fn create_plugins_terminal_view(row: &gtk::Box) -> Switch {
     hide_switch
 }
 
-pub fn create_plugins_shell_view(row: &gtk::Box) -> Switch {
+fn create_plugins_shell_view(row: &gtk::Box) -> Switch {
     let hide_row = gtk::Box::builder()
         .orientation(Orientation::Horizontal)
         .css_classes(["bordered"])
@@ -114,7 +112,7 @@ pub fn create_plugins_shell_view(row: &gtk::Box) -> Switch {
         .build();
     hide_row.append(&Label::new(Some("Run in Shell (background)")));
     let info_icon = gtk::Image::from_icon_name("dialog-information-symbolic");
-    info_icon.set_tooltip_text(Some("TODO"));
+    info_icon.set_tooltip_text(Some("Run the typed command in a shell (in the background). This plugin doesn't accept any options"));
     info_icon.set_cursor(Cursor::from_name("help", None).as_ref());
     hide_row.append(&info_icon);
     let switch_box = gtk::Box::builder()
@@ -130,7 +128,7 @@ pub fn create_plugins_shell_view(row: &gtk::Box) -> Switch {
     hide_switch
 }
 
-pub fn create_plugins_calc_view(row: &gtk::Box) -> Switch {
+fn create_plugins_calc_view(row: &gtk::Box) -> Switch {
     let hide_row = gtk::Box::builder()
         .orientation(Orientation::Horizontal)
         .css_classes(["bordered"])
@@ -139,7 +137,7 @@ pub fn create_plugins_calc_view(row: &gtk::Box) -> Switch {
         .build();
     hide_row.append(&Label::new(Some("Calculator")));
     let info_icon = gtk::Image::from_icon_name("dialog-information-symbolic");
-    info_icon.set_tooltip_text(Some("TODO"));
+    info_icon.set_tooltip_text(Some("Calculates any mathematical expression typed into the launcher using rink-rs. This plugin doesn't accept any options"));
     info_icon.set_cursor(Cursor::from_name("help", None).as_ref());
     hide_row.append(&info_icon);
     let switch_box = gtk::Box::builder()
@@ -162,7 +160,7 @@ pub fn create_plugins_calc_view(row: &gtk::Box) -> Switch {
     hide_switch
 }
 
-pub fn create_plugins_path_view(row: &gtk::Box) -> Switch {
+fn create_plugins_path_view(row: &gtk::Box) -> Switch {
     let hide_row = gtk::Box::builder()
         .orientation(Orientation::Horizontal)
         .css_classes(["bordered"])
@@ -171,7 +169,9 @@ pub fn create_plugins_path_view(row: &gtk::Box) -> Switch {
         .build();
     hide_row.append(&Label::new(Some("Open Filepath")));
     let info_icon = gtk::Image::from_icon_name("dialog-information-symbolic");
-    info_icon.set_tooltip_text(Some("TODO"));
+    info_icon.set_tooltip_text(Some(
+        "Opens the typed path in the default file manager. This plugin doesn't accept any options",
+    ));
     info_icon.set_cursor(Cursor::from_name("help", None).as_ref());
     hide_row.append(&info_icon);
     let switch_box = gtk::Box::builder()
@@ -187,48 +187,7 @@ pub fn create_plugins_path_view(row: &gtk::Box) -> Switch {
     hide_switch
 }
 
-pub fn create_plugins_applications_view(row: &gtk::Box) -> GTKApplications {
-    let hide_row = gtk::Box::builder()
-        .orientation(Orientation::Horizontal)
-        .hexpand(true)
-        .halign(Align::Start)
-        .spacing(10)
-        .build();
-    hide_row.append(&Label::new(Some("Applications")));
-    let info_icon = gtk::Image::from_icon_name("dialog-information-symbolic");
-    info_icon.set_tooltip_text(Some("TODO"));
-    info_icon.set_cursor(Cursor::from_name("help", None).as_ref());
-    hide_row.append(&info_icon);
-
-    let erow = ExpanderRow::builder()
-        .title_selectable(false)
-        .show_enable_switch(true)
-        .hexpand(true)
-        .css_classes(["enable-frame"])
-        .build();
-    erow.add_prefix(&hide_row);
-    row.append(&erow);
-
-    let row_1 = gtk::Box::builder()
-        .orientation(Orientation::Horizontal)
-        .css_classes(["frame-row"])
-        .spacing(30)
-        .build();
-    erow.add_row(&row_1);
-
-    let cache_weeks = run_cache_weeks(&row_1);
-    let show_exec = show_execs(&row_1);
-    let submenu = application_submenu(&row_1);
-
-    GTKApplications {
-        row: erow,
-        cache_weeks,
-        submenu,
-        show_exec,
-    }
-}
-
-pub fn create_plugins_websearch_view(row: &gtk::Box) {
+fn create_plugins_websearch_view(row: &gtk::Box) {
     let hide_row = gtk::Box::builder()
         .orientation(Orientation::Horizontal)
         .hexpand(true)
@@ -263,7 +222,7 @@ pub fn create_plugins_websearch_view(row: &gtk::Box) {
     )));
 }
 
-pub fn create_plugins_actions_view(row: &gtk::Box) {
+fn create_plugins_actions_view(row: &gtk::Box) {
     let hide_row = gtk::Box::builder()
         .orientation(Orientation::Horizontal)
         .hexpand(true)

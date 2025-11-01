@@ -39,7 +39,7 @@ fn modifier(windows_box: &gtk::Box) -> DropDown {
         .build();
     mod_row.append(&Label::new(Some("Modifier")));
     let info_icon = gtk::Image::from_icon_name("dialog-information-symbolic");
-    info_icon.set_tooltip_text(Some("TODO"));
+    info_icon.set_tooltip_text(Some("The modifier that must be helled down together with `tab` key to open the Switch mode (for example `alt`). Letting go of this key will close the Switch mode"));
     info_icon.set_cursor(Cursor::from_name("help", None).as_ref());
     mod_row.append(&info_icon);
     // DO NOT CHANGE ORDER OF THESE ITEMS
@@ -58,7 +58,7 @@ fn filter(windows_box: &gtk::Box) -> GTKWindowsFilter {
         .build();
     filter_row.append(&Label::new(Some("Filter")));
     let info_icon = gtk::Image::from_icon_name("dialog-information-symbolic");
-    info_icon.set_tooltip_text(Some("TODO"));
+    info_icon.set_tooltip_text(Some("Filter the shown windows by the provided filters"));
     info_icon.set_cursor(Cursor::from_name("help", None).as_ref());
     filter_row.append(&info_icon);
 
@@ -95,7 +95,9 @@ fn switch_workspaces(windows_box: &gtk::Box) -> Switch {
         .build();
     hide_row.append(&Label::new(Some("Switch Workspaces")));
     let info_icon = gtk::Image::from_icon_name("dialog-information-symbolic");
-    info_icon.set_tooltip_text(Some("TODO"));
+    info_icon.set_tooltip_text(Some(
+        "Switch between workspaces in the Switch mode instead of windows",
+    ));
     info_icon.set_cursor(Cursor::from_name("help", None).as_ref());
     hide_row.append(&info_icon);
     let switch_box = gtk::Box::builder()

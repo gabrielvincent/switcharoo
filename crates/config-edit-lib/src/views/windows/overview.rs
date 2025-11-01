@@ -51,7 +51,7 @@ fn key(windows_box: &gtk::Box) -> Entry {
         .build();
     key_row.append(&Label::new(Some("Key")));
     let info_icon = gtk::Image::from_icon_name("dialog-information-symbolic");
-    info_icon.set_tooltip_text(Some("TODO"));
+    info_icon.set_tooltip_text(Some("The key to use to open the Overview mode (like `tab` or `alt_r`). If you want to only open using a modifier, set this to the modifier name like `super_l`"));
     info_icon.set_cursor(Cursor::from_name("help", None).as_ref());
     key_row.append(&info_icon);
     let key_entry = Entry::builder()
@@ -71,7 +71,7 @@ fn modifier(windows_box: &gtk::Box) -> DropDown {
         .build();
     mod_row.append(&Label::new(Some("Modifier")));
     let info_icon = gtk::Image::from_icon_name("dialog-information-symbolic");
-    info_icon.set_tooltip_text(Some("TODO"));
+    info_icon.set_tooltip_text(Some("The modifier that must be pressed together with the key to open the Overview mode (like ctrl)"));
     info_icon.set_cursor(Cursor::from_name("help", None).as_ref());
     mod_row.append(&info_icon);
     // DO NOT CHANGE ORDER OF THESE ITEMS
@@ -89,7 +89,7 @@ fn filter(windows_box: &gtk::Box) -> GTKWindowsFilter {
         .build();
     filter_row.append(&Label::new(Some("Filter")));
     let info_icon = gtk::Image::from_icon_name("dialog-information-symbolic");
-    info_icon.set_tooltip_text(Some("TODO"));
+    info_icon.set_tooltip_text(Some("Filter the shown windows by the provided filters"));
     info_icon.set_cursor(Cursor::from_name("help", None).as_ref());
     filter_row.append(&info_icon);
 
@@ -126,7 +126,7 @@ fn hide_filtered(windows_box: &gtk::Box) -> Switch {
         .build();
     hide_row.append(&Label::new(Some("Hide filtered")));
     let info_icon = gtk::Image::from_icon_name("dialog-information-symbolic");
-    info_icon.set_tooltip_text(Some("TODO"));
+    info_icon.set_tooltip_text(Some("This is used to show the windows that are filtered out by the `filter_by` option. If this is set to false, the filtered windows are shown with a grayscale effect"));
     info_icon.set_cursor(Cursor::from_name("help", None).as_ref());
     hide_row.append(&info_icon);
     let switch_box = gtk::Box::builder()

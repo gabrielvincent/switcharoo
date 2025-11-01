@@ -16,6 +16,11 @@ pub use applications::get_stored_runs as get_applications_stored_runs;
 pub use applications::reload_desktop_entries_map as reload_applications_desktop_entries_map;
 use core_lib::transfer::{Identifier, PluginNames};
 
+#[cfg(feature = "calc")]
+pub use calc::init_context as init_calc_context;
+#[cfg(not(feature = "calc"))]
+pub fn init_calc_context() {}
+
 #[derive(Debug)]
 pub struct SortableLaunchOption {
     pub name: Box<str>,

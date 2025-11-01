@@ -25,7 +25,7 @@ The default values for these configs, which are also the values that get used wh
 ## Windows
 
 - **scale:**_[number]_ The scale used to scale down the real dimension the windows displayed in the overview. Can be set from `0.0 < X > to 15.0`
-- **items_per_row:**_[number]_ The number of workspaces or windows to show per row in the overview. If you have 6 workspaces open and set this to 3, you will see 2 rows of 3 workspaces.
+- **items_per_row:**_[number]_ The number of workspaces or windows to show. If you have 6 workspaces open and set this to 3, you will see 2 rows of 3 workspaces.
   Pressing arrow up or down switches between the rows.
 - **overview:**_[Overview?]_ Configuration for the overview mode (optional).
 - **switch:**_[Switch?]_ Configuration for the switch mode (optional).
@@ -37,7 +37,7 @@ This mode displays the windows in a downscaled view of the screen. It also shows
 - **launcher:**_[Launcher]_ Configuration for the launcher.
 - **key:**_[string]_ The key to use to open the Overview mode (like "tab" or "alt_r"). This is used to register the keybinding to open the Overview mode. If you want to only open using a modifier, set this to the modifier name like `super_l`.
 - **modifier:**_[string]_ The modifier that must be pressed together with the key to open the Overview mode (like ctrl). This MUST be one of these modifiers: `alt, ctrl, super`.
-- **filter_by:**_[List<FilterBy>]_ Filter the windows by the provided filter. This is a list of the following objects. (example: `filter_by: [current_workspace]`)
+- **filter_by:**_[List<FilterBy>]_ Filter the windows by the provided filters. This is a list of the following objects. (example: `filter_by: [current_workspace]`)
     - **same_class**: Only includes windows of the same class / type. If you currently have alacritty open, only alacritty windows will be shown.
     - **current_workspace**: Only includes windows of the current workspace.
     - **current_monitor**: Only includes windows of the current monitor.
@@ -53,13 +53,13 @@ This mode displays the windows in a downscaled view of the screen. It also shows
 - **max_items:**_[number]_ Sets the maximum number of items to show in the launcher.
   This does not include the plugin row and only limits the number of items retuned by for examples the application search.
   This value will get reduced to 10 if it is set to a value higher than 10.
-- **show_when_empty:**_[boolean]_ Show entries in the launcher when no text is entered. This will show applications sorted by usage
+- **show_when_empty:**_[boolean]_ Show entries in the launcher when no text is entered.
 - **plugins:**_[Plugins]_ Configuration for each Plugin. Ignore the individual plugins to disable them.
 
 ### Plugins
 
 - **applications:** Show installed applications in the launcher, filed by the input, sorted by how often they are used. The following options can be provided:
-    - **run_cache_weeks:**_[u8]_ How many weeks to cache the run history. This is used to sort the applications by how often they are used.
+    - **run_cache_weeks:**_[u8]_ Number of weeks to retain run history; used to rank applications by usage.
     - **show_execs:**_[boolean]_ Show the exec line from the Desktop file. In the case of Flatpaks and PWAs these get shortened to the name of the app.
       The full exec can still be seen in the tooltip.
     - **show_actions_submenu:**_[boolean]_ Show a dropdown menu with all the desktop actions specified in the `.desktop` files of the applications, like `new private window`, etc.
@@ -71,7 +71,7 @@ This mode displays the windows in a downscaled view of the screen. It also shows
         - **name:**_[string]_ Name of the search engine. This is used to show the name in the launcher.
         - **key:**_[string]_ Key to use to select this search engine. This is used to register the keybinding to select the search engine without clicking on it.
 - **calc:** Calculates any mathematical expression typed into the launcher. This plugin doesn't accept any options.
-- **path:** Opens the selected path in the default file manager (see [Debugging](DEBUG.md) to check default). This plugin doesn't accept any options.
+- **path:** Opens the typed path in the default file manager (see [Debugging](DEBUG.md) to check default). This plugin doesn't accept any options.
 - **actions:** Runs the specified action like reboot, hibernate, etc. Custom actions can also be specified.
     - **actions:**_[List<Action>]_ A list of actions to display in the launcher. Actions can be one of the following predefined actions or a custom action.
         - **lock_screen** Locks the screen.
