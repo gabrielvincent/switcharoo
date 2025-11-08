@@ -2,10 +2,7 @@ use crate::sort::{
     sort_clients_by_position, sort_clients_by_recent, sort_monitor_by_x,
     sort_workspaces_by_position, sort_workspaces_by_recent,
 };
-use core_lib::{
-    Active, ClientData, ClientId, FindByFirst, HyprlandData, MonitorData, MonitorId, WorkspaceData,
-    WorkspaceId,
-};
+use core_lib::{Active, ClientData, ClientId, FindByFirst, HyprlandData, MonitorData, MonitorId};
 use exec_lib::collect::collect_hypr_data;
 use tracing::{debug_span, trace, warn};
 
@@ -29,7 +26,7 @@ pub fn collect_data(config: &SortConfig) -> anyhow::Result<(HyprlandData, Active
         active_ws,
         active_monitor,
     ) = collect_hypr_data()?;
-    client_data = update_client_position(client_data, &workspace_data, &monitor_data);
+    client_data = update_client_position(client_data, &monitor_data);
     sort_monitor_by_x(&mut monitor_data);
     if config.sort_recent {
         sort_clients_by_recent(&mut client_data);
@@ -55,8 +52,8 @@ pub fn collect_data(config: &SortConfig) -> anyhow::Result<(HyprlandData, Active
     for (id, ws) in &mut workspace_data {
         ws.any_client_enabled = client_data
             .iter()
-            .filter(|(_, c)| c.enabled)
-            .any(|(_, c)| c.workspace.eq(id));
+            .filter(|(_, c)| c.workspace.eq(id))
+            .all(|(_, c)| c.enabled);
     }
 
     trace!("client_data: {client_data:?}");
@@ -77,39 +74,22 @@ pub fn collect_data(config: &SortConfig) -> anyhow::Result<(HyprlandData, Active
     ))
 }
 
-/// updates clients with workspace and monitor data
-/// * clients - Vector of clients to update
-/// * `workspace_data` - `HashMap` of workspace data
-/// * `monitor_data` - `HashMap` of monitor data, None if `ignore_monitors`
-///
-/// removes offset by monitor, adds offset by workspace (client on monitor 1 and workspace 2 will be moved left by monitor 1 offset and right by workspace 2 offset (workspace width * 2))
+/// removes offset by monitor from clients
 pub fn update_client_position(
     clients: Vec<(ClientId, ClientData)>,
-    workspace_data: &[(WorkspaceId, WorkspaceData)],
     monitor_data: &[(MonitorId, MonitorData)],
 ) -> Vec<(ClientId, ClientData)> {
     clients
         .into_iter()
         .filter_map(|(a, mut c)| {
-            let ws = workspace_data
-                .find_by_first(&c.workspace)
-                .map(|ws| (ws.x, ws.y))
-                .or_else(|| {
-                    warn!("Workspace {:?} not found for client: {c:?}", c.workspace);
-                    None
-                });
+            let md = monitor_data.find_by_first(&c.monitor).or_else(|| {
+                warn!("Monitor {:?} not found: {c:?}", c.monitor);
+                None
+            });
 
-            let md = monitor_data
-                .find_by_first(&c.monitor)
-                .map(|md| (md.x, md.y))
-                .or_else(|| {
-                    warn!("Monitor {:?} not found: {c:?}", c.monitor);
-                    None
-                });
-
-            if let (Some((ws_x, ws_y)), Some((md_x, md_y))) = (ws, md) {
-                c.x += (ws_x - md_x) as i16; // move x cord by workspace offset
-                c.y += (ws_y - md_y) as i16; // move y cord by workspace offset
+            if let Some(md) = md {
+                c.x -= md.x as i16;
+                c.y -= md.y as i16;
                 Some((a, c))
             } else {
                 None

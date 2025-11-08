@@ -30,3 +30,6 @@ launcher_calc_plugin = []
 
 [lints]
 workspace = true
+
+[dev-dependencies]
+test-log.workspace = true

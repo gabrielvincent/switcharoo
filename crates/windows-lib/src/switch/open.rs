@@ -1,7 +1,7 @@
 use crate::data::{SortConfig, collect_data};
 use crate::global::WindowsSwitchData;
 use crate::icon::set_icon;
-use crate::next::find_next;
+use crate::next::{find_next_client, find_next_workspace};
 use adw::gtk::gdk::Cursor;
 use adw::gtk::prelude::*;
 use adw::gtk::{Button, Fixed, Frame, Image, Label, Overflow, Overlay, pango};
@@ -33,18 +33,29 @@ pub fn open_switch(data: &mut WindowsSwitchData, config: &OpenSwitch) -> anyhow:
         sort_recent: true,
     })
     .context("Failed to collect data")?;
-    let active = find_next(
-        &if config.reverse {
-            Direction::Left
-        } else {
-            Direction::Right
-        },
-        data.config.switch_workspaces,
-        true,
-        &clients_data,
-        active_prev,
-        data.config.items_per_row as usize,
-    );
+    let dir = if config.reverse {
+        Direction::Left
+    } else {
+        Direction::Right
+    };
+    let active = if data.config.switch_workspaces {
+        find_next_workspace(
+            &dir,
+            true,
+            &clients_data,
+            active_prev,
+            data.config.items_per_row,
+        )
+    } else {
+        find_next_client(
+            &dir,
+            true,
+            &clients_data,
+            active_prev,
+            data.config.items_per_row,
+        )
+    };
+
     let remove_html = regex::Regex::new(r"<[^>]*>").context("Invalid regex")?;
 
     trace!("Showing window {:?}", data.window.id());
@@ -101,6 +112,9 @@ pub fn open_switch(data: &mut WindowsSwitchData, config: &OpenSwitch) -> anyhow:
                 }
                 button
             };
+            if workspace.name.starts_with("special:") {
+                workspace_button.add_css_class("special");
+            }
             data.main_flow.insert(&workspace_button, -1);
             data.workspaces.insert(*wid, workspace_button);
 
@@ -161,14 +175,8 @@ pub fn open_switch(data: &mut WindowsSwitchData, config: &OpenSwitch) -> anyhow:
                 };
                 workspace_fixed.put(
                     &client_button,
-                    f64::from(scale(
-                        client.x - i16::try_from(workspace.x)?,
-                        data.config.scale,
-                    )),
-                    f64::from(scale(
-                        client.y - i16::try_from(workspace.y)?,
-                        data.config.scale,
-                    )),
+                    f64::from(scale(client.x, data.config.scale)),
+                    f64::from(scale(client.y, data.config.scale)),
                 );
                 data.clients.insert(*address, client_button);
             }

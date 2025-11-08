@@ -21,8 +21,6 @@ pub struct MonitorData {
 #[derive(Debug, Clone)]
 pub struct WorkspaceData {
     pub name: String,
-    pub x: i32,
-    pub y: i32,
     pub width: u16,
     pub height: u16,
     pub monitor: MonitorId,

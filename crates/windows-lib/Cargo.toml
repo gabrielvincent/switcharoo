@@ -23,3 +23,6 @@ regex = { version = "1.11.1" }
 
 [lints]
 workspace = true
+
+[dev-dependencies]
+test-log.workspace = true

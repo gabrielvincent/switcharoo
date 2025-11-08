@@ -126,7 +126,8 @@ mod tests {
         }
     }
 
-    #[test]
+    #[test_log::test]
+    #[test_log(default_log_filter = "trace")]
     fn test_explain_with_overview() {
         const CONFIG: &str = r"Config is valid (/test/config.ron)
 Explanation (blue are keys, bold blue keys can be configured in config):
@@ -148,7 +149,8 @@ Press Alt + tab and hold Alt to view recently used applications. Press tab and g
         assert_eq!(result, CONFIG);
     }
 
-    #[test]
+    #[test_log::test]
+    #[test_log(default_log_filter = "trace")]
     fn test_explain_without_overview() {
         const CONFIG: &str = r"Config is valid (/test/config.ron)
 Explanation (blue are keys, bold blue keys can be configured in config):
@@ -167,7 +169,8 @@ Press Alt + tab and hold Alt to view recently used applications. Press tab and g
         assert_eq!(result, CONFIG);
     }
 
-    #[test]
+    #[test_log::test]
+    #[test_log(default_log_filter = "trace")]
     fn test_explain_without_switch() {
         const CONFIG: &str = r"Config is valid (/test/config.ron)
 Explanation (blue are keys, bold blue keys can be configured in config):
@@ -194,7 +197,8 @@ After opening the Overview the Launcher is available:
         assert_eq!(result, CONFIG);
     }
 
-    #[test]
+    #[test_log::test]
+    #[test_log(default_log_filter = "trace")]
     fn test_explain_without_plugins() {
         const CONFIG: &str = r"Use Super + super_l to open the Overview. Use tab and grave / shift + tab to select a different window, press return to switch
 You can also use the arrow keys or Ctrl + vim keys to navigate the workspaces. Use Esc to close the overview.

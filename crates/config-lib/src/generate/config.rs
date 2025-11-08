@@ -193,7 +193,8 @@ mod tests {
         }
     }
 
-    #[test]
+    #[test_log::test]
+    #[test_log(default_log_filter = "trace")]
     fn test_empty_config() {
         let data = ConfigData {
             default_terminal: None,
@@ -221,7 +222,8 @@ mod tests {
         );
     }
 
-    #[test]
+    #[test_log::test]
+    #[test_log(default_log_filter = "trace")]
     fn test_full_config() {
         let data = ConfigData {
             default_terminal: Some("alacritty".into()),
@@ -241,7 +243,8 @@ mod tests {
         assert_config_matches_data(&config, &data);
     }
 
-    #[test]
+    #[test_log::test]
+    #[test_log(default_log_filter = "trace")]
     fn test_partial_config() {
         let data = ConfigData {
             default_terminal: Some("xterm".into()),

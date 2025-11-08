@@ -6,12 +6,11 @@ PluginDescriptionInfo init(HANDLE handle) {
     PHANDLE = handle;
     // ALWAYS add this to your plugins. It will prevent random crashes coming from
     // mismatched header versions.
-    if (const std::string HASH = __hyprland_api_get_hash(); HASH != GIT_COMMIT_HASH) {
-        HyprlandAPI::addNotification(
-            PHANDLE,
-            "[Hyprshell Plugin] Mismatched headers! Can't proceed. (Hyprland was updated but not restarted)", RED,
-            5000);
-        throw std::runtime_error("[Hyprshell Plugin] Version mismatch");
+    if (const std::string API_HASH = __hyprland_api_get_hash(); API_HASH != GIT_COMMIT_HASH) {
+        const std::string PLUGIN_HASH = std::string(GIT_COMMIT_HASH);
+        const std::string msg = std::string("[Hyprshell Plugin] Mismatched headers! Can't proceed. (Hyprland was updated but not restarted) API hash: ") + API_HASH + ", Plugin hash: " + PLUGIN_HASH;
+        HyprlandAPI::addNotification(PHANDLE, msg, RED, 5000);
+        throw std::runtime_error(msg);
     }
 
     // ignore that this can return XKB_KEY_NoSymbol, it is only used to check if keysym equals

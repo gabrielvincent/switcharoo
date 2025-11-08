@@ -16,7 +16,6 @@ pub struct WindowsOverviewData {
 pub struct WindowsOverviewConfig {
     pub items_per_row: u8,
     pub scale: f64,
-    pub hide_filtered: bool,
     pub filter_current_workspace: bool,
     pub filter_current_monitor: bool,
     pub filter_same_class: bool,

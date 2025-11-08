@@ -88,13 +88,15 @@ mod tests {
         }
     }
 
-    #[test]
+    #[test_log::test]
+    #[test_log(default_log_filter = "trace")]
     fn test_valid_config() {
         let config = full();
         assert!(check(&config).is_ok());
     }
 
-    #[test]
+    #[test_log::test]
+    #[test_log(default_log_filter = "trace")]
     fn test_invalid_scale() {
         let mut config = full();
         config
@@ -111,7 +113,8 @@ mod tests {
         assert!(check(&config).is_err());
     }
 
-    #[test]
+    #[test_log::test]
+    #[test_log(default_log_filter = "trace")]
     fn test_same_modifier() {
         let mut config = full();
         let overview = config
@@ -125,7 +128,8 @@ mod tests {
         assert!(check(&config).is_err());
     }
 
-    #[test]
+    #[test_log::test]
+    #[test_log(default_log_filter = "trace")]
     fn test_invalid_key() {
         let mut config = full();
         let overview = config
@@ -139,7 +143,8 @@ mod tests {
         assert!(check(&config).is_err());
     }
 
-    #[test]
+    #[test_log::test]
+    #[test_log(default_log_filter = "trace")]
     fn test_duplicate_engine_key() {
         let mut config = full();
         let launcher = &mut config
@@ -160,7 +165,8 @@ mod tests {
         assert!(check(&config).is_err());
     }
 
-    #[test]
+    #[test_log::test]
+    #[test_log(default_log_filter = "trace")]
     fn test_empty_engine_url() {
         let mut config = full();
         let launcher = &mut config
@@ -177,7 +183,8 @@ mod tests {
         assert!(check(&config).is_err());
     }
 
-    #[test]
+    #[test_log::test]
+    #[test_log(default_log_filter = "trace")]
     fn test_empty_engine_name() {
         let mut config = full();
         let launcher = &mut config
@@ -194,7 +201,8 @@ mod tests {
         assert!(check(&config).is_err());
     }
 
-    #[test]
+    #[test_log::test]
+    #[test_log(default_log_filter = "trace")]
     fn test_empty_terminal() {
         let mut config = full();
         let launcher = &mut config

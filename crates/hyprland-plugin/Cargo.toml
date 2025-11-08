@@ -22,3 +22,6 @@ zip = { version = "5.0.0", default-features = false }
 
 [lints]
 workspace = true
+
+[dev-dependencies]
+test-log.workspace = true

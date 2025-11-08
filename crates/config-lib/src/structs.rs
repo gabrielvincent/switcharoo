@@ -184,6 +184,7 @@ pub struct Switch {
     pub filter_by: Vec<FilterBy>,
     #[default = false]
     pub switch_workspaces: bool,
+    // TODO add option to include special workspace
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]
