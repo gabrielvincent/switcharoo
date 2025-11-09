@@ -15,6 +15,7 @@ deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports noble-backports main unive
 EOF
 
 sudo apt remove -y libpango1.0-dev:amd64 libgtk-4-dev:amd64 libadwaita-1-dev:amd64
+sudo apt autoremove -y
 
 sudo dpkg --add-architecture arm64 && sudo apt update
 sudo apt -y install --no-install-recommends \

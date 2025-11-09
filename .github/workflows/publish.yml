@@ -32,6 +32,8 @@ jobs:
         with:
           fetch-depth: 0
           ssh-key: ${{ secrets.SSH_KEY }}
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
       - name: install Rust stable
         uses: dtolnay/rust-toolchain@stable
       - name: Install gtk4-layer-shell
