@@ -5,29 +5,33 @@ use std::collections::{BTreeMap, HashMap, VecDeque};
 /// Sorts clients with complex sorting
 pub fn sort_clients_by_position(
     clients: Vec<(ClientId, ClientData)>,
+    workspaces: &Vec<(WorkspaceId, WorkspaceData)>,
+    monitors: &Vec<(MonitorId, MonitorData)>,
 ) -> Vec<(ClientId, ClientData)> {
     // monitor -> workspace -> clients
-    let monitors: Vec<Vec<Vec<(ClientId, ClientData)>>> = {
-        let mut monitors: BTreeMap<MonitorId, BTreeMap<WorkspaceId, Vec<(ClientId, ClientData)>>> =
-            BTreeMap::new();
+    let mut presorted_clients = {
+        let mut presorted_clients: BTreeMap<
+            MonitorId,
+            BTreeMap<WorkspaceId, Vec<(ClientId, ClientData)>>,
+        > = BTreeMap::new();
         for (addr, client) in clients {
-            monitors
+            presorted_clients
                 .entry(client.monitor)
                 .or_default()
                 .entry(client.workspace)
                 .or_default()
                 .push((addr, client));
         }
-        monitors
-            .into_values()
-            .map(|m| m.into_values().collect())
-            .collect()
+        presorted_clients
     };
 
     let mut sorted_clients = Vec::new();
-
-    for workspaces in monitors {
-        for mut clients in workspaces {
+    for (monitor_id, _) in monitors {
+        for (workspace_id, _) in workspaces {
+            let mut clients = presorted_clients
+                .get_mut(monitor_id)
+                .and_then(|m| m.remove(workspace_id))
+                .unwrap_or(vec![]);
             clients.sort_by(|(_, a), (_, b)| {
                 if a.x == b.x {
                     a.y.cmp(&b.y)
