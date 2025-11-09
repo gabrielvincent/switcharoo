@@ -4,7 +4,7 @@ set -euxo pipefail
 sudo apt update
 sudo apt -y install --no-install-recommends \
   meson ninja-build python3 valac \
-  libgtk-4-dev libadwaita-1-dev \
+  libgtk-4-dev libadwaita-1-dev libpango1.0-dev \
   gobject-introspection
 
 git clone https://github.com/wmww/gtk4-layer-shell /tmp/gtk4-layer-shell

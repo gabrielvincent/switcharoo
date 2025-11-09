@@ -5,21 +5,24 @@ export PKG_CONFIG_ALLOW_CROSS=1
 export PKG_CONFIG_PATH=/usr/lib/aarch64-linux-gnu/pkgconfig
 
 if ! grep -q '^Architectures:' /etc/apt/sources.list.d/ubuntu.sources; then
-  sed -i '/^Components:/a Architectures: amd64' /etc/apt/sources.list.d/ubuntu.sources
+  sudo sed -i '/^Components:/a Architectures: amd64' /etc/apt/sources.list.d/ubuntu.sources
 fi
-tee /etc/apt/sources.list.d/ubuntu-arm64.list >/dev/null <<'EOF'
+sudo tee /etc/apt/sources.list.d/ubuntu-arm64.list >/dev/null <<'EOF'
 deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports noble main universe multiverse restricted
 deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports noble-updates main universe multiverse restricted
 deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports noble-security main universe multiverse restricted
 deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports noble-backports main universe multiverse restricted
 EOF
 
+sudo apt remove -y libpango1.0-dev:amd64 libgtk-4-dev:amd64 libadwaita-1-dev:amd64
+
 sudo dpkg --add-architecture arm64 && sudo apt update
 sudo apt -y install --no-install-recommends \
   crossbuild-essential-arm64 \
-  libgtk-4-dev:arm64 libadwaita-1-dev:arm64 \
-  gobject-introspection \
-  libgirepository1.0-dev:arm64
+  libgtk-4-dev:arm64 libadwaita-1-dev:arm64 libpango1.0-dev:arm64 \
+  libgirepository1.0-dev:arm64 \
+  gobject-introspection
+
 
 cat <<'EOF' > /tmp/aarch64.txt
 [binaries]

@@ -2,7 +2,7 @@
 set -euxo pipefail
 
 sudo apt update && sudo apt -y install --no-install-recommends \
-  libgraphene-1.0-dev:arm64
+  libgraphene-1.0-dev:arm64 zstd
 
 export PKG_CONFIG_ALLOW_CROSS=1
 export PKG_CONFIG_PATH=/usr/lib/aarch64-linux-gnu/pkgconfig:/usr/aarch64-linux-gnu/lib/pkgconfig
