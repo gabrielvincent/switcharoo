@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euxo pipefail
 
-apt update
-apt -y install --no-install-recommends \
+sudo apt update
+sudo apt -y install --no-install-recommends \
   meson ninja-build python3 valac \
   libgtk-4-dev libadwaita-1-dev \
   gobject-introspection

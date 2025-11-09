@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euxo pipefail
 
-apt update && apt -y install --no-install-recommends \
+sudo apt update && sudo apt -y install --no-install-recommends \
   libgraphene-1.0-dev:arm64
 
 export PKG_CONFIG_ALLOW_CROSS=1
