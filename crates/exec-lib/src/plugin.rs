@@ -1,15 +1,27 @@
-use anyhow::Context;
+use anyhow::{Context, bail};
 use config_lib::Modifier;
 use hyprland::ctl::plugin;
 use hyprland_plugin::PluginConfig;
 use std::path::Path;
+use std::sync::OnceLock;
 use tracing::{debug, debug_span, trace};
+
+// info: trying to load a plugin causes hyprland to issue a reload
+// this will cause hyprshell to restart.
+// this second restart wont reload the plugin as the plugin config didnt change
+// if the plugin fails to load it however tries again which the triggers the next reload
+static PLUGIN_COULD_BE_BUILD: OnceLock<bool> = OnceLock::new();
 
 pub fn load_plugin(
     switch: Option<Modifier>,
     overview: Option<(Modifier, Box<str>)>,
 ) -> anyhow::Result<()> {
     let _span = debug_span!("load_plugin").entered();
+
+    if PLUGIN_COULD_BE_BUILD.get() == Some(&false) {
+        bail!("plugin could not be built last, skipping to prevent reload loop");
+    }
+
     let config = PluginConfig {
         xkb_key_switch_mod: switch.map(|s| Box::from(mod_to_xkb_key(s))),
         xkb_key_overview_mod: overview
@@ -25,8 +37,11 @@ pub fn load_plugin(
             "generated plugin at {:?}",
             hyprland_plugin::PLUGIN_OUTPUT_PATH
         );
-        plugin::load(Path::new(hyprland_plugin::PLUGIN_OUTPUT_PATH))
-            .context("unable to load plugin")?;
+        if let Err(err) = plugin::load(Path::new(hyprland_plugin::PLUGIN_OUTPUT_PATH)) {
+            PLUGIN_COULD_BE_BUILD.get_or_init(|| false);
+            trace!("plugin failed to load, disabling plugin");
+            bail!("unable to load plugin: {err:?}")
+        }
         trace!("loaded plugin");
     } else {
         debug!("plugin already loaded, skipping");

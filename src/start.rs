@@ -366,14 +366,11 @@ fn setup_restart_listener(config_path: &Path, css_path: &Path, restart_tx: &Send
         })
         .await;
     });
-    // only listen if plugin is not used
-    if env::var_os("HYPRSHELL_NO_USE_PLUGIN").is_some() {
-        let tx = restart_tx.clone();
-        glib::spawn_future_local(async move {
-            hyprland_config_listener(move |mess| {
-                let _ = tx.send_blocking(mess);
-            })
-            .await;
-        });
-    }
+    let tx = restart_tx.clone();
+    glib::spawn_future_local(async move {
+        hyprland_config_listener(move |mess| {
+            let _ = tx.send_blocking(mess);
+        })
+        .await;
+    });
 }
