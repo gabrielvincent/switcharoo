@@ -9,6 +9,9 @@ use std::io::Write;
 use std::path::Path;
 use tracing::{debug, debug_span, info};
 
+const CONFIG_EXPLANATION: &str =
+    "Edit via `hyprshell config edit`, generate via `hyprshell config generate`";
+
 pub fn write_config(
     config_path: &Path,
     config: &Config,
@@ -40,9 +43,17 @@ pub fn write_config(
             "Invalid config file extension: {ext} (run with -vv and check `FEATURES: ` debug log to see enabled extensions)"
         ),
     }?;
+    #[allow(clippy::match_same_arms)]
+    let header = match config_path.extension().and_then(OsStr::to_str) {
+        None | Some("ron") => format!("// {CONFIG_EXPLANATION}"),
+        Some("json5") => format!("// {CONFIG_EXPLANATION}"),
+        Some("toml") => format!("# {CONFIG_EXPLANATION}"),
+        _ => String::new(),
+    };
+    let content = format!("{header}\n{str}");
     let mut file = File::create(config_path)
         .with_context(|| format!("Failed to create config file at ({config_path_display})"))?;
-    file.write_all(str.as_bytes())
+    file.write_all(content.as_bytes())
         .with_context(|| format!("Failed to write to config file at ({config_path_display})"))
         .inspect_err(|_| {
             info!("New config contents: {config:?}");

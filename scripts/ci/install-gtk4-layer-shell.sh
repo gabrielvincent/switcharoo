@@ -11,5 +11,5 @@ git clone https://github.com/wmww/gtk4-layer-shell /tmp/gtk4-layer-shell
 cd /tmp/gtk4-layer-shell
 meson setup build
 ninja -C build
-ninja -C build install
-ldconfig
+sudo ninja -C build install
+sudo ldconfig

@@ -39,5 +39,5 @@ EOF
 cd /tmp/gtk4-layer-shell
 meson setup build-arm64 --cross-file /tmp/aarch64.txt --prefix=/usr/aarch64-linux-gnu
 ninja -C build-arm64
-ninja -C build-arm64 install
-ldconfig
+sudo ninja -C build-arm64 install
+sudo ldconfig
