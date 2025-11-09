@@ -254,9 +254,8 @@ fn create_windows(
 
 fn apply_css(custom_css: &Path) -> anyhow::Result<()> {
     let provider_app = CssProvider::new();
-    provider_app.load_from_bytes(&glib::Bytes::from_static(include_bytes!(
-        "default_styles.css"
-    )));
+
+    provider_app.load_from_data(include_str!("default_styles.css"));
     style_context_add_provider_for_display(
         &Display::default().context("Could not connect to a display.")?,
         &provider_app,
