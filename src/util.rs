@@ -9,7 +9,7 @@ use std::fs::{File, read_to_string, write};
 use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::process::exit;
-use std::{thread, time};
+use std::{fs, thread, time};
 use tracing::{debug, info, trace, warn};
 
 pub fn preactivate() -> anyhow::Result<()> {
@@ -92,34 +92,128 @@ fn get_icon_data() -> (Vec<String>, Vec<PathBuf>) {
     (gtk_icons, search_path)
 }
 
+const NEW_VERSION_INFOS: &[(&str, &str)] = &[
+    (
+        "4.7.0",
+        "Version 4.7.0 adds a hyprland plugin to register keypresses, adds shell completion, improves UI, adds usefull commands and much more.",
+    ),
+    (
+        "4.8.0",
+        "Version 4.8.0 adds a graphical settings Editor, support for special workspaces and vim motions",
+    ),
+];
+
 /// Checks if the current version is newer than the cached version.
 /// If a mayor of minor update is detected, true is returned as second value.
-pub fn check_new_version(cache_dir: &Path) -> anyhow::Result<(Ordering, bool)> {
+pub fn check_new_version(cache_dir: &Path) -> anyhow::Result<(Ordering, Vec<String>)> {
     let version_file = cache_dir.join("version.txt");
     let current_version = env!("CARGO_PKG_VERSION");
     let current_version =
         Version::parse(current_version).context("Failed to parse current version")?;
-    if version_file.exists() {
+    let cached_version = if version_file.exists() {
         let contents = read_to_string(&version_file).context("Failed to read old version file")?;
-        let cached_version =
-            Version::parse(contents.trim()).context("Failed to parse old version")?;
-        trace!(
-            "Cached version: {cached_version:?}, current version: {current_version:?}: {:?}",
-            cached_version.cmp(&current_version)
-        );
-        write(&version_file, current_version.to_string().as_bytes())
-            .context("Failed to write current version to file")?;
-        Ok((
-            current_version.cmp(&cached_version),
-            current_version.major > cached_version.major
-                || (current_version.major == cached_version.major
-                    && current_version.minor > cached_version.minor),
-        ))
+        Version::parse(contents.trim()).context("Failed to parse old version")?
     } else {
-        std::fs::create_dir_all(cache_dir).context("Failed to create cache directory")?;
+        fs::create_dir_all(cache_dir).context("Failed to create cache directory")?;
         let mut file = File::create(&version_file).context("Failed to create version file")?;
         file.write_all(current_version.to_string().as_bytes())
             .context("Failed to write current version to file")?;
-        Ok((Ordering::Greater, true))
+        Version::new(0, 0, 0)
+    };
+    trace!(
+        "Cached version: {cached_version:?}, current version: {current_version:?}: {:?}",
+        cached_version.cmp(&current_version)
+    );
+    write(&version_file, current_version.to_string().as_bytes())
+        .context("Failed to write current version to file")?;
+    let versions = filter_version_messages(NEW_VERSION_INFOS, &current_version, &cached_version);
+    Ok((current_version.cmp(&cached_version), versions))
+}
+
+fn filter_version_messages(
+    versions: &[(&str, &str)],
+    current_version: &Version,
+    cached_version: &Version,
+) -> Vec<String> {
+    if current_version <= cached_version {
+        return Vec::new();
+    }
+    let mut parsed: Vec<(Version, String)> = versions
+        .iter()
+        .filter_map(|(k, _)| {
+            let ver_str = (*k).to_string();
+            Version::parse(&ver_str)
+                .ok()
+                .warn_details("version in NEW_VERSION_INFOS has invalid semver")
+                .map(|v| (v, (*k).to_string()))
+        })
+        .collect();
+    parsed.sort_by(|a, b| a.0.cmp(&b.0));
+    parsed
+        .into_iter()
+        .filter_map(|(v, s)| {
+            if v > *cached_version && v <= *current_version {
+                Some(s)
+            } else {
+                None
+            }
+        })
+        .collect()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::filter_version_messages;
+    use semver::Version;
+
+    fn v(s: &str) -> Version {
+        Version::parse(s).expect("invalid version")
+    }
+
+    #[test_log::test]
+    #[test_log(default_log_filter = "trace")]
+    fn test_empty_versions() {
+        let result = filter_version_messages(&[], &v("1.0.0"), &v("0.9.0"));
+        assert!(result.is_empty());
+    }
+
+    #[test_log::test]
+    #[test_log(default_log_filter = "trace")]
+    fn test_older_current_version() {
+        let versions = [("1.0.0", "test")];
+        let result = filter_version_messages(&versions, &v("0.9.0"), &v("1.0.0"));
+        assert!(result.is_empty());
+    }
+
+    #[test_log::test]
+    #[test_log(default_log_filter = "trace")]
+    fn test_newer_current_version() {
+        let versions = [("1.0.0", "test")];
+        let result = filter_version_messages(&versions, &v("1.0.0"), &v("0.9.0"));
+        assert_eq!(result, vec!["1.0.0"]);
+    }
+
+    #[test_log::test]
+    #[test_log(default_log_filter = "trace")]
+    fn test_same_version() {
+        let versions = [("1.0.0", "test")];
+        let result = filter_version_messages(&versions, &v("1.0.0"), &v("1.0.0"));
+        assert!(result.is_empty());
+    }
+
+    #[test_log::test]
+    #[test_log(default_log_filter = "trace")]
+    fn test_multiple_versions() {
+        let versions = [("1.0.0", "test1"), ("2.0.0", "test2"), ("1.5.0", "test3")];
+        let result = filter_version_messages(&versions, &v("2.0.0"), &v("1.0.0"));
+        assert_eq!(result, vec!["1.5.0", "2.0.0"]);
+    }
+
+    #[test_log::test]
+    #[test_log(default_log_filter = "trace")]
+    fn test_all_versions() {
+        let versions = [("1.0.0", "test1"), ("2.0.0", "test2"), ("1.5.0", "test3")];
+        let result = filter_version_messages(&versions, &v("2.0.0"), &v("0.0.0"));
+        assert_eq!(result, vec!["1.0.0", "1.5.0", "2.0.0"]);
     }
 }

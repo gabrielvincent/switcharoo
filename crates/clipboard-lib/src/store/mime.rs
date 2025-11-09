@@ -66,7 +66,7 @@ pub fn filer_mimes(mime_types: &mut HashSet<String>) {
     });
 
     trace!(
-        "Available MIME types: {:#?}, removed {} elements",
+        "Available MIME types: {:?}, removed {} elements",
         mime_types,
         count - mime_types.len()
     );

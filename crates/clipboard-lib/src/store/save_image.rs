@@ -1,18 +1,23 @@
-use crate::store::util::get_current_storage_string;
+use crate::store::util::create_storage_path;
 use anyhow::Context;
 use image::{ImageEncoder, ImageReader};
-use std::fs;
 use std::fs::File;
 use std::io::{BufWriter, Cursor};
+use std::path::Path;
 use tracing::trace;
 
+use crate::config::Config;
 use fast_image_resize::images::Image;
-use fast_image_resize::{FilterType, IntoImageView, ResizeAlg, ResizeOptions, Resizer};
+use fast_image_resize::{IntoImageView, ResizeAlg, ResizeOptions, Resizer};
 use image::codecs::png::PngEncoder;
 
 const IMAGE_HEIGHT: u32 = 150;
 
-pub fn compress_and_store_image(pref_data: Vec<u8>) -> anyhow::Result<()> {
+pub fn compress_and_store_image(
+    pref_data: Vec<u8>,
+    config: &Config,
+    cache_dir: &Path,
+) -> anyhow::Result<()> {
     let now = std::time::SystemTime::now();
     let img2 = ImageReader::new(Cursor::new(pref_data))
         .with_guessed_format()?
@@ -37,7 +42,7 @@ pub fn compress_and_store_image(pref_data: Vec<u8>) -> anyhow::Result<()> {
     resizer.resize(
         &img2,
         &mut dst_image,
-        &ResizeOptions::new().resize_alg(ResizeAlg::Convolution(FilterType::Box)),
+        &ResizeOptions::new().resize_alg(ResizeAlg::Convolution(config.image_conv_filter.into())),
     )?;
     trace!(
         "Resized image size: {}x{} in {:?}",
@@ -46,11 +51,9 @@ pub fn compress_and_store_image(pref_data: Vec<u8>) -> anyhow::Result<()> {
         now.elapsed()?
     );
 
-    let storage_string =
-        get_current_storage_string().context("Failed to get storage string for clipboard image")?;
-    fs::create_dir_all("test-data/images").context("Failed to create image directory")?;
-    let mut file = File::create(format!("test-data/images/{storage_string}.png"))
-        .context("Failed to create clipboard image file")?;
+    let storage_path = create_storage_path(cache_dir, "images", "png")
+        .context("Failed to get storage path for clipboard image")?;
+    let mut file = File::create(&storage_path).context("Failed to create clipboard image file")?;
     {
         let mut result_buf = BufWriter::new(&mut file);
         PngEncoder::new(&mut result_buf).write_image(
@@ -61,7 +64,8 @@ pub fn compress_and_store_image(pref_data: Vec<u8>) -> anyhow::Result<()> {
         )?;
     }
     trace!(
-        "Wrote image to test-data/images/{storage_string} ({} bytes)",
+        "Wrote image to {:?} ({} bytes)",
+        storage_path.display(),
         file.metadata().map(|m| m.len()).unwrap_or(0)
     );
     Ok(())

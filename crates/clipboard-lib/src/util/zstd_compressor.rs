@@ -7,9 +7,13 @@ pub struct ZstdCompressWriter<'a, W: Write> {
 }
 
 impl<W: Write> ZstdCompressWriter<'_, W> {
-    pub fn new(writer: W, level: u8) -> Self {
+    pub fn new(writer: W, mut level: u8) -> Self {
+        // use 16 as default compression level
+        if level > 22 {
+            warn!("Zstd compression level out of range, clamping to 22");
+            level = 22;
+        }
         Self {
-            // use 16 as default compression level
             encoder: Encoder::new(writer, i32::from(level)).expect("Failed to create encoder"),
         }
     }

@@ -130,6 +130,7 @@ Debug commands are provided to help troubleshoot desktop files, icons, default a
 - `launcher_calc`✅: Adds support for the calc plugin in the launcher.
 - `debug_command`✅✨: Adds the `hyprshell debug` command to debug icons, desktop files, etc.
 - `clipboard_compress_lz4`✅✨: Adds support for compressing clipboard content using lz4.
+- `clipboard_compress_brotli`✅: Adds support for compressing clipboard content using brotli.
 - `clipboard_compress_zstd`✅: Adds support for compressing clipboard content using zstd.
 - `clipboard_encrypt_chacha20poly1305`✅: Adds support for encrypting clipboard content using chacha20poly1305.
 - `clipboard_encrypt_aes_gcm`✅: Adds support for encrypting clipboard content using aes_256_gcm.

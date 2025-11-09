@@ -1,10 +1,11 @@
 use crate::config::Config;
-use crate::store::util::get_current_storage_string;
+use crate::store::util::create_storage_path;
 use crate::store::write::get_storage_writer;
 use anyhow::Context;
 use std::collections::HashMap;
-use std::fs;
 use std::fs::File;
+use std::io::{Cursor, Write};
+use std::path::Path;
 use std::time::SystemTime;
 use tracing::{trace, warn};
 
@@ -14,7 +15,7 @@ pub enum ClipboardDataType {
     Data(Vec<u8>),
 }
 
-pub fn compress_and_store_map(data: HashMap<String, Vec<u8>>, config: Config) {
+pub fn compress_and_store_map(data: HashMap<String, Vec<u8>>, config: &Config, cache_dir: &Path) {
     let combined_size = data.values().map(Vec::len).sum::<usize>();
     let (data, contains_image) = deduplicate_clipboard_entries(data, true);
     let compressed_combined_size = data
@@ -40,37 +41,34 @@ pub fn compress_and_store_map(data: HashMap<String, Vec<u8>>, config: Config) {
     );
 
     // dont compress if contains image
-    if let Err(err) = store_map(&data, config, !contains_image) {
+    if let Err(err) = store_map(&data, config, !contains_image, cache_dir) {
         warn!("Failed to store clipboard data: {err}");
     }
 }
 
 fn store_map(
     data: &HashMap<Box<str>, ClipboardDataType>,
-    config: Config,
+    config: &Config,
     compress: bool,
+    cache_dir: &Path,
 ) -> anyhow::Result<()> {
-    let storage_string =
-        get_current_storage_string().context("Failed to get storage string for clipboard data")?;
-    fs::create_dir_all("test-data/data").context("Failed to create data directory")?;
-    let name = format!(
-        "{storage_string}.{}",
-        if compress { "bin.lz4" } else { "bin" }
-    );
     let now = SystemTime::now();
-
-    let mut file = File::create(format!("test-data/data/{name}"))
-        .context("Failed to create clipboard data file")?;
-
-    {
-        let mut write = get_storage_writer(&mut file, config, compress);
+    let mut cursor = Cursor::new(Vec::new());
+    let ext = {
+        let (mut write, ext) = get_storage_writer(&mut cursor, config, compress);
         bincode::encode_into_std_write(data, &mut write, bincode::config::standard())
             .context("Failed to encode clipboard data")?;
-    }
+        ext
+    };
+    let storage_path = create_storage_path(cache_dir, "data", &format!("bin.{ext}"))
+        .context("Failed to get storage path for clipboard data")?;
+    let mut file = File::create(&storage_path).context("Failed to create clipboard data file")?;
+    file.write_all(&cursor.into_inner())
+        .context("Failed to write clipboard data")?;
 
     trace!(
         "Wrote clipboard data to {} ({} bytes) in {:?}",
-        name,
+        storage_path.display(),
         file.metadata().map(|m| m.len()).unwrap_or(0),
         now.elapsed()?
     );

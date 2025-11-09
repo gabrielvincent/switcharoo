@@ -66,8 +66,11 @@ launcher-lib.workspace = true
 clipboard-lib.workspace = true
 config-edit-lib.workspace = true
 
+[dev-dependencies]
+test-log.workspace = true
+
 [features]
-default = ["json5_config", "generate_config_command", "launcher_calc", "debug_command", "clipboard_compress_lz4", "clipboard_compress_zstd", "clipboard_encrypt_chacha20poly1305", "clipboard_encrypt_aes_gcm"]
+default = ["json5_config", "generate_config_command", "launcher_calc", "debug_command", "clipboard_compress_lz4", "clipboard_compress_zstd", "clipboard_compress_brotli", "clipboard_encrypt_chacha20poly1305", "clipboard_encrypt_aes_gcm"]
 slim = ["generate_config_command", "debug_command", "clipboard_compress_lz4"]
 json5_config = ["config-lib/json5_config"]
 generate_config_command = ["config-lib/generate_config"]
@@ -76,6 +79,7 @@ debug_command = []
 ci_config_check = ["config-lib/ci_no_default_config_values"]
 clipboard_compress_lz4 = ["clipboard-lib/compress_lz4"]
 clipboard_compress_zstd = ["clipboard-lib/compress_zstd"]
+clipboard_compress_brotli = ["clipboard-lib/compress_brotli"]
 clipboard_encrypt_chacha20poly1305 = ["clipboard-lib/encrypt_chacha20poly1305"]
 clipboard_encrypt_aes_gcm = ["clipboard-lib/encrypt_aes_gcm"]
 

@@ -7,4 +7,3 @@ pub(crate) mod util;
 mod write;
 
 pub use listen::test_clipboard;
-pub use save_map::ClipboardDataType;

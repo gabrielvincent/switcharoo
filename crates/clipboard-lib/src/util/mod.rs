@@ -1,3 +1,5 @@
+#[cfg(feature = "compress_brotli")]
+pub mod brotli_compressor;
 #[cfg(any(feature = "encrypt_chacha20poly1305", feature = "encrypt_aes_gcm"))]
 pub mod crypt;
 #[cfg(feature = "compress_lz4")]

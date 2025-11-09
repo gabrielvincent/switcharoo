@@ -16,7 +16,7 @@ use core_lib::{LAUNCHER_NAMESPACE, WarnWithDetails};
 use gtk4_layer_shell::{Edge, Layer, LayerShell};
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
-use tracing::{debug, debug_span};
+use tracing::{debug, debug_span, trace};
 
 pub fn create_windows_overview_launcher_window(
     app: &Application,
@@ -76,6 +76,7 @@ pub fn create_windows_overview_launcher_window(
     let results_2 = results.clone();
     let launch_modifier = launcher.launch_modifier;
     event_controller.connect_key_pressed(move |_, key, _, modt| {
+        trace!("input: {key:?}");
         handle_key(
             &entry_2,
             key,

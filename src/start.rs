@@ -34,8 +34,6 @@ use windows_lib::{
     create_windows_switch_window,
 };
 
-const NEW_VERSION_INFO: &str = "This version uses a hyprland plugin to register keypresses, adds shell completion, improves UI, adds usefull commands and much more.";
-
 pub fn start(
     config_path: PathBuf,
     css_path: PathBuf,
@@ -130,7 +128,7 @@ fn activate(
         Err(err) => {
             debug!("Unable to compare previous to current version.\n{err:?}");
         }
-        Ok((Ordering::Greater, no_patch)) => {
+        Ok((Ordering::Greater, messages)) => {
             info_toast(
                 &format!(
                     "Hyprshell was updated to a new version ({})",
@@ -138,8 +136,8 @@ fn activate(
                 ),
                 Duration::from_secs(5),
             );
-            if no_patch {
-                info_toast(NEW_VERSION_INFO, Duration::from_secs(10));
+            for info in messages {
+                info_toast(&info, Duration::from_secs(10));
             }
         }
         Ok((Ordering::Less, _)) => {

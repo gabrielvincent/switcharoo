@@ -70,7 +70,12 @@ fn main() -> anyhow::Result<()> {
             }
             exec_lib::check_version()
                 .warn_details("Unable to check hyprland version, continuing anyway");
-            // clipboard_lib::store::test_clipboard();
+            if env::var_os("HYPRSHELL_EXPERIMENTAL").is_some_and(|v| v.eq("1")) {
+                clipboard_lib::store::test_clipboard(
+                    cache_dir.unwrap_or_else(get_default_cache_dir),
+                );
+                return Ok(());
+            }
 
             start::start(
                 config_path.unwrap_or_else(get_default_config_path),
@@ -247,13 +252,14 @@ fn main() -> anyhow::Result<()> {
 
 fn check_features() {
     tracing::debug!(
-        "FEATURES: json5_config: {}, generate_config_command: {}, debug_command: {}, launcher_calc: {}, clipboard_compress_lz4: {}, clipboard_compress_zstd: {}, clipboard_encrypt_chacha20poly1305: {}, clipboard_encrypt_aes_gcm: {}",
+        "FEATURES: json5_config: {}, generate_config_command: {}, debug_command: {}, launcher_calc: {}, clipboard_compress_lz4: {}, clipboard_compress_zstd: {}, clipboard_compress_brotli: {}, clipboard_encrypt_chacha20poly1305: {}, clipboard_encrypt_aes_gcm: {}",
         cfg!(feature = "json5_config"),
         cfg!(feature = "generate_config_command"),
         cfg!(feature = "debug_command"),
         cfg!(feature = "launcher_calc"),
         cfg!(feature = "clipboard_compress_lz4"),
         cfg!(feature = "clipboard_compress_zstd"),
+        cfg!(feature = "clipboard_compress_brotli"),
         cfg!(feature = "clipboard_encrypt_chacha20poly1305"),
         cfg!(feature = "clipboard_encrypt_aes_gcm"),
     );

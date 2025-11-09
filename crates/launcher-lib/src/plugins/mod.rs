@@ -19,7 +19,7 @@ use core_lib::transfer::{Identifier, PluginNames};
 #[cfg(feature = "calc")]
 pub use calc::init_context as init_calc_context;
 #[cfg(not(feature = "calc"))]
-pub fn init_calc_context() {}
+pub const fn init_calc_context() {}
 
 #[derive(Debug)]
 pub struct SortableLaunchOption {

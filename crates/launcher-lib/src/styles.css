@@ -53,7 +53,10 @@
 }
 
 .launcher-other-menu {
-    padding: 6px;
+    background: transparent;
+    margin: 0;
+    padding: 0;
+
     border-radius: var(--border-radius, 12px);
     background: var(--bg-color, rgba(20, 20, 20, 0.9));
     border: calc(var(--border-size, 3px) / 1.5) var(--border-style, solid) var(--border-color, rgba(90, 90, 120, 0.4));
@@ -97,7 +100,7 @@
 }
 
 .launcher-plugin-inner {
-    padding: 4px 6px;
+    padding: 6px;
 
     border-radius: calc(1.5 * var(--border-radius, 12px));
     background: var(--bg-color, rgba(20, 20, 20, 0.9));

@@ -28,3 +28,6 @@ calc = ["dep:rink-core"]
 
 [lints]
 workspace = true
+
+[dev-dependencies]
+test-log.workspace = true

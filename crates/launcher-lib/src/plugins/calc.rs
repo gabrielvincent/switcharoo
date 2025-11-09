@@ -37,8 +37,9 @@ pub fn get_calc_options(matches: &mut Vec<SortableLaunchOption>, text: &str) {
     // let eval = context.evaluate(text);
 
     if let Ok(eval) = eval {
+        trace!("Eval: {eval:?}");
         let (title, desc) = parse_result(eval);
-        trace!("Added calc option: {title}");
+        trace!("Added calc option: {title}, {desc:?}");
         matches.push(SortableLaunchOption {
             icon: Some(Box::from(Path::new("accessories-calculator"))),
             name: title.clone(),
@@ -64,15 +65,88 @@ pub fn copy_result(data: Option<&str>) -> bool {
     false
 }
 
+// remove `(....) 23.23`
+// remove `approx. 34.34`
+// remove `23/233, 0.09871244`
 #[allow(clippy::map_unwrap_or)]
 fn parse_result(result: String) -> (Box<str>, Option<Box<str>>) {
-    result
-        .split_once(" (")
-        .map(|(title, desc)| {
-            (
-                Box::from(title),
-                Some(Box::from(desc.trim_end_matches(')'))),
-            )
-        })
-        .unwrap_or_else(|| (result.into_boxed_str(), None))
+    if result.contains("approx. ") {
+        return parse_result(result.replace("approx. ", ""));
+    }
+    if result.contains(", ") {
+        return result
+            .split_once(", ")
+            .map(|(desc, title)| {
+                let a = parse_result(title.to_string());
+                let des = a.1.map(|s| format!("{s} ")).unwrap_or_default();
+                (a.0, Some(Box::from(format!("{des}{desc}"))))
+            })
+            .unwrap_or_else(|| (result.into_boxed_str(), None));
+    }
+    if result.contains(" (") {
+        return result
+            .split_once(" (")
+            .map(|(title, desc)| {
+                (
+                    Box::from(title),
+                    Some(Box::from(desc.trim_end_matches(')'))),
+                )
+            })
+            .unwrap_or_else(|| (result.into_boxed_str(), None));
+    }
+
+    (result.into_boxed_str(), None)
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::plugins::calc::parse_result;
+
+    #[test_log::test]
+    #[test_log(default_log_filter = "trace")]
+    fn test_parse_result_approx_with_dimensions() {
+        let result = parse_result("approx. 0.5217391 (dimensionless)".to_string());
+        assert_eq!(result.0.as_ref(), "0.5217391");
+        assert_eq!(result.1.as_deref(), Some("dimensionless"));
+    }
+
+    #[test_log::test]
+    #[test_log(default_log_filter = "trace")]
+    fn test_parse_result_approx_with_dimensions_and_fraction() {
+        let result = parse_result("12/23, approx. 0.5217391 (dimensionless)".to_string());
+        assert_eq!(result.0.as_ref(), "0.5217391");
+        assert_eq!(result.1.as_deref(), Some("dimensionless 12/23"));
+    }
+
+    #[test_log::test]
+    #[test_log(default_log_filter = "trace")]
+    fn test_parse_result_approx() {
+        let result = parse_result("approx. 42".to_string());
+        assert_eq!(result.0.as_ref(), "42");
+        assert_eq!(result.1, None);
+    }
+
+    #[test_log::test]
+    #[test_log(default_log_filter = "trace")]
+    fn test_parse_result_fraction() {
+        let result = parse_result("1/2, 0.5".to_string());
+        assert_eq!(result.0.as_ref(), "0.5");
+        assert_eq!(result.1.as_deref(), Some("1/2"));
+    }
+
+    #[test_log::test]
+    #[test_log(default_log_filter = "trace")]
+    fn test_parse_result_with_parentheses() {
+        let result = parse_result("42 (answer)".to_string());
+        assert_eq!(result.0.as_ref(), "42");
+        assert_eq!(result.1.as_deref(), Some("answer"));
+    }
+
+    #[test_log::test]
+    #[test_log(default_log_filter = "trace")]
+    fn test_parse_result_simple() {
+        let result = parse_result("42".to_string());
+        assert_eq!(result.0.as_ref(), "42");
+        assert_eq!(result.1, None);
+    }
 }

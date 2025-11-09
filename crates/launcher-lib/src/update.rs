@@ -200,6 +200,9 @@ fn create_entry(
         let menu = Popover::builder()
             .css_classes(["launcher-other-menu"])
             .has_arrow(false)
+            .can_focus(false)
+            .can_target(true)
+            .focus_on_click(false)
             .overflow(Overflow::Hidden)
             .build();
         let menu_list_box = ListBox::builder()
