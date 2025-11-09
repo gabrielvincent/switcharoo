@@ -1,14 +1,14 @@
 use crate::data::{SortConfig, collect_data};
 use crate::global::WindowsOverviewData;
 use crate::icon::set_icon;
+use adw::gtk::gdk::Cursor;
+use adw::gtk::prelude::*;
+use adw::gtk::{Button, Fixed, Frame, Image, Label, Overflow, Overlay, pango};
 use anyhow::Context;
 use async_channel::Sender;
 use core_lib::transfer::{CloseOverviewConfig, TransferType, WindowsOverride};
-use core_lib::{ClientData, ClientId, WarnWithDetails};
+use core_lib::{ClientId, WarnWithDetails};
 use exec_lib::set_no_follow_mouse;
-use gtk::gdk::Cursor;
-use gtk::prelude::*;
-use gtk::{Button, Fixed, Frame, Image, Label, Overflow, Overlay, pango};
 use std::borrow::Cow;
 use tracing::{debug, debug_span, trace};
 
@@ -29,7 +29,7 @@ pub fn open_overview(
     let _span = debug_span!("open_overview").entered();
     set_no_follow_mouse().warn_details("Failed to set set_remain_focused");
 
-    let (clients_data, active) = collect_data(&SortConfig {
+    let (hypr_data, active) = collect_data(&SortConfig {
         filter_current_monitor: data.config.filter_current_monitor,
         filter_current_workspace: data.config.filter_current_workspace,
         filter_same_class: data.config.filter_same_class,
@@ -42,17 +42,10 @@ pub fn open_overview(
         trace!("Showing window {:?}", window.id());
         window.set_visible(true);
 
-        let workspaces = {
-            let mut workspaces = clients_data
-                .workspaces
-                .iter()
-                .filter(|(_, v)| v.monitor == monitor_data.id)
-                .collect::<Vec<_>>();
-            workspaces.sort_by(|(a, _), (b, _)| a.cmp(b));
-            workspaces
-        };
-
-        for (wid, workspace) in workspaces {
+        'workspaces: for (wid, workspace) in &hypr_data.workspaces {
+            if workspace.monitor != monitor_data.id {
+                continue 'workspaces;
+            }
             trace!(
                 "Creating workspace {wid} with ({}x{})",
                 scale(workspace.width, data.config.scale),
@@ -77,35 +70,23 @@ pub fn open_overview(
 
             let workspace_button = {
                 let workspace_overlay = Overlay::builder().child(&workspace_frame).build();
-                let button = gtk::Box::builder().css_classes(["workspace"]).build();
+                let button = adw::gtk::Box::builder().css_classes(["workspace"]).build();
                 button.append(&workspace_overlay);
                 if active.client.is_none() && active.workspace == *wid {
                     button.add_css_class("active");
                 }
-                monitor_data.workspaces_flow.insert(&button, -1);
                 button
             };
+            if workspace.name.starts_with("special:") {
+                workspace_button.add_css_class("special");
+            }
+            monitor_data.workspaces_flow.insert(&workspace_button, -1);
             monitor_data.workspaces.insert(*wid, workspace_button);
 
-            let clients: Vec<&(ClientId, ClientData)> = {
-                let mut clients = clients_data
-                    .clients
-                    .iter()
-                    .filter(|(_, client)| {
-                        client.workspace == *wid && (!data.config.hide_filtered || client.enabled)
-                    })
-                    .collect::<Vec<_>>();
-                clients.sort_by(|(_, a), (_, b)| {
-                    // prefer smaller windows
-                    if a.floating && b.floating {
-                        (b.width * b.height).cmp(&(a.width * a.height))
-                    } else {
-                        a.floating.cmp(&b.floating)
-                    }
-                });
-                clients
-            };
-            for (address, client) in clients {
+            'clients: for (address, client) in &hypr_data.clients {
+                if client.workspace != *wid {
+                    continue 'clients;
+                }
                 let client_button = {
                     let title = if client.title.trim().is_empty() {
                         &client.class
@@ -162,25 +143,13 @@ pub fn open_overview(
                     "Creating Client {address} with ({}x{}) at ({}x{})",
                     scale(client.width, data.config.scale),
                     scale(client.height, data.config.scale),
-                    f64::from(scale(
-                        client.x - i16::try_from(workspace.x)?,
-                        data.config.scale
-                    )),
-                    f64::from(scale(
-                        client.y - i16::try_from(workspace.y)?,
-                        data.config.scale
-                    ))
+                    f64::from(scale(client.x, data.config.scale)),
+                    f64::from(scale(client.y, data.config.scale))
                 );
                 workspace_fixed.put(
                     &client_button,
-                    f64::from(scale(
-                        client.x - i16::try_from(workspace.x)?,
-                        data.config.scale,
-                    )),
-                    f64::from(scale(
-                        client.y - i16::try_from(workspace.y)?,
-                        data.config.scale,
-                    )),
+                    f64::from(scale(client.x, data.config.scale)),
+                    f64::from(scale(client.y, data.config.scale)),
                 );
                 monitor_data.clients.insert(*address, client_button);
             }
@@ -189,7 +158,7 @@ pub fn open_overview(
 
     data.active = active;
     data.initial_active = active;
-    data.hypr_data = clients_data;
+    data.hypr_data = hypr_data;
     Ok(())
 }
 

@@ -1,36 +1,37 @@
 use core_lib::{ClientData, ClientId, MonitorData, MonitorId, WorkspaceData, WorkspaceId};
+use std::cmp::Ordering;
 use std::collections::{BTreeMap, HashMap, VecDeque};
 
 /// Sorts clients with complex sorting
-///
-/// * 'clients' - Vector of clients to sort
-/// * '`ignore_workspaces`' - Don't split clients into workspaces (treat all clients on monitor as one workspace)
-/// * '`ignore_monitors`' - Don't split clients into monitors (treat all clients as one monitor)
 pub fn sort_clients_by_position(
     clients: Vec<(ClientId, ClientData)>,
+    workspaces: &Vec<(WorkspaceId, WorkspaceData)>,
+    monitors: &Vec<(MonitorId, MonitorData)>,
 ) -> Vec<(ClientId, ClientData)> {
     // monitor -> workspace -> clients
-    let monitors: Vec<Vec<Vec<(ClientId, ClientData)>>> = {
-        let mut monitors: BTreeMap<MonitorId, BTreeMap<WorkspaceId, Vec<(ClientId, ClientData)>>> =
-            BTreeMap::new();
+    let mut presorted_clients = {
+        let mut presorted_clients: BTreeMap<
+            MonitorId,
+            BTreeMap<WorkspaceId, Vec<(ClientId, ClientData)>>,
+        > = BTreeMap::new();
         for (addr, client) in clients {
-            monitors
+            presorted_clients
                 .entry(client.monitor)
                 .or_default()
                 .entry(client.workspace)
                 .or_default()
                 .push((addr, client));
         }
-        monitors
-            .into_values()
-            .map(|m| m.into_values().collect())
-            .collect()
+        presorted_clients
     };
 
     let mut sorted_clients = Vec::new();
-
-    for workspaces in monitors {
-        for mut clients in workspaces {
+    for (monitor_id, _) in monitors {
+        for (workspace_id, _) in workspaces {
+            let mut clients = presorted_clients
+                .get_mut(monitor_id)
+                .and_then(|m| m.remove(workspace_id))
+                .unwrap_or(vec![]);
             clients.sort_by(|(_, a), (_, b)| {
                 if a.x == b.x {
                     a.y.cmp(&b.y)
@@ -111,8 +112,8 @@ pub fn sort_clients_by_recent(clients: &mut [(ClientId, ClientData)]) {
     clients.sort_by(|(a_addr, a), (b_addr, b)| {
         match (focus_map.get(a_addr), focus_map.get(b_addr)) {
             (None, None) => a.focus_history_id.cmp(&b.focus_history_id), // both none -> sort by focus_history_id
-            (None, Some(_)) => std::cmp::Ordering::Greater,
-            (Some(_), None) => std::cmp::Ordering::Less,
+            (None, Some(_)) => Ordering::Greater,
+            (Some(_), None) => Ordering::Less,
             (Some(a_id), Some(b_id)) => a_id.cmp(b_id),
         }
     });
@@ -150,18 +151,28 @@ pub fn sort_workspaces_by_position(
     workspaces: &mut [(WorkspaceId, WorkspaceData)],
     monitors: &[(MonitorId, MonitorData)],
 ) {
-    workspaces.sort_by(|(_, a), (_, b)| {
-        match (monitors
+    workspaces.sort_by(|(a_id, a), (b_id, b)| {
+        let monitor_a = monitors
             .iter()
             .position(|(id, _)| id == &a.monitor)
-            .unwrap_or(0))
-        .cmp(
-            &monitors
-                .iter()
-                .position(|(id, _)| id == &b.monitor)
-                .unwrap_or(0),
-        ) {
-            std::cmp::Ordering::Equal => a.x.cmp(&b.x),
+            .unwrap_or(0);
+        let monitor_b = monitors
+            .iter()
+            .position(|(id, _)| id == &b.monitor)
+            .unwrap_or(0);
+        match monitor_a.cmp(&monitor_b) {
+            // move special workspaces with -ids after normal workspaces
+            Ordering::Equal => {
+                // -10 > 10
+                if *a_id < 0 && *b_id > 0 {
+                    return Ordering::Greater;
+                }
+                // 10 > -10
+                if *a_id > 0 && *b_id < 0 {
+                    return Ordering::Less;
+                }
+                a_id.cmp(b_id)
+            }
             other => other,
         }
     });

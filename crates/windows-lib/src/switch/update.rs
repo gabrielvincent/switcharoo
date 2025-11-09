@@ -1,20 +1,29 @@
 use crate::global::WindowsSwitchData;
-use crate::next::find_next;
+use crate::next::{find_next_client, find_next_workspace};
+use adw::prelude::WidgetExt;
 use core_lib::transfer::SwitchSwitchConfig;
-use gtk::prelude::*;
 use tracing::debug_span;
 
 pub fn update_switch(data: &mut WindowsSwitchData, config: &SwitchSwitchConfig) {
     let _span = debug_span!("update_switch").entered();
 
-    let active = find_next(
-        &config.direction,
-        data.config.switch_workspaces,
-        true,
-        &data.hypr_data,
-        data.active,
-        data.config.items_per_row as usize,
-    );
+    let active = if data.config.switch_workspaces {
+        find_next_workspace(
+            &config.direction,
+            true,
+            &data.hypr_data,
+            data.active,
+            data.config.items_per_row,
+        )
+    } else {
+        find_next_client(
+            &config.direction,
+            true,
+            &data.hypr_data,
+            data.active,
+            data.config.items_per_row,
+        )
+    };
     data.active = active;
 
     if data.config.switch_workspaces {

@@ -1,3 +1,37 @@
+[workspace]
+members = ["crates/exec-lib", "crates/core-lib", "crates/windows-lib", "crates/launcher-lib", "crates/config-lib", "crates/hyprland-plugin", "crates/clipboard-lib", "dep-crates/hyprland-rs", "dep-crates/hyprland-rs/hyprland-macros", "dep-crates/wl-clipboard-rs", "crates/config-edit-lib"]
+
+[workspace.package]
+version = "4.7.0"
+description = "A modern GTK4-based window switcher and application launcher for Hyprland"
+license = "MIT"
+authors = ["h3rmt"]
+keywords = ["hyprland"]
+repository = "https://github.com/h3rmt/hyprshell/"
+rust-version = "1.87.0"
+edition = "2024"
+
+[workspace.dependencies]
+anyhow = { version = "1.0.99" }
+tracing = { version = "0.1.41" }
+serde_json = { version = "1.0.143" }
+serde = { version = "1.0.219", features = ["derive"] }
+async-channel = { version = "2.5.0", default-features = true }
+semver = { version = "1.0.26" }
+test-log = { version = "0.2.18", default-features = false, features = ["trace", "unstable"] }
+
+adw = { version = "0.8.0", package = "libadwaita", features = ["v1_6", "gtk_v4_18"] }
+gtk4-layer-shell = { version = "0.6.3" }
+
+config-lib = { path = "crates/config-lib", package = "hyprshell-config-lib", version = "=4.7.2" }
+core-lib = { path = "crates/core-lib", package = "hyprshell-core-lib", version = "=4.7.2" }
+exec-lib = { path = "crates/exec-lib", package = "hyprshell-exec-lib", version = "=4.7.2" }
+clipboard-lib = { path = "crates/clipboard-lib", package = "hyprshell-clipboard-lib", version = "=4.7.2" }
+windows-lib = { path = "crates/windows-lib", package = "hyprshell-windows-lib", version = "=4.7.2" }
+launcher-lib = { path = "crates/launcher-lib", package = "hyprshell-launcher-lib", version = "=4.7.2" }
+hyprland-plugin = { path = "crates/hyprland-plugin", package = "hyprshell-hyprland-plugin", version = "=4.7.2" }
+config-edit-lib = { path = "crates/config-edit-lib", package = "hyprshell-config-edit-lib", version = "=4.7.2" }
+
 [package]
 name = "hyprshell"
 readme = "README.md"
@@ -16,7 +50,7 @@ exclude = [".idea/*", ".github/*"]
 [dependencies]
 anyhow.workspace = true
 tracing.workspace = true
-gtk.workspace = true
+adw.workspace = true
 async-channel.workspace = true
 semver.workspace = true
 clap = { version = "4.5.47", features = ["derive"] }
@@ -29,59 +63,40 @@ core-lib.workspace = true
 exec-lib.workspace = true
 windows-lib.workspace = true
 launcher-lib.workspace = true
+clipboard-lib.workspace = true
+config-edit-lib.workspace = true
+
+[dev-dependencies]
+test-log.workspace = true
 
 [features]
-default = ["json5_config", "generate_config_command", "launcher_calc", "debug_command"]
+default = ["json5_config", "generate_config_command", "launcher_calc", "debug_command", "clipboard_compress_lz4", "clipboard_compress_zstd", "clipboard_compress_brotli", "clipboard_encrypt_chacha20poly1305", "clipboard_encrypt_aes_gcm"]
+slim = ["generate_config_command", "debug_command", "clipboard_compress_lz4"]
 json5_config = ["config-lib/json5_config"]
 generate_config_command = ["config-lib/generate_config"]
-launcher_calc = ["launcher-lib/calc", "config-lib/launcher_calc_plugin"]
+launcher_calc = ["launcher-lib/calc", "config-lib/launcher_calc_plugin", "config-edit-lib/launcher_calc_plugin"]
 debug_command = []
-config_check = ["config-lib/no-default-config-values"]
+ci_config_check = ["config-lib/ci_no_default_config_values"]
+clipboard_compress_lz4 = ["clipboard-lib/compress_lz4"]
+clipboard_compress_zstd = ["clipboard-lib/compress_zstd"]
+clipboard_compress_brotli = ["clipboard-lib/compress_brotli"]
+clipboard_encrypt_chacha20poly1305 = ["clipboard-lib/encrypt_chacha20poly1305"]
+clipboard_encrypt_aes_gcm = ["clipboard-lib/encrypt_aes_gcm"]
 
-
-[workspace]
-members = ["crates/exec-lib", "crates/core-lib", "crates/windows-lib", "crates/launcher-lib", "crates/config-lib", "crates/hyprland-plugin", "dep-crates/hyprland-rs", "dep-crates/hyprland-rs/hyprland-macros"]
-
-[workspace.package]
-version = "4.7.2"
-description = "A modern GTK4-based window switcher and application launcher for Hyprland"
-license = "MIT"
-authors = ["h3rmt"]
-keywords = ["hyprland"]
-repository = "https://github.com/h3rmt/hyprshell/"
-rust-version = "1.87.0"
-edition = "2024"
-
-[workspace.dependencies]
-anyhow = { version = "1.0.99" }
-tracing = { version = "0.1.41" }
-serde_json = { version = "1.0.143" }
-serde = { version = "1.0.219", features = ["derive"] }
-async-channel = { version = "2.5.0", default-features = true }
-semver = { version = "1.0.26" }
-
-gtk = { version = "0.10.0", package = "gtk4", default-features = false, features = ["v4_14"] }
-gtk4-layer-shell = { version = "0.6.3" }
-
-config-lib = { path = "crates/config-lib", package = "hyprshell-config-lib", version = "=4.7.2" }
-core-lib = { path = "crates/core-lib", package = "hyprshell-core-lib", version = "=4.7.2" }
-exec-lib = { path = "crates/exec-lib", package = "hyprshell-exec-lib", version = "=4.7.2" }
-windows-lib = { path = "crates/windows-lib", package = "hyprshell-windows-lib", version = "=4.7.2" }
-launcher-lib = { path = "crates/launcher-lib", package = "hyprshell-launcher-lib", version = "=4.7.2" }
-hyprland-plugin = { path = "crates/hyprland-plugin", package = "hyprshell-hyprland-plugin", version = "=4.7.2" }
-
-[lints]
-workspace = true
 
 [profile.release]
 strip = "debuginfo"
 lto = true
 opt-level = 3
 
+[lints]
+workspace = true
+
 [workspace.lints.clippy]
 all = { level = "warn", priority = -1 }
 pedantic = { level = "warn", priority = -1 }
 nursery = { level = "warn", priority = -1 }
+unwrap_used = "deny"
 missing_errors_doc = "allow"
 cast_possible_truncation = "allow"
 # This is broken

@@ -15,7 +15,7 @@ rec {
     buildLib.commonArgsFullCached
     // {
       cargoBuildCommand = "cargo build --profile dev --locked";
-      cargoExtraArgs = "--features config_check";
+      cargoExtraArgs = "--features ci_config_check";
     }
   );
   hyprshell-test = craneLib.cargoNextest (
@@ -23,14 +23,21 @@ rec {
     // {
       doCheck = true;
       CARGO_PROFILE = "dev";
-      cargoNextestExtraArgs = "--all-targets --all-features -p hyprshell-config-lib -p hyprshell-core-lib -p hyprshell-exec-lib -p hyprshell-launcher-lib -p hyprshell-windows-lib -p hyprshell-hyprland-plugin";
+      CPATH = pkgs.lib.makeIncludePath (
+        pkgs.hyprland.buildInputs
+        ++ [
+          pkgs.hyprland
+          pkgs.pixman
+        ]
+      );
+      cargoNextestExtraArgs = "--all-targets --all-features -p hyprshell-config-lib -p hyprshell-core-lib -p hyprshell-exec-lib -p hyprshell-launcher-lib -p hyprshell-windows-lib -p hyprshell-hyprland-plugin -p hyprshell-clipboard-lib -p hyprshell-config-edit-lib";
     }
   );
   hyprshell-clippy = craneLib.cargoClippy (
     buildLib.commonArgsFullCached
     // {
       CARGO_PROFILE = "dev";
-      cargoClippyExtraArgs = "--all-targets --all-features  -p hyprshell-config-lib -p hyprshell-core-lib -p hyprshell-exec-lib -p hyprshell-launcher-lib -p hyprshell-windows-lib -p hyprshell-hyprland-plugin -- --deny warnings";
+      cargoClippyExtraArgs = "--all-targets --all-features  -p hyprshell-config-lib -p hyprshell-core-lib -p hyprshell-exec-lib -p hyprshell-launcher-lib -p hyprshell-windows-lib -p hyprshell-hyprland-plugin  -p hyprshell-clipboard-lib -p hyprshell-config-edit-lib -- --deny warnings";
     }
   );
   hyprshell-fmt = craneLib.cargoFmt buildLib.commonArgs;
@@ -106,44 +113,7 @@ rec {
       ++ buildLib.commonArgs.nativeBuildInputs;
       cargoClippyExtraArgs = "";
       buildPhaseCargoCommand = ''
-        cargoBuildLog=$(mktemp cargoBuildLogXXXX.json)
-
-        # Define the features as an array
-        # features=$(cargo metadata --format-version 1 --no-deps | ${pkgs.jq}/bin/jq -r '.packages[4].features | keys[]')
-        declare -a features=("generate_config_command" "config_check" "launcher_calc" "debug_command" "json5_config")
-
-        # Get the total number of features
-        num_features=''${#features[@]}
-
-        # Function to build with a specific combination of features
-        build_with_features() {
-          local feature_combination="$1"
-          local iteration="$2"
-          local start_time=$(date +%s.%N)
-
-          if [[ -z "$feature_combination" ]]; then
-            echo "[$iteration] Running clippy without any features..."
-            cargo clippy --profile dev --locked --no-default-features --message-format json-render-diagnostics > "$cargoBuildLog"
-          else
-            echo "[$iteration] Building with features: $feature_combination"
-            cargo clippy --profile dev --locked --no-default-features --features "$feature_combination" --message-format json-render-diagnostics > "$cargoBuildLog"
-          fi
-
-          local duration=$(awk "BEGIN {print $(date +%s.%N) - $start_time}")
-          printf "  took %.2f seconds\n" "$duration"
-        }
-
-        echo "num_features: $num_features, iterations: $((1 << num_features))"
-        for ((i = 0; i < (1 << num_features); i++)); do
-          combination=()
-          for ((j = num_features - 1; j >= 0; j--)); do
-            if ((i & (1 << j))); then
-              combination+=("''${features[j]}")
-            fi
-          done
-          build_with_features "$(IFS=,; printf '%s' "''${combination[*]}")" "$i"
-        done
-        echo "all features tested"
+        bash ${../scripts/nix/check-all-feature-combinations.sh}
       '';
     }
   );

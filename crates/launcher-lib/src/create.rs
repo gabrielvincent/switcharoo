@@ -1,21 +1,22 @@
 use crate::global::{LauncherConfig, LauncherData};
+use crate::plugins;
 use crate::plugins::get_static_options_chars;
+use adw::gtk::gdk::{Key, ModifierType};
+use adw::gtk::glib::{ControlFlow, Propagation};
+use adw::gtk::prelude::*;
+use adw::gtk::{
+    Application, ApplicationWindow, Entry, EventControllerKey, ListBox, PropagationPhase,
+    SelectionMode,
+};
+use adw::gtk::{Orientation, glib};
 use async_channel::Sender;
 use config_lib::{Launcher, Modifier};
 use core_lib::transfer::{CloseOverviewConfig, Direction, SwitchOverviewConfig, TransferType};
 use core_lib::{LAUNCHER_NAMESPACE, WarnWithDetails};
-use gtk::gdk::{Key, ModifierType};
-use gtk::glib::{ControlFlow, Propagation};
-use gtk::prelude::*;
-use gtk::{
-    Application, ApplicationWindow, Entry, EventControllerKey, ListBox, PropagationPhase,
-    SelectionMode,
-};
-use gtk::{Orientation, glib};
 use gtk4_layer_shell::{Edge, Layer, LayerShell};
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
-use tracing::{debug, debug_span};
+use tracing::{debug, debug_span, trace};
 
 pub fn create_windows_overview_launcher_window(
     app: &Application,
@@ -38,14 +39,14 @@ pub fn create_windows_overview_launcher_window(
     });
     main_vbox.append(&entry);
 
-    let results = gtk::Box::builder()
+    let results = adw::gtk::Box::builder()
         .orientation(Orientation::Vertical)
         .css_classes(["launcher-results"])
         .spacing(3)
         .build();
     main_vbox.append(&results);
 
-    let plugin_box = gtk::Box::builder()
+    let plugin_box = adw::gtk::Box::builder()
         .orientation(Orientation::Horizontal)
         .css_classes(["launcher-plugins"])
         .spacing(4)
@@ -75,6 +76,7 @@ pub fn create_windows_overview_launcher_window(
     let results_2 = results.clone();
     let launch_modifier = launcher.launch_modifier;
     event_controller.connect_key_pressed(move |_, key, _, modt| {
+        trace!("input: {key:?}");
         handle_key(
             &entry_2,
             key,
@@ -100,6 +102,7 @@ pub fn create_windows_overview_launcher_window(
     debug!("Created launcher window ({})", window.id());
 
     launcher_entry_text_change(String::new(), event_sender);
+    plugins::init_calc_context();
 
     Ok(LauncherData {
         config: LauncherConfig {
@@ -135,7 +138,7 @@ fn handle_key(
     modt: ModifierType,
     plugin_keys: &[Key],
     launch_modifier: Modifier,
-    results: &gtk::Box,
+    results: &adw::gtk::Box,
     event_sender: &Sender<TransferType>,
 ) -> Propagation {
     let launch_mod = match launch_modifier {

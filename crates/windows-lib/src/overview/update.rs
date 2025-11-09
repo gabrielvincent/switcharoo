@@ -1,20 +1,35 @@
 use crate::global::WindowsOverviewData;
-use crate::next::find_next;
-use core_lib::transfer::SwitchOverviewConfig;
-use gtk::prelude::*;
-use tracing::debug_span;
+use crate::next::{find_next_client, find_next_workspace};
+use adw::gtk::prelude::*;
+use core_lib::transfer::{Direction, SwitchOverviewConfig};
+use tracing::{debug_span, error};
 
 pub fn update_overview(data: &mut WindowsOverviewData, config: &SwitchOverviewConfig) {
     let _span = debug_span!("update_overview").entered();
 
-    let active = find_next(
-        &config.direction,
-        config.workspace,
-        false,
-        &data.hypr_data,
-        data.active,
-        data.config.items_per_row as usize,
-    );
+    let active = if config.workspace {
+        find_next_workspace(
+            &config.direction,
+            false,
+            &data.hypr_data,
+            data.active,
+            data.config.items_per_row,
+        )
+    } else {
+        if config.direction == Direction::Up || config.direction == Direction::Down {
+            error!(
+                "Clients in overview can only be switched left and right (forwards and backwards)"
+            );
+            return;
+        }
+        find_next_client(
+            &config.direction,
+            false,
+            &data.hypr_data,
+            data.active,
+            data.config.items_per_row,
+        )
+    };
     data.active = active;
 
     for monitor_data in data.window_list.values_mut() {

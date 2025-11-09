@@ -25,8 +25,11 @@ serde_json5 = { version = "0.2.1", optional = true }
 [features]
 json5_config = ["dep:serde_json5"]
 generate_config = ["dep:inquire"]
-no-default-config-values = []
+ci_no_default_config_values = []
 launcher_calc_plugin = []
 
 [lints]
 workspace = true
+
+[dev-dependencies]
+test-log.workspace = true

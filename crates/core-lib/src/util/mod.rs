@@ -1,9 +1,9 @@
-mod r#const;
+mod boot;
 mod exec;
 mod helpers;
 mod path;
 
-pub use r#const::*;
+pub use boot::*;
 pub use exec::*;
 pub use helpers::*;
 pub use path::*;
@@ -43,7 +43,7 @@ pub fn daemon_running() -> bool {
 }
 
 #[allow(clippy::print_stderr, clippy::print_stdout)]
-pub fn explain_config(config_path: &Path) {
+pub fn explain_config(config_path: &Path, add_how_to_explain_again: bool) {
     let config = match config_lib::load_and_migrate_config(config_path, true) {
         Ok(config) => config,
         Err(err) => {
@@ -54,7 +54,7 @@ pub fn explain_config(config_path: &Path) {
             return;
         }
     };
-    let info = config_lib::explain(&config, config_path, true);
+    let info = config_lib::explain(&config, config_path, true, true);
     println!("{info}");
 
     if daemon_running() {
@@ -63,5 +63,9 @@ pub fn explain_config(config_path: &Path) {
         eprintln!(
             "Daemon \x1b[31mnot running\x1b[0m, start it with `hyprshell run` or `systemctl --user enable --now hyprshell`"
         );
+    }
+
+    if add_how_to_explain_again {
+        println!("\nTo explain the config again, run `hyprshell explain`\n");
     }
 }

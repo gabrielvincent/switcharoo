@@ -1,6 +1,7 @@
 mod build;
 mod configure;
 mod extract;
+mod test;
 
 use anyhow::Context;
 use tracing::{debug_span, trace};

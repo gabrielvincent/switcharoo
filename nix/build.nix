@@ -9,10 +9,20 @@ rec {
   # no more filtering, excluded to many files
   src = ../.;
   stdenv = p: p.stdenv;
-  wrapWithGcc = ''
-    wrapProgram $out/bin/hyprshell \
-      --prefix PATH : ${pkgs.lib.makeBinPath [ pkgs.gcc ]} \
-      --prefix CPATH : ${pkgs.lib.makeIncludePath ([ pkgs.pixman ])}
+  # use in preFixup
+  addWrapWithGccArgs = hyprland: ''
+    gappsWrapperArgs+=(
+       --prefix PATH : '${pkgs.lib.makeBinPath [ pkgs.gcc ]}'
+       --prefix CPATH : '${
+         pkgs.lib.makeIncludePath (
+           hyprland.buildInputs
+           ++ [
+             hyprland
+             pkgs.pixman
+           ]
+         )
+       }'
+     )
   '';
   commonArgs = {
     inherit
@@ -33,11 +43,10 @@ rec {
     nativeBuildInputs = [
       pkgs.pkg-config
       pkgs.wrapGAppsHook4
-      pkgs.makeBinaryWrapper
     ];
 
     buildInputs = [
-      pkgs.gtk4
+      pkgs.libadwaita
       pkgs.gtk4-layer-shell
     ];
   };
@@ -55,10 +64,7 @@ rec {
   cargoFullArtifacts = craneLib.buildDepsOnly (
     commonArgs
     // {
-      mkDummySrc = craneLib.mkDummySrc {
-        inherit stdenv;
-        src = craneLib.cleanCargoSource ../.;
-      };
+      src = craneLib.cleanCargoSource ../.;
       pname = "hyprshell-full";
       doCheck = true;
       cargoBuildCommand = "cargo build --profile dev --locked --all-targets --all-features";

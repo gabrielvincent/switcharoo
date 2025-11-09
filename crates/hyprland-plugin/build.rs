@@ -6,11 +6,10 @@ use zip::ZipWriter;
 use zip::write::FileOptions;
 
 fn include_plugin() {
-    let prepare_dir = combine();
+    let out_dir = env::var("OUT_DIR").expect("out dir missing??");
+    let prepare_dir = combine(&out_dir);
 
-    let out_dir = env::var("OUT_DIR").unwrap();
     let zip_path = Path::new(&out_dir).join("plugin.zip");
-
     let file = File::create(&zip_path).expect("Failed to create zip file");
     let mut zip = ZipWriter::new(&file);
     let options: FileOptions<()> = FileOptions::default()
@@ -33,8 +32,7 @@ fn include_plugin() {
     zip.finish().expect("Failed to finish zip");
 }
 
-fn combine() -> PathBuf {
-    let out_dir = env::var("OUT_DIR").unwrap();
+fn combine(out_dir: &str) -> PathBuf {
     let srcs_dir = Path::new("plugin/src");
     let prepare_dir = Path::new(&out_dir).join("prepare");
 
@@ -57,7 +55,14 @@ fn combine() -> PathBuf {
 
     for entry in cpp_files {
         let src_path = entry.path();
-        let file_name = src_path.file_name().unwrap();
+        #[allow(clippy::print_stderr)]
+        let Some(file_name) = src_path.file_name() else {
+            eprintln!(
+                "Warning: could not get file name for path {}",
+                src_path.display()
+            );
+            continue;
+        };
         all_cpp
             .write_fmt(format_args!("\n\n// {} \n", file_name.to_string_lossy()))
             .expect("Failed to write to all.cpp");

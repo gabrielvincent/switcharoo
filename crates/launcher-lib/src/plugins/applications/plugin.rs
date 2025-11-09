@@ -3,7 +3,8 @@ use crate::plugins::applications::map::{DesktopEntry, get_all_desktop_entries};
 use crate::plugins::{
     DetailsMenuItem, Identifier, PluginNames, PluginReturn, SortableLaunchOption,
 };
-use core_lib::{ExecType, WarnWithDetails, analyse_exec};
+use core_lib::WarnWithDetails;
+use core_lib::util::{ExecType, analyse_exec};
 use exec_lib::run::run_program;
 use std::collections::HashMap;
 use std::path::Path;

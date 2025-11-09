@@ -1,5 +1,5 @@
+use adw::gtk::{ApplicationWindow, Button, FlowBox};
 use core_lib::{Active, ClientId, HyprlandData, MonitorId, WorkspaceId};
-use gtk::{ApplicationWindow, Button, FlowBox};
 use std::collections::HashMap;
 
 #[derive(Debug)]
@@ -16,7 +16,6 @@ pub struct WindowsOverviewData {
 pub struct WindowsOverviewConfig {
     pub items_per_row: u8,
     pub scale: f64,
-    pub hide_filtered: bool,
     pub filter_current_workspace: bool,
     pub filter_current_monitor: bool,
     pub filter_same_class: bool,
@@ -48,7 +47,7 @@ pub struct WindowsSwitchConfig {
 pub struct WindowsOverviewMonitorData {
     pub id: MonitorId,
     pub workspaces_flow: FlowBox,
-    pub workspaces: HashMap<WorkspaceId, gtk::Box>,
+    pub workspaces: HashMap<WorkspaceId, adw::gtk::Box>,
     pub clients: HashMap<ClientId, Button>,
 }
 

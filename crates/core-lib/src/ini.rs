@@ -215,7 +215,8 @@ impl<'a> IntoIterator for &'a Section<'a> {
 mod tests {
     use super::*;
 
-    #[test]
+    #[test_log::test]
+    #[test_log(default_log_filter = "trace")]
     fn test_parse_ini() {
         let content = r"[Section1]
 key1=value1
@@ -236,30 +237,34 @@ key with spaces=value with spaces; and more values
         let ini = IniFile::from_str(content);
 
         assert_eq!(
-            ini.get_section("Section1").unwrap().get_first("key1"),
+            ini.get_section("Section1")
+                .expect("section missing")
+                .get_first("key1"),
             Some("value1")
         );
         assert_eq!(
-            ini.get_section("Section2").unwrap().get_first("foo"),
+            ini.get_section("Section2")
+                .expect("section missing")
+                .get_first("foo"),
             Some("bar")
         );
 
         assert!(ini.get_section("Empty Section").is_some());
         assert_ne!(
             ini.get_section("Section With Spaces")
-                .unwrap()
+                .expect("section missing")
                 .get_all("key with spaces"),
             Some(&vec!["value with spaces"])
         );
         assert_ne!(
             ini.get_section("Section With Spaces")
-                .unwrap()
+                .expect("section missing")
                 .get_all("key with spaces"),
             Some(&vec!["value with spaces"])
         );
         assert_eq!(
             ini.get_section("Section With Spaces")
-                .unwrap()
+                .expect("section missing")
                 .get_all("key with spaces"),
             Some(&vec!["value with spaces", "and more values"])
         );
@@ -267,27 +272,35 @@ key with spaces=value with spaces; and more values
         assert!(ini.get_section("NonExistent").is_none());
         assert_eq!(
             ini.get_section("Section1")
-                .unwrap()
+                .expect("section missing")
                 .get_first("nonexistent"),
             None
         );
     }
 
-    #[test]
+    #[test_log::test]
+    #[test_log(default_log_filter = "trace")]
     fn test_empty_ini() {
         let content = "";
         let ini = IniFile::from_str(content);
         assert_eq!(ini.sections().len(), 1);
     }
 
-    #[test]
+    #[test_log::test]
+    #[test_log(default_log_filter = "trace")]
     fn test_no_sections() {
         let content = "key=value";
         let ini = IniFile::from_str(content);
-        assert_eq!(ini.get_section("").unwrap().get_first("key"), Some("value"));
+        assert_eq!(
+            ini.get_section("")
+                .expect("section missing")
+                .get_first("key"),
+            Some("value")
+        );
     }
 
-    #[test]
+    #[test_log::test]
+    #[test_log(default_log_filter = "trace")]
     fn test_values_iterator() {
         let content = r"
     [Section1]
@@ -310,7 +323,8 @@ key with spaces=value with spaces; and more values
         assert_eq!(values.len(), 3);
     }
 
-    #[test]
+    #[test_log::test]
+    #[test_log(default_log_filter = "trace")]
     fn test_values_iterator_2() {
         let content = r"
     [Section1]
@@ -331,14 +345,16 @@ key with spaces=value with spaces; and more values
         assert_eq!(count, 3, "There should be 3 items in the iterator");
     }
 
-    #[test]
+    #[test_log::test]
+    #[test_log(default_log_filter = "trace")]
     fn test_format_empty() {
         let content = "test=test";
         let ini = IniFile::from_str(content);
         assert_eq!(ini.format(), "test=test\n");
     }
 
-    #[test]
+    #[test_log::test]
+    #[test_log(default_log_filter = "trace")]
     fn test_format_multiple_sections() {
         let content = r"[B]
 key1=value1

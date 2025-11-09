@@ -3,21 +3,21 @@ use serde::{Deserialize, Serialize};
 use smart_default::SmartDefault;
 
 #[derive(SmartDefault, Debug, Clone, PartialEq, Deserialize, Serialize)]
-#[cfg_attr(not(feature = "no-default-config-values"), serde(default))]
+#[cfg_attr(not(feature = "ci_no_default_config_values"), serde(default))]
 #[serde(deny_unknown_fields)]
 pub struct Config {
     #[cfg_attr(
-        not(feature = "no-default-config-values"),
+        not(feature = "ci_no_default_config_values"),
         default(Some(crate::CURRENT_CONFIG_VERSION))
     )]
-    #[cfg_attr(feature = "no-default-config-values", default(None))]
+    #[cfg_attr(feature = "ci_no_default_config_values", default(None))]
     pub version: Option<u16>,
     #[default(None)]
     pub windows: Option<Windows>,
 }
 
 #[derive(SmartDefault, Debug, Clone, PartialEq, Deserialize, Serialize)]
-#[cfg_attr(not(feature = "no-default-config-values"), serde(default))]
+#[cfg_attr(not(feature = "ci_no_default_config_values"), serde(default))]
 #[serde(deny_unknown_fields)]
 pub struct Windows {
     #[default = 8.5]
@@ -31,7 +31,7 @@ pub struct Windows {
 }
 
 #[derive(SmartDefault, Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]
-#[cfg_attr(not(feature = "no-default-config-values"), serde(default))]
+#[cfg_attr(not(feature = "ci_no_default_config_values"), serde(default))]
 #[serde(deny_unknown_fields)]
 pub struct Overview {
     pub launcher: Launcher,
@@ -46,7 +46,7 @@ pub struct Overview {
 }
 
 #[derive(SmartDefault, Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]
-#[cfg_attr(not(feature = "no-default-config-values"), serde(default))]
+#[cfg_attr(not(feature = "ci_no_default_config_values"), serde(default))]
 #[serde(deny_unknown_fields)]
 pub struct Launcher {
     #[default(None)]
@@ -86,12 +86,12 @@ pub struct Plugins {
 }
 
 #[derive(SmartDefault, Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]
-#[cfg_attr(not(feature = "no-default-config-values"), serde(default))]
+#[cfg_attr(not(feature = "ci_no_default_config_values"), serde(default))]
 #[serde(deny_unknown_fields)]
 pub struct EmptyConfig {}
 
 #[derive(SmartDefault, Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]
-#[cfg_attr(not(feature = "no-default-config-values"), serde(default))]
+#[cfg_attr(not(feature = "ci_no_default_config_values"), serde(default))]
 #[serde(deny_unknown_fields)]
 pub struct ActionsPluginConfig {
     #[default(vec![
@@ -118,7 +118,7 @@ pub struct ActionsPluginConfig {
 }
 
 #[derive(SmartDefault, Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]
-#[cfg_attr(not(feature = "no-default-config-values"), serde(default))]
+#[cfg_attr(not(feature = "ci_no_default_config_values"), serde(default))]
 #[serde(deny_unknown_fields)]
 pub struct ApplicationsPluginConfig {
     #[default = 8]
@@ -151,7 +151,7 @@ pub struct ActionsPluginActionCustom {
 }
 
 #[derive(SmartDefault, Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]
-#[cfg_attr(not(feature = "no-default-config-values"), serde(default))]
+#[cfg_attr(not(feature = "ci_no_default_config_values"), serde(default))]
 #[serde(deny_unknown_fields)]
 pub struct WebSearchConfig {
     #[default(vec![SearchEngine {
@@ -175,15 +175,16 @@ pub struct SearchEngine {
 }
 
 #[derive(SmartDefault, Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]
-#[cfg_attr(not(feature = "no-default-config-values"), serde(default))]
+#[cfg_attr(not(feature = "ci_no_default_config_values"), serde(default))]
 #[serde(deny_unknown_fields)]
 pub struct Switch {
     #[default(Modifier::Alt)]
     pub modifier: Modifier,
-    #[default(Vec::new())]
+    #[default(vec![FilterBy::CurrentMonitor])]
     pub filter_by: Vec<FilterBy>,
     #[default = false]
     pub switch_workspaces: bool,
+    // TODO add option to include special workspace
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]

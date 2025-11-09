@@ -30,7 +30,7 @@ void onKeyPress(const std::unordered_map<std::string, std::any> &data, SCallback
         const bool altActive = xkb_state_mod_name_is_active(state, XKB_MOD_NAME_ALT, XKB_STATE_MODS_EFFECTIVE) == 1;
         const xkb_keysym_t keysym = xkb_state_key_get_one_sym(keyboard->m_xkbState, keycode);
 
-        if constexpr (HYPRSHELL_PRINT_DEBUG == 1) {
+        if constexpr (HYPRSHELL_PRINT_DEBUG_DEBUG == 1) {
             char buffer[20];
             xkb_keysym_get_name(keysym, buffer, sizeof(buffer));
             const auto bigString = std::string("Name: ") + buffer +
@@ -89,7 +89,7 @@ void onKeyPress(const std::unordered_map<std::string, std::any> &data, SCallback
         }
 
         // open switch mode
-        if (!release) {
+        if (!release && !LAYER_VISIBLE) {
             if (keysym == XKB_KEY_Tab) {
                 if ((HYPRSHELL_SWTICH_XKB_MOD_L == XKB_KEY_Alt_L && altActive) ||
                     (HYPRSHELL_SWTICH_XKB_MOD_L == XKB_KEY_Super_L && superActive) ||

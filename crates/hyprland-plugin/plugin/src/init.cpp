@@ -13,8 +13,8 @@ PluginDescriptionInfo init(HANDLE handle) {
             PHANDLE,
             "[Hyprshell Plugin] Mismatched headers! Can't proceed. (Hyprland was updated but not restarted)", RED,
             5000);
-        HyprlandAPI::addNotification(PHANDLE, std::format("[Hyprshell Plugin] compositor hash: {}", HASH), CHyprColor{1.0, 0.2, 0.2, 1.0}, 5000);
-        HyprlandAPI::addNotification(PHANDLE, std::format("[Hyprshell Plugin] client hash: {}", CLIENT_HASH), CHyprColor{1.0, 0.2, 0.2, 1.0}, 5000);
+        HyprlandAPI::addNotification(PHANDLE, std::format("[Hyprshell Plugin] compositor hash: {}", HASH), CHyprColor{1.0, 0.2, 0.2, 1.0}, 7000);
+        HyprlandAPI::addNotification(PHANDLE, std::format("[Hyprshell Plugin] client hash: {}", CLIENT_HASH), CHyprColor{1.0, 0.2, 0.2, 1.0}, 7000);
         throw std::runtime_error("[Hyprshell Plugin] Version mismatch");
     }
 

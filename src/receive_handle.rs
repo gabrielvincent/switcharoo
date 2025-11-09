@@ -1,13 +1,13 @@
 use crate::start::Globals;
 use crate::util;
+use adw::gtk::prelude::{ApplicationExt, EntryExt};
+use adw::gtk::{gio, glib};
 use async_channel::{Receiver, Sender};
 use core_lib::WarnWithDetails;
 use core_lib::transfer::{
     CloseOverviewConfig, Direction, OpenSwitch, SwitchOverviewConfig, SwitchSwitchConfig,
     TransferType,
 };
-use gtk::prelude::{ApplicationExt, EntryExt};
-use gtk::{gio, glib};
 use tracing::{debug, trace, warn};
 
 #[allow(clippy::future_not_send)]

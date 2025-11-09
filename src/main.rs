@@ -1,10 +1,12 @@
 use anyhow::{Context, bail};
 use clap::Parser;
-use core_lib::{
-    WarnWithDetails, daemon_running, get_default_cache_dir, get_default_config_path,
-    get_default_css_path, get_default_data_dir,
+use core_lib::WarnWithDetails;
+use core_lib::path::{
+    get_default_cache_dir, get_default_config_path, get_default_css_path, get_default_data_dir,
 };
+use core_lib::util::daemon_running;
 use std::{env, fs};
+use tracing_subscriber::EnvFilter;
 
 mod cli;
 mod data;
@@ -35,6 +37,11 @@ fn main() -> anyhow::Result<()> {
             2.. => "trace",
         }
     };
+    let filter = EnvFilter::try_from_default_env().unwrap_or_else(|_| {
+        format!(
+            "hyprshell={level},config_lib={level},core_lib={level},exec_lib={level},launcher_lib={level},windows_lib={level},hyprland_plugin={level},hyprshell_clipboard_lib={level},hyprshell_config_edit_lib={level}"
+        ).into()}
+    );
     let subscriber = tracing_subscriber::fmt()
         .with_timer(tracing_subscriber::fmt::time::uptime())
         .with_target(
@@ -43,9 +50,7 @@ fn main() -> anyhow::Result<()> {
                 .and_then(|s| s.parse().ok())
                 .unwrap_or(false),
         )
-        .with_env_filter(format!(
-            "hyprshell={level},config_lib={level},core_lib={level},exec_lib={level},launcher_lib={level},windows_lib={level},hyprland_plugin={level}",
-        ))
+        .with_env_filter(filter)
         .finish();
     tracing::subscriber::set_global_default(subscriber)
         .unwrap_or_else(|e| tracing::warn!("Unable to initialize logging: {e}"));
@@ -65,6 +70,13 @@ fn main() -> anyhow::Result<()> {
             }
             exec_lib::check_version()
                 .warn_details("Unable to check hyprland version, continuing anyway");
+            if env::var_os("HYPRSHELL_EXPERIMENTAL").is_some_and(|v| v.eq("1")) {
+                clipboard_lib::store::test_clipboard(
+                    cache_dir.unwrap_or_else(get_default_cache_dir),
+                );
+                return Ok(());
+            }
+
             start::start(
                 config_path.unwrap_or_else(get_default_config_path),
                 css_file.unwrap_or_else(get_default_css_path),
@@ -72,8 +84,13 @@ fn main() -> anyhow::Result<()> {
                 cache_dir.unwrap_or_else(get_default_cache_dir),
             )?;
         }
-        #[cfg(feature = "generate_config_command")]
         cli::Command::Config { command } => match command {
+            cli::ConfigCommand::Edit {} => {
+                let config_path = config_path.unwrap_or_else(get_default_config_path);
+                let css_path = css_file.unwrap_or_else(get_default_css_path);
+                config_edit_lib::start(config_path, css_path);
+            }
+            #[cfg(feature = "generate_config_command")]
             cli::ConfigCommand::Generate { force, no_systemd } => {
                 use core_lib::Warn;
                 let config_path = config_path.unwrap_or_else(get_default_config_path);
@@ -92,20 +109,23 @@ fn main() -> anyhow::Result<()> {
                 tracing::trace!("Generated config: {:#?}", config);
                 config_lib::write_config(&config_path, &config, override_config).warn();
                 config_lib::generate::write_css(&css_path, &css_data, override_css).warn();
-                if !no_systemd {
+                if cfg!(debug_assertions) || no_systemd {
                     config_lib::generate::write_systemd_unit(
                         opts.config_file.as_ref(),
                         opts.css_file.as_ref(),
                         opts.data_dir.as_ref(),
                         opts.cache_dir.as_ref(),
-                        &core_lib::get_data_home(),
+                        &core_lib::path::get_data_home(),
                     )
                     .warn();
                 }
-                core_lib::explain_config(&config_path);
+                core_lib::util::explain_config(&config_path, true);
             }
             cli::ConfigCommand::Explain {} => {
-                core_lib::explain_config(&config_path.unwrap_or_else(get_default_config_path));
+                core_lib::util::explain_config(
+                    &config_path.unwrap_or_else(get_default_config_path),
+                    false,
+                );
             }
             cli::ConfigCommand::Check {} => {
                 if let Err(err) = config_lib::load_and_migrate_config(
@@ -116,7 +136,7 @@ fn main() -> anyhow::Result<()> {
                     std::process::exit(1);
                 }
             }
-            #[cfg(feature = "config_check")]
+            #[cfg(feature = "ci_config_check")]
             cli::ConfigCommand::CheckIfDefault {} => {
                 let config = config_lib::load_and_migrate_config(
                     &config_path.unwrap_or_else(get_default_config_path),
@@ -132,7 +152,7 @@ fn main() -> anyhow::Result<()> {
                     std::process::exit(1);
                 }
             }
-            #[cfg(feature = "config_check")]
+            #[cfg(feature = "ci_config_check")]
             cli::ConfigCommand::CheckIfFull {} => {
                 let config = config_lib::load_and_migrate_config(
                     &config_path.unwrap_or_else(get_default_config_path),
@@ -232,11 +252,16 @@ fn main() -> anyhow::Result<()> {
 
 fn check_features() {
     tracing::debug!(
-        "FEATURES: JSON5 support: {}, Config command: {}, Debug command: {}, Launcher calc: {}",
+        "FEATURES: json5_config: {}, generate_config_command: {}, debug_command: {}, launcher_calc: {}, clipboard_compress_lz4: {}, clipboard_compress_zstd: {}, clipboard_compress_brotli: {}, clipboard_encrypt_chacha20poly1305: {}, clipboard_encrypt_aes_gcm: {}",
         cfg!(feature = "json5_config"),
         cfg!(feature = "generate_config_command"),
         cfg!(feature = "debug_command"),
         cfg!(feature = "launcher_calc"),
+        cfg!(feature = "clipboard_compress_lz4"),
+        cfg!(feature = "clipboard_compress_zstd"),
+        cfg!(feature = "clipboard_compress_brotli"),
+        cfg!(feature = "clipboard_encrypt_chacha20poly1305"),
+        cfg!(feature = "clipboard_encrypt_aes_gcm"),
     );
 }
 

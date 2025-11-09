@@ -87,7 +87,8 @@ pub fn analyse_exec(exec: &str) -> ExecType {
 mod tests {
     use super::*;
 
-    #[test]
+    #[test_log::test]
+    #[test_log(default_log_filter = "trace")]
     fn test_relative_exec() {
         assert!(matches!(
             analyse_exec("nautilus --new-window"),
@@ -95,7 +96,8 @@ mod tests {
         ));
     }
 
-    #[test]
+    #[test_log::test]
+    #[test_log(default_log_filter = "trace")]
     fn test_flatpak_pwa_exec() {
         assert!(matches!(
             analyse_exec(
@@ -105,7 +107,8 @@ mod tests {
         ));
     }
 
-    #[test]
+    #[test_log::test]
+    #[test_log(default_log_filter = "trace")]
     fn test_appimage_exec() {
         assert!(matches!(
             analyse_exec(
@@ -115,7 +118,8 @@ mod tests {
         ));
     }
 
-    #[test]
+    #[test_log::test]
+    #[test_log(default_log_filter = "trace")]
     fn test_absolute_pwa_exec() {
         assert!(matches!(
             analyse_exec(
@@ -125,7 +129,8 @@ mod tests {
         ));
     }
 
-    #[test]
+    #[test_log::test]
+    #[test_log(default_log_filter = "trace")]
     fn test_flatpak_exec() {
         assert!(matches!(
             analyse_exec("flatpak run org.mozilla.firefox"),
@@ -133,7 +138,8 @@ mod tests {
         ));
     }
 
-    #[test]
+    #[test_log::test]
+    #[test_log(default_log_filter = "trace")]
     fn test_absolute_exec() {
         assert!(matches!(
             analyse_exec("/usr/bin/firefox"),

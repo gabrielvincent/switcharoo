@@ -37,6 +37,12 @@ pub fn check(config: &Config) -> anyhow::Result<()> {
         .as_ref()
         .and_then(|w| w.overview.as_ref().map(|o| &o.launcher))
     {
+        if let Some(dt) = &l.default_terminal {
+            if dt.is_empty() {
+                bail!("Default terminal command cannot be empty");
+            }
+        }
+
         let mut used: Vec<char> = vec![];
         for engine in l
             .plugins
@@ -82,47 +88,72 @@ mod tests {
         }
     }
 
-    #[test]
+    #[test_log::test]
+    #[test_log(default_log_filter = "trace")]
     fn test_valid_config() {
         let config = full();
         assert!(check(&config).is_ok());
     }
 
-    #[test]
+    #[test_log::test]
+    #[test_log(default_log_filter = "trace")]
     fn test_invalid_scale() {
         let mut config = full();
-        config.windows.as_mut().unwrap().scale = 20.0;
+        config
+            .windows
+            .as_mut()
+            .expect("config option missing")
+            .scale = 20.0;
         assert!(check(&config).is_err());
-        config.windows.as_mut().unwrap().scale = 0.0;
+        config
+            .windows
+            .as_mut()
+            .expect("config option missing")
+            .scale = 0.0;
         assert!(check(&config).is_err());
     }
 
-    #[test]
+    #[test_log::test]
+    #[test_log(default_log_filter = "trace")]
     fn test_same_modifier() {
         let mut config = full();
-        let overview = config.windows.as_mut().unwrap().overview.as_mut().unwrap();
+        let overview = config
+            .windows
+            .as_mut()
+            .expect("config option missing")
+            .overview
+            .as_mut()
+            .expect("config option missing");
         overview.launcher.launch_modifier = overview.modifier;
         assert!(check(&config).is_err());
     }
 
-    #[test]
+    #[test_log::test]
+    #[test_log(default_log_filter = "trace")]
     fn test_invalid_key() {
         let mut config = full();
-        let overview = config.windows.as_mut().unwrap().overview.as_mut().unwrap();
+        let overview = config
+            .windows
+            .as_mut()
+            .expect("config option missing")
+            .overview
+            .as_mut()
+            .expect("config option missing");
         overview.key = Box::from("super");
         assert!(check(&config).is_err());
     }
 
-    #[test]
+    #[test_log::test]
+    #[test_log(default_log_filter = "trace")]
     fn test_duplicate_engine_key() {
         let mut config = full();
         let launcher = &mut config
             .windows
             .as_mut()
-            .unwrap()
+            .expect("config option missing")
             .overview
             .as_mut()
-            .unwrap()
+            .expect("config option missing")
             .launcher;
         if let Some(ws) = launcher.plugins.websearch.as_mut() {
             ws.engines.push(SearchEngine {
@@ -134,16 +165,17 @@ mod tests {
         assert!(check(&config).is_err());
     }
 
-    #[test]
+    #[test_log::test]
+    #[test_log(default_log_filter = "trace")]
     fn test_empty_engine_url() {
         let mut config = full();
         let launcher = &mut config
             .windows
             .as_mut()
-            .unwrap()
+            .expect("config option missing")
             .overview
             .as_mut()
-            .unwrap()
+            .expect("config option missing")
             .launcher;
         if let Some(ws) = launcher.plugins.websearch.as_mut() {
             ws.engines[0].url = Box::from("");
@@ -151,20 +183,37 @@ mod tests {
         assert!(check(&config).is_err());
     }
 
-    #[test]
+    #[test_log::test]
+    #[test_log(default_log_filter = "trace")]
     fn test_empty_engine_name() {
         let mut config = full();
         let launcher = &mut config
             .windows
             .as_mut()
-            .unwrap()
+            .expect("config option missing")
             .overview
             .as_mut()
-            .unwrap()
+            .expect("config option missing")
             .launcher;
         if let Some(ws) = launcher.plugins.websearch.as_mut() {
             ws.engines[0].name = Box::from("");
         }
+        assert!(check(&config).is_err());
+    }
+
+    #[test_log::test]
+    #[test_log(default_log_filter = "trace")]
+    fn test_empty_terminal() {
+        let mut config = full();
+        let launcher = &mut config
+            .windows
+            .as_mut()
+            .expect("config option missing")
+            .overview
+            .as_mut()
+            .expect("config option missing")
+            .launcher;
+        launcher.default_terminal = Some(Box::from(""));
         assert!(check(&config).is_err());
     }
 }

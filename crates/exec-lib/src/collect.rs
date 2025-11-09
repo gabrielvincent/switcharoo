@@ -1,4 +1,5 @@
 use crate::to_client_id;
+use anyhow::Context;
 use core_lib::{
     ClientData, ClientId, FindByFirst, MonitorData, MonitorId, WorkspaceData, WorkspaceId,
 };
@@ -8,22 +9,22 @@ use tracing::{debug_span, warn};
 
 fn get_hypr_data() -> anyhow::Result<(Vec<Monitor>, Vec<Workspace>, Vec<Client>)> {
     let _span = debug_span!("get_hypr_data").entered();
-    let monitors = Monitors::get()?.to_vec();
+    let monitors = Monitors::get().context("monitors failed")?.to_vec();
     // sort and filter all workspaces sorted by ID
     let workspaces = {
-        let mut workspaces = Workspaces::get()?
+        let mut workspaces = Workspaces::get()
+            .context("workspaces failed")?
             .into_iter()
-            .filter(|w| w.id != -1) // filter invalid workspaces
-            .filter(|w| !w.id < 0) // TODO someday add special_workspace support
+            .filter(|w| w.id != -1) // TODO: check if still needed: ignore clients on invalid workspaces
             .collect::<Vec<_>>();
 
         workspaces.sort_by(|a, b| a.id.cmp(&b.id));
         workspaces
     };
-    let clients = Clients::get()?
+    let clients = Clients::get()
+        .context("clients failed")?
         .into_iter()
-        .filter(|c| c.workspace.id != -1) // ignore clients on invalid workspaces
-        .filter(|w| !w.workspace.id < 0) // TODO someday add special_workspace support
+        .filter(|c| c.workspace.id != -1) // TODO: check if still needed: ignore clients on invalid workspaces
         .collect::<Vec<_>>();
 
     Ok((monitors, workspaces, clients))
@@ -40,7 +41,8 @@ pub fn collect_hypr_data() -> anyhow::Result<(
 )> {
     let _span = debug_span!("convert_hypr_data").entered();
 
-    let (monitors, workspaces, clients) = get_hypr_data()?;
+    let (monitors, workspaces, clients) =
+        get_hypr_data().context("loading hyprland data failed")?;
 
     // all monitors with their data, x and y are the offset of the monitor, width and height are the size of the monitor.
     // combined_width and combined_height are the combined size of all workspaces on the monitor and workspaces_on_monitor is the number of workspaces on the monitor
@@ -68,7 +70,6 @@ pub fn collect_hypr_data() -> anyhow::Result<(
         let mut wd: Vec<(WorkspaceId, WorkspaceData)> = Vec::with_capacity(workspaces.len());
 
         for (monitor_id, monitor_data) in &monitor_data {
-            let mut x_offset: i32 = 0;
             workspaces
                 .iter()
                 .filter(|ws| ws.monitor_id == Some(*monitor_id))
@@ -76,16 +77,13 @@ pub fn collect_hypr_data() -> anyhow::Result<(
                     wd.push((
                         workspace.id,
                         WorkspaceData {
-                            x: x_offset,
-                            y: monitor_data.y,
                             name: workspace.name.clone(),
                             monitor: *monitor_id,
                             height: monitor_data.height,
                             width: monitor_data.width,
-                            any_client_enabled: false, // gets updated later
+                            any_client_enabled: true, // gets updated later
                         },
                     ));
-                    x_offset += i32::from(monitor_data.width);
                 });
         }
         wd
@@ -113,7 +111,7 @@ pub fn collect_hypr_data() -> anyhow::Result<(
                         title: client.title.clone(),
                         floating: client.floating,
                         pid: client.pid,
-                        enabled: false, // gets updated later
+                        enabled: true, // gets updated later
                     },
                 ));
             } else {
@@ -129,9 +127,18 @@ pub fn collect_hypr_data() -> anyhow::Result<(
     workspace_data.sort_by(|a, b| a.0.cmp(&b.0));
     monitor_data.sort_by(|a, b| a.0.cmp(&b.0));
 
-    let active_ws = Workspace::get_active()?.id;
-    let active_monitor = Monitor::get_active()?.id;
-    let active_client = Client::get_active()?.map(|a| (a.class.clone(), to_client_id(&a.address)));
+    // is broken, reports the "normal" workspace as active when a client in special workspace is selected
+    // let active_ws = Workspace::get_active()?.id;
+    let active_ws = Workspace::get_active()
+        .map(|w| w.id)
+        .context("active workspace failed")?;
+    let active_ws = Client::get_active()
+        .context("active client failed")?
+        .map_or(active_ws, |a| a.workspace.id);
+    let active_monitor = Monitor::get_active().context("active monitor failed")?.id;
+    let active_client = Client::get_active()
+        .context("active client failed")?
+        .map(|a| (a.class.clone(), to_client_id(&a.address)));
 
     Ok((
         client_data,

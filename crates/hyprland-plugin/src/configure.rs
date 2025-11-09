@@ -1,8 +1,8 @@
 use crate::{PLUGIN_AUTHOR, PLUGIN_DESC, PLUGIN_NAME, PLUGIN_VERSION};
 use anyhow::Context;
 use core_lib::binds::generate_transfer;
-use core_lib::get_daemon_socket_path_buff;
 use core_lib::transfer::{OpenSwitch, TransferType};
+use core_lib::util::get_daemon_socket_path_buff;
 use std::fmt::Display;
 use std::fs::OpenOptions;
 use std::io::{Read, Write};

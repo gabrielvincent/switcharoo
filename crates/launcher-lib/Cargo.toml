@@ -13,18 +13,21 @@ rust-version.workspace = true
 [dependencies]
 anyhow.workspace = true
 tracing.workspace = true
-gtk.workspace = true
+adw.workspace = true
 gtk4-layer-shell.workspace = true
 core-lib.workspace = true
 exec-lib.workspace = true
 serde_json.workspace = true
 async-channel.workspace = true
 config-lib.workspace = true
-calc = { version = "0.4.0", optional = true, default-features = false, features = [] }
+rink-core = { version = "0.8.0", optional = true, features = ["bundle-files"] }
 chrono = "0.4.41"
 
 [features]
-calc = ["dep:calc"]
+calc = ["dep:rink-core"]
 
 [lints]
 workspace = true
+
+[dev-dependencies]
+test-log.workspace = true

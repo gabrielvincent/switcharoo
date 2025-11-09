@@ -2,7 +2,7 @@ use anyhow::{Context, bail};
 use core_lib::TERMINALS;
 use std::ffi::OsString;
 use std::os::unix::prelude::CommandExt;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 use std::{env, thread};
 use tracing::{debug, trace};
@@ -14,6 +14,8 @@ pub fn run_program(
     default_terminal: Option<&str>,
 ) -> anyhow::Result<()> {
     debug!("Running: {run}");
+    let home_path_buf = env::var_os("HOME").map(PathBuf::from);
+    let path = path.map_or(home_path_buf.as_deref(), Some);
     if terminal {
         if let Some(term) = default_terminal {
             let command = format!("{term} -e {run}");

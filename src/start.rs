@@ -3,21 +3,22 @@ use crate::receive_handle::event_handler;
 use crate::socket::socket_handler;
 use crate::util;
 use crate::util::check_new_version;
-use anyhow::Context;
-use async_channel::{Receiver, Sender};
-use config_lib::Config;
-use core_lib::transfer::TransferType;
-use core_lib::{
-    WarnWithDetails, hyprshell_config_block, hyprshell_config_listener, hyprshell_css_listener,
-};
-use exec_lib::listener::{hyprland_config_listener, monitor_listener};
-use exec_lib::{info_toast, toast};
-use gtk::gdk::Display;
-use gtk::prelude::*;
-use gtk::{
+use adw::gtk::gdk::Display;
+use adw::gtk::prelude::*;
+use adw::gtk::{
     Application, CssProvider, STYLE_PROVIDER_PRIORITY_USER, glib,
     style_context_add_provider_for_display,
 };
+use anyhow::Context;
+use async_channel::{Receiver, Sender};
+use config_lib::Config;
+use core_lib::WarnWithDetails;
+use core_lib::listener::{
+    hyprshell_config_block, hyprshell_config_listener, hyprshell_css_listener,
+};
+use core_lib::transfer::TransferType;
+use exec_lib::listener::{hyprland_config_listener, monitor_listener};
+use exec_lib::{info_toast, toast};
 use launcher_lib::{LauncherData, create_windows_overview_launcher_window};
 use std::any::Any;
 use std::cell::RefCell;
@@ -32,8 +33,6 @@ use windows_lib::{
     WindowsOverviewData, WindowsSwitchData, create_windows_overview_window,
     create_windows_switch_window,
 };
-
-const NEW_VERSION_INFO: &str = "This version uses a hyprland plugin to register keypresses, adds shell completion, improves UI, adds usefull commands and much more.";
 
 pub fn start(
     config_path: PathBuf,
@@ -71,7 +70,7 @@ pub fn start(
     loop {
         let application = Application::builder()
             .application_id(format!(
-                "{}-test-{}{}",
+                "{}-{}{}",
                 core_lib::APPLICATION_ID,
                 wayland_socket_index,
                 if cfg!(debug_assertions) { "-test" } else { "" }
@@ -129,7 +128,7 @@ fn activate(
         Err(err) => {
             debug!("Unable to compare previous to current version.\n{err:?}");
         }
-        Ok((Ordering::Greater, no_patch)) => {
+        Ok((Ordering::Greater, messages)) => {
             info_toast(
                 &format!(
                     "Hyprshell was updated to a new version ({})",
@@ -137,8 +136,8 @@ fn activate(
                 ),
                 Duration::from_secs(5),
             );
-            if no_patch {
-                info_toast(NEW_VERSION_INFO, Duration::from_secs(10));
+            for info in messages {
+                info_toast(&info, Duration::from_secs(10));
             }
         }
         Ok((Ordering::Less, _)) => {

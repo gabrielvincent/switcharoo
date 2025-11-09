@@ -1,6 +1,6 @@
 use anyhow::Context;
 use core_lib::default::get_all_desktop_files;
-use core_lib::{ExecType, analyse_exec};
+use core_lib::util::{ExecType, analyse_exec};
 use std::path::Path;
 use std::sync::{OnceLock, RwLock, RwLockReadGuard};
 use tracing::{debug_span, trace, warn};

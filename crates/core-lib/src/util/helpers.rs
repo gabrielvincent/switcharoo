@@ -29,11 +29,11 @@ impl<I: Iterator> GetNextOrPrev for I {
 }
 
 pub trait RevIf<'a>: Iterator + Sized + 'a {
-    fn rev_if(self, cond: bool) -> Box<dyn Iterator<Item = Self::Item> + 'a>;
+    fn reverse_if(self, cond: bool) -> Box<dyn Iterator<Item = Self::Item> + 'a>;
 }
 
 impl<'a, I: DoubleEndedIterator + 'a> RevIf<'a> for I {
-    fn rev_if(self, cond: bool) -> Box<dyn Iterator<Item = Self::Item> + 'a> {
+    fn reverse_if(self, cond: bool) -> Box<dyn Iterator<Item = Self::Item> + 'a> {
         if cond {
             Box::new(self.rev())
         } else {
