@@ -70,7 +70,7 @@ impl TryFrom<&str> for Modifier {
             "Alt" | "alt" => Ok(Self::Alt),
             "Ctrl" | "ctrl" | "control" | "Control" => Ok(Self::Ctrl),
             "Super" | "super" | "Win" | "win" | "windows" | "Windows" => Ok(Self::Super),
-            other => bail!("Invalid modifier: {}", other),
+            other => bail!("Invalid modifier: {other}"),
         }
     }
 }

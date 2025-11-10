@@ -91,8 +91,7 @@ pub fn load_config_file<T: DeserializeOwned>(config_path: &Path) -> anyhow::Resu
             toml::from_str(&content).context("Failed to parse TOML config")
         }
         Some(ext) => bail!(
-            "Invalid config file extension: {} (run with -vv and check `FEATURES: ` debug log to see enabled extensions)",
-            ext
+            "Invalid config file extension: {ext} (run with -vv and check `FEATURES: ` debug log to see enabled extensions)"
         ),
     }
 }

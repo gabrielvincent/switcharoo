@@ -194,7 +194,7 @@ fn get_mod(modifier: &str) -> anyhow::Result<Modifier> {
         "super" => Ok(Modifier::Super),
         "ctrl" => Ok(Modifier::Ctrl),
         "alt" => Ok(Modifier::Alt),
-        _ => bail!("Unknown modifier: {}", modifier),
+        _ => bail!("Unknown modifier: {modifier}"),
     }
 }
 
