@@ -51,7 +51,7 @@ To synchronize the hyprland version with the hyprshell version, you must overrid
 
 ### No Home-manager with default hyprland
 
-**[Cachix Cache](https://app.cachix.org/cache/hyprshell#pull) can be added with `cachix use hyprshell`, be aware that this will break if you override any inputs**
+**[Cachix Cache](https://app.cachix.org/cache/hyprshell#pull) can be added with `cachix use hyprshell`**
 
 `flake.nix`:
 
@@ -59,8 +59,8 @@ To synchronize the hyprland version with the hyprshell version, you must overrid
 {
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
-    hyprland-plugins = {
-      url = "github:H3rmt/hyprshell";
+    hyprshell = {
+      url = "github:H3rmt/hyprshell?ref=hyprshell-release";
     };
   };
 
@@ -89,8 +89,8 @@ To synchronize the hyprland version with the hyprshell version, you must overrid
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
     hyprland.url = "github:hyprwm/Hyprland";
-    hyprland-plugins = {
-      url = "github:H3rmt/hyprshell";
+    hyprshell = {
+      url = "github:H3rmt/hyprshell?ref=hyprshell-release";
       inputs.hyprland.follows = "hyprland";
     };
   };
@@ -122,8 +122,8 @@ To synchronize the hyprland version with the hyprshell version, you must overrid
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
     hyprland.url = "github:hyprwm/Hyprland";
-    hyprland-plugins = {
-      url = "github:H3rmt/hyprshell";
+    hyprshell = {
+      url = "github:H3rmt/hyprshell?ref=hyprshell-release";
       inputs.hyprland.follows = "hyprland";
     };
   };

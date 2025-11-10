@@ -137,6 +137,7 @@ fn activate(
                 Duration::from_secs(5),
             );
             for info in messages {
+                info!(info);
                 info_toast(&info, Duration::from_secs(10));
             }
         }

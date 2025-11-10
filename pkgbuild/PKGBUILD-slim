@@ -10,7 +10,7 @@ provides=('hyprshell')
 url="https://github.com/h3rmt/hyprshell/"
 license=("MIT")
 makedepends=('cargo')
-depends=('hyprland' 'gtk4-layer-shell' 'gtk4' 'gcc' 'pixman')
+depends=('hyprland' 'gtk4-layer-shell' 'gtk4' 'gcc' 'pixman' 'libadwaita')
 source=("hyprshell-$pkgver.tar.gz::https://static.crates.io/crates/hyprshell/hyprshell-$pkgver.crate")
 
 prepare() {
@@ -34,3 +34,4 @@ package() {
     "$pkgdir/usr/bin/hyprshell" completions fish -p "$pkgdir/usr/share/fish/vendor_completions.d"
     "$pkgdir/usr/bin/hyprshell" completions zsh -p "$pkgdir/usr/share/zsh/site-functions"
 }
+sha256sums=('5d6ccaa010d969899c37062f7c188261c800774e60c5148f92c4c4da7753bf8a')
