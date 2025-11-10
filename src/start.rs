@@ -12,13 +12,12 @@ use adw::gtk::{
 use anyhow::Context;
 use async_channel::{Receiver, Sender};
 use config_lib::Config;
-use core_lib::WarnWithDetails;
 use core_lib::listener::{
     hyprshell_config_block, hyprshell_config_listener, hyprshell_css_listener,
 };
 use core_lib::transfer::TransferType;
+use core_lib::{WarnWithDetails, notify, notify_resident, notify_warn};
 use exec_lib::listener::{hyprland_config_listener, monitor_listener};
-use exec_lib::{info_toast, toast};
 use launcher_lib::{LauncherData, create_windows_overview_launcher_window};
 use std::any::Any;
 use std::cell::RefCell;
@@ -28,7 +27,7 @@ use std::rc::Rc;
 use std::sync::{Mutex, OnceLock};
 use std::time::Duration;
 use std::{env, process, thread};
-use tracing::{debug, debug_span, error, info, trace, warn};
+use tracing::{debug, debug_span, error, info, trace};
 use windows_lib::{
     WindowsOverviewData, WindowsSwitchData, create_windows_overview_window,
     create_windows_switch_window,
@@ -124,25 +123,28 @@ fn activate(
     let _span = debug_span!("activate").entered();
     apply_css(css_path).warn_details("Failed to apply CSS");
     exec_lib::set_follow_mouse_default().warn_details("Failed to set set_remain_focused default");
+
     match check_new_version(cache_dir) {
         Err(err) => {
             debug!("Unable to compare previous to current version.\n{err:?}");
         }
         Ok((Ordering::Greater, messages)) => {
-            info_toast(
+            notify(
                 &format!(
                     "Hyprshell was updated to a new version ({})",
                     env!("CARGO_PKG_VERSION")
                 ),
                 Duration::from_secs(5),
             );
+            thread::sleep(Duration::from_millis(500));
             for info in messages {
-                info!(info);
-                info_toast(&info, Duration::from_secs(10));
+                notify_resident(&info, Duration::from_secs(10));
             }
         }
         Ok((Ordering::Less, _)) => {
-            toast("Hyprshell was downgraded, downgrading config must be done manually if needed");
+            notify_warn(
+                "Hyprshell was downgraded, downgrading config must be done manually if needed",
+            );
         }
         Ok((Ordering::Equal, _)) => {
             debug!("Hyprshell is up to date");
@@ -152,11 +154,7 @@ fn activate(
     let config = match config_lib::load_and_migrate_config(config_path, true) {
         Ok(config) => config,
         Err(err) => {
-            error!(
-                "Failed to load config from path {}: {err:?}",
-                config_path.display()
-            );
-            toast(&format!("Failed to load config: {err:?}"));
+            notify_warn(&format!("Failed to load config: {err:?}"));
             if let Err(err) = hyprshell_config_block(config_path) {
                 error!("Failed to block config: {err:?}",);
                 process::exit(1);
@@ -170,8 +168,7 @@ fn activate(
     if config.windows.is_none()
         || matches!(&config.windows, Some(windows) if windows.overview.is_none() && windows.switch.is_none())
     {
-        warn!("Nothing is enabled in the config");
-        toast("Nothing is enabled in the config");
+        notify_warn("Nothing is enabled in the config");
         if let Err(err) = hyprshell_config_block(config_path) {
             error!("Failed to block config: {err:?}",);
             process::exit(1);
@@ -181,8 +178,7 @@ fn activate(
     }
 
     if let Err(err) = configure_wm(&config) {
-        error!("Failed to create keybinds: {err:?}");
-        toast(&format!("Failed to create keybinds: {err:?}"));
+        notify_warn(&format!("Failed to configure wm: {err:?}"));
         if let Err(err) = hyprshell_config_block(config_path) {
             error!("Failed to block config: {err:?}");
             process::exit(1);
@@ -194,8 +190,7 @@ fn activate(
     let globals = match create_windows(app, &config, data_dir, event_sender.clone()) {
         Ok(data) => data,
         Err(err) => {
-            error!("Failed to create windows: {err:?}");
-            toast(&format!("Failed to create windows: {err:?}"));
+            notify_warn(&format!("Failed to create windows: {err:?}"));
             if let Err(err) = hyprshell_config_block(config_path) {
                 error!("Failed to block config: {err:?}");
                 process::exit(1);

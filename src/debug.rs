@@ -6,7 +6,7 @@ use core_lib::default;
 use core_lib::ini::IniFile;
 use std::fs;
 use std::path::Path;
-use tracing::debug;
+use tracing::{debug, warn};
 
 pub fn check_class(class: Option<String>) -> anyhow::Result<()> {
     util::init_gtk();
@@ -93,7 +93,10 @@ pub fn search(text: &str, all: bool, config_path: &Path, data_dir: &Path) {
         .and_then(|c| c.windows)
         .and_then(|w| w.overview)
         .map_or_else(
-            || (config_lib::Launcher::default().plugins, 5),
+            || {
+                warn!("Failed to get plugins from config, falling back to default");
+                (config_lib::Launcher::default().plugins, 5)
+            },
             |o| (o.launcher.plugins, o.launcher.max_items),
         );
     launcher_lib::debug::get_matches(&plugins, text, all, max_items, data_dir);

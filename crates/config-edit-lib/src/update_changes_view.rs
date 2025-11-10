@@ -90,13 +90,6 @@ pub fn update_changes_view(
                             format!("{} -> {}", po.key, co.key),
                         );
                     }
-                    if po.hide_filtered != co.hide_filtered {
-                        add_info_subtitle(
-                            changes,
-                            "Changed overview hide filtered",
-                            format!("{} -> {}", po.hide_filtered, co.hide_filtered),
-                        );
-                    }
                     if po.filter_by != co.filter_by {
                         add_info_subtitle(
                             changes,

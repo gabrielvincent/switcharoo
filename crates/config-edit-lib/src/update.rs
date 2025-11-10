@@ -69,10 +69,6 @@ fn update_overview(g_overview: &GTKOverview, overview: Option<&Overview>, view_s
             g_overview.modifier.set_selected(desired_modifier);
         }
         update_windows_filter(&g_overview.filter, &overview.filter_by);
-        if g_overview.hide_filtered.is_active() != overview.hide_filtered {
-            g_overview.hide_filtered.set_active(overview.hide_filtered);
-        }
-
         update_launcher(&g_overview.launcher, Some(&overview.launcher), view_stack);
     } else {
         g_overview.row.set_enable_expansion(false);

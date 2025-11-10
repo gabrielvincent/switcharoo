@@ -1,8 +1,7 @@
 use anyhow::Context;
 use config_lib::Config;
-use core_lib::WarnWithDetails;
+use core_lib::{WarnWithDetails, notify_warn};
 use exec_lib::binds::{apply_exec_bind, apply_layerrules};
-use exec_lib::toast;
 use std::env;
 use tracing::{debug_span, info, warn};
 
@@ -11,7 +10,7 @@ pub fn configure_wm(config: &Config) -> anyhow::Result<()> {
 
     if env::var_os("HYPRSHELL_NO_USE_PLUGIN").is_none() {
         if let Err(err) = plugin(config) {
-            toast(
+            notify_warn(
                 "Unable to load hyprland plugin, please create a issue on github including the error. pass -vv to see the logs",
             );
             warn!("Failed to load hyprland plugin: {err:?}");
@@ -22,7 +21,6 @@ pub fn configure_wm(config: &Config) -> anyhow::Result<()> {
         apply_binds(config)?;
     }
 
-    // TODO apply layerrules in plugin
     apply_layerrules().warn_details("Failed to apply layerrules");
     Ok(())
 }

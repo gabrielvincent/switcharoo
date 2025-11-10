@@ -25,7 +25,6 @@ pub struct GTKOverview {
     pub key: Entry,
     pub modifier: DropDown,
     pub filter: GTKWindowsFilter,
-    pub hide_filtered: Switch,
 }
 
 pub struct GTKWindowsFilter {

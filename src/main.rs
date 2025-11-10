@@ -1,3 +1,4 @@
+use crate::explain::explain_config;
 use anyhow::{Context, bail};
 use clap::Parser;
 use core_lib::WarnWithDetails;
@@ -21,6 +22,7 @@ mod completions;
 mod debug;
 #[cfg(feature = "debug_command")]
 mod default_apps;
+mod explain;
 
 #[allow(clippy::too_many_lines)]
 fn main() -> anyhow::Result<()> {
@@ -58,6 +60,8 @@ fn main() -> anyhow::Result<()> {
     check_features();
     check_env();
 
+    exec_lib::check_version().warn_details("Unable to check hyprland version, continuing anyway");
+
     let data_dir = cli.global_opts.data_dir;
     let cache_dir = cli.global_opts.cache_dir;
     let css_file = cli.global_opts.css_file;
@@ -68,8 +72,6 @@ fn main() -> anyhow::Result<()> {
             if daemon_running() {
                 bail!("Daemon already running");
             }
-            exec_lib::check_version()
-                .warn_details("Unable to check hyprland version, continuing anyway");
             if env::var_os("HYPRSHELL_EXPERIMENTAL").is_some_and(|v| v.eq("1")) {
                 clipboard_lib::store::test_clipboard(
                     cache_dir.unwrap_or_else(get_default_cache_dir),
@@ -119,13 +121,10 @@ fn main() -> anyhow::Result<()> {
                     )
                     .warn();
                 }
-                core_lib::util::explain_config(&config_path, true);
+                explain_config(&config_path, true);
             }
             cli::ConfigCommand::Explain {} => {
-                core_lib::util::explain_config(
-                    &config_path.unwrap_or_else(get_default_config_path),
-                    false,
-                );
+                explain_config(&config_path.unwrap_or_else(get_default_config_path), false);
             }
             cli::ConfigCommand::Check {} => {
                 if let Err(err) = config_lib::load_and_migrate_config(

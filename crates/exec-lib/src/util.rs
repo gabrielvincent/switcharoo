@@ -1,6 +1,6 @@
 use anyhow::Context;
-use core_lib::{Active, ClientId};
-use hyprland::ctl::{Color, notify, reload};
+use core_lib::{Active, ClientId, notify_warn};
+use hyprland::ctl::reload;
 use hyprland::data::{Client, Clients, Monitor, Monitors, Workspace};
 use hyprland::keyword::Keyword;
 use hyprland::prelude::*;
@@ -26,24 +26,6 @@ pub fn get_current_monitor() -> Option<Monitor> {
 pub fn reload_hyprland_config() -> anyhow::Result<()> {
     debug!("Reloading hyprland config");
     reload::call().context("Failed to reload hyprland config")
-}
-
-pub fn toast(body: &str) {
-    let _ = notify::call(
-        notify::Icon::Warning,
-        Duration::from_secs(10),
-        Color::new(255, 0, 0, 255),
-        format!("hyprshell Error: {body}"),
-    );
-}
-
-pub fn info_toast(body: &str, duration: Duration) {
-    let _ = notify::call(
-        notify::Icon::Info,
-        duration,
-        Color::new(0, 255, 0, 255),
-        format!("hyprshell: {body}"),
-    );
 }
 
 /// trim 0x from hexadecimal (base-16) string and convert to id
@@ -139,7 +121,7 @@ fn internal_get_initial_active() -> anyhow::Result<Active> {
 }
 
 pub fn check_version() -> anyhow::Result<()> {
-    pub const MIN_VERSION: Version = Version::new(0, 42, 0);
+    pub const MIN_VERSION: Version = Version::new(0, 52, 0);
 
     let version = hyprland::data::Version::get()
         .context("Failed to get version! (hyprland is probably outdated or too new??)")?;
@@ -159,7 +141,7 @@ pub fn check_version() -> anyhow::Result<()> {
     );
     let parsed_version = Version::parse(&version).context("Unable to parse hyprland Version")?;
     if parsed_version.lt(&MIN_VERSION) {
-        toast(&format!(
+        notify_warn(&format!(
             "hyprland version {parsed_version} is too old or unknown, please update to at least {MIN_VERSION}",
         ));
     }

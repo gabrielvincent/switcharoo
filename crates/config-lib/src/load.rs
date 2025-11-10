@@ -30,12 +30,11 @@ pub fn load_and_migrate_config(config_path: &Path, allow_migrate: bool) -> anyho
                 return Ok(config);
             }
             Err(err) => {
-                warn!("Migration failed: \n{err:?}");
+                bail!("Config migration failed: \n{err:?}");
             }
         }
-    } else {
-        trace!("No migration needed");
     }
+    trace!("No migration needed");
 
     let config: Config = load_config_file(config_path).with_context(|| {
         format!(

@@ -1,7 +1,7 @@
 use crate::structs::{GTKOverview, GTKWindowsFilter};
 use crate::views::launcher::launcher::create_launcher_view;
 use adw::gdk::Cursor;
-use adw::gtk::{Align, DropDown, Entry, InputPurpose, Label, Orientation, Switch};
+use adw::gtk::{DropDown, Entry, InputPurpose, Label, Orientation};
 use adw::prelude::*;
 use adw::{ExpanderRow, SwitchRow, gtk};
 
@@ -19,7 +19,6 @@ pub fn generate_overview_view(windows_grid: &ExpanderRow) -> GTKOverview {
         .spacing(30)
         .build();
     let filter = filter(&overview_row_2);
-    let hide_filtered = hide_filtered(&overview_row_2);
 
     let row = ExpanderRow::builder()
         .title_selectable(true)
@@ -40,7 +39,6 @@ pub fn generate_overview_view(windows_grid: &ExpanderRow) -> GTKOverview {
         key,
         modifier,
         filter,
-        hide_filtered,
     }
 }
 
@@ -117,26 +115,4 @@ fn filter(windows_box: &gtk::Box) -> GTKWindowsFilter {
         workspace: sw_workspace,
         monitor: sw_monitor,
     }
-}
-
-fn hide_filtered(windows_box: &gtk::Box) -> Switch {
-    let hide_row = gtk::Box::builder()
-        .orientation(Orientation::Horizontal)
-        .spacing(10)
-        .build();
-    hide_row.append(&Label::new(Some("Hide filtered")));
-    let info_icon = gtk::Image::from_icon_name("dialog-information-symbolic");
-    info_icon.set_tooltip_text(Some("This is used to show the windows that are filtered out by the `filter_by` option. If this is set to false, the filtered windows are shown with a grayscale effect"));
-    info_icon.set_cursor(Cursor::from_name("help", None).as_ref());
-    hide_row.append(&info_icon);
-    let switch_box = gtk::Box::builder()
-        .orientation(Orientation::Vertical)
-        .halign(Align::Start)
-        .valign(Align::Center)
-        .build();
-    let hide_switch = Switch::builder().build();
-    switch_box.append(&hide_switch);
-    hide_row.append(&switch_box);
-    windows_box.append(&hide_row);
-    hide_switch
 }

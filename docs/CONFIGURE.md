@@ -41,7 +41,7 @@ This mode displays the windows in a downscaled view of the screen. It also shows
     - **same_class**: Only includes windows of the same class / type. If you currently have alacritty open, only alacritty windows will be shown.
     - **current_workspace**: Only includes windows of the current workspace.
     - **current_monitor**: Only includes windows of the current monitor.
-- **hide_filtered:**_[boolean]_ whether to hide the filtered windows or not. This is used to show the windows that are filtered out by the `filter_by` option. If this is set to false, the filtered windows are shown with a grayscale effect.
+- **hide_filtered:**_[boolean]_ !deprecated! whether to hide the filtered windows or not. This is used to show the windows that are filtered out by the `filter_by` option. If this is set to false, the filtered windows are shown with a grayscale effect.
 
 ## Launcher
 

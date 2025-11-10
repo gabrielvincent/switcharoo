@@ -159,23 +159,6 @@ fn bind_overview(
 
     bind_overview_filter(&overview.filter, gtk_config, config);
 
-    let config_clone = config.clone();
-    let gtk_config_clone = gtk_config.clone();
-    overview.hide_filtered.connect_active_notify(move |entry| {
-        trace!(
-            "windows.overview.hide_filtered changed to {}",
-            entry.is_active()
-        );
-        if let Ok(mut c) = config_clone.try_borrow_mut() {
-            if let Some(windows) = c.windows.as_mut() {
-                if let Some(overview) = windows.overview.as_mut() {
-                    overview.hide_filtered = entry.is_active();
-                }
-            }
-        }
-        update_config(&gtk_config_clone.borrow(), &config_clone.borrow());
-    });
-
     bind_launcher(gtk_conf, gtk_config, config);
 }
 

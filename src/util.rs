@@ -106,7 +106,7 @@ const NEW_VERSION_INFOS: &[(&str, &str)] = &[
 /// Checks if the current version is newer than the cached version.
 /// If a mayor of minor update is detected, true is returned as second value.
 pub fn check_new_version(cache_dir: &Path) -> anyhow::Result<(Ordering, Vec<String>)> {
-    let version_file = cache_dir.join("version.txt");
+    let version_file = cache_dir.join("last_version.txt");
     let current_version = env!("CARGO_PKG_VERSION");
     let current_version =
         Version::parse(current_version).context("Failed to parse current version")?;
@@ -140,12 +140,12 @@ fn filter_version_messages(
     }
     let mut parsed: Vec<(Version, String)> = versions
         .iter()
-        .filter_map(|(k, _)| {
+        .filter_map(|(k, s)| {
             let ver_str = (*k).to_string();
             Version::parse(&ver_str)
                 .ok()
                 .warn_details("version in NEW_VERSION_INFOS has invalid semver")
-                .map(|v| (v, (*k).to_string()))
+                .map(|v| (v, (*s).to_string()))
         })
         .collect();
     parsed.sort_by(|a, b| a.0.cmp(&b.0));
@@ -188,9 +188,9 @@ mod tests {
     #[test_log::test]
     #[test_log(default_log_filter = "trace")]
     fn test_newer_current_version() {
-        let versions = [("1.0.0", "test")];
+        let versions = [("1.0.0", "1.0.0 test")];
         let result = filter_version_messages(&versions, &v("1.0.0"), &v("0.9.0"));
-        assert_eq!(result, vec!["1.0.0"]);
+        assert_eq!(result, vec!["1.0.0 test"]);
     }
 
     #[test_log::test]
@@ -204,16 +204,24 @@ mod tests {
     #[test_log::test]
     #[test_log(default_log_filter = "trace")]
     fn test_multiple_versions() {
-        let versions = [("1.0.0", "test1"), ("2.0.0", "test2"), ("1.5.0", "test3")];
+        let versions = [
+            ("1.0.0", "1.0.0 test1"),
+            ("2.0.0", "2.0.0 test2"),
+            ("1.5.0", "1.5.0 test3"),
+        ];
         let result = filter_version_messages(&versions, &v("2.0.0"), &v("1.0.0"));
-        assert_eq!(result, vec!["1.5.0", "2.0.0"]);
+        assert_eq!(result, vec!["1.5.0 test3", "2.0.0 test2"]);
     }
 
     #[test_log::test]
     #[test_log(default_log_filter = "trace")]
     fn test_all_versions() {
-        let versions = [("1.0.0", "test1"), ("2.0.0", "test2"), ("1.5.0", "test3")];
+        let versions = [
+            ("1.0.0", "1.0.0 test1"),
+            ("2.0.0", "2.0.0 test2"),
+            ("1.5.0", "1.5.0 test3"),
+        ];
         let result = filter_version_messages(&versions, &v("2.0.0"), &v("0.0.0"));
-        assert_eq!(result, vec!["1.0.0", "1.5.0", "2.0.0"]);
+        assert_eq!(result, vec!["1.0.0 test1", "1.5.0 test3", "2.0.0 test2"]);
     }
 }

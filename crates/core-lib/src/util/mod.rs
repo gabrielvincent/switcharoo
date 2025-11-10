@@ -9,7 +9,7 @@ pub use helpers::*;
 pub use path::*;
 use std::env::{var, var_os};
 use std::os::unix::net::UnixStream;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use tracing::debug;
 
 #[must_use]
@@ -39,33 +39,5 @@ pub fn daemon_running() -> bool {
     } else {
         debug!("Daemon not running");
         false
-    }
-}
-
-#[allow(clippy::print_stderr, clippy::print_stdout)]
-pub fn explain_config(config_path: &Path, add_how_to_explain_again: bool) {
-    let config = match config_lib::load_and_migrate_config(config_path, true) {
-        Ok(config) => config,
-        Err(err) => {
-            eprintln!(
-                "\x1b[1m\x1b[31mConfig is invalid ({}):\x1b[0m {err:?}\n",
-                config_path.display()
-            );
-            return;
-        }
-    };
-    let info = config_lib::explain(&config, config_path, true, true);
-    println!("{info}");
-
-    if daemon_running() {
-        println!("Daemon \x1b[32mrunning\x1b[0m");
-    } else {
-        eprintln!(
-            "Daemon \x1b[31mnot running\x1b[0m, start it with `hyprshell run` or `systemctl --user enable --now hyprshell`"
-        );
-    }
-
-    if add_how_to_explain_again {
-        println!("\nTo explain the config again, run `hyprshell explain`\n");
     }
 }

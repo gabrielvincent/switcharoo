@@ -18,10 +18,13 @@ The application also includes a launcher for running applications, doing calcula
 - **Launcher Integration**: Launch applications directly from the GUI, sorted by usage frequency.
 - **Launcher Plugins**: Different plugins like Web search, actions or calculations can be enabled.
 - **Theming**: Customize the GUI appearance (gtk4) using [CSS](docs/CONFIGURE.md).
+- **Settings App**: Customize the application using a settings app.
 - **Dynamic Configuration**: Automatically reloads configuration/style changes without restarting the application.
 - **Debug commands**: Many [Commands](docs/DEBUG.md) to debug desktop files, icons and default applications.
 
 ## Installation
+
+**Minimum hyprland version: 0.52.0**
 
 [![Packaging status](https://repology.org/badge/vertical-allrepos/hyprshell.svg)](https://repology.org/project/hyprshell/versions)
 
@@ -33,7 +36,7 @@ paru -S hyprshell
 yay -S hyprshell
 ```
 
-Use `hyprshell-bin` for the pre-built binaries from github releases.
+Use `hyprshell-bin` for the pre-built binaries from GitHub releases.
 
 Use `hyprshell-slim` for the [slim](#feature-flags) version (faster buildtime).
 
@@ -75,7 +78,7 @@ Minimum required rustc version: `1.87.0`
 
 Run `hyprshell --help` to see available commands and options.
 
-### Config generation
+### Config
 
 To generate a default configuration file, run:
 
@@ -85,10 +88,7 @@ hyprshell config generate
 
 This launches an interactive prompt to set up your configuration.
 The generated file will be located at `~/.config/hyprshell/config.ron`.
-
 If you want to modify these settings, look at the [Documentation](docs/CONFIGURE.md) for the config file.
-
-### Config validation
 
 To validate your configuration file, run:
 
@@ -97,6 +97,8 @@ hyprshell config explain
 ```
 
 This checks for any syntax errors or issues in your configuration file and shows a `explanation` of how to use hyprshell.
+
+To edit the configuration file run `hyprshell config edit`. This launches the settings editor.
 
 ### Initialization
 

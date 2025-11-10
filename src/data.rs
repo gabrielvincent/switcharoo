@@ -1,7 +1,7 @@
 #![allow(clippy::print_stderr, clippy::print_stdout)]
 use std::fs::read_to_string;
 use std::path::Path;
-use tracing::debug;
+use tracing::{debug, warn};
 
 pub fn launch_history(
     run_cache_weeks: Option<u8>,
@@ -19,7 +19,10 @@ pub fn launch_history(
                         .and_then(|l| l.plugins.applications.as_ref().map(|a| a.run_cache_weeks))
                 })
             })
-            .unwrap_or(4)
+            .unwrap_or_else(|| {
+                warn!("Failed to get run cache weeks from config, falling back to 8 weeks");
+                8
+            })
     });
     debug!("showing history for the last {run_cache_weeks} weeks");
 
