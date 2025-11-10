@@ -80,7 +80,7 @@ pub fn set_follow_mouse_default() -> anyhow::Result<()> {
     Ok(())
 }
 
-/// tries to get initial data for 250 ms * 20 = 5 s
+/// tries to get initial data for 500 ms * 40 = 20 s
 ///
 /// # Errors
 /// Returns an error if the initial data is not available after 5000 ms
@@ -91,10 +91,10 @@ pub fn get_initial_active() -> anyhow::Result<Active> {
             Ok(a) => break Ok(a),
             Err(e) => {
                 warn!("waiting for correct initial active state: {e:?}");
-                thread::sleep(Duration::from_millis(250));
+                thread::sleep(Duration::from_millis(500));
             }
         }
-        if tries > 20 {
+        if tries > 40 {
             break internal_get_initial_active();
         }
         tries += 1;
