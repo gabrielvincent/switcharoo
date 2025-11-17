@@ -108,8 +108,10 @@ fn activate(app: &Application, config_path: &Path, _css_path: &Path) {
     view.add_bottom_bar(&footer);
 
     window.set_content(Some(&view));
+    window.present();
 
-    let gtk_config = GTKConfig {
+    let mut gtk_config = GTKConfig {
+        window,
         changes,
         how_to_use,
         windows,
@@ -117,8 +119,5 @@ fn activate(app: &Application, config_path: &Path, _css_path: &Path) {
         view_stack,
         path: PathBuf::from(config_path).into_boxed_path(),
     };
-    update_config(&gtk_config, &config);
     bind(gtk_config, config);
-
-    window.present();
 }

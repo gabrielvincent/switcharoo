@@ -14,7 +14,7 @@ pub fn create_changes_view(view_stack: &ViewStack) -> (ListBox, TextView) {
     view_stack.add_titled_with_icon(&row_box, None, "Changes", "document-edit-symbolic");
 
     let list = ListBox::builder()
-        .css_classes(["changes-list"])
+        .css_classes(["items-list", "boxed-list"])
         .selection_mode(SelectionMode::None)
         .show_separators(false)
         .halign(Align::Center)

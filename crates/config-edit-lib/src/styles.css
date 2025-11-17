@@ -68,12 +68,12 @@
     background: unset;
 }
 
-.changes-list {
+.items-list {
     padding: 8px;
     border-radius: 12px;
 }
 
-.changes-list > row {
+.items-list > row {
     padding: 6px;
 }
 

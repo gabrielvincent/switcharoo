@@ -1,5 +1,6 @@
 use crate::structs::GTKPlugins;
 use crate::views::launcher::application_plugin::create_plugins_applications_view;
+use crate::views::launcher::web_search::create_plugins_websearch_view;
 use adw::gdk::Cursor;
 use adw::gtk::{Align, Label, Orientation, Switch};
 use adw::prelude::{BoxExt, ExpanderRowExt, WidgetExt};
@@ -50,7 +51,7 @@ pub fn plugins_rows(plugins: &ExpanderRow) -> GTKPlugins {
         .margin_top(10)
         .spacing(16)
         .build();
-    create_plugins_websearch_view(&row_3);
+    let websearches = create_plugins_websearch_view(&row_3);
 
     let row_4 = gtk::Box::builder()
         .orientation(Orientation::Horizontal)
@@ -75,6 +76,7 @@ pub fn plugins_rows(plugins: &ExpanderRow) -> GTKPlugins {
         calc,
         path,
         applications,
+        websearches,
     }
 }
 
@@ -185,41 +187,6 @@ fn create_plugins_path_view(row: &gtk::Box) -> Switch {
     hide_row.append(&switch_box);
     row.append(&hide_row);
     hide_switch
-}
-
-fn create_plugins_websearch_view(row: &gtk::Box) {
-    let hide_row = gtk::Box::builder()
-        .orientation(Orientation::Horizontal)
-        .hexpand(true)
-        .halign(Align::Start)
-        .css_classes(["disabled"])
-        .spacing(10)
-        .build();
-    hide_row.append(&Label::new(Some("Web search (TODO)")));
-    let info_icon = gtk::Image::from_icon_name("dialog-information-symbolic");
-    info_icon.set_tooltip_text(Some("TODO"));
-    info_icon.set_cursor(Cursor::from_name("help", None).as_ref());
-    hide_row.append(&info_icon);
-
-    let erow = ExpanderRow::builder()
-        .title_selectable(false)
-        .show_enable_switch(false)
-        .hexpand(true)
-        .css_classes(["enable-frame"])
-        .build();
-    erow.add_prefix(&hide_row);
-    row.append(&erow);
-
-    let row_1 = gtk::Box::builder()
-        .orientation(Orientation::Horizontal)
-        .css_classes(["frame-row"])
-        .spacing(30)
-        .build();
-    erow.add_row(&row_1);
-
-    row_1.append(&Label::new(Some(
-        "coming soon (please configure in config file)",
-    )));
 }
 
 fn create_plugins_actions_view(row: &gtk::Box) {

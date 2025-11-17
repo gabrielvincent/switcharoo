@@ -1,15 +1,18 @@
 #![allow(clippy::too_many_lines)]
 
-use crate::structs::{GTKConfig, GTKWindowsFilter};
+use crate::structs::{GTKConfig, GTKWebsearch, GTKWindowsFilter};
 use config_lib::{
-    ApplicationsPluginConfig, Config, EmptyConfig, FilterBy, Overview, Switch, Windows,
+    ApplicationsPluginConfig, Config, EmptyConfig, FilterBy, Overview, Switch, WebSearchConfig,
+    Windows,
 };
 
 use crate::update::update_config;
 use crate::update_changes_view::set_previous_config;
-use adw::AlertDialog;
+use crate::views::launcher::open_edit_dialog;
 use adw::prelude::*;
-use std::cell::{Ref, RefCell};
+use adw::{AlertDialog, ApplicationWindow};
+use std::cell::{Ref, RefCell, RefMut};
+use std::collections::BTreeMap;
 use std::rc::Rc;
 use tracing::{debug, trace, warn};
 
@@ -17,13 +20,17 @@ pub fn bind(gtk_config: GTKConfig, config: Config) {
     let config = Rc::new(RefCell::new(config));
     let gtk_config = Rc::new(RefCell::new(gtk_config));
     let gtk_conf = gtk_config.clone();
-    let gtk_conf = gtk_conf.borrow();
+
+    update_config(&mut gtk_conf.borrow_mut(), &config);
+    let mut gtk_conf = gtk_conf.borrow();
 
     let config_clone = config.clone();
     let gtk_config_clone = gtk_config.clone();
     gtk_conf.save.connect_clicked(move |_button| {
         let c = config_clone.borrow();
-        if let Err(err) = config_lib::write_config(&gtk_config_clone.borrow().path, &c, true) {
+        if let Err(err) =
+            config_lib::write_config(&mut gtk_config_clone.borrow_mut().path, &c, true)
+        {
             warn!("Failed to save config: {err:?}");
             let dialog = AlertDialog::builder()
                 .heading("Failed to save config")
@@ -35,7 +42,7 @@ pub fn bind(gtk_config: GTKConfig, config: Config) {
         }
         debug!("{c:#?}");
         set_previous_config(c.clone());
-        update_config(&gtk_config_clone.borrow(), &c);
+        update_config(&mut gtk_config_clone.borrow_mut(), &config_clone);
     });
 
     bind_windows(&gtk_conf, &gtk_config, &config);
@@ -59,7 +66,7 @@ fn bind_windows(
         } else if let Ok(mut c) = config_clone.try_borrow_mut() {
             c.windows = None;
         }
-        update_config(&gtk_config_clone.borrow(), &config_clone.borrow());
+        update_config(&mut gtk_config_clone.borrow_mut(), &config_clone);
     });
 
     let config_clone = config.clone();
@@ -71,7 +78,7 @@ fn bind_windows(
                 windows.scale = (button.value() * 100.0).round() / 100.0;
             }
         }
-        update_config(&gtk_config_clone.borrow(), &config_clone.borrow());
+        update_config(&mut gtk_config_clone.borrow_mut(), &config_clone);
     });
 
     let config_clone = config.clone();
@@ -86,7 +93,7 @@ fn bind_windows(
                 }
             }
         }
-        update_config(&gtk_config_clone.borrow(), &config_clone.borrow());
+        update_config(&mut gtk_config_clone.borrow_mut(), &config_clone);
     });
 
     bind_overview(gtk_conf, gtk_config, config);
@@ -118,7 +125,7 @@ fn bind_overview(
                 windows.overview = None;
             }
         }
-        update_config(&gtk_config_clone.borrow(), &config_clone.borrow());
+        update_config(&mut gtk_config_clone.borrow_mut(), &config_clone);
     });
 
     let config_clone = config.clone();
@@ -132,7 +139,7 @@ fn bind_overview(
                 }
             }
         }
-        update_config(&gtk_config_clone.borrow(), &config_clone.borrow());
+        update_config(&mut gtk_config_clone.borrow_mut(), &config_clone);
     });
 
     let config_clone = config.clone();
@@ -154,7 +161,7 @@ fn bind_overview(
                 }
             }
         }
-        update_config(&gtk_config_clone.borrow(), &config_clone.borrow());
+        update_config(&mut gtk_config_clone.borrow_mut(), &config_clone);
     });
 
     bind_overview_filter(&overview.filter, gtk_config, config);
@@ -185,7 +192,7 @@ fn bind_overview_filter(
                 }
             }
         }
-        update_config(&gtk_config_clone.borrow(), &config_clone.borrow());
+        update_config(&mut gtk_config_clone.borrow_mut(), &config_clone);
     });
 
     let config_clone = config.clone();
@@ -214,7 +221,7 @@ fn bind_overview_filter(
                 }
             }
         }
-        update_config(&gtk_config_clone.borrow(), &config_clone.borrow());
+        update_config(&mut gtk_config_clone.borrow_mut(), &config_clone);
     });
 
     let config_clone = config.clone();
@@ -243,7 +250,7 @@ fn bind_overview_filter(
                 }
             }
         }
-        update_config(&gtk_config_clone.borrow(), &config_clone.borrow());
+        update_config(&mut gtk_config_clone.borrow_mut(), &config_clone);
     });
 }
 
@@ -272,7 +279,7 @@ fn bind_switch(
                 windows.switch = None;
             }
         }
-        update_config(&gtk_config_clone.borrow(), &config_clone.borrow());
+        update_config(&mut gtk_config_clone.borrow_mut(), &config_clone);
     });
 
     let config_clone = config.clone();
@@ -291,7 +298,7 @@ fn bind_switch(
                 }
             }
         }
-        update_config(&gtk_config_clone.borrow(), &config_clone.borrow());
+        update_config(&mut gtk_config_clone.borrow_mut(), &config_clone);
     });
 
     bind_switch_filter(&switch.filter, gtk_config, config);
@@ -312,7 +319,7 @@ fn bind_switch(
                     }
                 }
             }
-            update_config(&gtk_config_clone.borrow(), &config_clone.borrow());
+            update_config(&mut gtk_config_clone.borrow_mut(), &config_clone);
         });
 }
 
@@ -339,7 +346,7 @@ fn bind_switch_filter(
                 }
             }
         }
-        update_config(&gtk_config_clone.borrow(), &config_clone.borrow());
+        update_config(&mut gtk_config_clone.borrow_mut(), &config_clone);
     });
 
     let config_clone = config.clone();
@@ -366,7 +373,7 @@ fn bind_switch_filter(
                 }
             }
         }
-        update_config(&gtk_config_clone.borrow(), &config_clone.borrow());
+        update_config(&mut gtk_config_clone.borrow_mut(), &config_clone);
     });
 
     let config_clone = config.clone();
@@ -393,7 +400,7 @@ fn bind_switch_filter(
                 }
             }
         }
-        update_config(&gtk_config_clone.borrow(), &config_clone.borrow());
+        update_config(&mut gtk_config_clone.borrow_mut(), &config_clone);
     });
 }
 
@@ -423,7 +430,7 @@ fn bind_launcher(
                 }
             }
         }
-        update_config(&gtk_config_clone.borrow(), &config_clone.borrow());
+        update_config(&mut gtk_config_clone.borrow_mut(), &config_clone);
     });
 
     let config_clone = config.clone();
@@ -444,7 +451,7 @@ fn bind_launcher(
                 }
             }
         }
-        update_config(&gtk_config_clone.borrow(), &config_clone.borrow());
+        update_config(&mut gtk_config_clone.borrow_mut(), &config_clone);
     });
 
     let config_clone = config.clone();
@@ -464,7 +471,7 @@ fn bind_launcher(
                 }
             }
         }
-        update_config(&gtk_config_clone.borrow(), &config_clone.borrow());
+        update_config(&mut gtk_config_clone.borrow_mut(), &config_clone);
     });
 
     let config_clone = config.clone();
@@ -483,7 +490,7 @@ fn bind_launcher(
                     }
                 }
             }
-            update_config(&gtk_config_clone.borrow(), &config_clone.borrow());
+            update_config(&mut gtk_config_clone.borrow_mut(), &config_clone);
         });
 
     let config_clone = config.clone();
@@ -506,7 +513,7 @@ fn bind_launcher(
                     }
                 }
             }
-            update_config(&gtk_config_clone.borrow(), &config_clone.borrow());
+            update_config(&mut gtk_config_clone.borrow_mut(), &config_clone);
         });
 
     let config_clone = config.clone();
@@ -523,7 +530,7 @@ fn bind_launcher(
                 }
             }
         }
-        update_config(&gtk_config_clone.borrow(), &config_clone.borrow());
+        update_config(&mut gtk_config_clone.borrow_mut(), &config_clone);
     });
 
     bind_plugins(gtk_conf, gtk_config, config);
@@ -554,7 +561,7 @@ fn bind_plugins(
                 }
             }
         }
-        update_config(&gtk_config_clone.borrow(), &config_clone.borrow());
+        update_config(&mut gtk_config_clone.borrow_mut(), &config_clone);
     });
 
     let config_clone = config.clone();
@@ -575,7 +582,7 @@ fn bind_plugins(
                 }
             }
         }
-        update_config(&gtk_config_clone.borrow(), &config_clone.borrow());
+        update_config(&mut gtk_config_clone.borrow_mut(), &config_clone);
     });
 
     let config_clone = config.clone();
@@ -596,7 +603,7 @@ fn bind_plugins(
                 }
             }
         }
-        update_config(&gtk_config_clone.borrow(), &config_clone.borrow());
+        update_config(&mut gtk_config_clone.borrow_mut(), &config_clone);
     });
 
     let config_clone = config.clone();
@@ -617,10 +624,11 @@ fn bind_plugins(
                 }
             }
         }
-        update_config(&gtk_config_clone.borrow(), &config_clone.borrow());
+        update_config(&mut gtk_config_clone.borrow_mut(), &config_clone);
     });
 
     bind_application_plugin(gtk_conf, gtk_config, config);
+    bind_websearches_plugin(gtk_conf, gtk_config, config);
 }
 
 fn bind_application_plugin(
@@ -655,7 +663,7 @@ fn bind_application_plugin(
                     }
                 }
             }
-            update_config(&gtk_config_clone.borrow(), &config_clone.borrow());
+            update_config(&mut gtk_config_clone.borrow_mut(), &config_clone);
         });
 
     let config_clone = config.clone();
@@ -681,7 +689,7 @@ fn bind_application_plugin(
                     }
                 }
             }
-            update_config(&gtk_config_clone.borrow(), &config_clone.borrow());
+            update_config(&mut gtk_config_clone.borrow_mut(), &config_clone);
         });
 
     let config_clone = config.clone();
@@ -700,7 +708,7 @@ fn bind_application_plugin(
                 }
             }
         }
-        update_config(&gtk_config_clone.borrow(), &config_clone.borrow());
+        update_config(&mut gtk_config_clone.borrow_mut(), &config_clone);
     });
 
     let config_clone = config.clone();
@@ -719,6 +727,119 @@ fn bind_application_plugin(
                 }
             }
         }
-        update_config(&gtk_config_clone.borrow(), &config_clone.borrow());
+        update_config(&mut gtk_config_clone.borrow_mut(), &config_clone);
     });
+}
+
+fn bind_websearches_plugin(
+    gtk_conf: &Ref<GTKConfig>,
+    gtk_config: &Rc<RefCell<GTKConfig>>,
+    config: &Rc<RefCell<Config>>,
+) {
+    let websearches = &gtk_conf.windows.overview.launcher.plugins.websearches;
+
+    let config_clone = config.clone();
+    let gtk_config_clone = gtk_config.clone();
+    websearches
+        .row
+        .connect_enable_expansion_notify(move |button| {
+            trace!(
+                "windows.overview.launcher.plugins.websearch.row changed to {}",
+                button.enables_expansion()
+            );
+            if button.enables_expansion() {
+                if let Ok(mut c) = config_clone.try_borrow_mut() {
+                    if let Some(windows) = c.windows.as_mut() {
+                        if let Some(overview) = windows.overview.as_mut() {
+                            overview.launcher.plugins.websearch = Some(WebSearchConfig::default());
+                        }
+                    }
+                }
+            } else if let Ok(mut c) = config_clone.try_borrow_mut() {
+                if let Some(windows) = c.windows.as_mut() {
+                    if let Some(overview) = windows.overview.as_mut() {
+                        overview.launcher.plugins.websearch = None;
+                    }
+                }
+            }
+            update_config(&mut gtk_config_clone.borrow_mut(), &config_clone);
+        });
+
+    bind_websearches_list(&websearches.items, &gtk_config, &config);
+}
+
+// functions must be pub to be called in update after list is updated
+pub fn bind_websearches_list(
+    items: &BTreeMap<char, GTKWebsearch>,
+    gtk_config: &Rc<RefCell<GTKConfig>>,
+    config: &Rc<RefCell<Config>>,
+) {
+    for (item_key, item) in items {
+        let item_key = *item_key;
+        let config_clone = config.clone();
+        let gtk_config_clone = gtk_config.clone();
+        item.edit.connect_clicked(move |_| {
+            websearch_handler(
+                item_key,
+                &gtk_config_clone.borrow_mut().window,
+                &config_clone,
+                &mut gtk_config_clone.borrow_mut(),
+            )
+        });
+    }
+}
+
+pub fn websearch_handler(
+    item_key: char,
+    window: &ApplicationWindow,
+    config_clone: &Rc<RefCell<Config>>,
+    gtk_config: &mut GTKConfig,
+) {
+    trace!("windows.overview.launcher.plugins.applications.add pressed");
+    if let Ok(mut c) = config_clone.try_borrow_mut() {
+        if let Some(windows) = c.windows.as_ref() {
+            if let Some(overview) = windows.overview.as_ref() {
+                if let Some(websearch) = overview.launcher.plugins.websearch.as_ref() {
+                    if let Some(engine) = websearch.engines.iter().find(|e| e.key == item_key) {
+                        let (dialog, name, key, url) = open_edit_dialog(engine);
+                        dialog.present(Some(window));
+
+                        let config_clone_clone = config_clone.clone();
+                        dialog.connect_closed(move |_| {
+                            close_websearch_dialog(
+                                &config_clone_clone,
+                                item_key,
+                                &name.text(),
+                                &key.text(),
+                                &url.text(),
+                            );
+                        });
+                    }
+                }
+            }
+        }
+    }
+    update_config(gtk_config, config_clone);
+}
+
+fn close_websearch_dialog(
+    config: &Rc<RefCell<Config>>,
+    item_key: char,
+    name: &str,
+    key: &str,
+    url: &str,
+) {
+    if let Ok(mut c) = config.try_borrow_mut() {
+        if let Some(windows) = c.windows.as_mut() {
+            if let Some(overview) = windows.overview.as_mut() {
+                if let Some(websearch) = overview.launcher.plugins.websearch.as_mut() {
+                    if let Some(engine) = websearch.engines.iter_mut().find(|i| i.key == item_key) {
+                        engine.key = key.chars().next().expect("dialog closed with invalid key");
+                        engine.name = name.to_string().into_boxed_str();
+                        engine.url = url.to_string().into_boxed_str();
+                    }
+                }
+            }
+        }
+    }
 }

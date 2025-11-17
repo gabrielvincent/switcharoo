@@ -1,48 +1,62 @@
-use adw::gdk::Cursor;
-use adw::gtk::{ActionBar, Button, Orientation};
+use adw::gtk;
+use adw::gtk::Orientation;
 use adw::prelude::*;
-use adw::{ApplicationWindow, gtk};
+use relm4::{ComponentParts, ComponentSender, SimpleComponent};
 use std::path::Path;
 
-pub fn footer(window: &ApplicationWindow, config_path: &Path) -> (ActionBar, Button) {
-    let footer = gtk::Box::builder()
-        .spacing(20)
-        .hexpand(true)
-        .css_classes(["footer"])
-        .orientation(Orientation::Horizontal)
-        .build();
-    let bar = ActionBar::builder().build();
-    bar.set_center_widget(Some(&footer));
+pub struct Footer {
+    config_path: Box<Path>,
+}
 
-    let version_label = gtk::Label::builder()
-        .label(format!("Hyprshell v{}", env!("CARGO_PKG_VERSION")))
-        .build();
-    footer.append(&version_label);
+#[derive(Debug)]
+pub enum FooterOutput {
+    Close,
+}
 
-    let buttons = gtk::Box::builder()
-        .spacing(10)
-        .halign(gtk::Align::End)
-        .hexpand(true)
-        .orientation(Orientation::Horizontal)
-        .build();
-    footer.append(&buttons);
-    let save = Button::builder()
-        .label("Save Changes")
-        .css_classes(["suggested-action"])
-        .tooltip_text(format!("Config file: {}", config_path.display()))
-        .build();
-    save.set_cursor(Cursor::from_name("pointer", None).as_ref());
-    buttons.append(&save);
-    let cancel = Button::builder()
-        .label("Cancel")
-        .css_classes(["destructive-action"])
-        .build();
-    cancel.set_cursor(Cursor::from_name("pointer", None).as_ref());
-    buttons.append(&cancel);
+#[relm4::component(pub)]
+impl SimpleComponent for Footer {
+    type Init = Box<Path>;
+    type Input = ();
+    type Output = FooterOutput;
 
-    let window = window.clone();
-    cancel.connect_clicked(move |_| {
-        window.close();
-    });
-    (bar, save)
+    view! {
+        gtk::ActionBar  {
+            #[wrap(Some)]
+            set_center_widget = &gtk::Box {
+                set_spacing: 20,
+                set_hexpand: true,
+                set_css_classes: &["footer"],
+                set_orientation: Orientation::Horizontal,
+                gtk::Label {
+                    set_label: &format!("Hyprshell v{}", env!("CARGO_PKG_VERSION")),
+                },
+                gtk::Box {
+                    set_spacing: 10,
+                    set_hexpand: true,
+                    set_halign: gtk::Align::End,
+                    set_orientation: Orientation::Horizontal,
+                    gtk::Button {
+                        set_label: "Save Changes",
+                        set_css_classes: &["suggested-action"],
+                        set_tooltip_text: Some(&format!("Config file: {}", model.config_path.display()))
+                    },
+                    gtk::Button {
+                        set_label: "Cancel",
+                        set_css_classes: &["destructive-action"],
+                        connect_clicked[sender] => move |_| sender.output(FooterOutput::Close).unwrap(),
+                    }
+                }
+            }
+        }
+    }
+
+    fn init(
+        config_path: Self::Init,
+        root: Self::Root,
+        sender: ComponentSender<Self>,
+    ) -> ComponentParts<Self> {
+        let model = Footer { config_path };
+        let widgets = view_output!();
+        ComponentParts { model, widgets }
+    }
 }
