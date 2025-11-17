@@ -60,8 +60,6 @@ fn main() -> anyhow::Result<()> {
     check_features();
     check_env();
 
-    exec_lib::check_version().warn_details("Unable to check hyprland version, continuing anyway");
-
     let data_dir = cli.global_opts.data_dir;
     let cache_dir = cli.global_opts.cache_dir;
     let css_file = cli.global_opts.css_file;
@@ -69,6 +67,8 @@ fn main() -> anyhow::Result<()> {
 
     match cli.command {
         cli::Command::Run {} => {
+            exec_lib::check_version()
+                .warn_details("Unable to check hyprland version, continuing anyway");
             if daemon_running() {
                 bail!("Daemon already running");
             }
