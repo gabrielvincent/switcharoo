@@ -9,6 +9,6 @@
     "hyprshell"
   ],
   "ignorePaths": [
-    "./dep-crates/**/*"
+    "dep-crates/**/*"
   ]
 }

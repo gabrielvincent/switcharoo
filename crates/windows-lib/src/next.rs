@@ -41,6 +41,7 @@ pub fn find_next_workspace(
         });
 
     let index = find_next_grid(direction, wrap, filtered.len(), current, workspaces_per_row);
+    #[allow(clippy::map_unwrap_or)]
     let next_active = filtered
         .get(index)
         .map(|(id, data)| Active {
@@ -98,6 +99,7 @@ pub fn find_next_client(
                 .position(|(id, _)| *id == client_id)
                 .unwrap_or(0);
             let index = find_next_grid(direction, wrap, filtered.len(), current, clients_per_row);
+            #[allow(clippy::map_unwrap_or)]
             filtered
                 .get(index)
                 .map(|(id, data)| Active {
@@ -255,6 +257,7 @@ mod tests {
                         monitor: 0,
                         focus_history_id: 0,
                         floating: false,
+                        #[allow(clippy::map_unwrap_or)]
                         enabled: enabled.map(|s| s >= i).unwrap_or(true),
                         pid: 0,
                     },
