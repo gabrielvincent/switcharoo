@@ -1,10 +1,10 @@
 use crate::structs::GTKWindows;
 use crate::views::windows::overview::generate_overview_view;
 use crate::views::windows::switch::generate_switch_view;
-use adw::gdk::Cursor;
-use adw::gtk::{Adjustment, Label, Orientation, SpinButton};
-use adw::prelude::*;
-use adw::{ExpanderRow, ViewStack, gtk};
+use relm4::adw::gdk::Cursor;
+use relm4::adw::gtk::{Adjustment, Label, Orientation, SpinButton};
+use relm4::adw::prelude::*;
+use relm4::adw::{ExpanderRow, ViewStack, gtk};
 
 pub fn create_windows_view(view_stack: &ViewStack) -> GTKWindows {
     let row_box = gtk::Box::builder()

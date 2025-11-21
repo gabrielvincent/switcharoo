@@ -7,13 +7,13 @@ use crate::update_changes_view::set_previous_config;
 use crate::views::changes::create_changes_view;
 use crate::views::json_preview::create_preview_view;
 use crate::views::windows::windows::create_windows_view;
-use adw::gdk::Display;
-use adw::gtk::{
+use relm4::adw::gdk::Display;
+use relm4::adw::gtk::{
     CssProvider, STYLE_PROVIDER_PRIORITY_APPLICATION, ScrolledWindow,
     style_context_add_provider_for_display,
 };
-use adw::prelude::*;
-use adw::{
+use relm4::adw::prelude::*;
+use relm4::adw::{
     AlertDialog, Application, ApplicationWindow, ToolbarStyle, ToolbarView, ViewStack,
     ViewSwitcherBar, glib,
 };

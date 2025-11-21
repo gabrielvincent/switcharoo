@@ -1,11 +1,11 @@
 use crate::structs::GTKWebsearches;
-use adw::gdk::Cursor;
-use adw::gtk::{Align, Button, Label, ListBox, Orientation, SelectionMode};
-use adw::prelude::{
+use config_lib::{Modifier, SearchEngine};
+use relm4::adw::gdk::Cursor;
+use relm4::adw::gtk::{Align, Button, Label, ListBox, Orientation, SelectionMode};
+use relm4::adw::prelude::{
     ActionRowExt, AdwDialogExt, BoxExt, ButtonExt, EditableExt, ExpanderRowExt, WidgetExt,
 };
-use adw::{ActionRow, Dialog, EntryRow, ExpanderRow, gtk};
-use config_lib::{Modifier, SearchEngine};
+use relm4::adw::{ActionRow, Dialog, EntryRow, ExpanderRow, gtk};
 use std::collections::BTreeMap;
 
 pub fn create_plugins_websearch_view(row: &gtk::Box) -> GTKWebsearches {

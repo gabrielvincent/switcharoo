@@ -3,9 +3,9 @@ use crate::structs::{
 };
 use crate::update_changes_view::update_changes_view;
 use crate::views::launcher;
-use adw::ViewStack;
-use adw::prelude::{ButtonExt, EditableExt, ExpanderRowExt, PreferencesRowExt, WidgetExt};
 use config_lib::{Config, FilterBy, Launcher, Modifier, Overview, Plugins, Switch};
+use relm4::adw::ViewStack;
+use relm4::adw::prelude::{ButtonExt, EditableExt, ExpanderRowExt, PreferencesRowExt, WidgetExt};
 use std::cell::RefCell;
 use std::rc::Rc;
 use tracing::trace;

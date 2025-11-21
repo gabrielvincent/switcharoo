@@ -28,14 +28,14 @@ impl SimpleComponent for Launcher {
     fn init(
         _: Self::Init,
         root: Self::Root,
-        sender: ComponentSender<Self>,
+        _sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
         let model = Launcher {};
         let widgets = view_output!();
         ComponentParts { model, widgets }
     }
 
-    fn update(&mut self, message: Self::Input, sender: ComponentSender<Self>) {
-        todo!()
+    fn update(&mut self, message: Self::Input, _sender: ComponentSender<Self>) {
+        match message {}
     }
 }

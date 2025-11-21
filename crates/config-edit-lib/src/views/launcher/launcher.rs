@@ -1,11 +1,11 @@
 use crate::structs::GTKLauncher;
 use crate::views::launcher::plugins::plugins_rows;
-use adw::gdk::Cursor;
-use adw::gtk::{
+use relm4::adw::gdk::Cursor;
+use relm4::adw::gtk::{
     Adjustment, Align, DropDown, Entry, InputPurpose, Label, Orientation, SpinButton, Switch,
 };
-use adw::prelude::*;
-use adw::{ExpanderRow, gtk};
+use relm4::adw::prelude::*;
+use relm4::adw::{ExpanderRow, gtk};
 
 pub fn create_launcher_view() -> GTKLauncher {
     let row_box = gtk::Box::builder()

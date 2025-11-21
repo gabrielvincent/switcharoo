@@ -1,9 +1,9 @@
 #![allow(clippy::too_many_lines)]
 
-use adw::ActionRow;
-use adw::gtk::{ListBox, TextView};
-use adw::prelude::{TextBufferExt, TextViewExt, WidgetExt};
 use config_lib::{Config, Plugins};
+use relm4::adw::ActionRow;
+use relm4::adw::gtk::{ListBox, TextView};
+use relm4::adw::prelude::{TextBufferExt, TextViewExt, WidgetExt};
 use std::path::Path;
 use std::sync::{Mutex, MutexGuard, OnceLock};
 

@@ -9,8 +9,8 @@ use config_lib::{
 use crate::update::update_config;
 use crate::update_changes_view::set_previous_config;
 use crate::views::launcher::open_edit_dialog;
-use adw::prelude::*;
-use adw::{AlertDialog, ApplicationWindow};
+use relm4::adw::prelude::*;
+use relm4::adw::{AlertDialog, ApplicationWindow};
 use std::cell::{Ref, RefCell, RefMut};
 use std::collections::BTreeMap;
 use std::rc::Rc;

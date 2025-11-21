@@ -1,7 +1,7 @@
 use crate::plugins::{Identifier, PluginNames, SortableLaunchOption};
-use adw::gtk::gdk::Display;
-use adw::gtk::prelude::DisplayExt;
 use core_lib::WarnWithDetails;
+use relm4::adw::gtk::gdk::Display;
+use relm4::adw::gtk::prelude::DisplayExt;
 use std::path::Path;
 use std::sync::{OnceLock, RwLock};
 use tracing::{debug, trace};

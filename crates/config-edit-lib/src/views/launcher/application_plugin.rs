@@ -1,8 +1,8 @@
 use crate::structs::GTKApplications;
-use adw::gdk::Cursor;
-use adw::gtk::{Adjustment, Align, Label, Orientation, SpinButton, Switch};
-use adw::prelude::*;
-use adw::{ExpanderRow, gtk};
+use relm4::adw::gdk::Cursor;
+use relm4::adw::gtk::{Adjustment, Align, Label, Orientation, SpinButton, Switch};
+use relm4::adw::prelude::*;
+use relm4::adw::{ExpanderRow, gtk};
 
 pub fn create_plugins_applications_view(row: &gtk::Box) -> GTKApplications {
     let hide_row = gtk::Box::builder()

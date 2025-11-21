@@ -1,19 +1,20 @@
 use crate::global::{LauncherConfig, LauncherData};
 use crate::plugins;
 use crate::plugins::get_static_options_chars;
-use adw::gtk::gdk::{Key, ModifierType};
-use adw::gtk::glib::{ControlFlow, Propagation};
-use adw::gtk::prelude::*;
-use adw::gtk::{
-    Application, ApplicationWindow, Entry, EventControllerKey, ListBox, PropagationPhase,
-    SelectionMode,
-};
-use adw::gtk::{Orientation, glib};
 use async_channel::Sender;
 use config_lib::{Launcher, Modifier};
 use core_lib::transfer::{CloseOverviewConfig, Direction, SwitchOverviewConfig, TransferType};
 use core_lib::{LAUNCHER_NAMESPACE, WarnWithDetails};
 use gtk4_layer_shell::{Edge, Layer, LayerShell};
+use relm4::adw::gtk::gdk::{Key, ModifierType};
+use relm4::adw::gtk::glib::{ControlFlow, Propagation};
+use relm4::adw::gtk::prelude::*;
+use relm4::adw::gtk::{
+    Application, ApplicationWindow, Entry, EventControllerKey, ListBox, PropagationPhase,
+    SelectionMode,
+};
+use relm4::adw::gtk::{Orientation, glib};
+use relm4::gtk;
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use tracing::{debug, debug_span, trace};
@@ -39,14 +40,14 @@ pub fn create_windows_overview_launcher_window(
     });
     main_vbox.append(&entry);
 
-    let results = adw::gtk::Box::builder()
+    let results = gtk::Box::builder()
         .orientation(Orientation::Vertical)
         .css_classes(["launcher-results"])
         .spacing(3)
         .build();
     main_vbox.append(&results);
 
-    let plugin_box = adw::gtk::Box::builder()
+    let plugin_box = gtk::Box::builder()
         .orientation(Orientation::Horizontal)
         .css_classes(["launcher-plugins"])
         .spacing(4)
@@ -138,7 +139,7 @@ fn handle_key(
     modt: ModifierType,
     plugin_keys: &[Key],
     launch_modifier: Modifier,
-    results: &adw::gtk::Box,
+    results: &gtk::Box,
     event_sender: &Sender<TransferType>,
 ) -> Propagation {
     let launch_mod = match launch_modifier {

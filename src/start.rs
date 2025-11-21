@@ -3,12 +3,6 @@ use crate::receive_handle::event_handler;
 use crate::socket::socket_handler;
 use crate::util;
 use crate::util::check_new_version;
-use adw::gtk::gdk::Display;
-use adw::gtk::prelude::*;
-use adw::gtk::{
-    Application, CssProvider, STYLE_PROVIDER_PRIORITY_USER, glib,
-    style_context_add_provider_for_display,
-};
 use anyhow::Context;
 use async_channel::{Receiver, Sender};
 use config_lib::Config;
@@ -19,6 +13,12 @@ use core_lib::transfer::TransferType;
 use core_lib::{WarnWithDetails, notify, notify_resident, notify_warn};
 use exec_lib::listener::{hyprland_config_listener, monitor_listener};
 use launcher_lib::{LauncherData, create_windows_overview_launcher_window};
+use relm4::adw::gtk::gdk::Display;
+use relm4::adw::gtk::prelude::*;
+use relm4::adw::gtk::{
+    Application, CssProvider, STYLE_PROVIDER_PRIORITY_USER, glib,
+    style_context_add_provider_for_display,
+};
 use std::any::Any;
 use std::cell::RefCell;
 use std::cmp::Ordering;

@@ -1,14 +1,12 @@
-use crate::components;
 use crate::components::json_preview::JsonPreview;
 use crate::components::windows::{Windows, WindowsInit, WindowsInput, WindowsOutput};
 use crate::components::windows_overview::WindowsOverviewOutput;
 use crate::footer::{Footer, FooterOutput};
 use relm4::ComponentController;
 use relm4::adw;
-use relm4::adw::gtk::{Align, ListBox, SelectionMode, test_accessible_has_relation};
+use relm4::adw::gtk::{Align, ListBox, SelectionMode};
 use relm4::adw::prelude::*;
 use relm4::adw::{ActionRow, gtk};
-use relm4::component::Connector;
 use relm4::{Component, ComponentParts, ComponentSender, Controller, SimpleComponent};
 use relm4_components::alert::{Alert, AlertMsg, AlertResponse, AlertSettings};
 use std::path::Path;

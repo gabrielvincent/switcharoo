@@ -1,8 +1,8 @@
 use crate::structs::{GTKSwitch, GTKWindowsFilter};
-use adw::gdk::Cursor;
-use adw::gtk::{Align, DropDown, Label, Orientation, Switch};
-use adw::prelude::*;
-use adw::{ExpanderRow, SwitchRow, gtk};
+use relm4::adw::gdk::Cursor;
+use relm4::adw::gtk::{Align, DropDown, Label, Orientation, Switch};
+use relm4::adw::prelude::*;
+use relm4::adw::{ExpanderRow, SwitchRow, gtk};
 
 pub fn generate_switch_view(windows_grid: &ExpanderRow) -> GTKSwitch {
     let switch_row_1 = gtk::Box::builder()

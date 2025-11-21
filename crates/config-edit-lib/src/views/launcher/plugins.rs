@@ -1,10 +1,10 @@
 use crate::structs::GTKPlugins;
 use crate::views::launcher::application_plugin::create_plugins_applications_view;
 use crate::views::launcher::web_search::create_plugins_websearch_view;
-use adw::gdk::Cursor;
-use adw::gtk::{Align, Label, Orientation, Switch};
-use adw::prelude::{BoxExt, ExpanderRowExt, WidgetExt};
-use adw::{ExpanderRow, gtk};
+use relm4::adw::gdk::Cursor;
+use relm4::adw::gtk::{Align, Label, Orientation, Switch};
+use relm4::adw::prelude::{BoxExt, ExpanderRowExt, WidgetExt};
+use relm4::adw::{ExpanderRow, gtk};
 
 pub fn plugins_rows(plugins: &ExpanderRow) -> GTKPlugins {
     let row_0 = gtk::Box::builder()

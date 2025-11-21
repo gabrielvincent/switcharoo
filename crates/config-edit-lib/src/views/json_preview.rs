@@ -1,6 +1,6 @@
-use adw::gtk::{Label, Orientation};
-use adw::prelude::*;
-use adw::{ViewStack, gtk};
+use relm4::adw::gtk::{Label, Orientation};
+use relm4::adw::prelude::*;
+use relm4::adw::{ViewStack, gtk};
 
 pub fn create_preview_view(view_stack: &ViewStack) {
     let row_box = gtk::Box::builder()

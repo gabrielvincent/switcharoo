@@ -1,6 +1,6 @@
-use adw::gtk::{Align, ListBox, Orientation, SelectionMode, TextView};
-use adw::prelude::*;
-use adw::{ViewStack, gtk};
+use relm4::adw::gtk::{Align, ListBox, Orientation, SelectionMode, TextView};
+use relm4::adw::prelude::*;
+use relm4::adw::{ViewStack, gtk};
 
 pub fn create_changes_view(view_stack: &ViewStack) -> (ListBox, TextView) {
     let row_box = gtk::Box::builder()
