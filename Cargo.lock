@@ -1299,6 +1299,7 @@ dependencies = [
 ]
 
 [[package]]
+<<<<<<< HEAD
 name = "glam"
 version = "0.30.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1308,6 +1309,11 @@ checksum = "bd47b05dddf0005d850e5644cae7f2b14ac3df487979dbfff3b56f20b1a6ae46"
 name = "glib"
 version = "0.21.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
+=======
+name = "glib"
+version = "0.21.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+>>>>>>> 0528b0a (refactor: use relm4 as base for adw and gtk)
 checksum = "5b9dbecb1c33e483a98be4acfea2ab369e1c28f517c6eadb674537409c25c4b2"
 dependencies = [
  "bitflags 2.10.0",
