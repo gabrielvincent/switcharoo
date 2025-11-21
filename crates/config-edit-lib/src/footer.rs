@@ -1,6 +1,6 @@
-use adw::gtk;
-use adw::gtk::Orientation;
-use adw::prelude::*;
+use relm4::adw::gtk;
+use relm4::adw::gtk::Orientation;
+use relm4::adw::prelude::*;
 use relm4::{ComponentParts, ComponentSender, SimpleComponent};
 use std::path::Path;
 
@@ -11,6 +11,8 @@ pub struct Footer {
 #[derive(Debug)]
 pub enum FooterOutput {
     Close,
+    Save,
+    Reset,
 }
 
 #[relm4::component(pub)]
@@ -36,9 +38,15 @@ impl SimpleComponent for Footer {
                     set_halign: gtk::Align::End,
                     set_orientation: Orientation::Horizontal,
                     gtk::Button {
+                        set_label: "Reset",
+                        set_css_classes: &["destructive-action"],
+                        connect_clicked[sender] => move |_| sender.output(FooterOutput::Reset).unwrap(),
+                    },
+                    gtk::Button {
                         set_label: "Save Changes",
                         set_css_classes: &["suggested-action"],
-                        set_tooltip_text: Some(&format!("Config file: {}", model.config_path.display()))
+                        set_tooltip_text: Some(&format!("Config file: {}", model.config_path.display())),
+                        connect_clicked[sender] => move |_| sender.output(FooterOutput::Save).unwrap(),
                     },
                     gtk::Button {
                         set_label: "Cancel",

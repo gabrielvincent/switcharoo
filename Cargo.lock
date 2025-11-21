@@ -1604,7 +1604,6 @@ name = "hyprshell-config-edit-lib"
 version = "4.8.1"
 dependencies = [
  "hyprshell-config-lib",
- "libadwaita",
  "relm4",
  "relm4-components",
  "relm4-macros",

@@ -80,6 +80,7 @@ jobs:
           ./scripts/ci/build-x86.sh
           gh release upload ${{ github.ref_name }} "/tmp/hyprshell-x86_64.tar.zst"
           gh release upload ${{ github.ref_name }} "/tmp/hyprshell-x86_64-slim.tar.zst"
+          cargo clean
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Build binary for aarch64-unknown-linux-gnu
@@ -88,6 +89,7 @@ jobs:
           ./scripts/ci/build-aarch64.sh
           gh release upload ${{ github.ref_name }} "/tmp/hyprshell-aarch64.tar.zst"
           gh release upload ${{ github.ref_name }} "/tmp/hyprshell-aarch64-slim.tar.zst"
+          cargo clean
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Publish AUR package

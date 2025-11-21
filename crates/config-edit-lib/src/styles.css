@@ -82,3 +82,7 @@
     border-radius: 12px;
     border: 2px solid var(--border-color);
 }
+
+label.blue-label {
+    color: color-mix(in srgb, currentColor 40%, #13bdda 60%);
+}
