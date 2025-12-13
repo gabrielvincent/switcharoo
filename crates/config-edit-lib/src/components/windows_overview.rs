@@ -1,19 +1,27 @@
-use crate::structs::Modifier;
-use relm4::adw;
+use crate::SetTextIfDifferent;
+use crate::structs::{Modifier, to_accelerator};
+use adw::gdk::{Key, ModifierType};
+use relm4::ComponentController;
 use relm4::adw::gtk;
 use relm4::adw::prelude::*;
+use relm4::gtk::EventControllerKey;
+use relm4::{Component, Controller, adw};
 use relm4::{ComponentParts, ComponentSender, SimpleComponent};
+use relm4_components::alert::{Alert, AlertMsg, AlertResponse, AlertSettings};
 
 #[derive(Debug)]
 pub struct WindowsOverview {
     config: crate::Overview,
     prev_config: crate::Overview,
-    key_buffer: gtk::EntryBuffer,
+    get_keyboard_shortcut: bool,
+    pub alert_dialog: Controller<Alert>,
+    pub root: adw::ExpanderRow,
 }
 
 #[derive(Debug)]
 pub enum WindowsOverviewInput {
     SetOverview(crate::Overview),
+    ToggleGetKeyboardShortcut,
 }
 
 #[derive(Debug)]
@@ -44,55 +52,33 @@ impl SimpleComponent for WindowsOverview {
             set_show_enable_switch: true,
             set_hexpand: true,
             set_css_classes: &["enable-frame"],
-            set_title: "Overview + Launcher",
-            connect_enable_expansion_notify[sender] => move |e| {sender.output(WindowsOverviewOutput::Enabled(e.enables_expansion())).unwrap();},
+            add_prefix = &gtk::Box {
+                set_orientation: gtk::Orientation::Horizontal,
+                set_halign: gtk::Align::Fill,
+                set_valign: gtk::Align::Center,
+                set_spacing: 25,
+                gtk::Label {
+                    set_label: "Overview + Launcher",
+                },
+                gtk::Button {
+                    set_icon_name: "keyboard-layout",
+                    #[watch]
+                    set_css_classes: if model.get_keyboard_shortcut { &["active"] } else { &["not-active"] },
+                    connect_clicked[sender] => move |_| sender.input(WindowsOverviewInput::ToggleGetKeyboardShortcut),
+                },
+                adw::ShortcutLabel::new("") {
+                    #[watch]
+                    set_accelerator: &to_accelerator(model.config.modifier, &model.config.key).unwrap_or_default(),
+                    #[watch]
+                    set_css_classes: if model.config.key == model.prev_config.key &&
+                            model.config.modifier == model.prev_config.modifier  { &[] } else { &["blue-label"]  },
+                },
+            },
+            connect_enable_expansion_notify[sender] => move |e| {sender.output(WindowsOverviewOutput::Enabled(e.enables_expansion())).unwrap()},
             #[watch]
             set_enable_expansion: model.config.enabled,
             #[watch]
             set_expanded: model.config.enabled,
-            add_row = &gtk::Box {
-                set_orientation: gtk::Orientation::Horizontal,
-                set_css_classes: &["frame-row"],
-                set_spacing: 30,
-                gtk::Box {
-                    set_orientation: gtk::Orientation::Horizontal,
-                    set_spacing: 10,
-                    gtk::Label {
-                        #[watch]
-                        set_css_classes: if model.config.key == model.prev_config.key { &[] } else { &["blue-label"]  },
-                        set_label: "Key",
-                    },
-                    gtk::Image::from_icon_name("dialog-information-symbolic") {
-                        set_tooltip_text: Some("The key to use to open the Overview mode (like `tab` or `alt_r`). If you want to only open using a modifier, set this to the modifier name like `super_l`")
-                    },
-                    #[name = "gtk_entry"]
-                    gtk::Entry {
-                        connect_changed[sender] => move |e| { sender.output(WindowsOverviewOutput::Key(e.text().into())).unwrap(); } @h_2,
-                        set_buffer: &model.key_buffer,
-                        set_input_purpose: gtk::InputPurpose::FreeForm,
-                        set_placeholder_text: Some("super_l"),
-                        set_hexpand: true,
-                    }
-                },
-                gtk::Box {
-                    set_orientation: gtk::Orientation::Horizontal,
-                    set_spacing: 10,
-                    gtk::Label {
-                        #[watch]
-                        set_css_classes: if model.config.modifier == model.prev_config.modifier { &[] } else { &["blue-label"]  },
-                        set_label: "Modifier",
-                    },
-                    gtk::Image::from_icon_name("dialog-information-symbolic") {
-                        set_tooltip_text: Some("The modifier that must be pressed together with the key to open the Overview mode (like ctrl)")
-                    },
-                    gtk::DropDown::from_strings(Modifier::strings()) {
-                        connect_selected_notify[sender] => move |e| {sender.output(WindowsOverviewOutput::Modifier(e.selected().try_into().expect("invalid modifier"))).unwrap(); },
-                        #[watch]
-                        set_selected: model.config.modifier.into(),
-                        set_hexpand: true,
-                    }
-                }
-            },
             add_row = &gtk::Box {
                 set_orientation: gtk::Orientation::Horizontal,
                 set_css_classes: &["frame-row"],
@@ -116,19 +102,19 @@ impl SimpleComponent for WindowsOverview {
                         set_title_lines: 2,
                         set_css_classes: &["item-expander"],
                         add_row = &adw::SwitchRow {
-                            connect_active_notify[sender] => move |c| { sender.output(WindowsOverviewOutput::FilterSameClass(c.is_active())).unwrap(); },
+                            connect_active_notify[sender] => move |c| { sender.output(WindowsOverviewOutput::FilterSameClass(c.is_active())).unwrap() },
                             #[watch]
                             set_active: model.config.same_class,
                             set_title: "Same class",
                         },
                         add_row = &adw::SwitchRow {
-                            connect_active_notify[sender] => move |c| { sender.output(WindowsOverviewOutput::FilterWorkspace(c.is_active())).unwrap(); },
+                            connect_active_notify[sender] => move |c| { sender.output(WindowsOverviewOutput::FilterWorkspace(c.is_active())).unwrap() },
                             #[watch]
                             set_active: model.config.current_workspace,
                             set_title: "Current workspace",
                         },
                         add_row = &adw::SwitchRow {
-                            connect_active_notify[sender] => move |c| { sender.output(WindowsOverviewOutput::FilterMonitor(c.is_active())).unwrap(); },
+                            connect_active_notify[sender] => move |c| { sender.output(WindowsOverviewOutput::FilterMonitor(c.is_active())).unwrap() },
                             #[watch]
                             set_active: model.config.current_monitor,
                             set_title: "Current monitor",
@@ -144,10 +130,71 @@ impl SimpleComponent for WindowsOverview {
         root: Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
+        let entry = gtk::Label::new(None);
+
+        let alert_dialog = Alert::builder()
+            .transient_for(&root)
+            .launch(AlertSettings {
+                text: Some("Press Keyboard shortcut".to_string()),
+                secondary_text: None,
+                confirm_label: Some("Use".to_string()),
+                cancel_label: Some("Cancel".to_string()),
+                option_label: None,
+                is_modal: true,
+                destructive_accept: false,
+                extra_child: Some(entry.clone().into()),
+            })
+            .forward(sender.input_sender(), |res| match res {
+                AlertResponse::Confirm => WindowsOverviewInput::ToggleGetKeyboardShortcut,
+                AlertResponse::Cancel => WindowsOverviewInput::ToggleGetKeyboardShortcut,
+                AlertResponse::Option => unreachable!("no option button in alert dialog"),
+            });
+
+        // Attach an EventControllerKey to the alert dialog's window to print raw key events.
+        let key_controller = EventControllerKey::new();
+        let entry = entry.clone();
+        let window = alert_dialog.widgets().gtk_window_12.clone();
+        let send = sender.clone();
+        key_controller.connect_key_pressed(move |_, val, id, state| {
+            tracing::debug!("Raw key event - val: {}, state: {:?}", val, state);
+            if let Some(key_name) = val.name() {
+                if let Some(modifier) = match val {
+                    Key::Alt_L | Key::Alt_R => Some(Modifier::Alt),
+                    Key::Control_L | Key::Control_R => Some(Modifier::Ctrl),
+                    Key::Super_L | Key::Super_R => Some(Modifier::Super),
+                    _ => match state {
+                        ModifierType::NO_MODIFIER_MASK => Some(Modifier::None),
+                        ModifierType::ALT_MASK => Some(Modifier::Alt),
+                        ModifierType::CONTROL_MASK => Some(Modifier::Ctrl),
+                        ModifierType::SUPER_MASK => Some(Modifier::Super),
+                        _ => None,
+                    },
+                } {
+                    send.output(WindowsOverviewOutput::Key(format!("code:{id}")))
+                        .unwrap();
+                    send.output(WindowsOverviewOutput::Modifier(modifier))
+                        .unwrap();
+                    if modifier == Modifier::None {
+                        entry.set_label(&key_name);
+                    } else {
+                        entry.set_label(&format!("{modifier} + {key_name}"));
+                    };
+                } else {
+                    entry.set_label("---");
+                }
+            } else {
+                entry.set_label("---");
+            }
+            gtk::glib::Propagation::Stop
+        });
+        window.add_controller(key_controller);
+
         let model = WindowsOverview {
-            key_buffer: gtk::EntryBuffer::new(Some(init.config.key.clone())),
             config: init.config.clone(),
             prev_config: init.config,
+            get_keyboard_shortcut: false,
+            alert_dialog,
+            root: root.clone(),
         };
         let widgets = view_output!();
         ComponentParts { model, widgets }
@@ -157,9 +204,13 @@ impl SimpleComponent for WindowsOverview {
         match msg {
             WindowsOverviewInput::SetOverview(config) => {
                 self.config = config;
-                if self.key_buffer.text() != self.config.key {
-                    self.key_buffer.set_text(&self.config.key);
+            }
+            WindowsOverviewInput::ToggleGetKeyboardShortcut => {
+                self.get_keyboard_shortcut = !self.get_keyboard_shortcut;
+                if self.get_keyboard_shortcut {
+                    self.alert_dialog.emit(AlertMsg::Show);
                 }
+                self.alert_dialog.widgets().gtk_window_12.set_modal(true);
             }
         }
     }

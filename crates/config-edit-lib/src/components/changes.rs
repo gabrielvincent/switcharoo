@@ -3,22 +3,22 @@ use relm4::adw::prelude::*;
 use relm4::{ComponentParts, ComponentSender, RelmWidgetExt, SimpleComponent};
 
 #[derive(Debug)]
-pub struct JSONPreview {}
+pub struct Changes {}
 
 #[derive(Debug)]
-pub enum JSONPreviewInput {}
+pub enum ChangesInput {}
 
 #[derive(Debug)]
-pub struct JSONPreviewInit {}
+pub struct ChangesInit {}
 
 #[derive(Debug)]
-pub enum JSONPreviewOutput {}
+pub enum ChangesOutput {}
 
 #[relm4::component(pub)]
-impl SimpleComponent for JSONPreview {
-    type Init = JSONPreviewInit;
-    type Input = JSONPreviewInput;
-    type Output = JSONPreviewOutput;
+impl SimpleComponent for Changes {
+    type Init = ChangesInit;
+    type Input = ChangesInput;
+    type Output = ChangesOutput;
 
     view! {
         #[root]
@@ -26,7 +26,7 @@ impl SimpleComponent for JSONPreview {
            set_orientation: gtk::Orientation::Vertical,
             set_margin_all: 10,
             gtk::Label {
-                set_label:  "Json preview for nix users (TODO)"
+                set_label:  "Changes (TODO)"
             }
         }
     }
@@ -36,7 +36,7 @@ impl SimpleComponent for JSONPreview {
         root: Self::Root,
         _sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
-        let model = JSONPreview {};
+        let model = Changes {};
         let widgets = view_output!();
         ComponentParts { model, widgets }
     }

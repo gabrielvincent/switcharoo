@@ -50,7 +50,7 @@ impl SimpleComponent for Windows {
                 set_hexpand: true,
                 set_css_classes: &["enable-frame"],
                 set_title: "Windows (Overview and Switch)",
-                connect_enable_expansion_notify[sender] => move |e| {sender.output(WindowsOutput::Enabled(e.enables_expansion())).unwrap();} @h,
+                connect_enable_expansion_notify[sender] => move |e| {sender.output(WindowsOutput::Enabled(e.enables_expansion())).unwrap()} @h,
                 #[watch]
                 #[block_signal(h)]
                 set_enable_expansion: model.config.enabled,
@@ -75,7 +75,7 @@ impl SimpleComponent for Windows {
                             set_adjustment: &gtk::Adjustment::new(1.0, 0.5, 15.0, 0.5, 1.0, 0.0),
                             set_hexpand: true,
                             set_digits: 2,
-                            connect_value_changed[sender] => move |e| { sender.output(WindowsOutput::Scale((e.value() * 100.0).round() / 100.0)).unwrap(); } @h_2,
+                            connect_value_changed[sender] => move |e| { sender.output(WindowsOutput::Scale((e.value() * 100.0).round() / 100.0)).unwrap() } @h_2,
                             #[watch] // IMPORTANT: always call this last, else the initial value will not be set
                             #[block_signal(h_2)]
                             set_value: model.config.scale,
@@ -96,7 +96,7 @@ impl SimpleComponent for Windows {
                             set_adjustment: &gtk::Adjustment::new(1.0, 0.0, 50.0, 1.0, 5.0, 0.0),
                             set_hexpand: true,
                             set_digits: 0,
-                            connect_value_changed[sender] => move |e| { sender.output(WindowsOutput::ItemsPerRow(e.value() as u8)).unwrap(); } @h_3,
+                            connect_value_changed[sender] => move |e| { sender.output(WindowsOutput::ItemsPerRow(e.value() as u8)).unwrap() } @h_3,
                             #[watch] // IMPORTANT: always call this last, else the initial value will not be set
                             #[block_signal(h_3)]
                             set_value: model.config.items_per_row as f64,
@@ -125,14 +125,12 @@ impl SimpleComponent for Windows {
             prev_config: init.config,
         };
 
-        dbg!(model.config.items_per_row);
-
         let widgets = view_output!();
         ComponentParts { model, widgets }
     }
 
-    fn update(&mut self, msg: WindowsInput, _sender: ComponentSender<Self>) {
-        match msg {
+    fn update(&mut self, message: WindowsInput, _sender: ComponentSender<Self>) {
+        match message {
             WindowsInput::SetWindows(config) => {
                 self.config = config;
                 self.windows_overview

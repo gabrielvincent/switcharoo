@@ -1,3 +1,8 @@
+use adw::gdk::Display;
+use relm4::gtk::prelude::DisplayExtManual;
+use std::fmt;
+use std::fmt::Formatter;
+
 #[derive(Debug, Clone)]
 pub struct Config {
     pub windows: Windows,
@@ -79,8 +84,28 @@ pub struct Switch {
     pub switch_workspaces: bool,
 }
 
+pub fn to_accelerator(modifier: Modifier, key: &str) -> Option<String> {
+    // key is keycode
+    let key = if key.starts_with("code:") {
+        let key_id = key.split(':').nth(1)?;
+        let code = key_id.parse::<u32>().ok()?;
+        let display = &Display::default()?;
+        let data = display.map_keycode(code)?;
+        let (_, key) = data.iter().find(|(m, k)| m.level() == 0)?;
+        key.name()?.to_string()
+    } else {
+        key.to_string()
+    };
+    if modifier == Modifier::None {
+        Some(key)
+    } else {
+        Some(format!("<{}>{}", modifier, key))
+    }
+}
+
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub enum Modifier {
+    None,
     Alt,
     Super,
     Ctrl,
@@ -89,6 +114,20 @@ pub enum Modifier {
 impl Modifier {
     pub fn strings() -> &'static [&'static str] {
         &["Alt", "Super", "Ctrl"]
+    }
+    pub fn strings_with_none() -> &'static [&'static str] {
+        &["Alt", "Super", "Ctrl", "None"]
+    }
+}
+
+impl fmt::Display for Modifier {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        match self {
+            Modifier::None => write!(f, ""),
+            Modifier::Alt => write!(f, "Alt"),
+            Modifier::Super => write!(f, "Super"),
+            Modifier::Ctrl => write!(f, "Ctrl"),
+        }
     }
 }
 
@@ -99,6 +138,7 @@ impl TryFrom<u32> for Modifier {
             0 => Ok(Self::Alt),
             1 => Ok(Self::Super),
             2 => Ok(Self::Ctrl),
+            3 => Ok(Self::None),
             _ => Err(()),
         }
     }
@@ -107,9 +147,10 @@ impl TryFrom<u32> for Modifier {
 impl Into<u32> for Modifier {
     fn into(self) -> u32 {
         match self {
-            Self::Alt => 0,
-            Self::Super => 1,
-            Self::Ctrl => 2,
+            Modifier::Alt => 0,
+            Modifier::Super => 1,
+            Modifier::Ctrl => 2,
+            Modifier::None => 3,
         }
     }
 }

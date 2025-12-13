@@ -1,12 +1,14 @@
-use crate::components::json_preview::JsonPreview;
+use crate::components::changes::{Changes, ChangesInit};
+use crate::components::json_preview::{JSONPreview, JSONPreviewInit};
+use crate::components::launcher::{Launcher, LauncherInit, LauncherInput, LauncherOutput};
 use crate::components::windows::{Windows, WindowsInit, WindowsInput, WindowsOutput};
 use crate::components::windows_overview::WindowsOverviewOutput;
 use crate::footer::{Footer, FooterOutput};
 use relm4::ComponentController;
 use relm4::adw;
+use relm4::adw::gtk;
 use relm4::adw::gtk::{Align, ListBox, SelectionMode};
 use relm4::adw::prelude::*;
-use relm4::adw::{ActionRow, gtk};
 use relm4::{Component, ComponentParts, ComponentSender, Controller, SimpleComponent};
 use relm4_components::alert::{Alert, AlertMsg, AlertResponse, AlertSettings};
 use std::path::Path;
@@ -19,7 +21,9 @@ pub enum Msg {
     Close,
     Ignore,
     Save(bool),
+    LauncherTabVisible(bool),
     Windows(WindowsOutput),
+    Launcher(LauncherOutput),
 }
 
 pub struct Root {
@@ -27,7 +31,9 @@ pub struct Root {
     prev_config: crate::Config,
     footer: Controller<Footer>,
     alert_dialog: Controller<Alert>,
-    pub windows: Controller<Windows>,
+    launcher: Controller<Launcher>,
+    windows: Controller<Windows>,
+    pub view_stack: adw::ViewStack,
 }
 
 pub struct InitRoot {
@@ -58,7 +64,7 @@ impl SimpleComponent for Root {
                 set_bottom_bar_style: adw::ToolbarStyle::Flat,
                 set_reveal_bottom_bars: true,
                 set_reveal_top_bars: true,
-                add_bottom_bar = model.footer.widget(),
+                add_bottom_bar = footer.widget(),
                 #[wrap(Some)]
                 set_content = &gtk::ScrolledWindow {
                     #[name = "view_stack"]
@@ -106,7 +112,7 @@ impl SimpleComponent for Root {
             .hexpand(true)
             .build();
         list.append(
-            &ActionRow::builder()
+            &adw::ActionRow::builder()
                 .title("TODO add changes")
                 .focusable(false)
                 .build(),
@@ -118,7 +124,7 @@ impl SimpleComponent for Root {
                 secondary_text: Some(String::from("All unsaved changes will be lost")),
                 confirm_label: Some(String::from("Close without saving")),
                 cancel_label: Some(String::from("Cancel")),
-                option_label: Some(String::from("Save")),
+                option_label: Some(String::from("Save and quit")),
                 is_modal: true,
                 destructive_accept: true,
                 extra_child: Some(list.into()),
@@ -134,18 +140,22 @@ impl SimpleComponent for Root {
                 config: init.config.windows.clone(),
             })
             .forward(sender.input_sender(), Msg::Windows);
+        let launcher = Launcher::builder()
+            .launch(LauncherInit {
+                config: init.config.windows.overview.launcher.clone(),
+            })
+            .forward(sender.input_sender(), Msg::Launcher);
 
-        let model = Root {
-            config: init.config.clone(),
-            prev_config: init.config,
-            footer,
-            windows,
-            alert_dialog,
-        };
-
-        let json_preview = JsonPreview::builder().launch(()).detach();
+        let json_preview = JSONPreview::builder().launch(JSONPreviewInit {}).detach();
+        let changes = Changes::builder().launch(ChangesInit {}).detach();
 
         let widgets = view_output!();
+        widgets.view_stack.add_titled_with_icon(
+            changes.widget(),
+            None,
+            "Changes",
+            "document-edit-symbolic",
+        );
         widgets.view_stack.add_titled_with_icon(
             json_preview.widget(),
             None,
@@ -153,17 +163,28 @@ impl SimpleComponent for Root {
             "preview",
         );
         widgets.view_stack.add_titled_with_icon(
-            model.windows.widget(),
+            windows.widget(),
             Some("overview"),
             "Windows",
             "configure",
         );
-
+        sender.input(Msg::LauncherTabVisible(
+            init.config.windows.overview.enabled,
+        ));
         widgets
             .view_stack_switcher
             .set_stack(Some(&widgets.view_stack));
-
         widgets.view_stack.set_visible_child_name("overview");
+
+        let model = Root {
+            config: init.config.clone(),
+            prev_config: init.config,
+            footer,
+            windows,
+            launcher,
+            alert_dialog,
+            view_stack: widgets.view_stack.clone(),
+        };
         ComponentParts { model, widgets }
     }
 
@@ -172,6 +193,7 @@ impl SimpleComponent for Root {
             Msg::Ignore => (),
             Msg::CloseRequest => {
                 self.alert_dialog.emit(AlertMsg::Show);
+                self.alert_dialog.widgets().gtk_window_12.set_modal(true);
             }
             Msg::Close => {
                 relm4::main_application().quit();
@@ -188,10 +210,51 @@ impl SimpleComponent for Root {
                 self.windows
                     .emit(WindowsInput::SetWindows(self.config.windows.clone()));
             }
+            Msg::LauncherTabVisible(visible) => {
+                if visible {
+                    self.view_stack.add_titled_with_icon(
+                        self.launcher.widget(),
+                        Some("launcher"),
+                        "Launcher",
+                        "configure",
+                    );
+                } else {
+                    self.view_stack.child_by_name("launcher");
+                }
+            }
+            Msg::Launcher(msg) => {
+                match msg {
+                    LauncherOutput::Modifier(modifier) => {
+                        self.config.windows.overview.launcher.launch_modifier = modifier;
+                    }
+                    LauncherOutput::Width(width) => {
+                        self.config.windows.overview.launcher.width = width;
+                    }
+                    LauncherOutput::MaxItems(max_items) => {
+                        self.config.windows.overview.launcher.max_items = max_items;
+                    }
+                    LauncherOutput::DefaultTerminal(default_terminal) => {
+                        dbg!(&default_terminal);
+                        match default_terminal {
+                            None => {
+                                self.config.windows.overview.launcher.default_terminal = None;
+                            }
+                            Some(val) => {
+                                self.config.windows.overview.launcher.default_terminal = Some(val);
+                            }
+                        }
+                    }
+                }
+                // propagate event back
+                self.launcher.emit(LauncherInput::SetLauncher(
+                    self.config.windows.overview.launcher.clone(),
+                ));
+            }
             Msg::Windows(msg) => {
                 match msg {
                     WindowsOutput::Enabled(enabled) => {
                         self.config.windows.enabled = enabled;
+                        sender.input(Msg::LauncherTabVisible(enabled));
                     }
                     WindowsOutput::Scale(scale) => {
                         self.config.windows.scale = scale;
@@ -218,7 +281,7 @@ impl SimpleComponent for Root {
                         }
                     },
                 };
-
+                // propagate event back
                 self.windows
                     .emit(WindowsInput::SetWindows(self.config.windows.clone()));
             }

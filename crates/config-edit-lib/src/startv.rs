@@ -17,7 +17,7 @@ pub fn start(config_path: PathBuf, _css_path: PathBuf) {
     .with_args(vec![]);
 
     let provider_app = CssProvider::new();
-    provider_app.load_from_data(include_str!("styles.css"));
+    provider_app.load_from_string(include_str!("styles.css"));
     style_context_add_provider_for_display(
         &Display::default().expect("Could not connect to a display."),
         &provider_app,

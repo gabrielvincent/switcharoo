@@ -15,6 +15,7 @@ tracing.workspace = true
 config-lib.workspace = true
 relm4.workspace = true
 relm4-components = "0.10.0"
+adw = { version = "0.8.1", package = "libadwaita", features = ["v1_8"] }
 
 [features]
 launcher_calc_plugin = []
