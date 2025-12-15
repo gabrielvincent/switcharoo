@@ -1,5 +1,5 @@
 use crate::SetTextIfDifferent;
-use crate::structs::Modifier;
+use crate::structs::ConfigModifier;
 use relm4::adw::gtk;
 use relm4::adw::prelude::*;
 use relm4::{ComponentParts, ComponentSender, RelmWidgetExt, SimpleComponent};
@@ -22,7 +22,7 @@ pub struct LauncherInit {
 
 #[derive(Debug)]
 pub enum LauncherOutput {
-    Modifier(Modifier),
+    Modifier(ConfigModifier),
     Width(u32),
     MaxItems(u8),
     DefaultTerminal(Option<String>),
@@ -44,7 +44,7 @@ impl SimpleComponent for Launcher {
                 set_show_enable_switch: false,
                 set_hexpand: true,
                 set_css_classes: &["enable-frame"],
-                set_title: "Windows (Overview and Switch)",
+                set_title: "Launcher",
                 set_expanded: true,
                 add_row = &gtk::Box {
                     set_orientation: gtk::Orientation::Horizontal,
@@ -61,7 +61,7 @@ impl SimpleComponent for Launcher {
                         gtk::Image::from_icon_name("dialog-information-symbolic") {
                             set_tooltip_text: Some("The modifier used to select items in the launcher, pressing `<Mod> + 1` to open second entry, `<Mod> + t` to run in terminal, etc.")
                         },
-                        gtk::DropDown::from_strings(Modifier::strings()) {
+                        gtk::DropDown::from_strings(ConfigModifier::strings()) {
                             connect_selected_notify[sender] => move |e| {sender.output(LauncherOutput::Modifier(e.selected().try_into().expect("invalid modifier"))).unwrap() },
                             #[watch]
                             set_selected: model.config.launch_modifier.into(),
@@ -121,16 +121,16 @@ impl SimpleComponent for Launcher {
                         gtk::Label {
                             #[watch]
                             set_css_classes: if model.config.default_terminal == model.prev_config.default_terminal { &[] } else { &["blue-label"]  },
-                            set_label: "Max items",
-                        },
-                        gtk::Image::from_icon_name("dialog-information-symbolic") {
-                            set_tooltip_text: Some("name/path of the default terminal to use. This value is optional, if unset a list of default terminals is used to find a default terminal. Will be used to launch terminal apps and by the terminal plugin.")
+                            set_label: "Autodetect Terminal",
                         },
                         gtk::Switch {
                             #[watch]
-                            set_active: model.config.default_terminal.is_some(),
+                            set_active: !model.config.default_terminal.is_some(),
                             set_valign: gtk::Align::Center,
-                            connect_active_notify[sender] => move |e| { sender.output(LauncherOutput::DefaultTerminal(if e.is_active() { Some("".to_string()) } else { None })).unwrap() },
+                            connect_active_notify[sender] => move |e| { sender.output(LauncherOutput::DefaultTerminal(if e.is_active() { None } else { Some("".to_string()) })).unwrap() },
+                        },
+                        gtk::Image::from_icon_name("dialog-information-symbolic") {
+                            set_tooltip_text: Some("name/path of the default terminal to use. This value is optional, if unset a list of default terminals is used to find a default terminal. Will be used to launch terminal apps and by the terminal plugin.")
                         },
                         gtk::Entry {
                             connect_changed[sender] => move |e| {

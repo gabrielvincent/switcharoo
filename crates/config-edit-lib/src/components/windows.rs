@@ -1,3 +1,4 @@
+use crate::components::switch::{Switch, SwitchInit, SwitchInput, SwitchOutput};
 use crate::components::windows_overview::{
     WindowsOverview, WindowsOverviewInit, WindowsOverviewInput, WindowsOverviewOutput,
 };
@@ -13,6 +14,8 @@ pub struct Windows {
     pub windows_overview: Controller<WindowsOverview>,
     pub config: crate::Windows,
     pub prev_config: crate::Windows,
+    pub switch: Controller<Switch>,
+    pub switch_2: Controller<Switch>,
 }
 
 #[derive(Debug)]
@@ -26,6 +29,8 @@ pub enum WindowsOutput {
     Scale(f64),
     ItemsPerRow(u8),
     Overview(WindowsOverviewOutput),
+    Switch(SwitchOutput),
+    Switch2(SwitchOutput),
 }
 
 #[derive(Debug)]
@@ -104,6 +109,8 @@ impl SimpleComponent for Windows {
                     }
                 },
                 add_row = model.windows_overview.widget(),
+                add_row = model.switch.widget(),
+                add_row = model.switch_2.widget(),
             }
         }
     }
@@ -118,9 +125,23 @@ impl SimpleComponent for Windows {
                 config: init.config.overview.clone(),
             })
             .forward(sender.output_sender(), WindowsOutput::Overview);
+        let switch = Switch::builder()
+            .launch(SwitchInit {
+                config: init.config.switch.clone(),
+                name: "Switch",
+            })
+            .forward(sender.output_sender(), WindowsOutput::Switch);
+        let switch_2 = Switch::builder()
+            .launch(SwitchInit {
+                config: init.config.switch_2.clone(),
+                name: "Switch 2",
+            })
+            .forward(sender.output_sender(), WindowsOutput::Switch2);
 
         let model = Windows {
             windows_overview,
+            switch,
+            switch_2,
             config: init.config.clone(),
             prev_config: init.config,
         };
@@ -137,6 +158,10 @@ impl SimpleComponent for Windows {
                     .emit(WindowsOverviewInput::SetOverview(
                         self.config.overview.clone(),
                     ));
+                self.switch
+                    .emit(SwitchInput::SetSwitch(self.config.switch.clone()));
+                self.switch_2
+                    .emit(SwitchInput::SetSwitch(self.config.switch_2.clone()));
             }
         }
     }

@@ -1,35 +1,38 @@
 use crate::SetTextIfDifferent;
 use crate::structs::{ConfigModifier, to_accelerator};
 use adw::gdk::{Key, ModifierType};
+use adw::gtk::Align;
 use relm4::ComponentController;
 use relm4::adw::gtk;
 use relm4::adw::prelude::*;
-use relm4::gtk::{Align, EventControllerKey};
+use relm4::gtk::EventControllerKey;
 use relm4::{Component, Controller, adw};
 use relm4::{ComponentParts, ComponentSender, SimpleComponent};
 use relm4_components::alert::{Alert, AlertMsg, AlertResponse, AlertSettings};
 
 #[derive(Debug)]
-pub struct WindowsOverview {
-    config: crate::Overview,
-    prev_config: crate::Overview,
+pub struct Switch {
+    config: crate::Switch,
+    prev_config: crate::Switch,
     get_keyboard_shortcut: bool,
-    alert_dialog: Controller<Alert>,
+    name: &'static str,
+    keyboard_dialog: Controller<Alert>,
 }
 
 #[derive(Debug)]
-pub enum WindowsOverviewInput {
-    SetOverview(crate::Overview),
+pub enum SwitchInput {
+    SetSwitch(crate::Switch),
     ToggleGetKeyboardShortcut,
 }
 
 #[derive(Debug)]
-pub struct WindowsOverviewInit {
-    pub config: crate::Overview,
+pub struct SwitchInit {
+    pub config: crate::Switch,
+    pub name: &'static str,
 }
 
 #[derive(Debug)]
-pub enum WindowsOverviewOutput {
+pub enum SwitchOutput {
     Enabled(bool),
     Key(String),
     Modifier(ConfigModifier),
@@ -39,10 +42,10 @@ pub enum WindowsOverviewOutput {
 }
 
 #[relm4::component(pub)]
-impl SimpleComponent for WindowsOverview {
-    type Init = WindowsOverviewInit;
-    type Input = WindowsOverviewInput;
-    type Output = WindowsOverviewOutput;
+impl SimpleComponent for Switch {
+    type Init = SwitchInit;
+    type Input = SwitchInput;
+    type Output = SwitchOutput;
 
     view! {
         #[root]
@@ -53,17 +56,17 @@ impl SimpleComponent for WindowsOverview {
             set_css_classes: &["enable-frame"],
             add_prefix = &gtk::Box {
                 set_orientation: gtk::Orientation::Horizontal,
-                set_halign: gtk::Align::Fill,
-                set_valign: gtk::Align::Center,
+                set_halign: Align::Fill,
+                set_valign: Align::Center,
                 set_spacing: 25,
                 gtk::Label {
-                    set_label: "Overview + Launcher",
+                    set_label: model.name,
                 },
                 gtk::Button {
                     set_icon_name: "keyboard-layout",
                     #[watch]
                     set_css_classes: if model.get_keyboard_shortcut { &["active"] } else { &["not-active"] },
-                    connect_clicked[sender] => move |_| sender.input(WindowsOverviewInput::ToggleGetKeyboardShortcut),
+                    connect_clicked[sender] => move |_| sender.input(SwitchInput::ToggleGetKeyboardShortcut),
                 },
                 adw::ShortcutLabel::new(&to_accelerator(model.config.modifier, &model.config.key).unwrap_or_default()) {
                     #[watch]
@@ -72,7 +75,7 @@ impl SimpleComponent for WindowsOverview {
                     set_css_classes: if to_accelerator(model.config.modifier, &model.config.key) == to_accelerator(model.prev_config.modifier, &model.prev_config.key)  { &[] } else { &["blue-label"]  },
                 },
             },
-            connect_enable_expansion_notify[sender] => move |e| {sender.output(WindowsOverviewOutput::Enabled(e.enables_expansion())).unwrap()},
+            connect_enable_expansion_notify[sender] => move |e| {sender.output(SwitchOutput::Enabled(e.enables_expansion())).unwrap()},
             #[watch]
             set_enable_expansion: model.config.enabled,
             #[watch]
@@ -100,19 +103,19 @@ impl SimpleComponent for WindowsOverview {
                         set_title_lines: 2,
                         set_css_classes: &["item-expander"],
                         add_row = &adw::SwitchRow {
-                            connect_active_notify[sender] => move |c| { sender.output(WindowsOverviewOutput::FilterSameClass(c.is_active())).unwrap() },
+                            connect_active_notify[sender] => move |c| { sender.output(SwitchOutput::FilterSameClass(c.is_active())).unwrap() },
                             #[watch]
                             set_active: model.config.same_class,
                             set_title: "Same class",
                         },
                         add_row = &adw::SwitchRow {
-                            connect_active_notify[sender] => move |c| { sender.output(WindowsOverviewOutput::FilterWorkspace(c.is_active())).unwrap() },
+                            connect_active_notify[sender] => move |c| { sender.output(SwitchOutput::FilterWorkspace(c.is_active())).unwrap() },
                             #[watch]
                             set_active: model.config.current_workspace,
                             set_title: "Current workspace",
                         },
                         add_row = &adw::SwitchRow {
-                            connect_active_notify[sender] => move |c| { sender.output(WindowsOverviewOutput::FilterMonitor(c.is_active())).unwrap() },
+                            connect_active_notify[sender] => move |c| { sender.output(SwitchOutput::FilterMonitor(c.is_active())).unwrap() },
                             #[watch]
                             set_active: model.config.current_monitor,
                             set_title: "Current monitor",
@@ -146,7 +149,7 @@ impl SimpleComponent for WindowsOverview {
     ) -> ComponentParts<Self> {
         let entry = gtk::Label::new(None);
 
-        let alert_dialog = Alert::builder()
+        let keyboard_dialog = Alert::builder()
             .transient_for(&root)
             .launch(AlertSettings {
                 text: Some("Press Keyboard shortcut".to_string()),
@@ -159,15 +162,15 @@ impl SimpleComponent for WindowsOverview {
                 extra_child: Some(entry.clone().into()),
             })
             .forward(sender.input_sender(), |res| match res {
-                AlertResponse::Confirm => WindowsOverviewInput::ToggleGetKeyboardShortcut,
-                AlertResponse::Cancel => WindowsOverviewInput::ToggleGetKeyboardShortcut,
+                AlertResponse::Confirm => SwitchInput::ToggleGetKeyboardShortcut,
+                AlertResponse::Cancel => SwitchInput::ToggleGetKeyboardShortcut,
                 AlertResponse::Option => unreachable!("no option button in alert dialog"),
             });
 
         // Attach an EventControllerKey to the alert dialog's window to print raw key events.
         let key_controller = EventControllerKey::new();
         let entry = entry.clone();
-        let window = alert_dialog.widgets().gtk_window_12.clone();
+        let window = keyboard_dialog.widgets().gtk_window_12.clone();
         let send = sender.clone();
         key_controller.connect_key_pressed(move |_, val, id, state| {
             tracing::debug!("Raw key event - val: {}, state: {:?}", val, state);
@@ -184,10 +187,9 @@ impl SimpleComponent for WindowsOverview {
                         _ => None,
                     },
                 } {
-                    send.output(WindowsOverviewOutput::Key(format!("code:{id}")))
+                    send.output(SwitchOutput::Key(format!("code:{id}")))
                         .unwrap();
-                    send.output(WindowsOverviewOutput::Modifier(modifier))
-                        .unwrap();
+                    send.output(SwitchOutput::Modifier(modifier)).unwrap();
                     if modifier == ConfigModifier::None {
                         entry.set_label(&key_name);
                     } else {
@@ -203,27 +205,28 @@ impl SimpleComponent for WindowsOverview {
         });
         window.add_controller(key_controller);
 
-        let model = WindowsOverview {
+        let model = Switch {
             config: init.config.clone(),
             prev_config: init.config,
             get_keyboard_shortcut: false,
-            alert_dialog,
+            keyboard_dialog,
+            name: init.name,
         };
         let widgets = view_output!();
         ComponentParts { model, widgets }
     }
 
-    fn update(&mut self, message: WindowsOverviewInput, _sender: ComponentSender<Self>) {
+    fn update(&mut self, message: Self::Input, _sender: ComponentSender<Self>) {
         match message {
-            WindowsOverviewInput::SetOverview(config) => {
+            SwitchInput::SetSwitch(config) => {
                 self.config = config;
             }
-            WindowsOverviewInput::ToggleGetKeyboardShortcut => {
+            SwitchInput::ToggleGetKeyboardShortcut => {
                 self.get_keyboard_shortcut = !self.get_keyboard_shortcut;
                 if self.get_keyboard_shortcut {
-                    self.alert_dialog.emit(AlertMsg::Show);
+                    self.keyboard_dialog.emit(AlertMsg::Show);
                 }
-                self.alert_dialog.widgets().gtk_window_12.set_modal(true);
+                self.keyboard_dialog.widgets().gtk_window_12.set_modal(true);
             }
         }
     }

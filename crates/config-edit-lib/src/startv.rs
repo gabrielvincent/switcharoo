@@ -28,7 +28,8 @@ pub fn start(config_path: PathBuf, _css_path: PathBuf) {
     let mut windows = Windows::default();
     let mut overview = Overview::default();
     overview.filter_by = vec![FilterBy::CurrentMonitor];
-    overview.modifier = Modifier::Alt;
+    overview.modifier = Modifier::Super;
+    overview.key = "Super_L".into();
     windows.overview = Some(overview);
     windows.scale = 5.5;
     config.windows = Some(windows);

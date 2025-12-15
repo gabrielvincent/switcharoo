@@ -49,7 +49,7 @@ impl SimpleComponent for Footer {
                         connect_clicked[sender] => move |_| sender.output(FooterOutput::Save).unwrap(),
                     },
                     gtk::Button {
-                        set_label: "Cancel",
+                        set_label: "Close",
                         set_css_classes: &["destructive-action"],
                         connect_clicked[sender] => move |_| sender.output(FooterOutput::Close).unwrap(),
                     }

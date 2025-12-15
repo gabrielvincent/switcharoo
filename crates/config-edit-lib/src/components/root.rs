@@ -1,6 +1,7 @@
-use crate::components::changes::{Changes, ChangesInit};
+use crate::components::changes::{Changes, ChangesInit, ChangesInput, generate_items};
 use crate::components::json_preview::{JSONPreview, JSONPreviewInit};
 use crate::components::launcher::{Launcher, LauncherInit, LauncherInput, LauncherOutput};
+use crate::components::switch::SwitchOutput;
 use crate::components::windows::{Windows, WindowsInit, WindowsInput, WindowsOutput};
 use crate::components::windows_overview::WindowsOverviewOutput;
 use crate::footer::{Footer, FooterOutput};
@@ -33,7 +34,9 @@ pub struct Root {
     alert_dialog: Controller<Alert>,
     launcher: Controller<Launcher>,
     windows: Controller<Windows>,
-    pub view_stack: adw::ViewStack,
+    view_stack: adw::ViewStack,
+    changes: Controller<Changes>,
+    pub alert_dialog_changes_list: ListBox,
 }
 
 pub struct InitRoot {
@@ -103,7 +106,7 @@ impl SimpleComponent for Root {
                     FooterOutput::Save => Msg::Save(false),
                 });
 
-        let list = ListBox::builder()
+        let changes_list = ListBox::builder()
             .css_classes(["items-list", "boxed-list"])
             .selection_mode(SelectionMode::None)
             .show_separators(false)
@@ -111,23 +114,18 @@ impl SimpleComponent for Root {
             .valign(Align::Start)
             .hexpand(true)
             .build();
-        list.append(
-            &adw::ActionRow::builder()
-                .title("TODO add changes")
-                .focusable(false)
-                .build(),
-        );
-        let alert_dialog = relm4_components::alert::Alert::builder()
+        let alert_dialog = Alert::builder()
             .transient_for(&root)
             .launch(AlertSettings {
                 text: Some("Do you want to close before saving?".to_string()),
-                secondary_text: Some(String::from("All unsaved changes will be lost")),
+                secondary_text: None,
+                // secondary_text: Some(String::from("All unsaved changes will be lost")),
                 confirm_label: Some(String::from("Close without saving")),
                 cancel_label: Some(String::from("Cancel")),
                 option_label: Some(String::from("Save and quit")),
                 is_modal: true,
                 destructive_accept: true,
-                extra_child: Some(list.into()),
+                extra_child: Some((changes_list).clone().into()),
             })
             .forward(sender.input_sender(), |res| match res {
                 AlertResponse::Confirm => Msg::Close,
@@ -147,7 +145,11 @@ impl SimpleComponent for Root {
             .forward(sender.input_sender(), Msg::Launcher);
 
         let json_preview = JSONPreview::builder().launch(JSONPreviewInit {}).detach();
-        let changes = Changes::builder().launch(ChangesInit {}).detach();
+        let changes = Changes::builder()
+            .launch(ChangesInit {
+                config: init.config.clone(),
+            })
+            .detach();
 
         let widgets = view_output!();
         widgets.view_stack.add_titled_with_icon(
@@ -182,7 +184,9 @@ impl SimpleComponent for Root {
             footer,
             windows,
             launcher,
+            changes,
             alert_dialog,
+            alert_dialog_changes_list: changes_list,
             view_stack: widgets.view_stack.clone(),
         };
         ComponentParts { model, widgets }
@@ -192,8 +196,17 @@ impl SimpleComponent for Root {
         match msg {
             Msg::Ignore => (),
             Msg::CloseRequest => {
-                self.alert_dialog.emit(AlertMsg::Show);
-                self.alert_dialog.widgets().gtk_window_12.set_modal(true);
+                let changes = generate_items(
+                    &self.alert_dialog_changes_list,
+                    &self.config,
+                    &self.prev_config,
+                );
+                if changes {
+                    self.alert_dialog.emit(AlertMsg::Show);
+                    self.alert_dialog.widgets().gtk_window_12.set_modal(true);
+                } else {
+                    sender.input(Msg::Close);
+                }
             }
             Msg::Close => {
                 relm4::main_application().quit();
@@ -204,6 +217,7 @@ impl SimpleComponent for Root {
                 if close {
                     sender.input(Msg::Close);
                 }
+                // TODO set prev config
             }
             Msg::Reset => {
                 self.config = self.prev_config.clone();
@@ -280,11 +294,49 @@ impl SimpleComponent for Root {
                             self.config.windows.overview.current_monitor = enabled;
                         }
                     },
+                    WindowsOutput::Switch(msg) => match msg {
+                        SwitchOutput::Enabled(enabled) => {
+                            self.config.windows.switch.enabled = enabled;
+                        }
+                        SwitchOutput::Key(key) => self.config.windows.switch.key = key,
+                        SwitchOutput::Modifier(modifier) => {
+                            self.config.windows.switch.modifier = modifier;
+                        }
+                        SwitchOutput::FilterSameClass(enabled) => {
+                            self.config.windows.switch.same_class = enabled;
+                        }
+                        SwitchOutput::FilterWorkspace(enabled) => {
+                            self.config.windows.switch.current_workspace = enabled;
+                        }
+                        SwitchOutput::FilterMonitor(enabled) => {
+                            self.config.windows.switch.current_monitor = enabled;
+                        }
+                    },
+                    WindowsOutput::Switch2(msg) => match msg {
+                        SwitchOutput::Enabled(enabled) => {
+                            self.config.windows.switch_2.enabled = enabled;
+                        }
+                        SwitchOutput::Key(key) => self.config.windows.switch_2.key = key,
+                        SwitchOutput::Modifier(modifier) => {
+                            self.config.windows.switch_2.modifier = modifier;
+                        }
+                        SwitchOutput::FilterSameClass(enabled) => {
+                            self.config.windows.switch_2.same_class = enabled;
+                        }
+                        SwitchOutput::FilterWorkspace(enabled) => {
+                            self.config.windows.switch_2.current_workspace = enabled;
+                        }
+                        SwitchOutput::FilterMonitor(enabled) => {
+                            self.config.windows.switch_2.current_monitor = enabled;
+                        }
+                    },
                 };
                 // propagate event back
                 self.windows
                     .emit(WindowsInput::SetWindows(self.config.windows.clone()));
             }
         }
+        self.changes
+            .emit(ChangesInput::SetConfig(self.config.clone()));
     }
 }

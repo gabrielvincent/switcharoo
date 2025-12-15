@@ -2,6 +2,7 @@ use adw::gdk::Display;
 use relm4::gtk::prelude::DisplayExtManual;
 use std::fmt;
 use std::fmt::Formatter;
+use tracing::instrument;
 
 #[derive(Debug, Clone)]
 pub struct Config {
@@ -15,6 +16,7 @@ pub struct Windows {
     pub items_per_row: u8,
     pub overview: Overview,
     pub switch: Switch,
+    pub switch_2: Switch,
 }
 
 #[derive(Debug, Clone)]
@@ -22,7 +24,7 @@ pub struct Overview {
     pub enabled: bool,
     pub launcher: Launcher,
     pub key: String,
-    pub modifier: Modifier,
+    pub modifier: ConfigModifier,
     pub same_class: bool,
     pub current_workspace: bool,
     pub current_monitor: bool,
@@ -31,7 +33,7 @@ pub struct Overview {
 #[derive(Debug, Clone)]
 pub struct Launcher {
     pub default_terminal: Option<String>,
-    pub launch_modifier: Modifier,
+    pub launch_modifier: ConfigModifier,
     pub width: u32,
     pub max_items: u8,
     pub show_when_empty: bool,
@@ -77,41 +79,47 @@ pub struct ApplicationsPluginConfig {
 #[derive(Debug, Clone)]
 pub struct Switch {
     pub enabled: bool,
-    pub modifier: Modifier,
+    pub modifier: ConfigModifier,
+    pub key: String,
     pub same_class: bool,
     pub current_workspace: bool,
     pub current_monitor: bool,
     pub switch_workspaces: bool,
 }
 
-pub fn to_accelerator(modifier: Modifier, key: &str) -> Option<String> {
-    // key is keycode
-    let key = if key.starts_with("code:") {
-        let key_id = key.split(':').nth(1)?;
-        let code = key_id.parse::<u32>().ok()?;
-        let display = &Display::default()?;
-        let data = display.map_keycode(code)?;
-        let (_, key) = data.iter().find(|(m, k)| m.level() == 0)?;
-        key.name()?.to_string()
-    } else {
-        key.to_string()
-    };
-    if modifier == Modifier::None {
+#[instrument(level = "trace", ret(level = "trace"))]
+pub fn to_accelerator(modifier: ConfigModifier, key: &str) -> Option<String> {
+    let key = key_to_name(key)?;
+    if modifier == ConfigModifier::None {
         Some(key)
     } else {
         Some(format!("<{}>{}", modifier, key))
     }
 }
 
+pub fn key_to_name(key: &str) -> Option<String> {
+    // key is keycode
+    if key.starts_with("code:") {
+        let key_id = key.split(':').nth(1)?;
+        let code = key_id.parse::<u32>().ok()?;
+        let display = &Display::default()?;
+        let data = display.map_keycode(code)?;
+        let (_, key) = data.iter().find(|(m, k)| m.level() == 0)?;
+        Some(key.name()?.to_string())
+    } else {
+        Some(key.to_string())
+    }
+}
+
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
-pub enum Modifier {
+pub enum ConfigModifier {
     None,
     Alt,
     Super,
     Ctrl,
 }
 
-impl Modifier {
+impl ConfigModifier {
     pub fn strings() -> &'static [&'static str] {
         &["Alt", "Super", "Ctrl"]
     }
@@ -120,18 +128,18 @@ impl Modifier {
     }
 }
 
-impl fmt::Display for Modifier {
+impl fmt::Display for ConfigModifier {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         match self {
-            Modifier::None => write!(f, ""),
-            Modifier::Alt => write!(f, "Alt"),
-            Modifier::Super => write!(f, "Super"),
-            Modifier::Ctrl => write!(f, "Ctrl"),
+            ConfigModifier::None => write!(f, ""),
+            ConfigModifier::Alt => write!(f, "Alt"),
+            ConfigModifier::Super => write!(f, "Super"),
+            ConfigModifier::Ctrl => write!(f, "Ctrl"),
         }
     }
 }
 
-impl TryFrom<u32> for Modifier {
+impl TryFrom<u32> for ConfigModifier {
     type Error = ();
     fn try_from(value: u32) -> Result<Self, Self::Error> {
         match value {
@@ -144,13 +152,13 @@ impl TryFrom<u32> for Modifier {
     }
 }
 
-impl Into<u32> for Modifier {
+impl Into<u32> for ConfigModifier {
     fn into(self) -> u32 {
         match self {
-            Modifier::Alt => 0,
-            Modifier::Super => 1,
-            Modifier::Ctrl => 2,
-            Modifier::None => 3,
+            ConfigModifier::Alt => 0,
+            ConfigModifier::Super => 1,
+            ConfigModifier::Ctrl => 2,
+            ConfigModifier::None => 3,
         }
     }
 }
@@ -163,12 +171,13 @@ impl From<config_lib::Config> for Config {
     }
 }
 
-impl From<config_lib::Modifier> for Modifier {
+impl From<config_lib::Modifier> for ConfigModifier {
     fn from(value: config_lib::Modifier) -> Self {
         match value {
             config_lib::Modifier::Alt => Self::Alt,
             config_lib::Modifier::Super => Self::Super,
             config_lib::Modifier::Ctrl => Self::Ctrl,
+            config_lib::Modifier::None => Self::None,
         }
     }
 }
@@ -180,6 +189,7 @@ impl From<Option<config_lib::Switch>> for Switch {
         Self {
             enabled,
             modifier: v.modifier.into(),
+            key: "tab".to_string(),
             same_class: v.filter_by.contains(&config_lib::FilterBy::SameClass),
             current_workspace: v
                 .filter_by
@@ -287,6 +297,7 @@ impl From<Option<config_lib::Windows>> for Windows {
             items_per_row: v.items_per_row,
             overview: v.overview.into(),
             switch: v.switch.into(),
+            switch_2: v.switch_2.into(),
         }
     }
 }

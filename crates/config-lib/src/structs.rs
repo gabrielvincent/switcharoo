@@ -28,6 +28,8 @@ pub struct Windows {
     pub overview: Option<Overview>,
     #[default(None)]
     pub switch: Option<Switch>,
+    #[default(None)]
+    pub switch_2: Option<Switch>,
 }
 
 #[derive(SmartDefault, Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]
