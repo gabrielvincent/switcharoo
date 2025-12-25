@@ -112,6 +112,8 @@ fn main() -> anyhow::Result<()> {
                 config_lib::write_config(&config_path, &config, override_config).warn();
                 config_lib::generate::write_css(&css_path, &css_data, override_css).warn();
                 if cfg!(debug_assertions) || no_systemd {
+                    tracing::debug!("Skipping systemd unit generation");
+                } else {
                     config_lib::generate::write_systemd_unit(
                         opts.config_file.as_ref(),
                         opts.css_file.as_ref(),

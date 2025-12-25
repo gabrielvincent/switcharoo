@@ -121,7 +121,7 @@ fn internal_get_initial_active() -> anyhow::Result<Active> {
 }
 
 pub fn check_version() -> anyhow::Result<()> {
-    pub const MIN_VERSION: Version = Version::new(0, 52, 0);
+    pub const MIN_VERSION: Version = Version::new(0, 52, 1);
 
     let version = hyprland::data::Version::get()
         .context("Failed to get version! (hyprland is probably outdated or too new??)")?;

@@ -24,7 +24,7 @@ The application also includes a launcher for running applications, doing calcula
 
 ## Installation
 
-**Minimum hyprland version: 0.52.0**
+**Minimum hyprland version: 0.52.1**
 
 [![Packaging status](https://repology.org/badge/vertical-allrepos/hyprshell.svg)](https://repology.org/project/hyprshell/versions)
 
