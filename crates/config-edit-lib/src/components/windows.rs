@@ -74,7 +74,7 @@ impl SimpleComponent for Windows {
                             set_label: "Scale",
                         },
                         gtk::Image::from_icon_name("dialog-information-symbolic") {
-                            set_tooltip_text: Some("The scale used to scale down the real dimension the windows displayed in the overview. Can be set from `0.5 < X > to 15.0`")
+                            set_tooltip_text: Some("The scale used to scale down the real dimension the windows displayed in the overview. \nCan be set from `0.5 < X > to 15.0`")
                         },
                         gtk::SpinButton {
                             set_adjustment: &gtk::Adjustment::new(1.0, 0.5, 15.0, 0.5, 1.0, 0.0),
@@ -95,7 +95,7 @@ impl SimpleComponent for Windows {
                             set_label: "Items per row",
                         },
                         gtk::Image::from_icon_name("dialog-information-symbolic") {
-                            set_tooltip_text: Some("The number of workspaces or windows to show per row. If you have 6 workspaces open and set this to 3, you will see 2 rows of 3 workspaces")
+                            set_tooltip_text: Some("The number of workspaces or windows to show per row. \nIf you have 6 workspaces open and set this to 3, you will see 2 rows of 3 workspaces")
                         },
                         gtk::SpinButton {
                             set_adjustment: &gtk::Adjustment::new(1.0, 0.0, 50.0, 1.0, 5.0, 0.0),

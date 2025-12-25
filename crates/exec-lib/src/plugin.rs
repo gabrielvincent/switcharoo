@@ -91,5 +91,7 @@ pub const fn mod_to_xkb_key(r#mod: Modifier) -> &'static str {
         Modifier::Alt => "XKB_KEY_Alt",
         Modifier::Ctrl => "XKB_KEY_Control",
         Modifier::Super => "XKB_KEY_Super",
+        // TODO
+        Modifier::None => "XKB_KEY_NoSymbol",
     }
 }

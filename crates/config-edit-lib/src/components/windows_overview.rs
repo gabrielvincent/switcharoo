@@ -126,7 +126,7 @@ impl SimpleComponent for WindowsOverview {
                         set_label: "Exclude special workspaces",
                     },
                     gtk::Image::from_icon_name("dialog-information-symbolic") {
-                        set_tooltip_text: Some("Exclude special workspaces by regex (hyprctl workspaces -j | jq \".[].name\")")
+                        set_tooltip_text: Some("Exclude special workspaces by regex \n(hyprctl workspaces -j | jq \".[].name\")")
                     },
                     gtk::Entry {
                         set_input_purpose: gtk::InputPurpose::FreeForm,

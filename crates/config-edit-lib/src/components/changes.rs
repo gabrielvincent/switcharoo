@@ -1,10 +1,10 @@
 use crate::structs::{Config, key_to_name};
 use adw::ActionRow;
+use adw::gtk::SelectionMode;
 use relm4::adw::gtk;
 use relm4::adw::prelude::*;
-use relm4::gtk::{ListBox, TextView};
+use relm4::gtk::ListBox;
 use relm4::{ComponentParts, ComponentSender, RelmWidgetExt, SimpleComponent};
-use std::path::Path;
 
 #[derive(Debug)]
 pub struct Changes {
@@ -43,6 +43,7 @@ impl SimpleComponent for Changes {
                 set_halign: gtk::Align::Center,
                 set_valign: gtk::Align::Start,
                 set_hexpand: true,
+                set_selection_mode: SelectionMode::None,
                 set_css_classes: &["items-list", "boxed-list"]
             }
         }
@@ -78,6 +79,17 @@ impl SimpleComponent for Changes {
     }
 }
 
+macro_rules! flags_csv {
+    ($s:expr, $($field:ident),+ $(,)?) => {{
+        [$( (stringify!($field), $s.$field) ),+]
+            .into_iter()
+            .filter(|(_, v)| *v)
+            .map(|(k, _)| k)
+            .collect::<Vec<&str>>()
+            .join(", ")
+    }};
+}
+
 pub fn generate_items(
     changes: &ListBox,
     // how_to_use: &TextView,
@@ -94,10 +106,11 @@ pub fn generate_items(
         (true, false) => {
             add_info(changes, "Disabled Windows");
         }
-        (false, true) => {
-            add_info(changes, "Enabled Windows");
-        }
-        (true, true) => {
+        (_, true) => {
+            if !prev_config.windows.enabled {
+                add_info(changes, "Enabled Windows");
+            }
+
             #[allow(clippy::cast_sign_loss)]
             if (prev_config.windows.scale - config.windows.scale).abs() > 0.001 {
                 add_info_subtitle(
@@ -124,10 +137,10 @@ pub fn generate_items(
                 (true, false) => {
                     add_info(changes, "Disabled Overview");
                 }
-                (false, true) => {
-                    add_info(changes, "Enabled Overview");
-                }
-                (true, true) => {
+                (_, true) => {
+                    if !prev_config.windows.overview.enabled {
+                        add_info(changes, "Enabled Overview");
+                    }
                     if prev_config.windows.overview.modifier != config.windows.overview.modifier {
                         add_info_subtitle(
                             changes,
@@ -155,40 +168,28 @@ pub fn generate_items(
                         );
                     }
                     if prev_config.windows.overview.same_class != config.windows.overview.same_class
+                        || prev_config.windows.overview.current_monitor
+                            != config.windows.overview.current_monitor
+                        || prev_config.windows.overview.current_workspace
+                            != config.windows.overview.current_workspace
                     {
                         add_info_subtitle(
                             changes,
-                            "Changed overview filter by same_class",
+                            "Changed overview filter by",
                             format!(
-                                "{:?} -> {:?}",
-                                prev_config.windows.overview.same_class,
-                                config.windows.overview.same_class
-                            ),
-                        );
-                    }
-                    if prev_config.windows.overview.current_monitor
-                        != config.windows.overview.current_monitor
-                    {
-                        add_info_subtitle(
-                            changes,
-                            "Changed overview filter by current_monitor",
-                            format!(
-                                "{:?} -> {:?}",
-                                prev_config.windows.overview.current_monitor,
-                                config.windows.overview.current_monitor
-                            ),
-                        );
-                    }
-                    if prev_config.windows.overview.current_workspace
-                        != config.windows.overview.current_workspace
-                    {
-                        add_info_subtitle(
-                            changes,
-                            "Changed overview filter by current_workspace",
-                            format!(
-                                "{:?} -> {:?}",
-                                prev_config.windows.overview.current_workspace,
-                                config.windows.overview.current_workspace
+                                "{} -> {}",
+                                flags_csv!(
+                                    prev_config.windows.overview,
+                                    same_class,
+                                    current_monitor,
+                                    current_workspace
+                                ),
+                                flags_csv!(
+                                    config.windows.overview,
+                                    same_class,
+                                    current_monitor,
+                                    current_workspace
+                                ),
                             ),
                         );
                     }
@@ -281,10 +282,11 @@ pub fn generate_items(
                 (true, false) => {
                     add_info(changes, "Disabled Switch view");
                 }
-                (false, true) => {
-                    add_info(changes, "Enabled Switch view");
-                }
-                (true, true) => {
+                (_, true) => {
+                    if !prev_config.windows.switch.enabled {
+                        add_info(changes, "Enabled Switch view");
+                    }
+
                     if prev_config.windows.switch.modifier != config.windows.switch.modifier {
                         add_info_subtitle(
                             changes,
@@ -295,40 +297,29 @@ pub fn generate_items(
                             ),
                         );
                     }
-                    if prev_config.windows.switch.same_class != config.windows.switch.same_class {
-                        add_info_subtitle(
-                            changes,
-                            "Changed switch filter by same_class",
-                            format!(
-                                "{:?} -> {:?}",
-                                prev_config.windows.switch.same_class,
-                                config.windows.switch.same_class
-                            ),
-                        );
-                    }
-                    if prev_config.windows.switch.current_workspace
-                        != config.windows.switch.current_workspace
+                    if prev_config.windows.switch.same_class != config.windows.switch.same_class
+                        || prev_config.windows.switch.current_monitor
+                            != config.windows.switch.current_monitor
+                        || prev_config.windows.switch.current_workspace
+                            != config.windows.switch.current_workspace
                     {
                         add_info_subtitle(
                             changes,
-                            "Changed switch filter by current_workspace",
+                            "Changed switch filter by",
                             format!(
-                                "{:?} -> {:?}",
-                                prev_config.windows.switch.current_workspace,
-                                config.windows.switch.current_workspace
-                            ),
-                        );
-                    }
-                    if prev_config.windows.switch.current_monitor
-                        != config.windows.switch.current_monitor
-                    {
-                        add_info_subtitle(
-                            changes,
-                            "Changed switch filter by current_monitor",
-                            format!(
-                                "{:?} -> {:?}",
-                                prev_config.windows.switch.current_monitor,
-                                config.windows.switch.current_monitor
+                                "{} -> {}",
+                                flags_csv!(
+                                    prev_config.windows.switch,
+                                    same_class,
+                                    current_monitor,
+                                    current_workspace
+                                ),
+                                flags_csv!(
+                                    config.windows.switch,
+                                    same_class,
+                                    current_monitor,
+                                    current_workspace
+                                ),
                             ),
                         );
                     }
@@ -342,6 +333,71 @@ pub fn generate_items(
                                 "{} -> {}",
                                 prev_config.windows.switch.switch_workspaces,
                                 config.windows.switch.switch_workspaces
+                            ),
+                        );
+                    }
+                }
+            }
+            match (
+                &prev_config.windows.switch_2.enabled,
+                &config.windows.switch_2.enabled,
+            ) {
+                (false, false) => {}
+                (true, false) => {
+                    add_info(changes, "Disabled Switch 2 view");
+                }
+                (_, true) => {
+                    if !prev_config.windows.switch_2.enabled {
+                        add_info(changes, "Enabled Switch 2 view");
+                    }
+
+                    if prev_config.windows.switch_2.modifier != config.windows.switch_2.modifier {
+                        add_info_subtitle(
+                            changes,
+                            "Changed switch 2 modifier",
+                            format!(
+                                "{} -> {}",
+                                prev_config.windows.switch_2.modifier,
+                                config.windows.switch_2.modifier
+                            ),
+                        );
+                    }
+                    if prev_config.windows.switch_2.same_class != config.windows.switch_2.same_class
+                        || prev_config.windows.switch_2.current_monitor
+                            != config.windows.switch_2.current_monitor
+                        || prev_config.windows.switch_2.current_workspace
+                            != config.windows.switch_2.current_workspace
+                    {
+                        add_info_subtitle(
+                            changes,
+                            "Changed switch 2 filter by",
+                            format!(
+                                "{} -> {}",
+                                flags_csv!(
+                                    prev_config.windows.switch_2,
+                                    same_class,
+                                    current_monitor,
+                                    current_workspace
+                                ),
+                                flags_csv!(
+                                    config.windows.switch_2,
+                                    same_class,
+                                    current_monitor,
+                                    current_workspace
+                                ),
+                            ),
+                        );
+                    }
+                    if prev_config.windows.switch_2.switch_workspaces
+                        != config.windows.switch_2.switch_workspaces
+                    {
+                        add_info_subtitle(
+                            changes,
+                            "Changed switch 2 switch workspaces",
+                            format!(
+                                "{} -> {}",
+                                prev_config.windows.switch_2.switch_workspaces,
+                                config.windows.switch_2.switch_workspaces
                             ),
                         );
                     }

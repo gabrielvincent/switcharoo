@@ -15,6 +15,7 @@ impl From<old_structs::Windows> for crate::Windows {
             scale: value.scale,
             items_per_row: value.items_per_row,
             switch: value.switch,
+            switch_2: None,
             overview: value.overview.map(old_structs::Overview::into),
         }
     }

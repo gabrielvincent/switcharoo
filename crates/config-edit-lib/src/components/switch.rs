@@ -39,6 +39,7 @@ pub enum SwitchOutput {
     FilterSameClass(bool),
     FilterWorkspace(bool),
     FilterMonitor(bool),
+    SwitchWorkspaces(bool),
 }
 
 #[relm4::component(pub)]
@@ -129,7 +130,7 @@ impl SimpleComponent for Switch {
                         set_label: "Exclude special workspaces",
                     },
                     gtk::Image::from_icon_name("dialog-information-symbolic") {
-                        set_tooltip_text: Some("Exclude special workspaces by regex (hyprctl workspaces -j | jq \".[].name\")")
+                        set_tooltip_text: Some("Exclude special workspaces by regex \n(hyprctl workspaces -j | jq \".[].name\")")
                     },
                     gtk::Entry {
                         set_input_purpose: gtk::InputPurpose::FreeForm,
@@ -137,6 +138,22 @@ impl SimpleComponent for Switch {
                         set_hexpand: true,
                         set_valign: Align::Center
                     }
+                },
+                gtk::Box {
+                    set_orientation: gtk::Orientation::Horizontal,
+                    set_spacing: 10,
+                    gtk::Label {
+                        set_label: "Switch Workspaces",
+                    },
+                    gtk::Image::from_icon_name("dialog-information-symbolic") {
+                        set_tooltip_text: Some("Switch between workspaces in the Switch mode instead of windows")
+                    },
+                    gtk::Switch {
+                        #[watch]
+                        set_active: model.config.switch_workspaces,
+                        set_valign: Align::Center,
+                        connect_active_notify[sender] => move |e| { sender.output(SwitchOutput::SwitchWorkspaces(e.is_active())).unwrap() },
+                    },
                 }
             }
         }

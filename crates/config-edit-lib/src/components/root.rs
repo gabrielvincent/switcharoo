@@ -247,17 +247,14 @@ impl SimpleComponent for Root {
                     LauncherOutput::MaxItems(max_items) => {
                         self.config.windows.overview.launcher.max_items = max_items;
                     }
-                    LauncherOutput::DefaultTerminal(default_terminal) => {
-                        dbg!(&default_terminal);
-                        match default_terminal {
-                            None => {
-                                self.config.windows.overview.launcher.default_terminal = None;
-                            }
-                            Some(val) => {
-                                self.config.windows.overview.launcher.default_terminal = Some(val);
-                            }
+                    LauncherOutput::DefaultTerminal(default_terminal) => match default_terminal {
+                        None => {
+                            self.config.windows.overview.launcher.default_terminal = None;
                         }
-                    }
+                        Some(val) => {
+                            self.config.windows.overview.launcher.default_terminal = Some(val);
+                        }
+                    },
                 }
                 // propagate event back
                 self.launcher.emit(LauncherInput::SetLauncher(
@@ -289,9 +286,17 @@ impl SimpleComponent for Root {
                         }
                         WindowsOverviewOutput::FilterWorkspace(enabled) => {
                             self.config.windows.overview.current_workspace = enabled;
+                            // current monitor and current workspace are incompatible
+                            if enabled {
+                                self.config.windows.overview.current_monitor = false;
+                            }
                         }
                         WindowsOverviewOutput::FilterMonitor(enabled) => {
                             self.config.windows.overview.current_monitor = enabled;
+                            // current monitor and current workspace are incompatible
+                            if enabled {
+                                self.config.windows.overview.current_workspace = false;
+                            }
                         }
                     },
                     WindowsOutput::Switch(msg) => match msg {
@@ -307,9 +312,20 @@ impl SimpleComponent for Root {
                         }
                         SwitchOutput::FilterWorkspace(enabled) => {
                             self.config.windows.switch.current_workspace = enabled;
+                            // current monitor and current workspace are incompatible
+                            if enabled {
+                                self.config.windows.switch.current_monitor = false;
+                            }
                         }
                         SwitchOutput::FilterMonitor(enabled) => {
                             self.config.windows.switch.current_monitor = enabled;
+                            // current monitor and current workspace are incompatible
+                            if enabled {
+                                self.config.windows.switch.current_workspace = false;
+                            }
+                        }
+                        SwitchOutput::SwitchWorkspaces(enabled) => {
+                            self.config.windows.switch.switch_workspaces = enabled;
                         }
                     },
                     WindowsOutput::Switch2(msg) => match msg {
@@ -325,9 +341,20 @@ impl SimpleComponent for Root {
                         }
                         SwitchOutput::FilterWorkspace(enabled) => {
                             self.config.windows.switch_2.current_workspace = enabled;
+                            // current monitor and current workspace are incompatible
+                            if enabled {
+                                self.config.windows.switch_2.current_monitor = false;
+                            }
                         }
                         SwitchOutput::FilterMonitor(enabled) => {
                             self.config.windows.switch_2.current_monitor = enabled;
+                            // current monitor and current workspace are incompatible
+                            if enabled {
+                                self.config.windows.switch_2.current_workspace = false;
+                            }
+                        }
+                        SwitchOutput::SwitchWorkspaces(enabled) => {
+                            self.config.windows.switch_2.switch_workspaces = enabled;
                         }
                     },
                 };

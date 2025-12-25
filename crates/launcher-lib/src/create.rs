@@ -146,6 +146,7 @@ fn handle_key(
         Modifier::Ctrl => modt == ModifierType::CONTROL_MASK,
         Modifier::Alt => modt == ModifierType::ALT_MASK,
         Modifier::Super => modt == ModifierType::SUPER_MASK,
+        Modifier::None => false,
     };
     // tracing::trace!(
     //     "key: {}{:?}, mods: {:?}, launch_mod: {}, launch_modifier: {}",
