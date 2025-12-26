@@ -2,9 +2,6 @@
     --border-color: rgba(255, 255, 255, 0);
     --border-color-active: rgba(120, 245, 255, 0.85);
 
-    --box-shadow-color: rgba(255, 255, 255, 0.7);
-    --box-shadow-color-hover: rgba(255, 255, 255, 0.85);
-
     --bg-color: rgba(255, 255, 255, 0.01);
     --bg-color-hover: rgba(255, 255, 255, 0.05);
 
@@ -15,8 +12,13 @@
     --text-color: rgba(245, 245, 245, 1);
 
     --window-padding: 2px;
+    --bg-window-color: rgba(255, 255, 255, 0.01);
 }
 
+:root {
+    --box-shadow-color: rgba(255, 255, 255, 0.7);
+    --box-shadow-color-hover: rgba(255, 255, 255, 0.85);
+}
 
 .monitor {
     border: unset;
@@ -47,10 +49,6 @@
     box-shadow: inset 0 0 35px var(--box-shadow-color-hover);
 }
 
-.client-image {
-}
-
-
 .launcher {
     border: unset;
     box-shadow: inset 0 0 25px var(--box-shadow-color);
@@ -66,9 +64,6 @@
     box-shadow: inset 0 0 12px var(--box-shadow-color-hover);
 }
 
-.launcher-results {
-}
-
 .launcher-item {
     padding: 0 10px;
     border-radius: 16px;
@@ -79,15 +74,6 @@
     box-shadow: inset 0 0 14px var(--box-shadow-color-hover);
 }
 
-.launcher-exec {
-}
-
-.launcher-key {
-}
-
-.launcher-plugins {
-}
-
 .launcher-plugin {
     padding: 8px;
     border-radius: 24px;
@@ -96,4 +82,22 @@
 
 .launcher-plugin:hover {
     box-shadow: inset 0 0 20px var(--box-shadow-color-hover);
+}
+
+@keyframes background-moving {
+    0% {
+        background: linear-gradient(90deg, rgba(120, 245, 255, 0.15) 0%, transparent 0%);
+    }
+    100% {
+        background: linear-gradient(90deg, rgba(120, 245, 255, 0.15) 100%, transparent 100%);
+    }
+}
+
+@keyframes background-moving {
+    0% {
+        background: linear-gradient(90deg, rgba(120, 245, 255, 0.35) 0%, transparent 0%);
+    }
+    100% {
+        background: linear-gradient(90deg, rgba(120, 245, 255, 0.35) 100%, transparent 100%);
+    }
 }

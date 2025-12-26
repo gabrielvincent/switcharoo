@@ -125,7 +125,8 @@ fn create_static_plugin_box(
         .build();
     button.set_cursor(Cursor::from_name("pointer", None).as_ref());
     if text.is_empty() {
-        button.add_css_class("monochrome");
+        title.add_css_class("text-grayed");
+        exec.add_css_class("text-grayed");
     }
     click_plugin(&button, opt.iden.clone(), event_sender);
     button

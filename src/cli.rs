@@ -102,10 +102,6 @@ pub enum ConfigCommand {
         /// Force overwrite of a config file, can be used multiple times
         #[arg(short = 'f', long, default_missing_value = "all", value_parser = ["config", "css", "all"], num_args(0..=1))]
         force: Vec<String>,
-
-        /// dont generate systemd unit file
-        #[arg(long)]
-        no_systemd: bool,
     },
 
     /// Edit the config file with a GUI

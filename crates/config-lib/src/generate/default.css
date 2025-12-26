@@ -43,6 +43,9 @@
 .launcher-item {
 }
 
+.launcher-item-inner {
+}
+
 .launcher-exec {
 }
 
@@ -53,4 +56,10 @@
 }
 
 .launcher-plugin {
+}
+
+.launcher-plugin-inner {
+}
+
+.launcher-plugin-key {
 }

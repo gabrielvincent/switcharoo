@@ -96,7 +96,7 @@ jobs:
         uses: KSXGitHub/github-actions-deploy-aur@2ac5a4c1d7035885d46b10e3193393be8460b6f1 # v4.1.1
         with:
           pkgname: hyprshell
-          pkgbuild: ./pkgbuild/PKGBUILD
+          pkgbuild: ./packaging/pkgbuild/PKGBUILD
           commit_username: ${{ secrets.AUR_USERNAME }}
           commit_email: ${{ secrets.AUR_EMAIL }}
           ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
@@ -107,7 +107,7 @@ jobs:
         uses: KSXGitHub/github-actions-deploy-aur@2ac5a4c1d7035885d46b10e3193393be8460b6f1 # v4.1.1
         with:
           pkgname: hyprshell-slim
-          pkgbuild: ./pkgbuild/PKGBUILD-slim
+          pkgbuild: ./packaging/pkgbuild/PKGBUILD-slim
           commit_username: ${{ secrets.AUR_USERNAME }}
           commit_email: ${{ secrets.AUR_EMAIL }}
           ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
@@ -118,7 +118,7 @@ jobs:
         uses: KSXGitHub/github-actions-deploy-aur@2ac5a4c1d7035885d46b10e3193393be8460b6f1 # v4.1.1
         with:
           pkgname: hyprshell-bin
-          pkgbuild: ./pkgbuild/PKGBUILD-bin
+          pkgbuild: ./packaging/pkgbuild/PKGBUILD-bin
           commit_username: ${{ secrets.AUR_USERNAME }}
           commit_email: ${{ secrets.AUR_EMAIL }}
           ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}

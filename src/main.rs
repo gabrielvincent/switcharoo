@@ -93,7 +93,7 @@ fn main() -> anyhow::Result<()> {
                 config_edit_lib::start(config_path, css_path);
             }
             #[cfg(feature = "generate_config_command")]
-            cli::ConfigCommand::Generate { force, no_systemd } => {
+            cli::ConfigCommand::Generate { force } => {
                 use core_lib::Warn;
                 let config_path = config_path.unwrap_or_else(get_default_config_path);
                 let css_path = css_file.unwrap_or_else(get_default_css_path);
@@ -111,16 +111,6 @@ fn main() -> anyhow::Result<()> {
                 tracing::trace!("Generated config: {:#?}", config);
                 config_lib::write_config(&config_path, &config, override_config).warn();
                 config_lib::generate::write_css(&css_path, &css_data, override_css).warn();
-                if cfg!(debug_assertions) || no_systemd {
-                    config_lib::generate::write_systemd_unit(
-                        opts.config_file.as_ref(),
-                        opts.css_file.as_ref(),
-                        opts.data_dir.as_ref(),
-                        opts.cache_dir.as_ref(),
-                        &core_lib::path::get_data_home(),
-                    )
-                    .warn();
-                }
                 explain_config(&config_path, true);
             }
             cli::ConfigCommand::Explain {} => {

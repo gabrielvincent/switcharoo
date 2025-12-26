@@ -2,7 +2,7 @@
     padding: var(--window-padding, 2px);
 
     border-radius: var(--border-radius, 12px);
-    background: var(--bg-color, rgba(20, 20, 20, 0.9));
+    background: var(--bg-window-color, rgba(20, 20, 20, 0.9));
     border: var(--border-size, 3px) var(--border-style, solid) var(--border-color, rgba(90, 90, 120, 0.4));
 }
 
