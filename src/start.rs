@@ -65,16 +65,20 @@ pub fn start(
         .and_then(|s| s.split('-').next_back()?.parse::<i32>().ok())
         .unwrap_or(1);
 
+    let mut inc = 0;
+
     info!("Starting gui loop");
     loop {
-        let application = Application::builder()
-            .application_id(format!(
-                "{}-{}{}",
-                core_lib::APPLICATION_ID,
-                wayland_socket_index,
-                if cfg!(debug_assertions) { "-test" } else { "" }
-            ))
-            .build();
+        inc += 1;
+        let id = format!(
+            "{}-{}-{}{}",
+            core_lib::APPLICATION_ID,
+            wayland_socket_index,
+            inc,
+            if cfg!(debug_assertions) { "-test" } else { "" }
+        );
+        trace!("Application id: {}", id);
+        let application = Application::builder().application_id(id).build();
         debug!("Application created");
 
         let config_path = config_path.clone();
@@ -251,7 +255,7 @@ fn create_windows(
 fn apply_css(custom_css: &Path) -> anyhow::Result<()> {
     let provider_app = CssProvider::new();
 
-    provider_app.load_from_data(include_str!("default_styles.css"));
+    provider_app.load_from_string(include_str!("default_styles.css"));
     style_context_add_provider_for_display(
         &Display::default().context("Could not connect to a display.")?,
         &provider_app,

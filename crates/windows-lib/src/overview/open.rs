@@ -108,10 +108,10 @@ pub fn open_overview(
                     // hide picture if client so small
                     let client_h_w = scale(client.height, data.config.scale)
                         .min(scale(client.width, data.config.scale));
-                    if client_h_w > 70 {
+                    if client_h_w > 60 {
                         let image = Image::builder()
                             .css_classes(["client-image"])
-                            .pixel_size((f64::from(client_h_w.clamp(50, 600)) / 1.6) as i32 - 20)
+                            .pixel_size((f64::from(client_h_w.clamp(50, 600)) / 1.7) as i32 - 20)
                             .build();
                         if !client.enabled {
                             image.add_css_class("monochrome");

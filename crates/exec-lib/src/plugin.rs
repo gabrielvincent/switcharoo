@@ -32,7 +32,7 @@ pub fn load_plugin(
 
     if check_new_plugin_needed(&config) {
         unload().context("unable to unload old plugin")?;
-        info!("building plugin, this may take a while, please wait");
+        info!("Building plugin, this may take a while, please wait");
         hyprland_plugin::generate(&config).context("unable to generate plugin")?;
         trace!(
             "generated plugin at {:?}",

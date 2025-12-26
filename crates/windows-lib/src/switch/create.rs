@@ -60,8 +60,6 @@ pub fn create_windows_switch_window(
     // we only have one window, so we can do this
     // we also don't use relm4::adw::gtk::Popover which doesnt work with exclusive mode
     window.set_keyboard_mode(KeyboardMode::Exclusive);
-    window.present();
-    window.set_visible(false);
 
     debug!("Created switch window ({})", window.id());
 

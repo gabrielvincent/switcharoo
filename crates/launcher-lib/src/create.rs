@@ -65,10 +65,8 @@ pub fn create_windows_overview_launcher_window(
     window.set_namespace(Some(LAUNCHER_NAMESPACE));
     window.set_layer(Layer::Top);
     window.set_anchor(Edge::Top, true);
-    window.set_margin(Edge::Top, 17);
+    window.set_margin(Edge::Top, 0);
     window.set_exclusive_zone(-1);
-    window.present();
-    window.set_visible(false);
 
     let event_controller = EventControllerKey::new();
     let plugin_keys = get_static_options_chars(&launcher.plugins);

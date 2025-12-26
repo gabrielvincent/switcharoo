@@ -20,7 +20,7 @@ async-channel = { version = "2.5.0", default-features = true }
 semver = { version = "1.0.27" }
 test-log = { version = "0.2.18", default-features = false, features = ["trace", "unstable"] }
 
-relm4 = { version = "0.10.0", default-features = false, features = ["libadwaita", "macros", "gnome_46"] }
+relm4 = { version = "0.10.0", default-features = false, features = ["libadwaita", "macros", "gnome_48"] }
 relm4-components = "0.10.0"
 gtk4-layer-shell = { version = "0.7.0" }
 

@@ -210,6 +210,7 @@ fn close_switch(global: &mut Globals) {
 }
 
 fn restart(global: &Globals) {
+    // TODO block some time after recreating windows
     if let Some(windows) = &global.windows {
         if let Some((overview, launcher)) = &windows.overview {
             windows_lib::stop_overview(overview);
