@@ -37,7 +37,7 @@ pub struct Windows {
 #[serde(deny_unknown_fields)]
 pub struct Overview {
     pub launcher: Launcher,
-    #[default = "super_l"]
+    #[default = "Super_L"]
     pub key: Box<str>,
     #[default(Modifier::Super)]
     pub modifier: Modifier,
@@ -182,11 +182,12 @@ pub struct SearchEngine {
 pub struct Switch {
     #[default(Modifier::Alt)]
     pub modifier: Modifier,
+    #[default = "Tab"]
+    pub key: Box<str>,
     #[default(vec![FilterBy::CurrentMonitor])]
     pub filter_by: Vec<FilterBy>,
     #[default = false]
     pub switch_workspaces: bool,
-    // TODO add option to include special workspace
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]

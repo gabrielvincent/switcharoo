@@ -13,6 +13,8 @@ pub struct Launcher {
 #[derive(Debug)]
 pub enum LauncherInput {
     SetLauncher(crate::Launcher),
+    SetPrevLauncher(crate::Launcher),
+    ResetLauncher,
 }
 
 #[derive(Debug)]
@@ -168,6 +170,12 @@ impl SimpleComponent for Launcher {
         match message {
             LauncherInput::SetLauncher(config) => {
                 self.config = config;
+            }
+            LauncherInput::SetPrevLauncher(config) => {
+                self.prev_config = config;
+            }
+            LauncherInput::ResetLauncher => {
+                self.config = self.prev_config.clone();
             }
         }
     }

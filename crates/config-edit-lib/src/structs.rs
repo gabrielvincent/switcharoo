@@ -1,8 +1,5 @@
-use adw::gdk::Display;
-use relm4::gtk::prelude::DisplayExtManual;
 use std::fmt;
 use std::fmt::Formatter;
-use tracing::instrument;
 
 #[derive(Debug, Clone)]
 pub struct Config {
@@ -28,6 +25,7 @@ pub struct Overview {
     pub same_class: bool,
     pub current_workspace: bool,
     pub current_monitor: bool,
+    pub exclude_special_workspaces: String,
 }
 
 #[derive(Debug, Clone)]
@@ -85,30 +83,7 @@ pub struct Switch {
     pub current_workspace: bool,
     pub current_monitor: bool,
     pub switch_workspaces: bool,
-}
-
-#[instrument(level = "trace", ret(level = "trace"))]
-pub fn to_accelerator(modifier: ConfigModifier, key: &str) -> Option<String> {
-    let key = key_to_name(key)?;
-    if modifier == ConfigModifier::None {
-        Some(key)
-    } else {
-        Some(format!("<{}>{}", modifier, key))
-    }
-}
-
-pub fn key_to_name(key: &str) -> Option<String> {
-    // key is keycode
-    if key.starts_with("code:") {
-        let key_id = key.split(':').nth(1)?;
-        let code = key_id.parse::<u32>().ok()?;
-        let display = &Display::default()?;
-        let data = display.map_keycode(code)?;
-        let (_, key) = data.iter().find(|(m, k)| m.level() == 0)?;
-        Some(key.name()?.to_string())
-    } else {
-        Some(key.to_string())
-    }
+    pub exclude_special_workspaces: String,
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
@@ -124,7 +99,7 @@ impl ConfigModifier {
         &["Alt", "Super", "Ctrl"]
     }
     pub fn strings_with_none() -> &'static [&'static str] {
-        &["Alt", "Super", "Ctrl", "None"]
+        &["None", "Alt", "Super", "Ctrl"]
     }
 }
 
@@ -143,10 +118,10 @@ impl TryFrom<u32> for ConfigModifier {
     type Error = ();
     fn try_from(value: u32) -> Result<Self, Self::Error> {
         match value {
-            0 => Ok(Self::Alt),
+            0 => Ok(Self::None),
             1 => Ok(Self::Super),
             2 => Ok(Self::Ctrl),
-            3 => Ok(Self::None),
+            3 => Ok(Self::Alt),
             _ => Err(()),
         }
     }
@@ -155,10 +130,31 @@ impl TryFrom<u32> for ConfigModifier {
 impl Into<u32> for ConfigModifier {
     fn into(self) -> u32 {
         match self {
-            ConfigModifier::Alt => 0,
+            ConfigModifier::None => 0,
             ConfigModifier::Super => 1,
             ConfigModifier::Ctrl => 2,
-            ConfigModifier::None => 3,
+            ConfigModifier::Alt => 3,
+        }
+    }
+}
+
+impl From<config_lib::Modifier> for ConfigModifier {
+    fn from(value: config_lib::Modifier) -> Self {
+        match value {
+            config_lib::Modifier::None => Self::None,
+            config_lib::Modifier::Alt => Self::Alt,
+            config_lib::Modifier::Super => Self::Super,
+            config_lib::Modifier::Ctrl => Self::Ctrl,
+        }
+    }
+}
+impl Into<config_lib::Modifier> for ConfigModifier {
+    fn into(self) -> config_lib::Modifier {
+        match self {
+            Self::None => config_lib::Modifier::None,
+            Self::Alt => config_lib::Modifier::Alt,
+            Self::Super => config_lib::Modifier::Super,
+            Self::Ctrl => config_lib::Modifier::Ctrl,
         }
     }
 }
@@ -171,13 +167,32 @@ impl From<config_lib::Config> for Config {
     }
 }
 
-impl From<config_lib::Modifier> for ConfigModifier {
-    fn from(value: config_lib::Modifier) -> Self {
-        match value {
-            config_lib::Modifier::Alt => Self::Alt,
-            config_lib::Modifier::Super => Self::Super,
-            config_lib::Modifier::Ctrl => Self::Ctrl,
-            config_lib::Modifier::None => Self::None,
+impl From<Option<config_lib::Windows>> for Windows {
+    fn from(value: Option<config_lib::Windows>) -> Self {
+        let enabled = value.is_some();
+        let v = value.unwrap_or_default();
+        Self {
+            enabled,
+            scale: v.scale,
+            items_per_row: v.items_per_row,
+            overview: v.overview.into(),
+            switch: v.switch.into(),
+            switch_2: v.switch_2.into(),
+        }
+    }
+}
+impl Into<Option<config_lib::Windows>> for Windows {
+    fn into(self) -> Option<config_lib::Windows> {
+        if self.enabled {
+            Some(config_lib::Windows {
+                scale: self.scale,
+                items_per_row: self.items_per_row,
+                overview: self.overview.into(),
+                switch: self.switch.into(),
+                switch_2: self.switch_2.into(),
+            })
+        } else {
+            None
         }
     }
 }
@@ -189,13 +204,40 @@ impl From<Option<config_lib::Switch>> for Switch {
         Self {
             enabled,
             modifier: v.modifier.into(),
-            key: "tab".to_string(),
+            key: v.key.to_string(),
             same_class: v.filter_by.contains(&config_lib::FilterBy::SameClass),
             current_workspace: v
                 .filter_by
                 .contains(&config_lib::FilterBy::CurrentWorkspace),
             current_monitor: v.filter_by.contains(&config_lib::FilterBy::CurrentMonitor),
             switch_workspaces: v.switch_workspaces,
+            // TODO
+            exclude_special_workspaces: "".to_string(),
+        }
+    }
+}
+impl Into<Option<config_lib::Switch>> for Switch {
+    fn into(self) -> Option<config_lib::Switch> {
+        if self.enabled {
+            let mut vec = vec![];
+            if self.same_class {
+                vec.push(config_lib::FilterBy::SameClass);
+            }
+            if self.current_workspace {
+                vec.push(config_lib::FilterBy::CurrentWorkspace);
+            }
+            if self.current_monitor {
+                vec.push(config_lib::FilterBy::CurrentMonitor);
+            }
+            Some(config_lib::Switch {
+                modifier: self.modifier.into(),
+                key: Box::from(self.key),
+                filter_by: vec,
+                switch_workspaces: self.switch_workspaces,
+                // TODO exclude_special_workspaces
+            })
+        } else {
+            None
         }
     }
 }
@@ -214,6 +256,34 @@ impl From<Option<config_lib::Overview>> for Overview {
                 .filter_by
                 .contains(&config_lib::FilterBy::CurrentWorkspace),
             current_monitor: v.filter_by.contains(&config_lib::FilterBy::CurrentMonitor),
+            // TODO
+            exclude_special_workspaces: "".to_string(),
+        }
+    }
+}
+impl Into<Option<config_lib::Overview>> for Overview {
+    fn into(self) -> Option<config_lib::Overview> {
+        if self.enabled {
+            let mut vec = vec![];
+            if self.same_class {
+                vec.push(config_lib::FilterBy::SameClass);
+            }
+            if self.current_workspace {
+                vec.push(config_lib::FilterBy::CurrentWorkspace);
+            }
+            if self.current_monitor {
+                vec.push(config_lib::FilterBy::CurrentMonitor);
+            }
+            Some(config_lib::Overview {
+                launcher: self.launcher.into(),
+                key: Box::from(self.key),
+                modifier: self.modifier.into(),
+                filter_by: vec,
+                hide_filtered: false,
+                // TODO exclude_special_workspaces
+            })
+        } else {
+            None
         }
     }
 }
@@ -230,11 +300,32 @@ impl From<config_lib::Launcher> for Launcher {
         }
     }
 }
+impl Into<config_lib::Launcher> for Launcher {
+    fn into(self) -> config_lib::Launcher {
+        config_lib::Launcher {
+            default_terminal: self.default_terminal.map(Box::from),
+            launch_modifier: self.launch_modifier.into(),
+            width: self.width,
+            max_items: self.max_items,
+            show_when_empty: self.show_when_empty,
+            plugins: self.plugins.into(),
+        }
+    }
+}
 
 impl From<Option<config_lib::EmptyConfig>> for EmptyConfig {
     fn from(value: Option<config_lib::EmptyConfig>) -> Self {
         let enabled = value.is_some();
         Self { enabled }
+    }
+}
+impl Into<Option<config_lib::EmptyConfig>> for EmptyConfig {
+    fn into(self) -> Option<config_lib::EmptyConfig> {
+        if self.enabled {
+            Some(config_lib::EmptyConfig {})
+        } else {
+            None
+        }
     }
 }
 
@@ -245,6 +336,17 @@ impl From<Option<config_lib::ActionsPluginConfig>> for ActionsPluginConfig {
         Self {
             enabled,
             actions: v.actions,
+        }
+    }
+}
+impl Into<Option<config_lib::ActionsPluginConfig>> for ActionsPluginConfig {
+    fn into(self) -> Option<config_lib::ActionsPluginConfig> {
+        if self.enabled {
+            Some(config_lib::ActionsPluginConfig {
+                actions: self.actions,
+            })
+        } else {
+            None
         }
     }
 }
@@ -261,6 +363,19 @@ impl From<Option<config_lib::ApplicationsPluginConfig>> for ApplicationsPluginCo
         }
     }
 }
+impl Into<Option<config_lib::ApplicationsPluginConfig>> for ApplicationsPluginConfig {
+    fn into(self) -> Option<config_lib::ApplicationsPluginConfig> {
+        if self.enabled {
+            Some(config_lib::ApplicationsPluginConfig {
+                run_cache_weeks: self.run_cache_weeks,
+                show_execs: self.show_execs,
+                show_actions_submenu: self.show_actions_submenu,
+            })
+        } else {
+            None
+        }
+    }
+}
 
 impl From<Option<config_lib::WebSearchConfig>> for WebSearchConfig {
     fn from(value: Option<config_lib::WebSearchConfig>) -> Self {
@@ -269,6 +384,17 @@ impl From<Option<config_lib::WebSearchConfig>> for WebSearchConfig {
         Self {
             enabled,
             engines: v.engines,
+        }
+    }
+}
+impl Into<Option<config_lib::WebSearchConfig>> for WebSearchConfig {
+    fn into(self) -> Option<config_lib::WebSearchConfig> {
+        if self.enabled {
+            Some(config_lib::WebSearchConfig {
+                engines: self.engines,
+            })
+        } else {
+            None
         }
     }
 }
@@ -286,18 +412,16 @@ impl From<config_lib::Plugins> for Plugins {
         }
     }
 }
-
-impl From<Option<config_lib::Windows>> for Windows {
-    fn from(value: Option<config_lib::Windows>) -> Self {
-        let enabled = value.is_some();
-        let v = value.unwrap_or_default();
-        Self {
-            enabled,
-            scale: v.scale,
-            items_per_row: v.items_per_row,
-            overview: v.overview.into(),
-            switch: v.switch.into(),
-            switch_2: v.switch_2.into(),
+impl Into<config_lib::Plugins> for Plugins {
+    fn into(self) -> config_lib::Plugins {
+        config_lib::Plugins {
+            applications: self.applications.into(),
+            terminal: self.terminal.into(),
+            shell: self.shell.into(),
+            websearch: self.websearch.into(),
+            calc: self.calc.into(),
+            path: self.path.into(),
+            actions: self.actions.into(),
         }
     }
 }

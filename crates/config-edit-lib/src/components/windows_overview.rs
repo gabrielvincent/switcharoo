@@ -1,26 +1,29 @@
-use crate::SetTextIfDifferent;
-use crate::structs::{ConfigModifier, to_accelerator};
-use adw::gdk::{Key, ModifierType};
-use relm4::ComponentController;
+use crate::flags_csv;
+use crate::shortcut_dialog::{
+    KeyboardShortcut, KeyboardShortcutInit, KeyboardShortcutInput, KeyboardShortcutOutput,
+};
+use crate::structs::ConfigModifier;
+use crate::util::to_accelerator;
 use relm4::adw::gtk;
 use relm4::adw::prelude::*;
-use relm4::gtk::{Align, EventControllerKey};
-use relm4::{Component, Controller, adw};
+use relm4::gtk::Align;
+use relm4::{Component, adw};
+use relm4::{ComponentController, Controller};
 use relm4::{ComponentParts, ComponentSender, SimpleComponent};
-use relm4_components::alert::{Alert, AlertMsg, AlertResponse, AlertSettings};
 
 #[derive(Debug)]
 pub struct WindowsOverview {
     config: crate::Overview,
     prev_config: crate::Overview,
-    get_keyboard_shortcut: bool,
-    alert_dialog: Controller<Alert>,
+    keyboard_shortcut: Controller<KeyboardShortcut>,
 }
 
 #[derive(Debug)]
 pub enum WindowsOverviewInput {
     SetOverview(crate::Overview),
-    ToggleGetKeyboardShortcut,
+    SetPrevOverview(crate::Overview),
+    ResetOverview,
+    OpenKeyboardShortcut,
 }
 
 #[derive(Debug)]
@@ -36,6 +39,7 @@ pub enum WindowsOverviewOutput {
     FilterSameClass(bool),
     FilterWorkspace(bool),
     FilterMonitor(bool),
+    ExcludeSpecialWorkspaces(String),
 }
 
 #[relm4::component(pub)]
@@ -53,23 +57,25 @@ impl SimpleComponent for WindowsOverview {
             set_css_classes: &["enable-frame"],
             add_prefix = &gtk::Box {
                 set_orientation: gtk::Orientation::Horizontal,
-                set_halign: gtk::Align::Fill,
-                set_valign: gtk::Align::Center,
+                set_halign: Align::Fill,
+                set_valign: Align::Center,
                 set_spacing: 25,
                 gtk::Label {
                     set_label: "Overview + Launcher",
                 },
-                gtk::Button {
-                    set_icon_name: "keyboard-layout",
-                    #[watch]
-                    set_css_classes: if model.get_keyboard_shortcut { &["active"] } else { &["not-active"] },
-                    connect_clicked[sender] => move |_| sender.input(WindowsOverviewInput::ToggleGetKeyboardShortcut),
-                },
+                append = model.keyboard_shortcut.widget(),
                 adw::ShortcutLabel::new(&to_accelerator(model.config.modifier, &model.config.key).unwrap_or_default()) {
                     #[watch]
                     set_accelerator: &to_accelerator(model.config.modifier, &model.config.key).unwrap_or_default(),
                     #[watch]
-                    set_css_classes: if to_accelerator(model.config.modifier, &model.config.key) == to_accelerator(model.prev_config.modifier, &model.prev_config.key)  { &[] } else { &["blue-label"]  },
+                    set_css_classes: if !model.config.enabled {
+                        &["gray-label"]
+                    } else {
+                        if to_accelerator(model.config.modifier, &model.config.key) == to_accelerator(model.prev_config.modifier, &model.prev_config.key)
+                            { &[] }
+                        else
+                            { &["blue-label"] }
+                    },
                 },
             },
             connect_enable_expansion_notify[sender] => move |e| {sender.output(WindowsOverviewOutput::Enabled(e.enables_expansion())).unwrap()},
@@ -95,7 +101,8 @@ impl SimpleComponent for WindowsOverview {
                         set_tooltip_text: Some("Filter the shown windows by the provided filters")
                     },
                     adw::ExpanderRow {
-                        set_title: "Filter",
+                        #[watch]
+                        set_title: &flags_csv!(model.config,same_class,current_monitor,current_workspace),
                         set_hexpand: true,
                         set_title_lines: 2,
                         set_css_classes: &["item-expander"],
@@ -123,7 +130,7 @@ impl SimpleComponent for WindowsOverview {
                     set_orientation: gtk::Orientation::Horizontal,
                     set_spacing: 10,
                     gtk::Label {
-                        set_label: "Exclude special workspaces",
+                        set_label: "Exclude special workspaces (TODO)",
                     },
                     gtk::Image::from_icon_name("dialog-information-symbolic") {
                         set_tooltip_text: Some("Exclude special workspaces by regex \n(hyprctl workspaces -j | jq \".[].name\")")
@@ -132,7 +139,10 @@ impl SimpleComponent for WindowsOverview {
                         set_input_purpose: gtk::InputPurpose::FreeForm,
                         set_placeholder_text: Some("special:(monitor|second)"),
                         set_hexpand: true,
-                        set_valign: Align::Center
+                        set_valign: Align::Center,
+                        connect_changed[sender] => move |e| { sender.output(WindowsOverviewOutput::ExcludeSpecialWorkspaces(e.text().into())).unwrap() },
+                        #[watch]
+                        set_text: &model.config.exclude_special_workspaces,
                     }
                 }
             }
@@ -144,70 +154,28 @@ impl SimpleComponent for WindowsOverview {
         root: Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
-        let entry = gtk::Label::new(None);
-
-        let alert_dialog = Alert::builder()
-            .transient_for(&root)
-            .launch(AlertSettings {
-                text: Some("Press Keyboard shortcut".to_string()),
-                secondary_text: None,
-                confirm_label: Some("Use".to_string()),
-                cancel_label: Some("Cancel".to_string()),
-                option_label: None,
-                is_modal: true,
-                destructive_accept: false,
-                extra_child: Some(entry.clone().into()),
+        let outs = sender.output_sender().clone();
+        let ins = sender.input_sender().clone();
+        let keyboard_shortcut = KeyboardShortcut::builder()
+            .launch(KeyboardShortcutInit {
+                key: init.config.key.clone(),
+                modifier: init.config.modifier.clone(),
             })
-            .forward(sender.input_sender(), |res| match res {
-                AlertResponse::Confirm => WindowsOverviewInput::ToggleGetKeyboardShortcut,
-                AlertResponse::Cancel => WindowsOverviewInput::ToggleGetKeyboardShortcut,
-                AlertResponse::Option => unreachable!("no option button in alert dialog"),
-            });
-
-        // Attach an EventControllerKey to the alert dialog's window to print raw key events.
-        let key_controller = EventControllerKey::new();
-        let entry = entry.clone();
-        let window = alert_dialog.widgets().gtk_window_12.clone();
-        let send = sender.clone();
-        key_controller.connect_key_pressed(move |_, val, id, state| {
-            tracing::debug!("Raw key event - val: {}, state: {:?}", val, state);
-            if let Some(key_name) = val.name() {
-                if let Some(modifier) = match val {
-                    Key::Alt_L | Key::Alt_R => Some(ConfigModifier::Alt),
-                    Key::Control_L | Key::Control_R => Some(ConfigModifier::Ctrl),
-                    Key::Super_L | Key::Super_R => Some(ConfigModifier::Super),
-                    _ => match state {
-                        ModifierType::NO_MODIFIER_MASK => Some(ConfigModifier::None),
-                        ModifierType::ALT_MASK => Some(ConfigModifier::Alt),
-                        ModifierType::CONTROL_MASK => Some(ConfigModifier::Ctrl),
-                        ModifierType::SUPER_MASK => Some(ConfigModifier::Super),
-                        _ => None,
-                    },
-                } {
-                    send.output(WindowsOverviewOutput::Key(format!("code:{id}")))
-                        .unwrap();
-                    send.output(WindowsOverviewOutput::Modifier(modifier))
-                        .unwrap();
-                    if modifier == ConfigModifier::None {
-                        entry.set_label(&key_name);
-                    } else {
-                        entry.set_label(&format!("{modifier} + {key_name}"));
-                    };
-                } else {
-                    entry.set_label("---");
+            .connect_receiver(move |_, out| match out {
+                KeyboardShortcutOutput::SetKey(key, r#mod) => {
+                    outs.emit(WindowsOverviewOutput::Key(key));
+                    outs.emit(WindowsOverviewOutput::Modifier(r#mod));
                 }
-            } else {
-                entry.set_label("---");
-            }
-            gtk::glib::Propagation::Stop
-        });
-        window.add_controller(key_controller);
+                KeyboardShortcutOutput::OpenRequest => {
+                    ins.emit(WindowsOverviewInput::OpenKeyboardShortcut);
+                }
+                _ => {}
+            });
 
         let model = WindowsOverview {
             config: init.config.clone(),
             prev_config: init.config,
-            get_keyboard_shortcut: false,
-            alert_dialog,
+            keyboard_shortcut,
         };
         let widgets = view_output!();
         ComponentParts { model, widgets }
@@ -218,12 +186,18 @@ impl SimpleComponent for WindowsOverview {
             WindowsOverviewInput::SetOverview(config) => {
                 self.config = config;
             }
-            WindowsOverviewInput::ToggleGetKeyboardShortcut => {
-                self.get_keyboard_shortcut = !self.get_keyboard_shortcut;
-                if self.get_keyboard_shortcut {
-                    self.alert_dialog.emit(AlertMsg::Show);
-                }
-                self.alert_dialog.widgets().gtk_window_12.set_modal(true);
+            WindowsOverviewInput::SetPrevOverview(config) => {
+                self.prev_config = config;
+            }
+            WindowsOverviewInput::ResetOverview => {
+                self.config = self.prev_config.clone();
+            }
+            WindowsOverviewInput::OpenKeyboardShortcut => {
+                self.keyboard_shortcut
+                    .emit(KeyboardShortcutInput::ShowKeyboardShortcut(
+                        self.config.key.clone(),
+                        self.config.modifier,
+                    ));
             }
         }
     }

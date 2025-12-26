@@ -1,4 +1,6 @@
-use crate::structs::{Config, key_to_name};
+use crate::flags_csv;
+use crate::structs::Config;
+use crate::util::key_to_name;
 use adw::ActionRow;
 use adw::gtk::SelectionMode;
 use relm4::adw::gtk;
@@ -16,6 +18,7 @@ pub struct Changes {
 #[derive(Debug)]
 pub enum ChangesInput {
     SetConfig(Config),
+    SetPrevConfig(Config),
 }
 
 #[derive(Debug)]
@@ -24,7 +27,9 @@ pub struct ChangesInit {
 }
 
 #[derive(Debug)]
-pub enum ChangesOutput {}
+pub enum ChangesOutput {
+    ChangesExist(bool),
+}
 
 #[relm4::component(pub)]
 impl SimpleComponent for Changes {
@@ -63,31 +68,24 @@ impl SimpleComponent for Changes {
         ComponentParts { model, widgets }
     }
 
-    fn update(&mut self, message: Self::Input, _sender: ComponentSender<Self>) {
+    fn update(&mut self, message: Self::Input, sender: ComponentSender<Self>) {
         match message {
             ChangesInput::SetConfig(config) => {
                 self.config = config;
-                generate_items(
-                    &self.list,
-                    // TODO
-                    &self.config,
-                    &self.prev_config,
-                    // TODO
-                );
+            }
+            ChangesInput::SetPrevConfig(config) => {
+                self.prev_config = config;
             }
         }
+        let changes = generate_items(
+            &self.list,
+            // TODO
+            &self.config,
+            &self.prev_config,
+            // TODO
+        );
+        sender.output(ChangesOutput::ChangesExist(changes)).unwrap();
     }
-}
-
-macro_rules! flags_csv {
-    ($s:expr, $($field:ident),+ $(,)?) => {{
-        [$( (stringify!($field), $s.$field) ),+]
-            .into_iter()
-            .filter(|(_, v)| *v)
-            .map(|(k, _)| k)
-            .collect::<Vec<&str>>()
-            .join(", ")
-    }};
 }
 
 pub fn generate_items(

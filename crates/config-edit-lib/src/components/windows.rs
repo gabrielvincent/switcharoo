@@ -21,6 +21,8 @@ pub struct Windows {
 #[derive(Debug)]
 pub enum WindowsInput {
     SetWindows(crate::Windows),
+    SetPrevWindows(crate::Windows),
+    ResetWindows,
 }
 
 #[derive(Debug)]
@@ -162,6 +164,24 @@ impl SimpleComponent for Windows {
                     .emit(SwitchInput::SetSwitch(self.config.switch.clone()));
                 self.switch_2
                     .emit(SwitchInput::SetSwitch(self.config.switch_2.clone()));
+            }
+            WindowsInput::SetPrevWindows(config) => {
+                self.prev_config = config;
+                self.windows_overview
+                    .emit(WindowsOverviewInput::SetPrevOverview(
+                        self.config.overview.clone(),
+                    ));
+                self.switch
+                    .emit(SwitchInput::SetPrevSwitch(self.config.switch.clone()));
+                self.switch_2
+                    .emit(SwitchInput::SetPrevSwitch(self.config.switch_2.clone()));
+            }
+            WindowsInput::ResetWindows => {
+                self.config = self.prev_config.clone();
+                self.windows_overview
+                    .emit(WindowsOverviewInput::ResetOverview);
+                self.switch.emit(SwitchInput::ResetSwitch);
+                self.switch_2.emit(SwitchInput::ResetSwitch);
             }
         }
     }

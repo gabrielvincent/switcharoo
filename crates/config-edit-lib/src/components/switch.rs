@@ -1,28 +1,30 @@
-use crate::SetTextIfDifferent;
-use crate::structs::{ConfigModifier, to_accelerator};
-use adw::gdk::{Key, ModifierType};
+use crate::flags_csv;
+use crate::shortcut_dialog::{
+    KeyboardShortcut, KeyboardShortcutInit, KeyboardShortcutInput, KeyboardShortcutOutput,
+};
+use crate::structs::ConfigModifier;
+use crate::util::to_accelerator;
 use adw::gtk::Align;
 use relm4::ComponentController;
 use relm4::adw::gtk;
 use relm4::adw::prelude::*;
-use relm4::gtk::EventControllerKey;
 use relm4::{Component, Controller, adw};
 use relm4::{ComponentParts, ComponentSender, SimpleComponent};
-use relm4_components::alert::{Alert, AlertMsg, AlertResponse, AlertSettings};
 
 #[derive(Debug)]
 pub struct Switch {
     config: crate::Switch,
     prev_config: crate::Switch,
-    get_keyboard_shortcut: bool,
     name: &'static str,
-    keyboard_dialog: Controller<Alert>,
+    keyboard_shortcut: Controller<KeyboardShortcut>,
 }
 
 #[derive(Debug)]
 pub enum SwitchInput {
     SetSwitch(crate::Switch),
-    ToggleGetKeyboardShortcut,
+    SetPrevSwitch(crate::Switch),
+    ResetSwitch,
+    OpenKeyboardShortcut,
 }
 
 #[derive(Debug)]
@@ -40,6 +42,7 @@ pub enum SwitchOutput {
     FilterWorkspace(bool),
     FilterMonitor(bool),
     SwitchWorkspaces(bool),
+    ExcludeSpecialWorkspaces(String),
 }
 
 #[relm4::component(pub)]
@@ -63,17 +66,19 @@ impl SimpleComponent for Switch {
                 gtk::Label {
                     set_label: model.name,
                 },
-                gtk::Button {
-                    set_icon_name: "keyboard-layout",
-                    #[watch]
-                    set_css_classes: if model.get_keyboard_shortcut { &["active"] } else { &["not-active"] },
-                    connect_clicked[sender] => move |_| sender.input(SwitchInput::ToggleGetKeyboardShortcut),
-                },
+                append = model.keyboard_shortcut.widget(),
                 adw::ShortcutLabel::new(&to_accelerator(model.config.modifier, &model.config.key).unwrap_or_default()) {
                     #[watch]
                     set_accelerator: &to_accelerator(model.config.modifier, &model.config.key).unwrap_or_default(),
                     #[watch]
-                    set_css_classes: if to_accelerator(model.config.modifier, &model.config.key) == to_accelerator(model.prev_config.modifier, &model.prev_config.key)  { &[] } else { &["blue-label"]  },
+                    set_css_classes: if !model.config.enabled {
+                        &["gray-label"]
+                    } else {
+                        if to_accelerator(model.config.modifier, &model.config.key) == to_accelerator(model.prev_config.modifier, &model.prev_config.key)
+                            { &[] }
+                        else
+                            { &["blue-label"] }
+                    },
                 },
             },
             connect_enable_expansion_notify[sender] => move |e| {sender.output(SwitchOutput::Enabled(e.enables_expansion())).unwrap()},
@@ -99,7 +104,8 @@ impl SimpleComponent for Switch {
                         set_tooltip_text: Some("Filter the shown windows by the provided filters")
                     },
                     adw::ExpanderRow {
-                        set_title: "Filter",
+                        #[watch]
+                        set_title: &flags_csv!(model.config,same_class,current_monitor,current_workspace),
                         set_hexpand: true,
                         set_title_lines: 2,
                         set_css_classes: &["item-expander"],
@@ -127,22 +133,6 @@ impl SimpleComponent for Switch {
                     set_orientation: gtk::Orientation::Horizontal,
                     set_spacing: 10,
                     gtk::Label {
-                        set_label: "Exclude special workspaces",
-                    },
-                    gtk::Image::from_icon_name("dialog-information-symbolic") {
-                        set_tooltip_text: Some("Exclude special workspaces by regex \n(hyprctl workspaces -j | jq \".[].name\")")
-                    },
-                    gtk::Entry {
-                        set_input_purpose: gtk::InputPurpose::FreeForm,
-                        set_placeholder_text: Some("special:(monitor|second)"),
-                        set_hexpand: true,
-                        set_valign: Align::Center
-                    }
-                },
-                gtk::Box {
-                    set_orientation: gtk::Orientation::Horizontal,
-                    set_spacing: 10,
-                    gtk::Label {
                         set_label: "Switch Workspaces",
                     },
                     gtk::Image::from_icon_name("dialog-information-symbolic") {
@@ -154,7 +144,26 @@ impl SimpleComponent for Switch {
                         set_valign: Align::Center,
                         connect_active_notify[sender] => move |e| { sender.output(SwitchOutput::SwitchWorkspaces(e.is_active())).unwrap() },
                     },
-                }
+                },
+                gtk::Box {
+                    set_orientation: gtk::Orientation::Horizontal,
+                    set_spacing: 10,
+                    gtk::Label {
+                        set_label: "Exclude special workspaces (TODO)",
+                    },
+                    gtk::Image::from_icon_name("dialog-information-symbolic") {
+                        set_tooltip_text: Some("Exclude special workspaces by regex \n(hyprctl workspaces -j | jq \".[].name\")")
+                    },
+                    gtk::Entry {
+                        set_input_purpose: gtk::InputPurpose::FreeForm,
+                        set_placeholder_text: Some("special:(monitor|second)"),
+                        set_hexpand: true,
+                        set_valign: Align::Center,
+                        connect_changed[sender] => move |e| { sender.output(SwitchOutput::ExcludeSpecialWorkspaces(e.text().into())).unwrap() },
+                        #[watch]
+                        set_text: &model.config.exclude_special_workspaces,
+                    }
+                },
             }
         }
     }
@@ -164,70 +173,29 @@ impl SimpleComponent for Switch {
         root: Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
-        let entry = gtk::Label::new(None);
-
-        let keyboard_dialog = Alert::builder()
-            .transient_for(&root)
-            .launch(AlertSettings {
-                text: Some("Press Keyboard shortcut".to_string()),
-                secondary_text: None,
-                confirm_label: Some("Use".to_string()),
-                cancel_label: Some("Cancel".to_string()),
-                option_label: None,
-                is_modal: true,
-                destructive_accept: false,
-                extra_child: Some(entry.clone().into()),
+        let outs = sender.output_sender().clone();
+        let ins = sender.input_sender().clone();
+        let keyboard_shortcut = KeyboardShortcut::builder()
+            .launch(KeyboardShortcutInit {
+                key: init.config.key.clone(),
+                modifier: init.config.modifier.clone(),
             })
-            .forward(sender.input_sender(), |res| match res {
-                AlertResponse::Confirm => SwitchInput::ToggleGetKeyboardShortcut,
-                AlertResponse::Cancel => SwitchInput::ToggleGetKeyboardShortcut,
-                AlertResponse::Option => unreachable!("no option button in alert dialog"),
+            .connect_receiver(move |_, out| match out {
+                KeyboardShortcutOutput::SetKey(key, r#mod) => {
+                    outs.emit(SwitchOutput::Key(key));
+                    outs.emit(SwitchOutput::Modifier(r#mod));
+                }
+                KeyboardShortcutOutput::OpenRequest => {
+                    ins.emit(SwitchInput::OpenKeyboardShortcut);
+                }
+                _ => {}
             });
 
-        // Attach an EventControllerKey to the alert dialog's window to print raw key events.
-        let key_controller = EventControllerKey::new();
-        let entry = entry.clone();
-        let window = keyboard_dialog.widgets().gtk_window_12.clone();
-        let send = sender.clone();
-        key_controller.connect_key_pressed(move |_, val, id, state| {
-            tracing::debug!("Raw key event - val: {}, state: {:?}", val, state);
-            if let Some(key_name) = val.name() {
-                if let Some(modifier) = match val {
-                    Key::Alt_L | Key::Alt_R => Some(ConfigModifier::Alt),
-                    Key::Control_L | Key::Control_R => Some(ConfigModifier::Ctrl),
-                    Key::Super_L | Key::Super_R => Some(ConfigModifier::Super),
-                    _ => match state {
-                        ModifierType::NO_MODIFIER_MASK => Some(ConfigModifier::None),
-                        ModifierType::ALT_MASK => Some(ConfigModifier::Alt),
-                        ModifierType::CONTROL_MASK => Some(ConfigModifier::Ctrl),
-                        ModifierType::SUPER_MASK => Some(ConfigModifier::Super),
-                        _ => None,
-                    },
-                } {
-                    send.output(SwitchOutput::Key(format!("code:{id}")))
-                        .unwrap();
-                    send.output(SwitchOutput::Modifier(modifier)).unwrap();
-                    if modifier == ConfigModifier::None {
-                        entry.set_label(&key_name);
-                    } else {
-                        entry.set_label(&format!("{modifier} + {key_name}"));
-                    };
-                } else {
-                    entry.set_label("---");
-                }
-            } else {
-                entry.set_label("---");
-            }
-            gtk::glib::Propagation::Stop
-        });
-        window.add_controller(key_controller);
-
         let model = Switch {
+            name: init.name,
             config: init.config.clone(),
             prev_config: init.config,
-            get_keyboard_shortcut: false,
-            keyboard_dialog,
-            name: init.name,
+            keyboard_shortcut,
         };
         let widgets = view_output!();
         ComponentParts { model, widgets }
@@ -238,12 +206,18 @@ impl SimpleComponent for Switch {
             SwitchInput::SetSwitch(config) => {
                 self.config = config;
             }
-            SwitchInput::ToggleGetKeyboardShortcut => {
-                self.get_keyboard_shortcut = !self.get_keyboard_shortcut;
-                if self.get_keyboard_shortcut {
-                    self.keyboard_dialog.emit(AlertMsg::Show);
-                }
-                self.keyboard_dialog.widgets().gtk_window_12.set_modal(true);
+            SwitchInput::SetPrevSwitch(config) => {
+                self.prev_config = config;
+            }
+            SwitchInput::ResetSwitch => {
+                self.config = self.prev_config.clone();
+            }
+            SwitchInput::OpenKeyboardShortcut => {
+                self.keyboard_shortcut
+                    .emit(KeyboardShortcutInput::ShowKeyboardShortcut(
+                        self.config.key.clone(),
+                        self.config.modifier,
+                    ));
             }
         }
     }

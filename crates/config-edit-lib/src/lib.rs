@@ -3,8 +3,10 @@
 // mod start;
 mod components;
 mod footer;
+mod shortcut_dialog;
 mod startv;
 mod structs;
+mod util;
 // mod update;
 // mod update_changes_view;
 // mod views;

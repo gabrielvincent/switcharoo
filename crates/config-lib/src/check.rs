@@ -14,17 +14,6 @@ pub fn check(config: &Config) -> anyhow::Result<()> {
         .windows
         .as_ref()
         .and_then(|w| w.overview.as_ref())
-        .is_some_and(|o| o.launcher.launch_modifier == o.modifier)
-    {
-        bail!(
-            "Launcher modifier cannot be the same as overview open modifier. (pressing the modifier will just close the overview instead of launching an app)"
-        );
-    }
-
-    if config
-        .windows
-        .as_ref()
-        .and_then(|w| w.overview.as_ref())
         .is_some_and(|o| matches!(&*o.key, "super" | "alt" | "control" | "ctrl"))
     {
         bail!(
