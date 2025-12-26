@@ -1546,7 +1546,7 @@ dependencies = [
 
 [[package]]
 name = "hyprshell"
-version = "4.8.1"
+version = "4.8.2"
 dependencies = [
  "anyhow",
  "async-channel",
@@ -1569,7 +1569,7 @@ dependencies = [
 
 [[package]]
 name = "hyprshell-clipboard-lib"
-version = "4.8.1"
+version = "4.8.2"
 dependencies = [
  "aes-gcm",
  "anyhow",
@@ -1588,7 +1588,7 @@ dependencies = [
 
 [[package]]
 name = "hyprshell-config-edit-lib"
-version = "4.8.1"
+version = "4.8.2"
 dependencies = [
  "anyhow",
  "hyprshell-config-lib",
@@ -1601,7 +1601,7 @@ dependencies = [
 
 [[package]]
 name = "hyprshell-config-lib"
-version = "4.8.1"
+version = "4.8.2"
 dependencies = [
  "anyhow",
  "hyprshell-core-lib",
@@ -1618,7 +1618,7 @@ dependencies = [
 
 [[package]]
 name = "hyprshell-core-lib"
-version = "4.8.1"
+version = "4.8.2"
 dependencies = [
  "anyhow",
  "notify",
@@ -1631,7 +1631,7 @@ dependencies = [
 
 [[package]]
 name = "hyprshell-exec-lib"
-version = "4.8.1"
+version = "4.8.2"
 dependencies = [
  "anyhow",
  "hyprshell-config-lib",
@@ -1644,7 +1644,7 @@ dependencies = [
 
 [[package]]
 name = "hyprshell-hyprland"
-version = "4.8.1"
+version = "4.8.2"
 dependencies = [
  "ahash",
  "async-net",
@@ -1662,7 +1662,7 @@ dependencies = [
 
 [[package]]
 name = "hyprshell-hyprland-macros"
-version = "4.8.1"
+version = "4.8.2"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1671,7 +1671,7 @@ dependencies = [
 
 [[package]]
 name = "hyprshell-hyprland-plugin"
-version = "4.8.1"
+version = "4.8.2"
 dependencies = [
  "anyhow",
  "hyprshell-core-lib",
@@ -1683,7 +1683,7 @@ dependencies = [
 
 [[package]]
 name = "hyprshell-launcher-lib"
-version = "4.8.1"
+version = "4.8.2"
 dependencies = [
  "anyhow",
  "async-channel",
@@ -1701,7 +1701,7 @@ dependencies = [
 
 [[package]]
 name = "hyprshell-windows-lib"
-version = "4.8.1"
+version = "4.8.2"
 dependencies = [
  "anyhow",
  "async-channel",
@@ -1717,7 +1717,7 @@ dependencies = [
 
 [[package]]
 name = "hyprshell-wl-clipboard-rs"
-version = "4.8.1"
+version = "4.8.2"
 dependencies = [
  "libc",
  "log",
