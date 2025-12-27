@@ -1,5 +1,5 @@
-use crate::SetTextIfDifferent;
 use crate::structs::ConfigModifier;
+use crate::util::{SetCursor, SetTextIfDifferent};
 use relm4::adw::gtk;
 use relm4::adw::prelude::*;
 use relm4::{ComponentParts, ComponentSender, RelmWidgetExt, SimpleComponent};
@@ -61,6 +61,7 @@ impl SimpleComponent for Launcher {
                             set_label: "Modifier",
                         },
                         gtk::Image::from_icon_name("dialog-information-symbolic") {
+                            set_cursor_by_name: "help",
                             set_tooltip_text: Some("The modifier used to select items in the launcher, pressing `<Mod> + 1` to open second entry, `<Mod> + t` to run in terminal, etc.")
                         },
                         gtk::DropDown::from_strings(ConfigModifier::strings()) {
@@ -79,6 +80,7 @@ impl SimpleComponent for Launcher {
                             set_label: "Width",
                         },
                         gtk::Image::from_icon_name("dialog-information-symbolic") {
+                            set_cursor_by_name: "help",
                             set_tooltip_text: Some("The width of the launcher in pixels.")
                         },
                         gtk::SpinButton {
@@ -100,6 +102,7 @@ impl SimpleComponent for Launcher {
                             set_label: "Max items",
                         },
                         gtk::Image::from_icon_name("dialog-information-symbolic") {
+                            set_cursor_by_name: "help",
                             set_tooltip_text: Some("Sets the maximum number of items to show in the launcher.")
                         },
                         gtk::SpinButton {
@@ -132,6 +135,7 @@ impl SimpleComponent for Launcher {
                             connect_active_notify[sender] => move |e| { sender.output(LauncherOutput::DefaultTerminal(if e.is_active() { None } else { Some("".to_string()) })).unwrap() },
                         },
                         gtk::Image::from_icon_name("dialog-information-symbolic") {
+                            set_cursor_by_name: "help",
                             set_tooltip_text: Some("name/path of the default terminal to use. This value is optional, if unset a list of default terminals is used to find a default terminal. Will be used to launch terminal apps and by the terminal plugin.")
                         },
                         gtk::Entry {

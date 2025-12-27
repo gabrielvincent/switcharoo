@@ -13,4 +13,5 @@ pub struct Theme {
 pub struct ThemeData {
     pub name: String,
     pub description: String,
+    pub experimental: bool,
 }

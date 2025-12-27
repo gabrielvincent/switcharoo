@@ -1,13 +1,12 @@
+use crate::util::SetCursor;
 use adw::gtk::Orientation;
 use adw::prelude::*;
 use config_lib::style::Theme;
 use relm4::abstractions::Toaster;
 use relm4::factory::*;
-use relm4::gtk::gdk_pixbuf::{InterpType, Pixbuf};
-use relm4::gtk::{Align, IconPaintable, Justification, gio, glib};
+use relm4::gtk::{Align, Justification, gio};
 use relm4::{ComponentParts, ComponentSender, RelmWidgetExt, SimpleComponent, gtk};
-use std::fs::File;
-use std::path::PathBuf;
+use std::path::Path;
 use tracing::{debug, trace, warn};
 
 #[derive(Debug)]
@@ -19,7 +18,9 @@ struct ThemeCarousel {
 enum ThemeCarouselInput {}
 
 #[derive(Debug)]
-enum ThemeCarouselOutput {}
+enum ThemeCarouselOutput {
+    Apply(String),
+}
 
 #[relm4::factory]
 impl FactoryComponent for ThemeCarousel {
@@ -40,14 +41,33 @@ impl FactoryComponent for ThemeCarousel {
                 set_halign: Align::Fill,
                 set_margin_bottom: 15,
                 set_homogeneous: true,
-                gtk::Box {},
-                gtk::Label {
-                    set_text: &self.theme.data.name,
-                    set_css_classes: &["big-text"],
-                },
                 gtk::Image::from_icon_name("file-system-manager") {
                     set_tooltip_text: Some(&self.theme.path.display().to_string()),
+                    set_cursor_by_name: "help",
+                    set_pixel_size: 22,
+                    set_halign: Align::Start,
+                },
+                gtk::Label {
+                    set_text: &self.theme.data.name,
+                    set_css_classes: &["title-2"],
+                },
+                gtk::Box {
                     set_halign: Align::End,
+                    set_spacing: 15,
+                    if self.theme.data.experimental {
+                        gtk::Image::from_icon_name("dialog-warning-symbolic") {
+                            set_tooltip_text: Some("Experimental theme"),
+                            set_pixel_size: 22
+                        }
+                    } else {
+                        gtk::Box {
+                        }
+                    },
+                    gtk::Button {
+                        set_label: "Apply",
+                        set_css_classes: &["suggested-action", "pill"],
+                        connect_clicked[sender, style = self.theme.style.clone()] => move |_| sender.output(ThemeCarouselOutput::Apply(style.clone())).unwrap(),
+                    }
                 },
             },
             gtk::Label {
@@ -87,10 +107,14 @@ pub struct Style {
 pub enum StyleInput {}
 
 #[derive(Debug)]
-pub struct StyleInit {}
+pub struct StyleInit {
+    pub system_data_dir: Box<Path>,
+}
 
 #[derive(Debug)]
-pub enum StyleOutput {}
+pub enum StyleOutput {
+    Apply(String),
+}
 
 #[relm4::component(pub)]
 impl SimpleComponent for Style {
@@ -134,15 +158,17 @@ impl SimpleComponent for Style {
     }
 
     fn init(
-        _init: Self::Init,
+        init: Self::Init,
         root: Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
         let mut themes_list = FactoryVecDeque::builder()
             .launch(adw::Carousel::builder().build())
-            .forward(sender.input_sender(), |output| match output {});
+            .forward(sender.output_sender(), |output| match output {
+                ThemeCarouselOutput::Apply(content) => StyleOutput::Apply(content),
+            });
 
-        let model = match load_themes() {
+        let model = match load_themes(init.system_data_dir) {
             Ok((themes, errors)) => {
                 let mut v = themes_list.guard();
                 for theme in themes {
@@ -181,8 +207,8 @@ impl SimpleComponent for Style {
     }
 }
 
-fn load_themes() -> Result<(Vec<Theme>, Vec<String>), String> {
-    let path = core_lib::path::get_default_system_data_dir().join("themes");
+fn load_themes(system_data_dir: Box<Path>) -> Result<(Vec<Theme>, Vec<String>), String> {
+    let path = system_data_dir.join("themes");
     let themes = config_lib::style::load_themes(path);
     trace!("Loaded themes: {:?}", themes);
     match themes {

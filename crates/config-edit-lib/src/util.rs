@@ -1,7 +1,32 @@
 use crate::structs::ConfigModifier;
-use relm4::gtk::gdk::{Display, Key, ModifierType};
+use relm4::gtk;
+use relm4::gtk::gdk::{Cursor, Display, Key, ModifierType};
 use relm4::gtk::prelude::DisplayExtManual;
 use tracing::instrument;
+
+pub trait SetTextIfDifferent {
+    fn set_text_if_different(&self, text: &str);
+}
+
+impl SetTextIfDifferent for gtk::Entry {
+    fn set_text_if_different(&self, text: &str) {
+        use relm4::adw::prelude::EditableExt;
+        if self.text() != text {
+            self.set_text(text);
+        }
+    }
+}
+
+pub trait SetCursor {
+    fn set_cursor_by_name(&self, name: &str);
+}
+
+impl SetCursor for gtk::Image {
+    fn set_cursor_by_name(&self, name: &str) {
+        use relm4::adw::prelude::WidgetExt;
+        self.set_cursor(Cursor::from_name(name, None).as_ref());
+    }
+}
 
 pub fn handle_key(
     val: Key,
@@ -59,7 +84,7 @@ pub fn key_to_name(key: &str) -> Option<String> {
         let code = key_id.parse::<u32>().ok()?;
         let display = &Display::default()?;
         let data = display.map_keycode(code)?;
-        let (_, key) = data.iter().find(|(m, k)| m.level() == 0)?;
+        let (_, key) = data.iter().find(|(m, _k)| m.level() == 0)?;
         Some(key.name()?.to_string())
     } else {
         Some(key.to_string())

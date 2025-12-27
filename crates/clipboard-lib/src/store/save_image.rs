@@ -2,7 +2,7 @@ use crate::store::util::create_storage_path;
 use anyhow::Context;
 use image::{ImageEncoder, ImageReader};
 use std::fs::File;
-use std::io::{BufWriter, Cursor, Write};
+use std::io::{Cursor, Write};
 use std::path::Path;
 use tracing::trace;
 

@@ -18,7 +18,7 @@ impl Modifier {
             Self::Alt => "alt_l".to_string(),
             Self::Ctrl => "ctrl_l".to_string(),
             Self::Super => "super_l".to_string(),
-            Self::None => "".to_string(),
+            Self::None => String::new(),
         }
     }
     pub const fn to_str(&self) -> &'static str {

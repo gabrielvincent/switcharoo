@@ -94,6 +94,7 @@ pub enum ConfigModifier {
     Ctrl,
 }
 
+#[allow(dead_code)]
 impl ConfigModifier {
     pub fn strings() -> &'static [&'static str] {
         &["Alt", "Super", "Ctrl"]
@@ -163,6 +164,14 @@ impl From<config_lib::Config> for Config {
     fn from(value: config_lib::Config) -> Self {
         Self {
             windows: value.windows.into(),
+        }
+    }
+}
+impl Into<config_lib::Config> for Config {
+    fn into(self) -> config_lib::Config {
+        config_lib::Config {
+            version: Some(config_lib::CURRENT_CONFIG_VERSION),
+            windows: self.windows.into(),
         }
     }
 }

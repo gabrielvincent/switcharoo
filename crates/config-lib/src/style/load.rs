@@ -3,11 +3,11 @@ use crate::style::structs::Theme;
 use anyhow::{Context, bail};
 use core_lib::ini::IniFile;
 use std::fs;
-use std::path::PathBuf;
+use std::path::Path;
 use tracing::{debug, instrument, warn};
 
 #[instrument(level = "debug")]
-pub fn load_themes(path: PathBuf) -> anyhow::Result<(Vec<Theme>, Vec<anyhow::Error>)> {
+pub fn load_themes(path: &Path) -> anyhow::Result<(Vec<Theme>, Vec<anyhow::Error>)> {
     let mut themes = Vec::new();
     if !path.exists() {
         bail!("Themes directory does not exist: {}", path.display());
@@ -75,21 +75,9 @@ pub fn load_themes(path: PathBuf) -> anyhow::Result<(Vec<Theme>, Vec<anyhow::Err
                     ));
                     continue;
                 };
-                let data = IniFile::from_str(&data);
-                let data = ThemeData {
-                    name: data
-                        .get_section("")
-                        .and_then(|s| s.get_first("name"))
-                        .unwrap_or(name)
-                        .to_string(),
-                    description: data
-                        .get_section("")
-                        .and_then(|s| s.get_first("description"))
-                        .unwrap_or("")
-                        .replace("\\n", "\n"),
-                };
 
-                let image_path = dir_path.join("image.jpg");
+                let data = parse_data(&data, name);
+                let image_path = dir_path.join("image.png");
                 themes.push(Theme {
                     name: name.to_string(),
                     path: dir_path.clone(),
@@ -106,5 +94,28 @@ pub fn load_themes(path: PathBuf) -> anyhow::Result<(Vec<Theme>, Vec<anyhow::Err
         }
     }
 
+    themes.sort_by(|a, b| a.name.cmp(&b.name));
     Ok((themes, errors))
+}
+
+fn parse_data(data: &str, name: &str) -> ThemeData {
+    let data = IniFile::from_str(data);
+    ThemeData {
+        name: data
+            .get_section("")
+            .and_then(|s| s.get_first("name"))
+            .unwrap_or(name)
+            .to_string(),
+        description: data
+            .get_section("")
+            .and_then(|s| s.get_first("description"))
+            .unwrap_or("")
+            .replace("\\n", "\n"),
+        experimental: data
+            .get_section("")
+            .and_then(|s| s.get_first("experimental"))
+            .unwrap_or("false")
+            .parse::<bool>()
+            .unwrap_or(false),
+    }
 }

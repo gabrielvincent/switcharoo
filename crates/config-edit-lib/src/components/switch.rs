@@ -3,7 +3,7 @@ use crate::shortcut_dialog::{
     KeyboardShortcut, KeyboardShortcutInit, KeyboardShortcutInput, KeyboardShortcutOutput,
 };
 use crate::structs::ConfigModifier;
-use crate::util::to_accelerator;
+use crate::util::{SetCursor, SetTextIfDifferent, to_accelerator};
 use adw::gtk::Align;
 use relm4::ComponentController;
 use relm4::adw::gtk;
@@ -101,6 +101,7 @@ impl SimpleComponent for Switch {
                         set_label: "Filter",
                     },
                     gtk::Image::from_icon_name("dialog-information-symbolic") {
+                        set_cursor_by_name: "help",
                         set_tooltip_text: Some("Filter the shown windows by the provided filters")
                     },
                     adw::ExpanderRow {
@@ -134,8 +135,11 @@ impl SimpleComponent for Switch {
                     set_spacing: 10,
                     gtk::Label {
                         set_label: "Switch Workspaces",
+                        #[watch]
+                        set_css_classes: if model.config.switch_workspaces == model.prev_config.switch_workspaces { &[] } else { &["blue-label"] },
                     },
                     gtk::Image::from_icon_name("dialog-information-symbolic") {
+                        set_cursor_by_name: "help",
                         set_tooltip_text: Some("Switch between workspaces in the Switch mode instead of windows")
                     },
                     gtk::Switch {
@@ -150,8 +154,11 @@ impl SimpleComponent for Switch {
                     set_spacing: 10,
                     gtk::Label {
                         set_label: "Exclude special workspaces (TODO)",
+                        #[watch]
+                        set_css_classes: if model.config.exclude_special_workspaces == model.prev_config.exclude_special_workspaces { &[] } else { &["blue-label"] },
                     },
                     gtk::Image::from_icon_name("dialog-information-symbolic") {
+                        set_cursor_by_name: "help",
                         set_tooltip_text: Some("Exclude special workspaces by regex \n(hyprctl workspaces -j | jq \".[].name\")")
                     },
                     gtk::Entry {
@@ -159,9 +166,10 @@ impl SimpleComponent for Switch {
                         set_placeholder_text: Some("special:(monitor|second)"),
                         set_hexpand: true,
                         set_valign: Align::Center,
-                        connect_changed[sender] => move |e| { sender.output(SwitchOutput::ExcludeSpecialWorkspaces(e.text().into())).unwrap() },
+                        connect_changed[sender] => move |e| { sender.output(SwitchOutput::ExcludeSpecialWorkspaces(e.text().into())).unwrap() } @h,
                         #[watch]
-                        set_text: &model.config.exclude_special_workspaces,
+                        #[block_signal(h)]
+                        set_text_if_different: &model.config.exclude_special_workspaces,
                     }
                 },
             }

@@ -2,6 +2,7 @@ use crate::components::switch::{Switch, SwitchInit, SwitchInput, SwitchOutput};
 use crate::components::windows_overview::{
     WindowsOverview, WindowsOverviewInit, WindowsOverviewInput, WindowsOverviewOutput,
 };
+use crate::util::SetCursor;
 use relm4::adw::gtk;
 use relm4::adw::prelude::*;
 use relm4::{
@@ -76,6 +77,7 @@ impl SimpleComponent for Windows {
                             set_label: "Scale",
                         },
                         gtk::Image::from_icon_name("dialog-information-symbolic") {
+                            set_cursor_by_name: "help",
                             set_tooltip_text: Some("The scale used to scale down the real dimension the windows displayed in the overview. \nCan be set from `0.5 < X > to 15.0`")
                         },
                         gtk::SpinButton {
@@ -93,10 +95,11 @@ impl SimpleComponent for Windows {
                         set_spacing: 10,
                         gtk::Label {
                             #[watch]
-                            set_css_classes: if model.config.items_per_row == model.prev_config.items_per_row { &[] } else { &["blue-label"]  },
+                            set_css_classes: if model.config.items_per_row == model.prev_config.items_per_row { &[] } else { &["blue-label"] },
                             set_label: "Items per row",
                         },
                         gtk::Image::from_icon_name("dialog-information-symbolic") {
+                            set_cursor_by_name: "help",
                             set_tooltip_text: Some("The number of workspaces or windows to show per row. \nIf you have 6 workspaces open and set this to 3, you will see 2 rows of 3 workspaces")
                         },
                         gtk::SpinButton {

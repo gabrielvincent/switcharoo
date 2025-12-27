@@ -51,7 +51,7 @@ impl SimpleComponent for KeyboardShortcut {
             set_icon_name: "keyboard-layout",
             #[watch]
             set_css_classes: if model.is_visible { &["active"] } else { &["not-active"] },
-            connect_clicked[sender] => move |_| { sender.output(KeyboardShortcutOutput::OpenRequest); },
+            connect_clicked[sender] => move |_| { sender.output(KeyboardShortcutOutput::OpenRequest).unwrap(); },
         },
     }
 

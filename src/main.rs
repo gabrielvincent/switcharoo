@@ -4,6 +4,7 @@ use clap::Parser;
 use core_lib::WarnWithDetails;
 use core_lib::path::{
     get_default_cache_dir, get_default_config_path, get_default_css_path, get_default_data_dir,
+    get_default_system_data_dir,
 };
 use core_lib::util::daemon_running;
 use std::{env, fs};
@@ -62,6 +63,7 @@ fn main() -> anyhow::Result<()> {
 
     let data_dir = cli.global_opts.data_dir;
     let cache_dir = cli.global_opts.cache_dir;
+    let system_data_dir = None;
     let css_file = cli.global_opts.css_file;
     let config_path = cli.global_opts.config_file;
 
@@ -91,7 +93,8 @@ fn main() -> anyhow::Result<()> {
             cli::ConfigCommand::Edit {} => {
                 let config_path = config_path.unwrap_or_else(get_default_config_path);
                 let css_path = css_file.unwrap_or_else(get_default_css_path);
-                config_edit_lib::start(config_path, css_path);
+                let system_data_dir = system_data_dir.unwrap_or_else(get_default_system_data_dir);
+                config_edit_lib::start(config_path, css_path, system_data_dir);
             }
             #[cfg(feature = "generate_config_command")]
             cli::ConfigCommand::Generate { force } => {
@@ -111,7 +114,7 @@ fn main() -> anyhow::Result<()> {
                 let config = config_lib::generate::generate_config(config_data);
                 tracing::trace!("Generated config: {:#?}", config);
                 config_lib::write_config(&config_path, &config, override_config).warn();
-                config_lib::generate::write_css(&css_path, &css_data, override_css).warn();
+                config_lib::generate::write_css_data(&css_path, &css_data, override_css).warn();
                 explain_config(&config_path, true);
             }
             cli::ConfigCommand::Explain {} => {

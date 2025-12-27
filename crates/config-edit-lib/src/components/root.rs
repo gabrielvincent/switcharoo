@@ -3,7 +3,7 @@ use crate::components::changes::{
 };
 use crate::components::json_preview::{JSONPreview, JSONPreviewInit};
 use crate::components::launcher::{Launcher, LauncherInit, LauncherInput, LauncherOutput};
-use crate::components::style::{Style, StyleInit, StyleInput, StyleOutput};
+use crate::components::style::{Style, StyleInit, StyleOutput};
 use crate::components::switch::SwitchOutput;
 use crate::components::windows::{Windows, WindowsInit, WindowsInput, WindowsOutput};
 use crate::components::windows_overview::WindowsOverviewOutput;
@@ -12,6 +12,7 @@ use crate::structs;
 use crate::util::default_config;
 use adw::AlertDialog;
 use relm4::ComponentController;
+use relm4::abstractions::Toaster;
 use relm4::adw;
 use relm4::adw::gtk;
 use relm4::adw::gtk::{Align, ListBox, SelectionMode};
@@ -20,7 +21,7 @@ use relm4::gtk::glib;
 use relm4::{Component, ComponentParts, ComponentSender, Controller, SimpleComponent};
 use relm4_components::alert::{Alert, AlertMsg, AlertResponse, AlertSettings};
 use std::path::Path;
-use tracing::{debug, info, trace, warn};
+use tracing::{debug, error, info, trace, warn};
 
 #[derive(Debug)]
 pub enum Msg {
@@ -37,6 +38,9 @@ pub enum Msg {
 }
 
 pub struct Root {
+    config_path: Box<Path>,
+    css_path: Box<Path>,
+
     config: crate::Config,
     prev_config: crate::Config,
     footer: Controller<Footer>,
@@ -46,15 +50,14 @@ pub struct Root {
     view_stack: adw::ViewStack,
     changes: Controller<Changes>,
     alert_dialog_changes_list: ListBox,
-    pub style: Controller<Style>,
+    _style: Controller<Style>,
+    toaster: Toaster,
 }
 
 pub struct InitRoot {
     pub config_path: Box<Path>,
-}
-
-struct AppWidgets {
-    label: gtk::Label,
+    pub system_data_dir: Box<Path>,
+    pub css_path: Box<Path>,
 }
 
 #[relm4::component(pub)]
@@ -71,25 +74,32 @@ impl SimpleComponent for Root {
             set_default_height: 700,
             set_resizable: true,
             #[wrap(Some)]
-            set_content = &adw::ToolbarView {
-                set_top_bar_style: adw::ToolbarStyle::Raised,
-                set_bottom_bar_style: adw::ToolbarStyle::Flat,
-                set_reveal_bottom_bars: true,
-                set_reveal_top_bars: true,
-                add_bottom_bar = footer.widget(),
-                #[wrap(Some)]
-                set_content = &gtk::ScrolledWindow {
-                    #[name = "view_stack"]
-                    adw::ViewStack {
-                    }
-                },
-                add_top_bar = &adw::HeaderBar {
-                    set_show_end_title_buttons: true,
-                    set_show_start_title_buttons: true,
-                    set_show_back_button: true,
+            #[local_ref]
+            set_content = toast_overlay -> adw::ToastOverlay {
+                set_vexpand: true,
+                adw::ToolbarView {
+                    set_top_bar_style: adw::ToolbarStyle::Raised,
+                    set_bottom_bar_style: adw::ToolbarStyle::Flat,
+                    set_reveal_bottom_bars: true,
+                    set_reveal_top_bars: true,
+                    add_bottom_bar = footer.widget(),
                     #[wrap(Some)]
-                    set_title_widget: view_stack_switcher = &adw::ViewSwitcherBar {
-                        set_reveal: true,
+                    set_content = &adw::Clamp {
+                        set_maximum_size: 1400,
+                        gtk::ScrolledWindow {
+                            #[name = "view_stack"]
+                            adw::ViewStack {
+                            }
+                        },
+                    },
+                    add_top_bar = &adw::HeaderBar {
+                        set_show_end_title_buttons: true,
+                        set_show_start_title_buttons: true,
+                        set_show_back_button: true,
+                        #[wrap(Some)]
+                        set_title_widget: view_stack_switcher = &adw::ViewSwitcherBar {
+                            set_reveal: true,
+                        },
                     },
                 },
             },
@@ -145,14 +155,13 @@ impl SimpleComponent for Root {
         };
         let config = structs::Config::from(config);
 
-        let footer: Controller<Footer> =
-            Footer::builder()
-                .launch(init.config_path)
-                .forward(sender.input_sender(), |msg| match msg {
-                    FooterOutput::Reset => Msg::Reset,
-                    FooterOutput::Close => Msg::CloseRequest,
-                    FooterOutput::Save => Msg::Save(false),
-                });
+        let footer: Controller<Footer> = Footer::builder()
+            .launch(init.config_path.clone())
+            .forward(sender.input_sender(), |msg| match msg {
+                FooterOutput::Reset => Msg::Reset,
+                FooterOutput::Close => Msg::CloseRequest,
+                FooterOutput::Save => Msg::Save(false),
+            });
 
         let changes_list = ListBox::builder()
             .css_classes(["items-list", "boxed-list"])
@@ -182,7 +191,9 @@ impl SimpleComponent for Root {
             });
 
         let style = Style::builder()
-            .launch(StyleInit {})
+            .launch(StyleInit {
+                system_data_dir: init.system_data_dir,
+            })
             .forward(sender.input_sender(), Msg::Style);
         let windows = Windows::builder()
             .launch(WindowsInit {
@@ -201,7 +212,11 @@ impl SimpleComponent for Root {
             })
             .forward(sender.input_sender(), Msg::Changes);
 
+        let toaster = Toaster::default();
+
+        let toast_overlay = toaster.overlay_widget();
         let widgets = view_output!();
+
         widgets.view_stack.add_titled_with_icon(
             style.widget(),
             Some("style"),
@@ -240,6 +255,8 @@ impl SimpleComponent for Root {
         widgets.view_stack.set_visible_child_name("overview");
 
         let model = Root {
+            config_path: init.config_path,
+            css_path: init.css_path,
             config: config.clone(),
             prev_config: config.clone(),
             footer,
@@ -248,6 +265,7 @@ impl SimpleComponent for Root {
             changes,
             style,
             alert_dialog,
+            toaster,
             alert_dialog_changes_list: changes_list,
             view_stack: widgets.view_stack.clone(),
         };
@@ -287,8 +305,31 @@ impl SimpleComponent for Root {
                     .emit(ChangesInput::SetConfig(self.config.clone()));
             }
             Msg::Save(close) => {
-                info!("save");
-                // TODO
+                match config_lib::write_config(
+                    &self.config_path,
+                    &(self.config.clone().into()),
+                    true,
+                ) {
+                    Ok(_) => {
+                        info!("Saved config to {}", self.config_path.display());
+                        self.toaster.add_toast(
+                            adw::Toast::builder()
+                                .title("Saved".to_string())
+                                .timeout(2)
+                                .build(),
+                        );
+                    }
+                    Err(err) => {
+                        error!("Failed to save config: {err:#}");
+                        self.toaster.add_toast(
+                            adw::Toast::builder()
+                                .title(err.to_string())
+                                .timeout(0)
+                                .build(),
+                        );
+                    }
+                }
+
                 if close {
                     sender.input(Msg::Close);
                 }
@@ -315,9 +356,30 @@ impl SimpleComponent for Root {
                     self.footer.emit(FooterInput::ChangesExist(changes_exist))
                 }
             },
-            Msg::Style(msg) => {}
+            Msg::Style(msg) => match msg {
+                StyleOutput::Apply(content) => match std::fs::write(&self.css_path, content) {
+                    Ok(_) => {
+                        info!("Saved css to {}", self.css_path.display());
+                        self.toaster.add_toast(
+                            adw::Toast::builder()
+                                .title("Saved".to_string())
+                                .timeout(2)
+                                .build(),
+                        );
+                    }
+                    Err(err) => {
+                        error!("Failed to save css: {err:#}");
+                        self.toaster.add_toast(
+                            adw::Toast::builder()
+                                .title(err.to_string())
+                                .timeout(0)
+                                .build(),
+                        );
+                    }
+                },
+            },
             Msg::Launcher(msg) => {
-                let mut r#ref = &mut self.config.windows.overview.launcher;
+                let r#ref = &mut self.config.windows.overview.launcher;
                 match msg {
                     LauncherOutput::Modifier(modifier) => {
                         r#ref.launch_modifier = modifier;
@@ -344,7 +406,7 @@ impl SimpleComponent for Root {
                     .emit(ChangesInput::SetConfig(self.config.clone()));
             }
             Msg::Windows(msg) => {
-                let mut r#ref = &mut self.config.windows;
+                let r#ref = &mut self.config.windows;
                 match msg {
                     WindowsOutput::Enabled(enabled) => {
                         r#ref.enabled = enabled;

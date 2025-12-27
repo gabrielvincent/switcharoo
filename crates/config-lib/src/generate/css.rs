@@ -11,7 +11,11 @@ pub struct StyleData {
 
 const CSS_CONFIG: &str = include_str!("default.css");
 
-pub fn write_css(css_path: &Path, data: &StyleData, override_file: bool) -> anyhow::Result<()> {
+pub fn write_css_data(
+    css_path: &Path,
+    data: &StyleData,
+    override_file: bool,
+) -> anyhow::Result<()> {
     let _span = debug_span!("write_css").entered();
 
     if css_path.exists() && !override_file {
