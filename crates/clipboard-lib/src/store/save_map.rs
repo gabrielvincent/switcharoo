@@ -9,7 +9,7 @@ use std::path::Path;
 use std::time::SystemTime;
 use tracing::{trace, warn};
 
-#[derive(Debug, bincode::Encode)]
+#[derive(Debug, bitcode::Encode, bitcode::Decode)]
 pub enum ClipboardDataType {
     Alias(Box<str>),
     Data(Vec<u8>),
@@ -55,9 +55,11 @@ fn store_map(
     let now = SystemTime::now();
     let mut cursor = Cursor::new(Vec::new());
     let ext = {
-        let (mut write, ext) = get_storage_writer(&mut cursor, config, compress);
-        bincode::encode_into_std_write(data, &mut write, bincode::config::standard())
-            .context("Failed to encode clipboard data")?;
+        let (mut writer, ext) = get_storage_writer(&mut cursor, config, compress);
+        let encoded = bitcode::encode(data);
+        writer
+            .write_all(&encoded)
+            .context("Failed to write encoded clipboard data")?;
         ext
     };
     let storage_path = create_storage_path(cache_dir, "data", &format!("bin.{ext}"))

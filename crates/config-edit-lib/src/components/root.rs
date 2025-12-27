@@ -3,6 +3,7 @@ use crate::components::changes::{
 };
 use crate::components::json_preview::{JSONPreview, JSONPreviewInit};
 use crate::components::launcher::{Launcher, LauncherInit, LauncherInput, LauncherOutput};
+use crate::components::style::{Style, StyleInit, StyleInput, StyleOutput};
 use crate::components::switch::SwitchOutput;
 use crate::components::windows::{Windows, WindowsInit, WindowsInput, WindowsOutput};
 use crate::components::windows_overview::WindowsOverviewOutput;
@@ -31,6 +32,7 @@ pub enum Msg {
     SetConfig(crate::Config),
     Windows(WindowsOutput),
     Launcher(LauncherOutput),
+    Style(StyleOutput),
     Changes(ChangesOutput),
 }
 
@@ -44,6 +46,7 @@ pub struct Root {
     view_stack: adw::ViewStack,
     changes: Controller<Changes>,
     alert_dialog_changes_list: ListBox,
+    pub style: Controller<Style>,
 }
 
 pub struct InitRoot {
@@ -178,6 +181,9 @@ impl SimpleComponent for Root {
                 AlertResponse::Cancel => Msg::Ignore,
             });
 
+        let style = Style::builder()
+            .launch(StyleInit {})
+            .forward(sender.input_sender(), Msg::Style);
         let windows = Windows::builder()
             .launch(WindowsInit {
                 config: config.windows.clone(),
@@ -196,6 +202,12 @@ impl SimpleComponent for Root {
             .forward(sender.input_sender(), Msg::Changes);
 
         let widgets = view_output!();
+        widgets.view_stack.add_titled_with_icon(
+            style.widget(),
+            Some("style"),
+            "Style",
+            "viewimage",
+        );
         widgets.view_stack.add_titled_with_icon(
             changes.widget(),
             None,
@@ -234,6 +246,7 @@ impl SimpleComponent for Root {
             windows,
             launcher,
             changes,
+            style,
             alert_dialog,
             alert_dialog_changes_list: changes_list,
             view_stack: widgets.view_stack.clone(),
@@ -302,6 +315,7 @@ impl SimpleComponent for Root {
                     self.footer.emit(FooterInput::ChangesExist(changes_exist))
                 }
             },
+            Msg::Style(msg) => {}
             Msg::Launcher(msg) => {
                 let mut r#ref = &mut self.config.windows.overview.launcher;
                 match msg {

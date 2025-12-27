@@ -13,9 +13,11 @@ rust-version.workspace = true
 [dependencies]
 tracing.workspace = true
 config-lib.workspace = true
+core-lib.workspace = true
 relm4.workspace = true
 relm4-components = "0.10.0"
 adw = { version = "0.8.1", package = "libadwaita", features = ["v1_8"] }
+anyhow = "1.0.100"
 
 [features]
 launcher_calc_plugin = []

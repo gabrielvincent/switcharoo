@@ -23,7 +23,7 @@ impl SimpleComponent for JSONPreview {
     view! {
         #[root]
         gtk::Box {
-           set_orientation: gtk::Orientation::Vertical,
+            set_orientation: gtk::Orientation::Vertical,
             set_margin_all: 10,
             gtk::Label {
                 set_label:  "Json preview for nix users (TODO)"

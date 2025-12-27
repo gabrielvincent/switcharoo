@@ -83,12 +83,38 @@
     border: 2px solid var(--border-color);
 }
 
+.theme-carousel {
+    /*border: 2px solid var(--border-color);*/
+    border-radius: 24px;
+}
+
+.theme {
+    padding: 24px;
+    /*background: red;*/
+}
+
+.theme-image {
+    border-radius: 18px;
+    border: 2px solid var(--border-color);
+    min-height: 100px;
+}
+
 .blue-label {
     color: color-mix(in srgb, currentColor 40%, #13bdda 60%);
 }
 
 .gray-label {
     color: color-mix(in srgb, currentColor 40%, #464444 60%);
+}
+
+.big-text {
+    font-size: 1.6rem;
+    font-weight: 700;
+}
+
+.large-text {
+    font-size: 1.2rem;
+    font-weight: 500;
 }
 
 button.active {

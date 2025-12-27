@@ -7,6 +7,7 @@ mod migrate;
 mod modifier;
 mod save;
 mod structs;
+pub mod style;
 
 pub use check::check;
 pub use explain::explain;

@@ -74,6 +74,7 @@ fn main() -> anyhow::Result<()> {
             }
             if env::var_os("HYPRSHELL_EXPERIMENTAL").is_some_and(|v| v.eq("1")) {
                 clipboard_lib::store::test_clipboard(
+                    data_dir.unwrap_or_else(get_default_data_dir),
                     cache_dir.unwrap_or_else(get_default_cache_dir),
                 );
                 return Ok(());
