@@ -1,17 +1,13 @@
+use crate::style::ThemeData;
+use crate::style::structs::Theme;
 use anyhow::{Context, bail};
+use core_lib::ini::IniFile;
 use std::fs;
 use std::path::PathBuf;
-use tracing::{debug, warn};
+use tracing::{debug, instrument, warn};
 
-#[derive(Debug)]
-pub struct Theme {
-    pub name: String,
-    pub path: PathBuf,
-    pub style: String,
-    pub image_path: Option<PathBuf>,
-}
-
-pub fn list_themes(path: PathBuf) -> anyhow::Result<(Vec<Theme>, Vec<anyhow::Error>)> {
+#[instrument(level = "debug")]
+pub fn load_themes(path: PathBuf) -> anyhow::Result<(Vec<Theme>, Vec<anyhow::Error>)> {
     let mut themes = Vec::new();
     if !path.exists() {
         bail!("Themes directory does not exist: {}", path.display());
@@ -52,9 +48,12 @@ pub fn list_themes(path: PathBuf) -> anyhow::Result<(Vec<Theme>, Vec<anyhow::Err
         let dir_path = entry.path();
         let style_path = dir_path.join("style.css");
         if !style_path.is_file() {
-            warn!("Invalid theme directory: {}", dir_path.display());
+            warn!(
+                "Invalid theme directory: {}, style file missing",
+                dir_path.display()
+            );
             errors.push(anyhow::anyhow!(
-                "Invalid theme directory: {}",
+                "Invalid theme directory: {}, style file missing",
                 dir_path.display()
             ));
         } else {
@@ -67,11 +66,35 @@ pub fn list_themes(path: PathBuf) -> anyhow::Result<(Vec<Theme>, Vec<anyhow::Err
                     ));
                     continue;
                 };
+                let data_path = dir_path.join("data.ini");
+                let Ok(data) = fs::read_to_string(&data_path) else {
+                    warn!("Failed to read theme data file: {}", data_path.display());
+                    errors.push(anyhow::anyhow!(
+                        "Failed to read theme data file: {}",
+                        data_path.display()
+                    ));
+                    continue;
+                };
+                let data = IniFile::from_str(&data);
+                let data = ThemeData {
+                    name: data
+                        .get_section("")
+                        .and_then(|s| s.get_first("name"))
+                        .unwrap_or(name)
+                        .to_string(),
+                    description: data
+                        .get_section("")
+                        .and_then(|s| s.get_first("description"))
+                        .unwrap_or("")
+                        .replace("\\n", "\n"),
+                };
+
                 let image_path = dir_path.join("image.jpg");
                 themes.push(Theme {
                     name: name.to_string(),
                     path: dir_path.clone(),
                     style: theme_content,
+                    data,
                     image_path: if image_path.exists() {
                         Some(image_path)
                     } else {

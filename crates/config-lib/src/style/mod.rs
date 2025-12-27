@@ -1,3 +1,5 @@
-mod list;
+mod load;
+mod structs;
 
-pub use list::{Theme, list_themes};
+pub use load::load_themes;
+pub use structs::*;

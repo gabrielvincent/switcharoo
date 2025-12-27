@@ -1604,6 +1604,7 @@ name = "hyprshell-config-lib"
 version = "4.8.1"
 dependencies = [
  "anyhow",
+ "hyprshell-core-lib",
  "inquire",
  "ron",
  "serde",

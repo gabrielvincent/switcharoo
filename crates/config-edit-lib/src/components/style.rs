@@ -4,7 +4,7 @@ use config_lib::style::Theme;
 use relm4::abstractions::Toaster;
 use relm4::factory::*;
 use relm4::gtk::gdk_pixbuf::{InterpType, Pixbuf};
-use relm4::gtk::{Align, IconPaintable, gio, glib};
+use relm4::gtk::{Align, IconPaintable, Justification, gio, glib};
 use relm4::{ComponentParts, ComponentSender, RelmWidgetExt, SimpleComponent, gtk};
 use std::fs::File;
 use std::path::PathBuf;
@@ -34,13 +34,27 @@ impl FactoryComponent for ThemeCarousel {
             // set_description: Some(&self.theme.path.display().to_string()),
             set_orientation: Orientation::Vertical,
             set_css_classes: &["theme"],
-            // set_hexpand: true,
             set_halign: Align::Fill,
             set_valign: Align::Fill,
-            gtk::Label {
-                set_text: &self.theme.name,
-                set_css_classes: &["big-text"],
+            gtk::Box {
+                set_halign: Align::Fill,
                 set_margin_bottom: 15,
+                set_homogeneous: true,
+                gtk::Box {},
+                gtk::Label {
+                    set_text: &self.theme.data.name,
+                    set_css_classes: &["big-text"],
+                },
+                gtk::Image::from_icon_name("file-system-manager") {
+                    set_tooltip_text: Some(&self.theme.path.display().to_string()),
+                    set_halign: Align::End,
+                },
+            },
+            gtk::Label {
+                set_text: &self.theme.data.description,
+                set_halign: Align::Center,
+                set_justify: Justification::Center,
+                set_margin_bottom: 10,
             },
             gtk::Picture {
                 set_file:  self.theme.image_path.as_ref().map(|path| gio::File::for_path(path)).as_ref(),
@@ -169,7 +183,7 @@ impl SimpleComponent for Style {
 
 fn load_themes() -> Result<(Vec<Theme>, Vec<String>), String> {
     let path = core_lib::path::get_default_system_data_dir().join("themes");
-    let themes = config_lib::style::list_themes(path);
+    let themes = config_lib::style::load_themes(path);
     trace!("Loaded themes: {:?}", themes);
     match themes {
         Ok((themes, errors)) => {
