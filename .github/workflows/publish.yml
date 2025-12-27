@@ -79,16 +79,22 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Build binary for x86_64-unknown-linux-gnu
         run: |
+          version=$(echo ${{ github.ref_name }} | sed 's/v//')
           ./scripts/ci/build-x86.sh
+          mv "/tmp/hyprshell-x86_64.tar.zst" "/tmp/hyprshell-$version-x86_64.tar.zst"
           gh release upload ${{ github.ref_name }} "/tmp/hyprshell-x86_64.tar.zst"
+          mv "/tmp/hyprshell-slim-x86_64.tar.zst" "/tmp/hyprshell-slim-$version-x86_64.tar.zst"
           gh release upload ${{ github.ref_name }} "/tmp/hyprshell-x86_64-slim.tar.zst"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Build binary for aarch64-unknown-linux-gnu
         run: |
+          version=$(echo ${{ github.ref_name }} | sed 's/v//')
           ./scripts/ci/install-gtk4-layer-shell-aarch64.sh
           ./scripts/ci/build-aarch64.sh
+          mv "/tmp/hyprshell-aarch64.tar.zst" "/tmp/hyprshell-$version-aarch64.tar.zst"
           gh release upload ${{ github.ref_name }} "/tmp/hyprshell-aarch64.tar.zst"
+          mv "/tmp/hyprshell-slim-aarch64.tar.zst" "/tmp/hyprshell-slim-$version-aarch64.tar.zst"
           gh release upload ${{ github.ref_name }} "/tmp/hyprshell-aarch64-slim.tar.zst"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
