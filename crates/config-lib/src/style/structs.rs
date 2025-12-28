@@ -7,6 +7,7 @@ pub struct Theme {
     pub style: String,
     pub image_path: Option<PathBuf>,
     pub data: ThemeData,
+    pub current: bool,
 }
 
 #[derive(Debug)]

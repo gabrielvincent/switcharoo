@@ -10,6 +10,7 @@ use relm4::gtk::Align;
 use relm4::{Component, adw};
 use relm4::{ComponentController, Controller};
 use relm4::{ComponentParts, ComponentSender, SimpleComponent};
+use tracing::trace;
 
 #[derive(Debug)]
 pub struct WindowsOverview {
@@ -63,7 +64,10 @@ impl SimpleComponent for WindowsOverview {
                 gtk::Label {
                     set_label: "Overview + Launcher",
                 },
-                append = model.keyboard_shortcut.widget(),
+                model.keyboard_shortcut.widget().clone() -> gtk::Button {
+                    #[watch]
+                    set_sensitive: model.config.enabled,
+                },
                 adw::ShortcutLabel::new(&to_accelerator(model.config.modifier, &model.config.key).unwrap_or_default()) {
                     #[watch]
                     set_accelerator: &to_accelerator(model.config.modifier, &model.config.key).unwrap_or_default(),
@@ -187,6 +191,7 @@ impl SimpleComponent for WindowsOverview {
     }
 
     fn update(&mut self, message: WindowsOverviewInput, _sender: ComponentSender<Self>) {
+        trace!("windows_overview::update: {message:?}");
         match message {
             WindowsOverviewInput::SetOverview(config) => {
                 self.config = config;

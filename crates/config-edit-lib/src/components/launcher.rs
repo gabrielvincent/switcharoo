@@ -1,13 +1,21 @@
+use crate::components::launcher_plugins::{
+    LauncherPlugins, LauncherPluginsInit, LauncherPluginsInput, LauncherPluginsOutput,
+};
 use crate::structs::ConfigModifier;
 use crate::util::{SetCursor, SetTextIfDifferent};
+use relm4::ComponentController;
 use relm4::adw::gtk;
 use relm4::adw::prelude::*;
-use relm4::{ComponentParts, ComponentSender, RelmWidgetExt, SimpleComponent};
+use relm4::{
+    Component, ComponentParts, ComponentSender, Controller, RelmWidgetExt, SimpleComponent,
+};
+use tracing::trace;
 
 #[derive(Debug)]
 pub struct Launcher {
-    pub config: crate::Launcher,
-    pub prev_config: crate::Launcher,
+    config: crate::Launcher,
+    prev_config: crate::Launcher,
+    launcher_plugins: Controller<LauncherPlugins>,
 }
 
 #[derive(Debug)]
@@ -28,6 +36,7 @@ pub enum LauncherOutput {
     Width(u32),
     MaxItems(u8),
     DefaultTerminal(Option<String>),
+    LauncherPlugins(LauncherPluginsOutput),
 }
 
 #[relm4::component(pub)]
@@ -152,7 +161,8 @@ impl SimpleComponent for Launcher {
                             set_hexpand: true,
                         }
                     },
-                }
+                },
+                add_row = model.launcher_plugins.widget(),
             }
         }
     }
@@ -162,24 +172,42 @@ impl SimpleComponent for Launcher {
         root: Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
+        let launcher_plugins = LauncherPlugins::builder()
+            .launch(LauncherPluginsInit {
+                config: init.config.plugins.clone(),
+            })
+            .forward(sender.output_sender(), LauncherOutput::LauncherPlugins);
+
         let model = Launcher {
             config: init.config.clone(),
             prev_config: init.config,
+            launcher_plugins,
         };
         let widgets = view_output!();
         ComponentParts { model, widgets }
     }
 
     fn update(&mut self, message: Self::Input, _sender: ComponentSender<Self>) {
+        trace!("launcher::update: {message:?}");
         match message {
             LauncherInput::SetLauncher(config) => {
                 self.config = config;
+                self.launcher_plugins
+                    .emit(LauncherPluginsInput::SetLauncherPlugins(
+                        self.config.plugins.clone(),
+                    ));
             }
             LauncherInput::SetPrevLauncher(config) => {
                 self.prev_config = config;
+                self.launcher_plugins
+                    .emit(LauncherPluginsInput::SetPrevLauncherPlugins(
+                        self.prev_config.plugins.clone(),
+                    ));
             }
             LauncherInput::ResetLauncher => {
                 self.config = self.prev_config.clone();
+                self.launcher_plugins
+                    .emit(LauncherPluginsInput::ResetLauncherPlugins)
             }
         }
     }

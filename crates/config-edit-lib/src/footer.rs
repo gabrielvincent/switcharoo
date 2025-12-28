@@ -35,8 +35,9 @@ impl SimpleComponent for Footer {
                 set_hexpand: true,
                 set_css_classes: &["footer"],
                 set_orientation: Orientation::Horizontal,
-                gtk::Label {
+                gtk::LinkButton {
                     set_label: &format!("Hyprshell v{}", env!("CARGO_PKG_VERSION")),
+                    set_uri: &format!("https://github.com/H3rmt/hyprshell/tree/v{}", env!("CARGO_PKG_VERSION")),
                 },
                 gtk::Box {
                     set_spacing: 10,

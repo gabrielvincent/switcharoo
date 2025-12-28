@@ -1,12 +1,18 @@
-use crate::util::SetCursor;
+use crate::util::{ScrollToPosition, SetCursor};
 use adw::gtk::Orientation;
 use adw::prelude::*;
 use config_lib::style::Theme;
 use relm4::abstractions::Toaster;
 use relm4::factory::*;
 use relm4::gtk::{Align, Justification, gio};
+use relm4::tokio::time::sleep;
 use relm4::{ComponentParts, ComponentSender, RelmWidgetExt, SimpleComponent, gtk};
+use std::cell::RefCell;
+use std::fs;
 use std::path::Path;
+use std::rc::Rc;
+use std::sync::Mutex;
+use std::time::Duration;
 use tracing::{debug, trace, warn};
 
 #[derive(Debug)]
@@ -19,7 +25,7 @@ enum ThemeCarouselInput {}
 
 #[derive(Debug)]
 enum ThemeCarouselOutput {
-    Apply(String),
+    Apply((String, String)),
 }
 
 #[relm4::factory]
@@ -54,6 +60,15 @@ impl FactoryComponent for ThemeCarousel {
                 gtk::Box {
                     set_halign: Align::End,
                     set_spacing: 15,
+                    if self.theme.current {
+                        gtk::Image::from_icon_name("checkmark") {
+                            set_tooltip_text: Some("Current theme"),
+                            set_pixel_size: 22
+                        }
+                    } else {
+                        gtk::Box {
+                        }
+                    },
                     if self.theme.data.experimental {
                         gtk::Image::from_icon_name("dialog-warning-symbolic") {
                             set_tooltip_text: Some("Experimental theme"),
@@ -66,7 +81,7 @@ impl FactoryComponent for ThemeCarousel {
                     gtk::Button {
                         set_label: "Apply",
                         set_css_classes: &["suggested-action", "pill"],
-                        connect_clicked[sender, style = self.theme.style.clone()] => move |_| sender.output(ThemeCarouselOutput::Apply(style.clone())).unwrap(),
+                        connect_clicked[sender, style = self.theme.style.clone(), name = self.theme.name.clone()] => move |_| sender.output(ThemeCarouselOutput::Apply((name.clone(), style.clone()))).unwrap(),
                     }
                 },
             },
@@ -101,19 +116,25 @@ pub struct Style {
     err: Option<String>,
     themes_list: FactoryVecDeque<ThemeCarousel>,
     toaster: Toaster,
+    system_data_dir: Box<Path>,
+    css_path: Box<Path>,
+    initial_position: Option<usize>,
 }
 
 #[derive(Debug)]
-pub enum StyleInput {}
+pub enum StyleInput {
+    Reload,
+}
 
 #[derive(Debug)]
 pub struct StyleInit {
     pub system_data_dir: Box<Path>,
+    pub css_path: Box<Path>,
 }
 
 #[derive(Debug)]
 pub enum StyleOutput {
-    Apply(String),
+    Apply((String, String)),
 }
 
 #[relm4::component(pub)]
@@ -127,12 +148,6 @@ impl SimpleComponent for Style {
         gtk::Box {
             set_orientation: Orientation::Vertical,
             set_margin_all: 10,
-            // gtk::Label {
-            //     set_text: "Themes",
-            //     set_css_classes: &["big-text"],
-            //     set_margin_top: 5,
-            //     set_margin_bottom: 10,
-            // },
             gtk::Label {
                 #[watch]
                 set_visible: model.err.is_some(),
@@ -152,6 +167,12 @@ impl SimpleComponent for Style {
                     set_css_classes: &["theme-carousel"],
                     set_vexpand: true,
                     set_vexpand_set: true,
+                    connect_realize[refc = model.initial_position.clone()] => move |s| {
+                        if let Some(pos) = refc {
+                            debug!("Scroll to position: {:?}", pos);
+                            s.scroll_to_pos(pos, false);
+                        }
+                    }
                 },
             }
         }
@@ -168,10 +189,14 @@ impl SimpleComponent for Style {
                 ThemeCarouselOutput::Apply(content) => StyleOutput::Apply(content),
             });
 
-        let model = match load_themes(init.system_data_dir) {
+        let model = match load_themes(&init.system_data_dir, &init.css_path) {
             Ok((themes, errors)) => {
                 let mut v = themes_list.guard();
-                for theme in themes {
+                let mut index = 0;
+                for (idx, theme) in themes.into_iter().enumerate() {
+                    if theme.current {
+                        index = idx;
+                    }
                     v.push_back(theme);
                 }
                 drop(v);
@@ -183,6 +208,9 @@ impl SimpleComponent for Style {
                     toaster,
                     err: None,
                     themes_list,
+                    css_path: init.css_path,
+                    system_data_dir: init.system_data_dir,
+                    initial_position: Some(index),
                 }
             }
             Err(err) => {
@@ -191,6 +219,9 @@ impl SimpleComponent for Style {
                     toaster: Toaster::default(),
                     err: Some(err),
                     themes_list,
+                    css_path: init.css_path,
+                    system_data_dir: init.system_data_dir,
+                    initial_position: None,
                 }
             }
         };
@@ -201,15 +232,48 @@ impl SimpleComponent for Style {
         ComponentParts { model, widgets }
     }
 
-    fn update(&mut self, message: Self::Input, _sender: ComponentSender<Self>) {
-        trace!("update: {message:?}");
-        match message {}
+    fn update(&mut self, message: Self::Input, sender: ComponentSender<Self>) {
+        trace!("style::update: {message:?}");
+        match message {
+            StyleInput::Reload => match load_themes(&self.system_data_dir, &self.css_path) {
+                Ok((themes, errors)) => {
+                    let mut v = self.themes_list.guard();
+                    let mut index = 0;
+                    v.clear();
+                    for (idx, theme) in themes.into_iter().enumerate() {
+                        if theme.current {
+                            index = idx;
+                        }
+                        v.push_back(theme);
+                    }
+                    drop(v);
+                    self.themes_list.widget().scroll_to_pos(index, false);
+                    for err in errors {
+                        self.toaster
+                            .add_toast(adw::Toast::builder().title(err).timeout(0).build());
+                    }
+                }
+                Err(err) => {
+                    warn!("Failed to load themes: {err}");
+                    self.err = Some(err);
+                }
+            },
+        }
     }
 }
 
-fn load_themes(system_data_dir: Box<Path>) -> Result<(Vec<Theme>, Vec<String>), String> {
+fn load_themes(
+    system_data_dir: &Path,
+    css_path: &Path,
+) -> Result<(Vec<Theme>, Vec<String>), String> {
+    let current = fs::read_to_string(css_path)
+        .inspect_err(|err| {
+            warn!("Failed to read css file({}): {err:?}", css_path.display());
+        })
+        .unwrap_or_default();
+
     let path = system_data_dir.join("themes");
-    let themes = config_lib::style::load_themes(path);
+    let themes = config_lib::style::load_themes(&path, &current);
     trace!("Loaded themes: {:?}", themes);
     match themes {
         Ok((themes, errors)) => {

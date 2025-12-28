@@ -1,9 +1,12 @@
 use crate::components::changes::{
     Changes, ChangesInit, ChangesInput, ChangesOutput, generate_items,
 };
-use crate::components::json_preview::{JSONPreview, JSONPreviewInit};
 use crate::components::launcher::{Launcher, LauncherInit, LauncherInput, LauncherOutput};
-use crate::components::style::{Style, StyleInit, StyleOutput};
+use crate::components::launcher_plugins::LauncherPluginsOutput;
+use crate::components::launcher_plugins::applications::ApplicationsOutput;
+use crate::components::launcher_plugins::simple::SimplePluginOutput;
+use crate::components::nix_preview::{NixPreview, NixPreviewInit};
+use crate::components::style::{Style, StyleInit, StyleInput, StyleOutput};
 use crate::components::switch::SwitchOutput;
 use crate::components::windows::{Windows, WindowsInit, WindowsInput, WindowsOutput};
 use crate::components::windows_overview::WindowsOverviewOutput;
@@ -50,7 +53,7 @@ pub struct Root {
     view_stack: adw::ViewStack,
     changes: Controller<Changes>,
     alert_dialog_changes_list: ListBox,
-    _style: Controller<Style>,
+    style: Controller<Style>,
     toaster: Toaster,
 }
 
@@ -193,6 +196,7 @@ impl SimpleComponent for Root {
         let style = Style::builder()
             .launch(StyleInit {
                 system_data_dir: init.system_data_dir,
+                css_path: init.css_path.clone(),
             })
             .forward(sender.input_sender(), Msg::Style);
         let windows = Windows::builder()
@@ -205,7 +209,7 @@ impl SimpleComponent for Root {
                 config: config.windows.overview.launcher.clone(),
             })
             .forward(sender.input_sender(), Msg::Launcher);
-        let json_preview = JSONPreview::builder().launch(JSONPreviewInit {}).detach();
+        let nix_preview = NixPreview::builder().launch(NixPreviewInit {}).detach();
         let changes = Changes::builder()
             .launch(ChangesInit {
                 config: config.clone(),
@@ -230,9 +234,9 @@ impl SimpleComponent for Root {
             "document-edit-symbolic",
         );
         widgets.view_stack.add_titled_with_icon(
-            json_preview.widget(),
+            nix_preview.widget(),
             None,
-            "Json Preview",
+            "Nix Preview",
             "preview",
         );
         widgets.view_stack.add_titled_with_icon(
@@ -263,7 +267,7 @@ impl SimpleComponent for Root {
             windows,
             launcher,
             changes,
-            style,
+            style: style,
             alert_dialog,
             toaster,
             alert_dialog_changes_list: changes_list,
@@ -272,9 +276,9 @@ impl SimpleComponent for Root {
         ComponentParts { model, widgets }
     }
 
-    fn update(&mut self, msg: Self::Input, sender: ComponentSender<Self>) {
-        trace!("update: {msg:?}");
-        match msg {
+    fn update(&mut self, message: Self::Input, sender: ComponentSender<Self>) {
+        trace!("root::update: {message:?}");
+        match message {
             Msg::Ignore => (),
             Msg::CloseRequest => {
                 debug!("close request");
@@ -357,26 +361,29 @@ impl SimpleComponent for Root {
                 }
             },
             Msg::Style(msg) => match msg {
-                StyleOutput::Apply(content) => match std::fs::write(&self.css_path, content) {
-                    Ok(_) => {
-                        info!("Saved css to {}", self.css_path.display());
-                        self.toaster.add_toast(
-                            adw::Toast::builder()
-                                .title("Saved".to_string())
-                                .timeout(2)
-                                .build(),
-                        );
+                StyleOutput::Apply((name, content)) => {
+                    match std::fs::write(&self.css_path, content) {
+                        Ok(_) => {
+                            info!("Saved css from {name} to {}", self.css_path.display());
+                            self.toaster.add_toast(
+                                adw::Toast::builder()
+                                    .title("Saved".to_string())
+                                    .timeout(2)
+                                    .build(),
+                            );
+                        }
+                        Err(err) => {
+                            error!("Failed to save css from {name}: {err:#}");
+                            self.toaster.add_toast(
+                                adw::Toast::builder()
+                                    .title(err.to_string())
+                                    .timeout(0)
+                                    .build(),
+                            );
+                        }
                     }
-                    Err(err) => {
-                        error!("Failed to save css: {err:#}");
-                        self.toaster.add_toast(
-                            adw::Toast::builder()
-                                .title(err.to_string())
-                                .timeout(0)
-                                .build(),
-                        );
-                    }
-                },
+                    self.style.emit(StyleInput::Reload);
+                }
             },
             Msg::Launcher(msg) => {
                 let r#ref = &mut self.config.windows.overview.launcher;
@@ -397,6 +404,42 @@ impl SimpleComponent for Root {
                         Some(val) => {
                             r#ref.default_terminal = Some(val);
                         }
+                    },
+                    LauncherOutput::LauncherPlugins(msg) => match msg {
+                        LauncherPluginsOutput::Applications(msg) => match msg {
+                            ApplicationsOutput::Enabled(enabled) => {
+                                r#ref.plugins.applications.enabled = enabled;
+                            }
+                            ApplicationsOutput::ShowExecs(enabled) => {
+                                r#ref.plugins.applications.show_execs = enabled;
+                            }
+                            ApplicationsOutput::ShowActions(enabled) => {
+                                r#ref.plugins.applications.show_actions_submenu = enabled;
+                            }
+                            ApplicationsOutput::CacheWeeks(weeks) => {
+                                r#ref.plugins.applications.run_cache_weeks = weeks;
+                            }
+                        },
+                        LauncherPluginsOutput::Terminal(msg) => match msg {
+                            SimplePluginOutput::Enabled(enabled) => {
+                                r#ref.plugins.terminal.enabled = enabled;
+                            }
+                        },
+                        LauncherPluginsOutput::Shell(msg) => match msg {
+                            SimplePluginOutput::Enabled(enabled) => {
+                                r#ref.plugins.shell.enabled = enabled;
+                            }
+                        },
+                        LauncherPluginsOutput::Calculator(msg) => match msg {
+                            SimplePluginOutput::Enabled(enabled) => {
+                                r#ref.plugins.calc.enabled = enabled;
+                            }
+                        },
+                        LauncherPluginsOutput::FilePath(msg) => match msg {
+                            SimplePluginOutput::Enabled(enabled) => {
+                                r#ref.plugins.path.enabled = enabled;
+                            }
+                        },
                     },
                 }
                 // propagate event back

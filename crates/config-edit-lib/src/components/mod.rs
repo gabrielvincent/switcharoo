@@ -1,6 +1,7 @@
 pub mod changes;
-pub mod json_preview;
 mod launcher;
+mod launcher_plugins;
+pub mod nix_preview;
 pub mod root;
 mod style;
 mod switch;

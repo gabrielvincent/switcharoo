@@ -10,6 +10,7 @@ use relm4::adw::gtk;
 use relm4::adw::prelude::*;
 use relm4::{Component, Controller, adw};
 use relm4::{ComponentParts, ComponentSender, SimpleComponent};
+use tracing::trace;
 
 #[derive(Debug)]
 pub struct Switch {
@@ -66,7 +67,10 @@ impl SimpleComponent for Switch {
                 gtk::Label {
                     set_label: model.name,
                 },
-                append = model.keyboard_shortcut.widget(),
+                model.keyboard_shortcut.widget().clone() -> gtk::Button {
+                    #[watch]
+                    set_sensitive: model.config.enabled,
+                },
                 adw::ShortcutLabel::new(&to_accelerator(model.config.modifier, &model.config.key).unwrap_or_default()) {
                     #[watch]
                     set_accelerator: &to_accelerator(model.config.modifier, &model.config.key).unwrap_or_default(),
@@ -210,6 +214,7 @@ impl SimpleComponent for Switch {
     }
 
     fn update(&mut self, message: Self::Input, _sender: ComponentSender<Self>) {
+        trace!("switch::update: {message:?}");
         match message {
             SwitchInput::SetSwitch(config) => {
                 self.config = config;

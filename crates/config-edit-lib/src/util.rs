@@ -1,8 +1,10 @@
 use crate::structs::ConfigModifier;
 use relm4::gtk;
 use relm4::gtk::gdk::{Cursor, Display, Key, ModifierType};
-use relm4::gtk::prelude::DisplayExtManual;
-use tracing::instrument;
+use relm4::gtk::prelude::{Cast, DisplayExtManual, WidgetExt};
+use relm4::tokio::time::sleep;
+use std::time::Duration;
+use tracing::{instrument, trace};
 
 pub trait SetTextIfDifferent {
     fn set_text_if_different(&self, text: &str);
@@ -25,6 +27,26 @@ impl SetCursor for gtk::Image {
     fn set_cursor_by_name(&self, name: &str) {
         use relm4::adw::prelude::WidgetExt;
         self.set_cursor(Cursor::from_name(name, None).as_ref());
+    }
+}
+
+pub trait ScrollToPosition {
+    fn scroll_to_pos(&self, pos: usize, animate: bool);
+}
+
+impl ScrollToPosition for adw::Carousel {
+    fn scroll_to_pos(&self, pos: usize, animate: bool) {
+        if let Some(wdg) = self.observe_children().into_iter().flatten().nth(pos) {
+            if let Ok(widget) = wdg.downcast::<gtk::Widget>() {
+                let wdg = widget.clone();
+                let s2 = self.clone();
+                gtk::glib::spawn_future_local(async move {
+                    sleep(Duration::from_millis(50)).await;
+                    trace!("Scroll to widget: {:?}", wdg);
+                    s2.scroll_to(&wdg, animate);
+                });
+            }
+        }
     }
 }
 

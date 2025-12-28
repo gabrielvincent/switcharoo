@@ -9,6 +9,7 @@ use relm4::{
     Component, ComponentParts, ComponentSender, Controller, RelmWidgetExt, SimpleComponent,
 };
 use relm4::{ComponentController, adw};
+use tracing::trace;
 
 #[derive(Debug)]
 pub struct Windows {
@@ -156,6 +157,7 @@ impl SimpleComponent for Windows {
     }
 
     fn update(&mut self, message: WindowsInput, _sender: ComponentSender<Self>) {
+        trace!("windows::update: {message:?}");
         match message {
             WindowsInput::SetWindows(config) => {
                 self.config = config;

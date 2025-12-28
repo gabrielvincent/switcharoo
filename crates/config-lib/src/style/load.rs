@@ -7,7 +7,10 @@ use std::path::Path;
 use tracing::{debug, instrument, warn};
 
 #[instrument(level = "debug")]
-pub fn load_themes(path: &Path) -> anyhow::Result<(Vec<Theme>, Vec<anyhow::Error>)> {
+pub fn load_themes(
+    path: &Path,
+    current_css: &str,
+) -> anyhow::Result<(Vec<Theme>, Vec<anyhow::Error>)> {
     let mut themes = Vec::new();
     if !path.exists() {
         bail!("Themes directory does not exist: {}", path.display());
@@ -79,6 +82,7 @@ pub fn load_themes(path: &Path) -> anyhow::Result<(Vec<Theme>, Vec<anyhow::Error
                 let data = parse_data(&data, name);
                 let image_path = dir_path.join("image.png");
                 themes.push(Theme {
+                    current: theme_content == current_css,
                     name: name.to_string(),
                     path: dir_path.clone(),
                     style: theme_content,

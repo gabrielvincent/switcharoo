@@ -1,5 +1,5 @@
 use crate::flags_csv;
-use crate::structs::Config;
+use crate::structs::{Config, Plugins};
 use crate::util::key_to_name;
 use adw::ActionRow;
 use adw::gtk::SelectionMode;
@@ -7,6 +7,7 @@ use relm4::adw::gtk;
 use relm4::adw::prelude::*;
 use relm4::gtk::ListBox;
 use relm4::{ComponentParts, ComponentSender, RelmWidgetExt, SimpleComponent};
+use tracing::trace;
 
 #[derive(Debug)]
 pub struct Changes {
@@ -69,6 +70,7 @@ impl SimpleComponent for Changes {
     }
 
     fn update(&mut self, message: Self::Input, sender: ComponentSender<Self>) {
+        trace!("changes::update: {message:?}");
         match message {
             ChangesInput::SetConfig(config) => {
                 self.config = config;
@@ -268,8 +270,11 @@ pub fn generate_items(
                             }
                         }
                     }
-                    // TODO
-                    // add_plugin_changes(changes, &po.launcher.plugins, &co.launcher.plugins);
+                    add_plugin_changes(
+                        changes,
+                        &prev_config.windows.overview.launcher.plugins,
+                        &config.windows.overview.launcher.plugins,
+                    );
                 }
             }
             match (
@@ -415,6 +420,74 @@ pub fn generate_items(
     // how_to_use.buffer().set_text(&text);
 
     changes_exist
+}
+
+fn add_plugin_changes(changes: &ListBox, prev: &Plugins, current: &Plugins) {
+    match (&prev.applications.enabled, &current.applications.enabled) {
+        (false, false) => {}
+        (true, false) => {
+            add_info(changes, "Disabled Application Plugin");
+        }
+        (_, true) => {
+            if !prev.applications.enabled {
+                add_info(changes, "Enabled Application Plugin");
+            }
+
+            if prev.applications.show_execs != current.applications.show_execs {
+                add_info_subtitle(
+                    changes,
+                    "Changed application plugin show execs",
+                    format!(
+                        "{} -> {}",
+                        prev.applications.show_execs, current.applications.show_execs
+                    ),
+                );
+            }
+
+            if prev.applications.show_actions_submenu != current.applications.show_actions_submenu {
+                add_info_subtitle(
+                    changes,
+                    "Changed application plugin show actions",
+                    format!(
+                        "{} -> {}",
+                        prev.applications.show_actions_submenu,
+                        current.applications.show_actions_submenu
+                    ),
+                );
+            }
+
+            if prev.applications.run_cache_weeks != current.applications.run_cache_weeks {
+                add_info_subtitle(
+                    changes,
+                    "Changed application plugin run cache weeks",
+                    format!(
+                        "{} -> {}",
+                        prev.applications.run_cache_weeks, current.applications.run_cache_weeks
+                    ),
+                );
+            }
+        }
+    }
+
+    match (&prev.terminal.enabled, &current.terminal.enabled) {
+        (true, false) => {
+            add_info(changes, "Disabled Terminal Plugin");
+        }
+        (false, true) => {
+            add_info(changes, "Enabled Terminal Plugin");
+        }
+        _ => {}
+    }
+
+    match (&prev.shell.enabled, &current.shell.enabled) {
+        (true, false) => {
+            add_info(changes, "Disabled Shell Plugin");
+        }
+        (false, true) => {
+            add_info(changes, "Enabled Shell Plugin");
+        }
+        _ => {}
+    }
 }
 
 fn add_info(changes: &ListBox, text: &str) {
