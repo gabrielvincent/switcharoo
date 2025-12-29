@@ -1,4 +1,5 @@
 pub mod changes;
+mod generate;
 mod launcher;
 mod launcher_plugins;
 pub mod nix_preview;

@@ -2,9 +2,8 @@ use crate::structs::ConfigModifier;
 use relm4::gtk;
 use relm4::gtk::gdk::{Cursor, Display, Key, ModifierType};
 use relm4::gtk::prelude::{Cast, DisplayExtManual, WidgetExt};
-use relm4::tokio::time::sleep;
-use std::time::Duration;
-use tracing::{instrument, trace};
+// use relm4::tokio::time::sleep;
+use tracing::instrument;
 
 pub trait SetTextIfDifferent {
     fn set_text_if_different(&self, text: &str);
@@ -38,12 +37,15 @@ impl ScrollToPosition for adw::Carousel {
     fn scroll_to_pos(&self, pos: usize, animate: bool) {
         if let Some(wdg) = self.observe_children().into_iter().flatten().nth(pos) {
             if let Ok(widget) = wdg.downcast::<gtk::Widget>() {
-                let wdg = widget.clone();
                 let s2 = self.clone();
-                gtk::glib::spawn_future_local(async move {
-                    sleep(Duration::from_millis(50)).await;
-                    trace!("Scroll to widget: {:?}", wdg);
-                    s2.scroll_to(&wdg, animate);
+                // scuffed method to select new widget (else it doesnt work on first render)
+                gtk::glib::idle_add_local(move || {
+                    s2.scroll_to(&widget, animate);
+                    if s2.position() as usize == pos {
+                        gtk::glib::ControlFlow::Break
+                    } else {
+                        gtk::glib::ControlFlow::Continue
+                    }
                 });
             }
         }
@@ -95,7 +97,7 @@ pub fn to_accelerator(modifier: ConfigModifier, key: &str) -> Option<String> {
     if modifier == ConfigModifier::None {
         Some(key)
     } else {
-        Some(format!("<{}>{}", modifier, key))
+        Some(format!("<{modifier}>{key}"))
     }
 }
 

@@ -74,9 +74,10 @@ impl SimpleComponent for Launcher {
                             set_tooltip_text: Some("The modifier used to select items in the launcher, pressing `<Mod> + 1` to open second entry, `<Mod> + t` to run in terminal, etc.")
                         },
                         gtk::DropDown::from_strings(ConfigModifier::strings()) {
-                            connect_selected_notify[sender] => move |e| {sender.output(LauncherOutput::Modifier(e.selected().try_into().expect("invalid modifier"))).unwrap() },
                             #[watch]
+                            #[block_signal(h_1)]
                             set_selected: model.config.launch_modifier.into(),
+                            connect_selected_notify[sender] => move |e| {sender.output(LauncherOutput::Modifier(e.selected().try_into().expect("invalid modifier"))).unwrap() } @ h_1,
                             set_hexpand: true,
                         }
                     },
@@ -96,10 +97,10 @@ impl SimpleComponent for Launcher {
                             set_adjustment: &gtk::Adjustment::new(0.0, 0.0, 2000.0, 50.0, 100.0, 0.0),
                             set_hexpand: true,
                             set_digits: 0,
-                            connect_value_changed[sender] => move |e| { sender.output(LauncherOutput::Width(e.value() as u32)).unwrap() } @h_3,
-                            #[watch] // IMPORTANT: always call this last, else the initial value will not be set
-                            #[block_signal(h_3)]
+                            #[watch]
+                            #[block_signal(h_2)]
                             set_value: model.config.width as f64,
+                            connect_value_changed[sender] => move |e| { sender.output(LauncherOutput::Width(e.value() as u32)).unwrap() } @h_2,
                         }
                     },
                     gtk::Box {
@@ -118,10 +119,10 @@ impl SimpleComponent for Launcher {
                             set_adjustment: &gtk::Adjustment::new(0.0, 0.0, 10.0, 1.0, 2.0, 0.0),
                             set_hexpand: true,
                             set_digits: 0,
-                            connect_value_changed[sender] => move |e| { sender.output(LauncherOutput::MaxItems(e.value() as u8)).unwrap() } @h_4,
-                            #[watch] // IMPORTANT: always call this last, else the initial value will not be set
-                            #[block_signal(h_4)]
+                            #[watch]
+                            #[block_signal(h_3)]
                             set_value: model.config.max_items as f64,
+                            connect_value_changed[sender] => move |e| { sender.output(LauncherOutput::MaxItems(e.value() as u8)).unwrap() } @h_3,
                         }
                     }
                 },
@@ -139,23 +140,22 @@ impl SimpleComponent for Launcher {
                         },
                         gtk::Switch {
                             #[watch]
+                            #[block_signal(h_4)]
                             set_active: !model.config.default_terminal.is_some(),
                             set_valign: gtk::Align::Center,
-                            connect_active_notify[sender] => move |e| { sender.output(LauncherOutput::DefaultTerminal(if e.is_active() { None } else { Some("".to_string()) })).unwrap() },
+                            connect_active_notify[sender] => move |e| { sender.output(LauncherOutput::DefaultTerminal(if e.is_active() { None } else { Some("".to_string()) })).unwrap() } @h_4,
                         },
                         gtk::Image::from_icon_name("dialog-information-symbolic") {
                             set_cursor_by_name: "help",
-                            set_tooltip_text: Some("name/path of the default terminal to use. This value is optional, if unset a list of default terminals is used to find a default terminal. Will be used to launch terminal apps and by the terminal plugin.")
+                            set_tooltip_text: Some("name/path of the default terminal to use. This value is optional, if unset a list of default terminals is used to find a default terminal. Will be used to launch terminal apps and for the terminal plugin.")
                         },
                         gtk::Entry {
-                            connect_changed[sender] => move |e| {
-                                sender.output(LauncherOutput::DefaultTerminal(Some(e.text().into()))).unwrap()
-                            } @h_5,
                             #[watch]
                             set_sensitive: model.config.default_terminal.is_some(),
                             #[watch]
                             #[block_signal(h_5)]
                             set_text_if_different: &model.config.default_terminal.as_ref().unwrap_or(&"".to_string()),
+                            connect_changed[sender] => move |e| { sender.output(LauncherOutput::DefaultTerminal(Some(e.text().into()))).unwrap()} @h_5,
                             set_input_purpose: gtk::InputPurpose::FreeForm,
                             set_placeholder_text: Some("kitty"),
                             set_hexpand: true,

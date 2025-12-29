@@ -85,9 +85,10 @@ impl SimpleComponent for Switch {
                     },
                 },
             },
-            connect_enable_expansion_notify[sender] => move |e| {sender.output(SwitchOutput::Enabled(e.enables_expansion())).unwrap()},
             #[watch]
+            #[block_signal(h)]
             set_enable_expansion: model.config.enabled,
+            connect_enable_expansion_notify[sender] => move |e| {sender.output(SwitchOutput::Enabled(e.enables_expansion())).unwrap()} @h,
             #[watch]
             set_expanded: model.config.enabled,
             add_row = &gtk::Box {
@@ -115,21 +116,24 @@ impl SimpleComponent for Switch {
                         set_title_lines: 2,
                         set_css_classes: &["item-expander"],
                         add_row = &adw::SwitchRow {
-                            connect_active_notify[sender] => move |c| { sender.output(SwitchOutput::FilterSameClass(c.is_active())).unwrap() },
                             #[watch]
+                            #[block_signal(h_2)]
                             set_active: model.config.same_class,
+                            connect_active_notify[sender] => move |c| { sender.output(SwitchOutput::FilterSameClass(c.is_active())).unwrap() } @h_2,
                             set_title: "Same class",
                         },
                         add_row = &adw::SwitchRow {
-                            connect_active_notify[sender] => move |c| { sender.output(SwitchOutput::FilterWorkspace(c.is_active())).unwrap() },
                             #[watch]
+                            #[block_signal(h_3)]
                             set_active: model.config.current_workspace,
+                            connect_active_notify[sender] => move |c| { sender.output(SwitchOutput::FilterWorkspace(c.is_active())).unwrap() } @h_3,
                             set_title: "Current workspace",
                         },
                         add_row = &adw::SwitchRow {
-                            connect_active_notify[sender] => move |c| { sender.output(SwitchOutput::FilterMonitor(c.is_active())).unwrap() },
                             #[watch]
+                            #[block_signal(h_4)]
                             set_active: model.config.current_monitor,
+                            connect_active_notify[sender] => move |c| { sender.output(SwitchOutput::FilterMonitor(c.is_active())).unwrap() } @h_4,
                             set_title: "Current monitor",
                         }
                     }
@@ -148,9 +152,10 @@ impl SimpleComponent for Switch {
                     },
                     gtk::Switch {
                         #[watch]
+                        #[block_signal(h_5)]
                         set_active: model.config.switch_workspaces,
+                        connect_active_notify[sender] => move |e| { sender.output(SwitchOutput::SwitchWorkspaces(e.is_active())).unwrap() } @h_5,
                         set_valign: Align::Center,
-                        connect_active_notify[sender] => move |e| { sender.output(SwitchOutput::SwitchWorkspaces(e.is_active())).unwrap() },
                     },
                 },
                 gtk::Box {
@@ -170,10 +175,10 @@ impl SimpleComponent for Switch {
                         set_placeholder_text: Some("special:(monitor|second)"),
                         set_hexpand: true,
                         set_valign: Align::Center,
-                        connect_changed[sender] => move |e| { sender.output(SwitchOutput::ExcludeSpecialWorkspaces(e.text().into())).unwrap() } @h,
                         #[watch]
-                        #[block_signal(h)]
+                        #[block_signal(h_6)]
                         set_text_if_different: &model.config.exclude_special_workspaces,
+                        connect_changed[sender] => move |e| { sender.output(SwitchOutput::ExcludeSpecialWorkspaces(e.text().into())).unwrap() } @h_6,
                     }
                 },
             }

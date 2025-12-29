@@ -5,14 +5,9 @@ use config_lib::style::Theme;
 use relm4::abstractions::Toaster;
 use relm4::factory::*;
 use relm4::gtk::{Align, Justification, gio};
-use relm4::tokio::time::sleep;
 use relm4::{ComponentParts, ComponentSender, RelmWidgetExt, SimpleComponent, gtk};
-use std::cell::RefCell;
 use std::fs;
 use std::path::Path;
-use std::rc::Rc;
-use std::sync::Mutex;
-use std::time::Duration;
 use tracing::{debug, trace, warn};
 
 #[derive(Debug)]
@@ -60,7 +55,7 @@ impl FactoryComponent for ThemeCarousel {
                 gtk::Box {
                     set_halign: Align::End,
                     set_spacing: 15,
-                    if self.theme.current {
+                    if self.theme.is_current {
                         gtk::Image::from_icon_name("checkmark") {
                             set_tooltip_text: Some("Current theme"),
                             set_pixel_size: 22
@@ -160,20 +155,27 @@ impl SimpleComponent for Style {
             #[local_ref]
             toast_overlay -> adw::ToastOverlay {
                 set_vexpand: true,
-                #[local_ref]
-                themes_carousel -> adw::Carousel {
-                    set_orientation: Orientation::Horizontal,
-                    set_spacing: 5,
-                    set_css_classes: &["theme-carousel"],
-                    set_vexpand: true,
-                    set_vexpand_set: true,
-                    connect_realize[refc = model.initial_position.clone()] => move |s| {
-                        if let Some(pos) = refc {
-                            debug!("Scroll to position: {:?}", pos);
-                            s.scroll_to_pos(pos, false);
+                gtk::Box {
+                    set_orientation: Orientation::Vertical,
+                    set_spacing: 10,
+                    #[local_ref]
+                    themes_carousel -> adw::Carousel {
+                        set_orientation: Orientation::Horizontal,
+                        set_spacing: 5,
+                        set_css_classes: &["theme-carousel"],
+                        set_vexpand: true,
+                        set_vexpand_set: true,
+                        connect_realize[refc = model.initial_position.clone()] => move |s| {
+                            if let Some(pos) = refc {
+                                debug!("Scroll to position: {:?}", pos);
+                                s.scroll_to_pos(pos, false);
+                            }
                         }
+                    },
+                    adw::CarouselIndicatorDots {
+                        set_carousel: Some(&themes_carousel),
                     }
-                },
+                }
             }
         }
     }
@@ -194,7 +196,7 @@ impl SimpleComponent for Style {
                 let mut v = themes_list.guard();
                 let mut index = 0;
                 for (idx, theme) in themes.into_iter().enumerate() {
-                    if theme.current {
+                    if theme.is_current {
                         index = idx;
                     }
                     v.push_back(theme);
@@ -232,7 +234,7 @@ impl SimpleComponent for Style {
         ComponentParts { model, widgets }
     }
 
-    fn update(&mut self, message: Self::Input, sender: ComponentSender<Self>) {
+    fn update(&mut self, message: Self::Input, _sender: ComponentSender<Self>) {
         trace!("style::update: {message:?}");
         match message {
             StyleInput::Reload => match load_themes(&self.system_data_dir, &self.css_path) {
@@ -241,7 +243,7 @@ impl SimpleComponent for Style {
                     let mut index = 0;
                     v.clear();
                     for (idx, theme) in themes.into_iter().enumerate() {
-                        if theme.current {
+                        if theme.is_current {
                             index = idx;
                         }
                         v.push_back(theme);
@@ -274,7 +276,7 @@ fn load_themes(
 
     let path = system_data_dir.join("themes");
     let themes = config_lib::style::load_themes(&path, &current);
-    trace!("Loaded themes: {:?}", themes);
+    // trace!("Loaded themes: {:?}", themes);
     match themes {
         Ok((themes, errors)) => {
             debug!("Loaded {} themes, {} errors", themes.len(), errors.len());

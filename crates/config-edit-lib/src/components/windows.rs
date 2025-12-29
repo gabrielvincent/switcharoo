@@ -59,10 +59,10 @@ impl SimpleComponent for Windows {
                 set_hexpand: true,
                 set_css_classes: &["enable-frame"],
                 set_title: "Windows (Overview and Switch)",
-                connect_enable_expansion_notify[sender] => move |e| {sender.output(WindowsOutput::Enabled(e.enables_expansion())).unwrap()} @h,
                 #[watch]
                 #[block_signal(h)]
                 set_enable_expansion: model.config.enabled,
+                connect_enable_expansion_notify[sender] => move |e| {sender.output(WindowsOutput::Enabled(e.enables_expansion())).unwrap()} @h,
                 #[watch]
                 set_expanded: model.config.enabled,
                 add_row = &gtk::Box {
@@ -85,10 +85,10 @@ impl SimpleComponent for Windows {
                             set_adjustment: &gtk::Adjustment::new(1.0, 0.5, 15.0, 0.5, 1.0, 0.0),
                             set_hexpand: true,
                             set_digits: 2,
-                            connect_value_changed[sender] => move |e| { sender.output(WindowsOutput::Scale((e.value() * 100.0).round() / 100.0)).unwrap() } @h_2,
-                            #[watch] // IMPORTANT: always call this last, else the initial value will not be set
+                            #[watch]
                             #[block_signal(h_2)]
                             set_value: model.config.scale,
+                            connect_value_changed[sender] => move |e| { sender.output(WindowsOutput::Scale((e.value() * 100.0).round() / 100.0)).unwrap() } @h_2,
                         }
                     },
                     gtk::Box {
@@ -107,10 +107,10 @@ impl SimpleComponent for Windows {
                             set_adjustment: &gtk::Adjustment::new(1.0, 0.0, 50.0, 1.0, 5.0, 0.0),
                             set_hexpand: true,
                             set_digits: 0,
-                            connect_value_changed[sender] => move |e| { sender.output(WindowsOutput::ItemsPerRow(e.value() as u8)).unwrap() } @h_3,
-                            #[watch] // IMPORTANT: always call this last, else the initial value will not be set
+                            #[watch]
                             #[block_signal(h_3)]
                             set_value: model.config.items_per_row as f64,
+                            connect_value_changed[sender] => move |e| { sender.output(WindowsOutput::ItemsPerRow(e.value() as u8)).unwrap() } @h_3,
                         }
                     }
                 },
@@ -174,12 +174,13 @@ impl SimpleComponent for Windows {
                 self.prev_config = config;
                 self.windows_overview
                     .emit(WindowsOverviewInput::SetPrevOverview(
-                        self.config.overview.clone(),
+                        self.prev_config.overview.clone(),
                     ));
                 self.switch
-                    .emit(SwitchInput::SetPrevSwitch(self.config.switch.clone()));
-                self.switch_2
-                    .emit(SwitchInput::SetPrevSwitch(self.config.switch_2.clone()));
+                    .emit(SwitchInput::SetPrevSwitch(self.prev_config.switch.clone()));
+                self.switch_2.emit(SwitchInput::SetPrevSwitch(
+                    self.prev_config.switch_2.clone(),
+                ));
             }
             WindowsInput::ResetWindows => {
                 self.config = self.prev_config.clone();

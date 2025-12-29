@@ -60,6 +60,7 @@ impl SimpleComponent for Changes {
         root: Self::Root,
         _sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
+        #[allow(unused_assignments)]
         let widgets = view_output!();
         let model = Changes {
             config: init.config.clone(),
@@ -160,10 +161,10 @@ pub fn generate_items(
                                 "{} ({}) -> {} ({})",
                                 prev_config.windows.overview.key,
                                 key_to_name(&prev_config.windows.overview.key)
-                                    .unwrap_or(String::from("---")),
+                                    .unwrap_or_else(|| String::from("---")),
                                 config.windows.overview.key,
                                 key_to_name(&config.windows.overview.key)
-                                    .unwrap_or(String::from("---")),
+                                    .unwrap_or_else(|| String::from("---")),
                             ),
                         );
                     }

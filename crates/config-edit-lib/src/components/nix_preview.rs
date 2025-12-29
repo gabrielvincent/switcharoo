@@ -31,9 +31,9 @@ impl SimpleComponent for NixPreview {
     }
 
     fn init(
-        init: Self::Init,
+        _init: Self::Init,
         root: Self::Root,
-        sender: ComponentSender<Self>,
+        _sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
         let model = NixPreview {};
 
@@ -41,5 +41,5 @@ impl SimpleComponent for NixPreview {
         ComponentParts { model, widgets }
     }
 
-    fn update(&mut self, message: Self::Input, sender: ComponentSender<Self>) {}
+    fn update(&mut self, _message: Self::Input, _sender: ComponentSender<Self>) {}
 }

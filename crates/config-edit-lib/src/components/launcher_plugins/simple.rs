@@ -59,9 +59,10 @@ impl SimpleComponent for SimplePlugin {
                     set_tooltip_text: Some(init.description)
                 },
             },
-            connect_enable_expansion_notify[sender] => move |e| {sender.output(SimplePluginOutput::Enabled(e.enables_expansion())).unwrap()},
             #[watch]
+            #[block_signal(h)]
             set_enable_expansion: !model.todo && model.config.enabled,
+            connect_enable_expansion_notify[sender] => move |e| {sender.output(SimplePluginOutput::Enabled(e.enables_expansion())).unwrap()} @h,
             #[watch]
             set_expanded: !model.todo && model.config.enabled,
         }

@@ -17,7 +17,7 @@ pub fn load_themes(
     }
 
     let mut errors = Vec::new();
-    for entry in fs::read_dir(&path)
+    for entry in fs::read_dir(path)
         .with_context(|| format!("Failed to read themes directory ({})", path.display()))?
     {
         let entry = match entry {
@@ -50,16 +50,7 @@ pub fn load_themes(
         }
         let dir_path = entry.path();
         let style_path = dir_path.join("style.css");
-        if !style_path.is_file() {
-            warn!(
-                "Invalid theme directory: {}, style file missing",
-                dir_path.display()
-            );
-            errors.push(anyhow::anyhow!(
-                "Invalid theme directory: {}, style file missing",
-                dir_path.display()
-            ));
-        } else {
+        if style_path.is_file() {
             if let Some(name) = dir_path.file_name().and_then(|n| n.to_str()) {
                 let Ok(theme_content) = fs::read_to_string(&style_path) else {
                     warn!("Failed to read theme file: {}", style_path.display());
@@ -82,7 +73,7 @@ pub fn load_themes(
                 let data = parse_data(&data, name);
                 let image_path = dir_path.join("image.png");
                 themes.push(Theme {
-                    current: theme_content == current_css,
+                    is_current: theme_content == current_css,
                     name: name.to_string(),
                     path: dir_path.clone(),
                     style: theme_content,
@@ -95,6 +86,15 @@ pub fn load_themes(
                     },
                 });
             }
+        } else {
+            warn!(
+                "Invalid theme directory: {}, style file missing",
+                dir_path.display()
+            );
+            errors.push(anyhow::anyhow!(
+                "Invalid theme directory: {}, style file missing",
+                dir_path.display()
+            ));
         }
     }
 

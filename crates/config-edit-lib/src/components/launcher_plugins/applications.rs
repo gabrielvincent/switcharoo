@@ -57,9 +57,10 @@ impl SimpleComponent for Applications {
                     set_tooltip_text: Some("TODO")
                 },
             },
-            connect_enable_expansion_notify[sender] => move |e| {sender.output(ApplicationsOutput::Enabled(e.enables_expansion())).unwrap()},
             #[watch]
+            #[block_signal(h)]
             set_enable_expansion: model.config.enabled,
+            connect_enable_expansion_notify[sender] => move |e| {sender.output(ApplicationsOutput::Enabled(e.enables_expansion())).unwrap()} @h,
             #[watch]
             set_expanded: model.config.enabled,
             add_row = &gtk::Box {
@@ -82,10 +83,11 @@ impl SimpleComponent for Applications {
                         set_adjustment: &Adjustment::new(0.0, 0.0, 52.0, 1.0, 8.0, 0.0),
                         set_digits: 0,
                         set_hexpand: true,
-                        connect_value_changed[sender] => move |e| { sender.output(ApplicationsOutput::CacheWeeks(e.value() as u8)).unwrap() } @h_3,
-                        #[watch] // IMPORTANT: always call this last, else the initial value will not be set
-                        #[block_signal(h_3)]
+                        #[watch]
+                        #[block_signal(h_1)]
                         set_value: model.config.run_cache_weeks as f64,
+                        connect_value_changed[sender] => move |e| { sender.output(ApplicationsOutput::CacheWeeks(e.value() as u8)).unwrap() } @h_1,
+
                     }
                 },
                 gtk::Box {
@@ -102,9 +104,10 @@ impl SimpleComponent for Applications {
                     },
                     gtk::Switch {
                         set_valign: Align::Center,
-                        connect_active_notify[sender] => move |e| { sender.output(ApplicationsOutput::ShowExecs(e.is_active())).unwrap() },
                         #[watch]
+                        #[block_signal(h_2)]
                         set_active: model.config.show_execs,
+                        connect_active_notify[sender] => move |e| { sender.output(ApplicationsOutput::ShowExecs(e.is_active())).unwrap() } @h_2,
                     },
                 },
                 gtk::Box {
@@ -121,9 +124,10 @@ impl SimpleComponent for Applications {
                     },
                     gtk::Switch {
                         set_valign: Align::Center,
-                        connect_active_notify[sender] => move |e| { sender.output(ApplicationsOutput::ShowActions(e.is_active())).unwrap() },
                         #[watch]
+                        #[block_signal(h_3)]
                         set_active: model.config.show_actions_submenu,
+                        connect_active_notify[sender] => move |e| { sender.output(ApplicationsOutput::ShowActions(e.is_active())).unwrap() } @h_3,
                     },
                 },
             }

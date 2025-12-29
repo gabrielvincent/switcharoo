@@ -128,9 +128,9 @@ impl TryFrom<u32> for ConfigModifier {
     }
 }
 
-impl Into<u32> for ConfigModifier {
-    fn into(self) -> u32 {
-        match self {
+impl From<ConfigModifier> for u32 {
+    fn from(value: ConfigModifier) -> u32 {
+        match value {
             ConfigModifier::None => 0,
             ConfigModifier::Super => 1,
             ConfigModifier::Ctrl => 2,
@@ -149,13 +149,14 @@ impl From<config_lib::Modifier> for ConfigModifier {
         }
     }
 }
-impl Into<config_lib::Modifier> for ConfigModifier {
-    fn into(self) -> config_lib::Modifier {
-        match self {
-            Self::None => config_lib::Modifier::None,
-            Self::Alt => config_lib::Modifier::Alt,
-            Self::Super => config_lib::Modifier::Super,
-            Self::Ctrl => config_lib::Modifier::Ctrl,
+
+impl From<ConfigModifier> for config_lib::Modifier {
+    fn from(value: ConfigModifier) -> config_lib::Modifier {
+        match value {
+            ConfigModifier::None => config_lib::Modifier::None,
+            ConfigModifier::Alt => config_lib::Modifier::Alt,
+            ConfigModifier::Super => config_lib::Modifier::Super,
+            ConfigModifier::Ctrl => config_lib::Modifier::Ctrl,
         }
     }
 }
@@ -167,11 +168,12 @@ impl From<config_lib::Config> for Config {
         }
     }
 }
-impl Into<config_lib::Config> for Config {
-    fn into(self) -> config_lib::Config {
+
+impl From<Config> for config_lib::Config {
+    fn from(value: Config) -> config_lib::Config {
         config_lib::Config {
             version: Some(config_lib::CURRENT_CONFIG_VERSION),
-            windows: self.windows.into(),
+            windows: value.windows.into(),
         }
     }
 }
@@ -190,15 +192,16 @@ impl From<Option<config_lib::Windows>> for Windows {
         }
     }
 }
-impl Into<Option<config_lib::Windows>> for Windows {
-    fn into(self) -> Option<config_lib::Windows> {
-        if self.enabled {
+
+impl From<Windows> for Option<config_lib::Windows> {
+    fn from(value: Windows) -> Option<config_lib::Windows> {
+        if value.enabled {
             Some(config_lib::Windows {
-                scale: self.scale,
-                items_per_row: self.items_per_row,
-                overview: self.overview.into(),
-                switch: self.switch.into(),
-                switch_2: self.switch_2.into(),
+                scale: value.scale,
+                items_per_row: value.items_per_row,
+                overview: value.overview.into(),
+                switch: value.switch.into(),
+                switch_2: value.switch_2.into(),
             })
         } else {
             None
@@ -225,24 +228,25 @@ impl From<Option<config_lib::Switch>> for Switch {
         }
     }
 }
-impl Into<Option<config_lib::Switch>> for Switch {
-    fn into(self) -> Option<config_lib::Switch> {
-        if self.enabled {
+
+impl From<Switch> for Option<config_lib::Switch> {
+    fn from(value: Switch) -> Option<config_lib::Switch> {
+        if value.enabled {
             let mut vec = vec![];
-            if self.same_class {
+            if value.same_class {
                 vec.push(config_lib::FilterBy::SameClass);
             }
-            if self.current_workspace {
+            if value.current_workspace {
                 vec.push(config_lib::FilterBy::CurrentWorkspace);
             }
-            if self.current_monitor {
+            if value.current_monitor {
                 vec.push(config_lib::FilterBy::CurrentMonitor);
             }
             Some(config_lib::Switch {
-                modifier: self.modifier.into(),
-                key: Box::from(self.key),
+                modifier: value.modifier.into(),
+                key: Box::from(value.key),
                 filter_by: vec,
-                switch_workspaces: self.switch_workspaces,
+                switch_workspaces: value.switch_workspaces,
                 // TODO exclude_special_workspaces
             })
         } else {
@@ -270,23 +274,24 @@ impl From<Option<config_lib::Overview>> for Overview {
         }
     }
 }
-impl Into<Option<config_lib::Overview>> for Overview {
-    fn into(self) -> Option<config_lib::Overview> {
-        if self.enabled {
+
+impl From<Overview> for Option<config_lib::Overview> {
+    fn from(value: Overview) -> Option<config_lib::Overview> {
+        if value.enabled {
             let mut vec = vec![];
-            if self.same_class {
+            if value.same_class {
                 vec.push(config_lib::FilterBy::SameClass);
             }
-            if self.current_workspace {
+            if value.current_workspace {
                 vec.push(config_lib::FilterBy::CurrentWorkspace);
             }
-            if self.current_monitor {
+            if value.current_monitor {
                 vec.push(config_lib::FilterBy::CurrentMonitor);
             }
             Some(config_lib::Overview {
-                launcher: self.launcher.into(),
-                key: Box::from(self.key),
-                modifier: self.modifier.into(),
+                launcher: value.launcher.into(),
+                key: Box::from(value.key),
+                modifier: value.modifier.into(),
                 filter_by: vec,
                 hide_filtered: false,
                 // TODO exclude_special_workspaces
@@ -309,15 +314,16 @@ impl From<config_lib::Launcher> for Launcher {
         }
     }
 }
-impl Into<config_lib::Launcher> for Launcher {
-    fn into(self) -> config_lib::Launcher {
+
+impl From<Launcher> for config_lib::Launcher {
+    fn from(value: Launcher) -> config_lib::Launcher {
         config_lib::Launcher {
-            default_terminal: self.default_terminal.map(Box::from),
-            launch_modifier: self.launch_modifier.into(),
-            width: self.width,
-            max_items: self.max_items,
-            show_when_empty: self.show_when_empty,
-            plugins: self.plugins.into(),
+            default_terminal: value.default_terminal.map(Box::from),
+            launch_modifier: value.launch_modifier.into(),
+            width: value.width,
+            max_items: value.max_items,
+            show_when_empty: value.show_when_empty,
+            plugins: value.plugins.into(),
         }
     }
 }
@@ -328,9 +334,10 @@ impl From<Option<config_lib::EmptyConfig>> for EmptyConfig {
         Self { enabled }
     }
 }
-impl Into<Option<config_lib::EmptyConfig>> for EmptyConfig {
-    fn into(self) -> Option<config_lib::EmptyConfig> {
-        if self.enabled {
+
+impl From<EmptyConfig> for Option<config_lib::EmptyConfig> {
+    fn from(value: EmptyConfig) -> Option<config_lib::EmptyConfig> {
+        if value.enabled {
             Some(config_lib::EmptyConfig {})
         } else {
             None
@@ -348,11 +355,12 @@ impl From<Option<config_lib::ActionsPluginConfig>> for ActionsPluginConfig {
         }
     }
 }
-impl Into<Option<config_lib::ActionsPluginConfig>> for ActionsPluginConfig {
-    fn into(self) -> Option<config_lib::ActionsPluginConfig> {
-        if self.enabled {
+
+impl From<ActionsPluginConfig> for Option<config_lib::ActionsPluginConfig> {
+    fn from(value: ActionsPluginConfig) -> Option<config_lib::ActionsPluginConfig> {
+        if value.enabled {
             Some(config_lib::ActionsPluginConfig {
-                actions: self.actions,
+                actions: value.actions,
             })
         } else {
             None
@@ -372,13 +380,14 @@ impl From<Option<config_lib::ApplicationsPluginConfig>> for ApplicationsPluginCo
         }
     }
 }
-impl Into<Option<config_lib::ApplicationsPluginConfig>> for ApplicationsPluginConfig {
-    fn into(self) -> Option<config_lib::ApplicationsPluginConfig> {
-        if self.enabled {
+
+impl From<ApplicationsPluginConfig> for Option<config_lib::ApplicationsPluginConfig> {
+    fn from(value: ApplicationsPluginConfig) -> Option<config_lib::ApplicationsPluginConfig> {
+        if value.enabled {
             Some(config_lib::ApplicationsPluginConfig {
-                run_cache_weeks: self.run_cache_weeks,
-                show_execs: self.show_execs,
-                show_actions_submenu: self.show_actions_submenu,
+                run_cache_weeks: value.run_cache_weeks,
+                show_execs: value.show_execs,
+                show_actions_submenu: value.show_actions_submenu,
             })
         } else {
             None
@@ -396,11 +405,12 @@ impl From<Option<config_lib::WebSearchConfig>> for WebSearchConfig {
         }
     }
 }
-impl Into<Option<config_lib::WebSearchConfig>> for WebSearchConfig {
-    fn into(self) -> Option<config_lib::WebSearchConfig> {
-        if self.enabled {
+
+impl From<WebSearchConfig> for Option<config_lib::WebSearchConfig> {
+    fn from(value: WebSearchConfig) -> Option<config_lib::WebSearchConfig> {
+        if value.enabled {
             Some(config_lib::WebSearchConfig {
-                engines: self.engines,
+                engines: value.engines,
             })
         } else {
             None
@@ -421,16 +431,17 @@ impl From<config_lib::Plugins> for Plugins {
         }
     }
 }
-impl Into<config_lib::Plugins> for Plugins {
-    fn into(self) -> config_lib::Plugins {
+
+impl From<Plugins> for config_lib::Plugins {
+    fn from(value: Plugins) -> config_lib::Plugins {
         config_lib::Plugins {
-            applications: self.applications.into(),
-            terminal: self.terminal.into(),
-            shell: self.shell.into(),
-            websearch: self.websearch.into(),
-            calc: self.calc.into(),
-            path: self.path.into(),
-            actions: self.actions.into(),
+            applications: value.applications.into(),
+            terminal: value.terminal.into(),
+            shell: value.shell.into(),
+            websearch: value.websearch.into(),
+            calc: value.calc.into(),
+            path: value.path.into(),
+            actions: value.actions.into(),
         }
     }
 }

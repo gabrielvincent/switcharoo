@@ -2,7 +2,7 @@ use crate::components::launcher_plugins::applications::{
     Applications, ApplicationsInit, ApplicationsInput, ApplicationsOutput,
 };
 use crate::components::launcher_plugins::simple::{
-    SimplePlugin, SimplePluginInit, SimplePluginOutput,
+    SimplePlugin, SimplePluginInit, SimplePluginInput, SimplePluginOutput,
 };
 use adw::prelude::*;
 use relm4::{
@@ -20,8 +20,8 @@ pub struct LauncherPlugins {
     run_in_shell: Controller<SimplePlugin>,
     calculator: Controller<SimplePlugin>,
     file_path: Controller<SimplePlugin>,
-    pub web_search: Controller<SimplePlugin>,
-    pub actions: Controller<SimplePlugin>,
+    web_search: Controller<SimplePlugin>,
+    actions: Controller<SimplePlugin>,
 }
 
 #[derive(Debug)]
@@ -175,6 +175,22 @@ impl SimpleComponent for LauncherPlugins {
                     .emit(ApplicationsInput::SetApplicationsPluginConfig(
                         self.config.applications.clone(),
                     ));
+                self.run_in_terminal
+                    .emit(SimplePluginInput::SetSimplePluginConfig(
+                        self.config.terminal.clone(),
+                    ));
+                self.run_in_shell
+                    .emit(SimplePluginInput::SetSimplePluginConfig(
+                        self.config.shell.clone(),
+                    ));
+                self.calculator
+                    .emit(SimplePluginInput::SetSimplePluginConfig(
+                        self.config.calc.clone(),
+                    ));
+                self.file_path
+                    .emit(SimplePluginInput::SetSimplePluginConfig(
+                        self.config.path.clone(),
+                    ));
             }
             LauncherPluginsInput::SetPrevLauncherPlugins(config) => {
                 self.prev_config = config;
@@ -182,11 +198,35 @@ impl SimpleComponent for LauncherPlugins {
                     .emit(ApplicationsInput::SetPrevApplicationsPluginConfig(
                         self.prev_config.applications.clone(),
                     ));
+                self.run_in_terminal
+                    .emit(SimplePluginInput::SetPrevSimplePluginConfig(
+                        self.prev_config.terminal.clone(),
+                    ));
+                self.run_in_shell
+                    .emit(SimplePluginInput::SetPrevSimplePluginConfig(
+                        self.prev_config.shell.clone(),
+                    ));
+                self.calculator
+                    .emit(SimplePluginInput::SetPrevSimplePluginConfig(
+                        self.prev_config.calc.clone(),
+                    ));
+                self.file_path
+                    .emit(SimplePluginInput::SetPrevSimplePluginConfig(
+                        self.prev_config.path.clone(),
+                    ));
             }
             LauncherPluginsInput::ResetLauncherPlugins => {
                 self.config = self.prev_config.clone();
                 self.applications
                     .emit(ApplicationsInput::ResetApplicationsPluginConfig);
+                self.run_in_terminal
+                    .emit(SimplePluginInput::ResetSimplePluginConfig);
+                self.run_in_shell
+                    .emit(SimplePluginInput::ResetSimplePluginConfig);
+                self.calculator
+                    .emit(SimplePluginInput::ResetSimplePluginConfig);
+                self.file_path
+                    .emit(SimplePluginInput::ResetSimplePluginConfig);
             }
         }
     }

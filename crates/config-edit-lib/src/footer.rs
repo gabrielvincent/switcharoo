@@ -7,6 +7,7 @@ use std::path::Path;
 pub struct Footer {
     config_path: Box<Path>,
     changes: bool,
+    generate: bool,
 }
 
 #[derive(Debug)]
@@ -14,11 +15,14 @@ pub enum FooterOutput {
     Close,
     Save,
     Reset,
+    Reload,
+    Abort,
 }
 
 #[derive(Debug)]
 pub enum FooterInput {
     ChangesExist(bool),
+    GenerateMode(bool),
 }
 
 #[relm4::component(pub)]
@@ -45,7 +49,17 @@ impl SimpleComponent for Footer {
                     set_halign: gtk::Align::End,
                     set_orientation: Orientation::Horizontal,
                     gtk::Button {
+                        set_label: "Reload from Disk",
+                        #[watch]
+                        set_visible: !model.generate,
+                        set_sensitive: true,
+                        set_css_classes: &["destructive-action"],
+                        connect_clicked[sender] => move |_| sender.output(FooterOutput::Reload).unwrap(),
+                    },
+                    gtk::Button {
                         set_label: "Reset",
+                        #[watch]
+                        set_visible: !model.generate,
                         #[watch]
                         set_sensitive: model.changes,
                         set_css_classes: &["destructive-action"],
@@ -54,10 +68,19 @@ impl SimpleComponent for Footer {
                     gtk::Button {
                         set_label: "Save Changes",
                         #[watch]
+                        set_visible: !model.generate,
+                        #[watch]
                         set_sensitive: model.changes,
                         set_css_classes: &["suggested-action"],
                         set_tooltip_text: Some(&format!("Config file: {}", model.config_path.display())),
                         connect_clicked[sender] => move |_| sender.output(FooterOutput::Save).unwrap(),
+                    },
+                    gtk::Button {
+                        set_label: "Abort Generate",
+                        #[watch]
+                        set_visible: model.generate,
+                        set_css_classes: &["destructive-action"],
+                        connect_clicked[sender] => move |_| sender.output(FooterOutput::Abort).unwrap(),
                     },
                     gtk::Button {
                         set_label: "Close",
@@ -77,6 +100,7 @@ impl SimpleComponent for Footer {
         let model = Footer {
             config_path,
             changes: false,
+            generate: false,
         };
         let widgets = view_output!();
         ComponentParts { model, widgets }
@@ -86,6 +110,9 @@ impl SimpleComponent for Footer {
         match msg {
             FooterInput::ChangesExist(changes) => {
                 self.changes = changes;
+            }
+            FooterInput::GenerateMode(generate) => {
+                self.generate = generate;
             }
         }
     }
