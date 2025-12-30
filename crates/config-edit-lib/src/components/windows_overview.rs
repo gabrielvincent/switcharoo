@@ -3,7 +3,7 @@ use crate::shortcut_dialog::{
     KeyboardShortcut, KeyboardShortcutInit, KeyboardShortcutInput, KeyboardShortcutOutput,
 };
 use crate::structs::ConfigModifier;
-use crate::util::{SetCursor, SetTextIfDifferent, to_accelerator};
+use crate::util::{SetCursor, SetTextIfDifferent, mod_key_to_accelerator};
 use relm4::adw::gtk;
 use relm4::adw::prelude::*;
 use relm4::gtk::Align;
@@ -68,14 +68,14 @@ impl SimpleComponent for WindowsOverview {
                     #[watch]
                     set_sensitive: model.config.enabled,
                 },
-                adw::ShortcutLabel::new(&to_accelerator(model.config.modifier, &model.config.key).unwrap_or_default()) {
+                adw::ShortcutLabel::new(&mod_key_to_accelerator(model.config.modifier, &model.config.key).unwrap_or_default()) {
                     #[watch]
-                    set_accelerator: &to_accelerator(model.config.modifier, &model.config.key).unwrap_or_default(),
+                    set_accelerator: &mod_key_to_accelerator(model.config.modifier, &model.config.key).unwrap_or_default(),
                     #[watch]
                     set_css_classes: if !model.config.enabled {
                         &["gray-label"]
                     } else {
-                        if to_accelerator(model.config.modifier, &model.config.key) == to_accelerator(model.prev_config.modifier, &model.prev_config.key)
+                        if mod_key_to_accelerator(model.config.modifier, &model.config.key) == mod_key_to_accelerator(model.prev_config.modifier, &model.prev_config.key)
                             { &[] }
                         else
                             { &["blue-label"] }
@@ -171,11 +171,12 @@ impl SimpleComponent for WindowsOverview {
         let ins = sender.input_sender().clone();
         let keyboard_shortcut = KeyboardShortcut::builder()
             .launch(KeyboardShortcutInit {
-                key: init.config.key.clone(),
-                modifier: init.config.modifier.clone(),
+                label: None,
+                icon: Some("keyboard-layout".to_string()),
+                init: Some((init.config.modifier.clone(), init.config.key.clone())),
             })
             .connect_receiver(move |_, out| match out {
-                KeyboardShortcutOutput::SetKey(key, r#mod) => {
+                KeyboardShortcutOutput::SetKey(r#mod, key) => {
                     outs.emit(WindowsOverviewOutput::Key(key));
                     outs.emit(WindowsOverviewOutput::Modifier(r#mod));
                 }
@@ -208,10 +209,10 @@ impl SimpleComponent for WindowsOverview {
             }
             WindowsOverviewInput::OpenKeyboardShortcut => {
                 self.keyboard_shortcut
-                    .emit(KeyboardShortcutInput::ShowKeyboardShortcut(
-                        self.config.key.clone(),
+                    .emit(KeyboardShortcutInput::ShowKeyboardShortcutDialog(Some((
                         self.config.modifier,
-                    ));
+                        self.config.key.clone(),
+                    ))));
             }
         }
     }

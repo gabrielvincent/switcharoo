@@ -1,7 +1,7 @@
 use crate::components::changes::{
     Changes, ChangesInit, ChangesInput, ChangesOutput, generate_items,
 };
-use crate::components::generate::{Generate, GenerateInit};
+use crate::components::generate::{Generate, GenerateInit, GenerateInput, GenerateOutput};
 use crate::components::launcher::{Launcher, LauncherInit, LauncherInput, LauncherOutput};
 use crate::components::launcher_plugins::LauncherPluginsOutput;
 use crate::components::launcher_plugins::applications::ApplicationsOutput;
@@ -45,13 +45,14 @@ pub enum Msg {
     Launcher(LauncherOutput),
     Style(StyleOutput),
     Changes(ChangesOutput),
+    Generate(GenerateOutput),
 }
 
 pub struct Root {
     config_path: Box<Path>,
     css_path: Box<Path>,
 
-    generate: bool,
+    is_generate_mode: bool,
 
     config: crate::Config,
     prev_config: crate::Config,
@@ -63,7 +64,7 @@ pub struct Root {
     changes: Controller<Changes>,
     nix_preview: Controller<NixPreview>,
     style: Controller<Style>,
-    generatec: Controller<Generate>,
+    generate: Controller<Generate>,
 
     view_stack: adw::ViewStack,
     alert_dialog_changes_list: gtk::ListBox,
@@ -106,6 +107,7 @@ impl SimpleComponent for Root {
                         gtk::ScrolledWindow {
                             #[local_ref]
                             view_stack -> adw::ViewStack {
+                                set_enable_transitions: true,
                             }
                         }
                     },
@@ -116,14 +118,14 @@ impl SimpleComponent for Root {
                         #[wrap(Some)]
                         set_title_widget: view_stack_switcher = &adw::ViewSwitcherBar {
                             #[watch]
-                            set_visible: !model.generate,
+                            set_visible: !model.is_generate_mode,
                             set_reveal: true,
                         },
                         pack_start = &gtk::Button {
                             set_label: "Generate new",
                             set_css_classes: &["pill", "warning"],
                             #[watch]
-                            set_visible: !model.generate,
+                            set_visible: !model.is_generate_mode,
                             connect_clicked[sender] => move |_| {
                                 sender.input(Msg::Regenerate)
                             }
@@ -184,7 +186,7 @@ impl SimpleComponent for Root {
             });
         let style = Style::builder()
             .launch(StyleInit {
-                system_data_dir: init.system_data_dir,
+                system_data_dir: init.system_data_dir.clone(),
                 css_path: init.css_path.clone(),
             })
             .forward(sender.input_sender(), Msg::Style);
@@ -204,7 +206,11 @@ impl SimpleComponent for Root {
                 config: config.clone(),
             })
             .forward(sender.input_sender(), Msg::Changes);
-        let generatec = Generate::builder().launch(GenerateInit {}).detach();
+        let generate = Generate::builder()
+            .launch(GenerateInit {
+                system_data_dir: init.system_data_dir,
+            })
+            .forward(sender.input_sender(), Msg::Generate);
 
         let view_stack = adw::ViewStack::builder().build();
         let toaster = Toaster::default();
@@ -213,8 +219,8 @@ impl SimpleComponent for Root {
             css_path: init.css_path.clone(),
             config: config.clone(),
             prev_config: config.clone(),
-            generate: false,
-            generatec,
+            is_generate_mode: false,
+            generate,
             footer,
             windows,
             launcher,
@@ -293,12 +299,14 @@ impl SimpleComponent for Root {
                 relm4::main_application().quit();
             }
             Msg::Regenerate => {
-                self.generate = true;
+                // TODO check for changes. dont check for changes if window is being closed
+                self.is_generate_mode = true;
                 self.footer.emit(FooterInput::GenerateMode(true));
+                self.generate.emit(GenerateInput::Start);
                 trace!("Adding generate tab");
                 if self.view_stack.child_by_name("generate").is_none() {
                     self.view_stack.add_titled_with_icon(
-                        self.generatec.widget(),
+                        self.generate.widget(),
                         Some("generate"),
                         "Generate",
                         "configure",
@@ -309,13 +317,25 @@ impl SimpleComponent for Root {
                 self.view_stack.set_visible_child_name("generate");
             }
             Msg::AbortGenerate => {
-                self.generate = false;
+                self.is_generate_mode = false;
                 self.footer.emit(FooterInput::GenerateMode(false));
                 if let Some(ch) = self.view_stack.child_by_name("generate") {
                     self.view_stack.remove(&ch);
                 }
                 self.view_stack.set_visible_child_name("overview");
             }
+            Msg::Generate(msg) => match msg {
+                GenerateOutput::Finish(out) => {
+                    self.is_generate_mode = false;
+                    self.footer.emit(FooterInput::GenerateMode(false));
+                    if let Some(ch) = self.view_stack.child_by_name("generate") {
+                        self.view_stack.remove(&ch);
+                    }
+                    self.view_stack.set_visible_child_name("overview");
+                    dbg!(out);
+                    // TODO out
+                }
+            },
             Msg::Reload(initial) => {
                 if !self.config_path.exists() {
                     if initial {

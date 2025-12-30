@@ -1,21 +1,23 @@
 use crate::structs::ConfigModifier;
-use crate::util::{handle_key, key_to_name};
+use crate::util::{handle_key, key_to_name, mod_key_to_string};
 use adw::gtk;
 use adw::prelude::*;
 use relm4::gtk::{EventControllerKey, Label};
 use relm4::{
-    Component, ComponentController, ComponentParts, ComponentSender, Controller, SimpleComponent,
+    Component, ComponentController, ComponentParts, ComponentSender, Controller, RelmWidgetExt,
+    SimpleComponent,
 };
 use relm4_components::alert::{Alert, AlertMsg, AlertResponse, AlertSettings};
-use tracing::debug;
+use tracing::{debug, warn};
 
 #[derive(Debug)]
 pub struct KeyboardShortcut {
-    key: String,
-    modifier: ConfigModifier,
+    key: Option<String>,
+    modifier: Option<ConfigModifier>,
     is_visible: bool,
     dialog: Controller<Alert>,
-    pub entry: Label,
+    entry: Label,
+    label: Option<String>,
 }
 
 #[derive(Debug)]
@@ -23,18 +25,21 @@ pub enum KeyboardShortcutInput {
     UpdateKey(String),
     UpdateModifier(ConfigModifier),
     HideKeyboardShortcut(bool),
-    ShowKeyboardShortcut(String, ConfigModifier),
+    ShowKeyboardShortcutDialog(Option<(ConfigModifier, String)>),
+    SetWidgetRef(gtk::Widget),
+    SetLabelText(Option<String>),
 }
 
 #[derive(Debug)]
 pub struct KeyboardShortcutInit {
-    pub key: String,
-    pub modifier: ConfigModifier,
+    pub label: Option<String>,
+    pub icon: Option<String>,
+    pub init: Option<(ConfigModifier, String)>,
 }
 
 #[derive(Debug)]
 pub enum KeyboardShortcutOutput {
-    SetKey(String, ConfigModifier),
+    SetKey(ConfigModifier, String),
     Abort,
     OpenRequest,
 }
@@ -47,8 +52,10 @@ impl SimpleComponent for KeyboardShortcut {
 
     view! {
         #[root]
-            gtk::Button {
-            set_icon_name: "keyboard-layout",
+        gtk::Button {
+            set_icon_name?: &init.icon,
+            #[watch]
+            set_label?: &model.label,
             #[watch]
             set_css_classes: if model.is_visible { &["active"] } else { &["not-active"] },
             connect_clicked[sender] => move |_| { sender.output(KeyboardShortcutOutput::OpenRequest).unwrap(); },
@@ -62,7 +69,7 @@ impl SimpleComponent for KeyboardShortcut {
     ) -> ComponentParts<Self> {
         use relm4::ComponentController;
 
-        let entry = gtk::Label::new(None);
+        let entry = Label::new(None);
         let dialog = Alert::builder()
             .transient_for(&root)
             .launch(AlertSettings {
@@ -104,11 +111,12 @@ impl SimpleComponent for KeyboardShortcut {
         window.add_controller(key_controller);
 
         let model = KeyboardShortcut {
-            key: init.key,
-            modifier: init.modifier,
+            key: init.init.as_ref().map(|(_, key)| key.clone()),
+            modifier: init.init.map(|(r#mod, _)| r#mod.clone()),
             is_visible: false,
             entry: entry_2,
             dialog,
+            label: init.label.clone(),
         };
 
         let widgets = view_output!();
@@ -118,39 +126,44 @@ impl SimpleComponent for KeyboardShortcut {
     fn update(&mut self, message: Self::Input, sender: ComponentSender<Self>) {
         match message {
             KeyboardShortcutInput::UpdateKey(key) => {
-                self.key = key;
+                self.key = Some(key);
             }
             KeyboardShortcutInput::UpdateModifier(modifier) => {
-                self.modifier = modifier;
+                self.modifier = Some(modifier);
             }
             KeyboardShortcutInput::HideKeyboardShortcut(confirm) => {
                 self.is_visible = false;
                 if confirm {
-                    sender
-                        .output(KeyboardShortcutOutput::SetKey(
-                            self.key.clone(),
-                            self.modifier.clone(),
-                        ))
-                        .unwrap();
+                    if let (Some(key), Some(r#mod)) = (&self.key, &self.modifier) {
+                        sender
+                            .output(KeyboardShortcutOutput::SetKey(r#mod.clone(), key.clone()))
+                            .unwrap();
+                    } else {
+                        warn!("Tried to hide keyboard shortcut dialog without key or modifier");
+                        sender.output(KeyboardShortcutOutput::Abort).unwrap();
+                    }
                 } else {
                     sender.output(KeyboardShortcutOutput::Abort).unwrap();
                 }
             }
-            KeyboardShortcutInput::ShowKeyboardShortcut(key, r#mod) => {
+            KeyboardShortcutInput::ShowKeyboardShortcutDialog(initial) => {
                 self.is_visible = true;
-                self.key = key;
-                self.modifier = r#mod;
-                let label = if self.modifier == ConfigModifier::None {
-                    key_to_name(&self.key).unwrap_or("---".to_string())
+                self.key = initial.as_ref().map(|(_, key)| key.clone());
+                self.modifier = initial.map(|(r#mod, _)| r#mod.clone());
+                if let (Some(r#mod), Some(key)) = (&self.modifier, &self.key) {
+                    self.entry.set_text(&mod_key_to_string(r#mod, key));
                 } else {
-                    format!(
-                        "{} + {}",
-                        self.modifier,
-                        key_to_name(&self.key).unwrap_or("---".to_string())
-                    )
-                };
-                self.entry.set_text(&label);
+                    self.entry.set_text("");
+                }
                 self.dialog.emit(AlertMsg::Show);
+            }
+            KeyboardShortcutInput::SetWidgetRef(root) => {
+                self.dialog
+                    .widget()
+                    .set_transient_for(root.toplevel_window().as_ref());
+            }
+            KeyboardShortcutInput::SetLabelText(text) => {
+                self.label = text;
             }
         }
     }

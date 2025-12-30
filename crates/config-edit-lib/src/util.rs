@@ -92,12 +92,25 @@ pub fn default_config() -> config_lib::Config {
 }
 
 #[instrument(level = "trace", ret(level = "trace"))]
-pub fn to_accelerator(modifier: ConfigModifier, key: &str) -> Option<String> {
+pub fn mod_key_to_accelerator(modifier: ConfigModifier, key: &str) -> Option<String> {
     let key = key_to_name(key)?;
     if modifier == ConfigModifier::None {
         Some(key)
     } else {
         Some(format!("<{modifier}>{key}"))
+    }
+}
+
+#[instrument(level = "trace", ret(level = "trace"))]
+pub fn mod_key_to_string(modifier: &ConfigModifier, key: &str) -> String {
+    if *modifier == ConfigModifier::None {
+        key_to_name(key).unwrap_or("---".to_string())
+    } else {
+        format!(
+            "{} + {}",
+            modifier,
+            key_to_name(key).unwrap_or("---".to_string())
+        )
     }
 }
 

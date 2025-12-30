@@ -91,7 +91,7 @@ impl FactoryComponent for ThemeCarousel {
                 set_css_classes: &["theme-image"],
                 set_vexpand: true,
                 set_hexpand: false,
-                set_valign: Align::Center,
+                set_valign: Align::Fill,
                 set_halign: Align::Center,
             }
         }
