@@ -4,7 +4,7 @@ mod launcher;
 mod launcher_plugins;
 pub mod nix_preview;
 pub mod root;
-mod style;
 mod switch;
+mod theme;
 pub mod windows;
 pub mod windows_overview;

@@ -1,7 +1,7 @@
 use anyhow::Context;
 use core_lib::{Warn, WarnWithDetails, default};
 use relm4::adw::gtk::{IconTheme, Settings};
-use relm4::gtk;
+use relm4::{adw, gtk};
 use semver::Version;
 use signal_hook::consts::{SIGINT, SIGTERM};
 use signal_hook::iterator::Signals;

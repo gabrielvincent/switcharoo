@@ -1,7 +1,5 @@
 mod check;
 mod explain;
-#[cfg(feature = "generate_config")]
-pub mod generate;
 mod load;
 mod migrate;
 mod modifier;

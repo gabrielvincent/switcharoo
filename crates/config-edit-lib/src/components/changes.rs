@@ -1,12 +1,12 @@
 use crate::flags_csv;
 use crate::structs::{Config, Plugins};
 use crate::util::key_to_name;
-use adw::ActionRow;
-use adw::gtk::SelectionMode;
-use relm4::adw::gtk;
+use relm4::adw::ActionRow;
+use relm4::adw::gtk::SelectionMode;
 use relm4::adw::prelude::*;
 use relm4::gtk::ListBox;
 use relm4::{ComponentParts, ComponentSender, RelmWidgetExt, SimpleComponent};
+use relm4::{adw, gtk};
 use tracing::trace;
 
 #[derive(Debug)]
@@ -43,7 +43,7 @@ impl SimpleComponent for Changes {
         gtk::Box {
             set_orientation: gtk::Orientation::Vertical,
             set_margin_all: 10,
-            #[name="how_to_use"]
+            #[name="list"]
             ListBox {
                 set_show_separators: false,
                 set_halign: gtk::Align::Center,
@@ -65,7 +65,7 @@ impl SimpleComponent for Changes {
         let model = Changes {
             config: init.config.clone(),
             prev_config: init.config,
-            list: widgets.how_to_use.clone(),
+            list: widgets.list.clone(),
         };
         ComponentParts { model, widgets }
     }

@@ -7,22 +7,20 @@ use crate::components::launcher_plugins::LauncherPluginsOutput;
 use crate::components::launcher_plugins::applications::ApplicationsOutput;
 use crate::components::launcher_plugins::simple::SimplePluginOutput;
 use crate::components::nix_preview::{NixPreview, NixPreviewInit};
-use crate::components::style::{Style, StyleInit, StyleInput, StyleOutput};
 use crate::components::switch::SwitchOutput;
+use crate::components::theme::{Style, StyleInit, StyleInput, StyleOutput};
 use crate::components::windows::{Windows, WindowsInit, WindowsInput, WindowsOutput};
 use crate::components::windows_overview::WindowsOverviewOutput;
 use crate::footer::{Footer, FooterInput, FooterOutput};
 use crate::structs;
 use crate::util::default_config;
-use adw::StyleManager;
 use relm4::ComponentController;
 use relm4::abstractions::Toaster;
-use relm4::adw;
-use relm4::adw::gtk;
 use relm4::adw::gtk::{Align, SelectionMode};
 use relm4::adw::prelude::*;
 use relm4::gtk::glib;
 use relm4::{Component, ComponentParts, ComponentSender, Controller, SimpleComponent};
+use relm4::{adw, gtk};
 use relm4_components::alert::{Alert, AlertMsg, AlertResponse, AlertSettings};
 use std::path::Path;
 use tracing::{debug, error, info, trace, warn};
@@ -75,6 +73,7 @@ pub struct InitRoot {
     pub config_path: Box<Path>,
     pub system_data_dir: Box<Path>,
     pub css_path: Box<Path>,
+    pub generate: bool,
 }
 
 #[relm4::component(pub)]
@@ -209,6 +208,7 @@ impl SimpleComponent for Root {
         let generate = Generate::builder()
             .launch(GenerateInit {
                 system_data_dir: init.system_data_dir,
+                config_path: init.config_path.clone(),
             })
             .forward(sender.input_sender(), Msg::Generate);
 
@@ -219,7 +219,7 @@ impl SimpleComponent for Root {
             css_path: init.css_path.clone(),
             config: config.clone(),
             prev_config: config.clone(),
-            is_generate_mode: false,
+            is_generate_mode: init.generate,
             generate,
             footer,
             windows,
@@ -290,7 +290,7 @@ impl SimpleComponent for Root {
                 );
                 if changes {
                     self.alert_dialog.emit(AlertMsg::Show);
-                    // self.alert_dialog.widgets().gtk_window_12.set_modal(true);
+                    self.alert_dialog.widgets().gtk_window_12.set_modal(true); // TODO remove if https://github.com/Relm4/Relm4/issues/837 fixed
                 } else {
                     sender.input(Msg::Close);
                 }
@@ -327,13 +327,12 @@ impl SimpleComponent for Root {
             Msg::Generate(msg) => match msg {
                 GenerateOutput::Finish(out) => {
                     self.is_generate_mode = false;
+                    sender.input(Msg::SetConfig(out));
                     self.footer.emit(FooterInput::GenerateMode(false));
                     if let Some(ch) = self.view_stack.child_by_name("generate") {
                         self.view_stack.remove(&ch);
                     }
                     self.view_stack.set_visible_child_name("overview");
-                    dbg!(out);
-                    // TODO out
                 }
             },
             Msg::Reload(initial) => {

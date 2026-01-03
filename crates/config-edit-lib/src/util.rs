@@ -1,9 +1,9 @@
 use crate::structs::ConfigModifier;
-use relm4::gtk;
 use relm4::gtk::gdk::{Cursor, Display, Key, ModifierType};
-use relm4::gtk::prelude::{Cast, DisplayExtManual, WidgetExt};
+use relm4::gtk::prelude::{Cast, DisplayExtManual, EditableExt, WidgetExt};
+use relm4::{adw, gtk};
 // use relm4::tokio::time::sleep;
-use tracing::instrument;
+use tracing::{instrument, warn};
 
 pub trait SetTextIfDifferent {
     fn set_text_if_different(&self, text: &str);
@@ -12,6 +12,14 @@ pub trait SetTextIfDifferent {
 impl SetTextIfDifferent for gtk::Entry {
     fn set_text_if_different(&self, text: &str) {
         use relm4::adw::prelude::EditableExt;
+        if self.text() != text {
+            self.set_text(text);
+        }
+    }
+}
+
+impl SetTextIfDifferent for adw::EntryRow {
+    fn set_text_if_different(&self, text: &str) {
         if self.text() != text {
             self.set_text(text);
         }
@@ -47,6 +55,31 @@ impl ScrollToPosition for adw::Carousel {
                         gtk::glib::ControlFlow::Continue
                     }
                 });
+            }
+        }
+    }
+}
+
+pub trait SelectRow {
+    fn select_row_index_opt(&self, index: Option<i32>);
+    fn select_row_index(&self, index: i32);
+}
+
+impl SelectRow for gtk::ListBox {
+    fn select_row_index_opt(&self, index: Option<i32>) {
+        self.unselect_all();
+        if let Some(index) = index {
+            self.select_row_index(index);
+        }
+    }
+
+    fn select_row_index(&self, index: i32) {
+        self.unselect_all();
+        if self.selected_row() != self.row_at_index(index) {
+            if let Some(row) = self.row_at_index(index) {
+                self.select_row(Some(&row));
+            } else {
+                warn!("select_row_index: row not found ({index})");
             }
         }
     }

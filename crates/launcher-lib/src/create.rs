@@ -14,7 +14,7 @@ use relm4::adw::gtk::{
     SelectionMode,
 };
 use relm4::adw::gtk::{Orientation, glib};
-use relm4::gtk;
+use relm4::{adw, gtk};
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use tracing::{debug, debug_span, trace};

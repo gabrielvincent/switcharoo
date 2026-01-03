@@ -1,12 +1,12 @@
 use crate::structs::ConfigModifier;
-use crate::util::{handle_key, key_to_name, mod_key_to_string};
-use adw::gtk;
-use adw::prelude::*;
+use crate::util::{handle_key, mod_key_to_string};
+use relm4::adw::prelude::*;
 use relm4::gtk::{EventControllerKey, Label};
 use relm4::{
     Component, ComponentController, ComponentParts, ComponentSender, Controller, RelmWidgetExt,
     SimpleComponent,
 };
+use relm4::{adw, gtk};
 use relm4_components::alert::{Alert, AlertMsg, AlertResponse, AlertSettings};
 use tracing::{debug, warn};
 
@@ -25,8 +25,7 @@ pub enum KeyboardShortcutInput {
     UpdateKey(String),
     UpdateModifier(ConfigModifier),
     HideKeyboardShortcut(bool),
-    ShowKeyboardShortcutDialog(Option<(ConfigModifier, String)>),
-    SetWidgetRef(gtk::Widget),
+    ShowKeyboardShortcutDialog(Option<(ConfigModifier, String)>, Option<gtk::Widget>),
     SetLabelText(Option<String>),
 }
 
@@ -58,7 +57,7 @@ impl SimpleComponent for KeyboardShortcut {
             set_label?: &model.label,
             #[watch]
             set_css_classes: if model.is_visible { &["active"] } else { &["not-active"] },
-            connect_clicked[sender] => move |_| { sender.output(KeyboardShortcutOutput::OpenRequest).unwrap(); },
+            connect_clicked[sender] => move |_b| { sender.output(KeyboardShortcutOutput::OpenRequest).unwrap(); },
         },
     }
 
@@ -146,7 +145,12 @@ impl SimpleComponent for KeyboardShortcut {
                     sender.output(KeyboardShortcutOutput::Abort).unwrap();
                 }
             }
-            KeyboardShortcutInput::ShowKeyboardShortcutDialog(initial) => {
+            KeyboardShortcutInput::ShowKeyboardShortcutDialog(initial, root) => {
+                if let Some(root) = root {
+                    self.dialog
+                        .widget()
+                        .set_transient_for(root.toplevel_window().as_ref());
+                }
                 self.is_visible = true;
                 self.key = initial.as_ref().map(|(_, key)| key.clone());
                 self.modifier = initial.map(|(r#mod, _)| r#mod.clone());
@@ -156,11 +160,7 @@ impl SimpleComponent for KeyboardShortcut {
                     self.entry.set_text("");
                 }
                 self.dialog.emit(AlertMsg::Show);
-            }
-            KeyboardShortcutInput::SetWidgetRef(root) => {
-                self.dialog
-                    .widget()
-                    .set_transient_for(root.toplevel_window().as_ref());
+                self.dialog.widgets().gtk_window_12.set_modal(true); // TODO remove if https://github.com/Relm4/Relm4/issues/837 fixed
             }
             KeyboardShortcutInput::SetLabelText(text) => {
                 self.label = text;

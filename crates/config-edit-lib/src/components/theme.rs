@@ -1,11 +1,12 @@
 use crate::util::{ScrollToPosition, SetCursor};
-use adw::gtk::Orientation;
-use adw::prelude::*;
 use config_lib::style::Theme;
 use relm4::abstractions::Toaster;
+use relm4::adw::gtk::Orientation;
+use relm4::adw::prelude::*;
 use relm4::factory::*;
 use relm4::gtk::{Align, Justification, gio};
-use relm4::{ComponentParts, ComponentSender, RelmWidgetExt, SimpleComponent, gtk};
+use relm4::{ComponentParts, ComponentSender, RelmWidgetExt, SimpleComponent};
+use relm4::{adw, gtk};
 use std::fs;
 use std::path::Path;
 use tracing::{debug, trace, warn};

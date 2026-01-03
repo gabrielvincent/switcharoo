@@ -4,7 +4,7 @@ use core_lib::transfer::Identifier;
 use gtk4_layer_shell::{KeyboardMode, LayerShell};
 use relm4::adw::gtk::prelude::*;
 use relm4::adw::gtk::{ApplicationWindow, Button, Entry, glib};
-use relm4::gtk;
+use relm4::{adw, gtk};
 use std::collections::HashMap;
 use std::time::{Duration, Instant};
 use tracing::{debug_span, trace, warn};

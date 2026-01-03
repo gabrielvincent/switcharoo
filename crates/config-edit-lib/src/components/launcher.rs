@@ -4,11 +4,11 @@ use crate::components::launcher_plugins::{
 use crate::structs::ConfigModifier;
 use crate::util::{SetCursor, SetTextIfDifferent};
 use relm4::ComponentController;
-use relm4::adw::gtk;
 use relm4::adw::prelude::*;
 use relm4::{
     Component, ComponentParts, ComponentSender, Controller, RelmWidgetExt, SimpleComponent,
 };
+use relm4::{adw, gtk};
 use tracing::trace;
 
 #[derive(Debug)]

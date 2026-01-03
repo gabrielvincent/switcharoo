@@ -127,7 +127,7 @@ Debug commands are provided to help troubleshoot desktop files, icons, default a
 
 ✨ = included in the slim feature set. (build with ``--no-default-features --features "slim"``)
 
-- `generate_config_command`✅✨: Adds the `hyprshell config generate` command to interactively generate a config file.
+- `gui_settings_editor`✅✨: Adds the `hyprshell config edit` command to open the settings editor.
 - `json5_config`✅: Adds support for a json5 config file.
 - `launcher_calc`✅: Adds support for the calc plugin in the launcher.
 - `debug_command`✅✨: Adds the `hyprshell debug` command to debug icons, desktop files, etc.

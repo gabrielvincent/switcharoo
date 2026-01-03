@@ -94,28 +94,23 @@ fn main() -> anyhow::Result<()> {
                 let config_path = config_path.unwrap_or_else(get_default_config_path);
                 let css_path = css_file.unwrap_or_else(get_default_css_path);
                 let system_data_dir = system_data_dir.unwrap_or_else(get_default_system_data_dir);
-                config_edit_lib::start(config_path, css_path, system_data_dir);
+                #[cfg(feature = "gui_settings_editor")]
+                config_edit_lib::start(config_path, css_path, system_data_dir, false);
+                #[cfg(not(feature = "gui_settings_editor"))]
+                core_lib::notify_warn(
+                    "GUI settings editor not available, compile with `gui_settings_editor` feature",
+                );
             }
-            #[cfg(feature = "generate_config_command")]
-            cli::ConfigCommand::Generate { force } => {
-                use core_lib::Warn;
+            cli::ConfigCommand::Generate {} => {
                 let config_path = config_path.unwrap_or_else(get_default_config_path);
                 let css_path = css_file.unwrap_or_else(get_default_css_path);
-
-                let (override_config, override_css) = config_lib::generate::get_overrides(&force);
-                config_lib::generate::check_file_exist(
-                    &config_path,
-                    &css_path,
-                    override_config,
-                    override_css,
-                )?;
-
-                let (config_data, css_data) = config_lib::generate::prompt_config()?;
-                let config = config_lib::generate::generate_config(config_data);
-                tracing::trace!("Generated config: {:#?}", config);
-                config_lib::write_config(&config_path, &config, override_config).warn();
-                config_lib::generate::write_css_data(&css_path, &css_data, override_css).warn();
-                explain_config(&config_path, true);
+                let system_data_dir = system_data_dir.unwrap_or_else(get_default_system_data_dir);
+                #[cfg(feature = "gui_settings_editor")]
+                config_edit_lib::start(config_path, css_path, system_data_dir, true);
+                #[cfg(not(feature = "gui_settings_editor"))]
+                core_lib::notify_warn(
+                    "GUI settings editor not available, compile with `gui_settings_editor` feature",
+                );
             }
             cli::ConfigCommand::Explain {} => {
                 explain_config(&config_path.unwrap_or_else(get_default_config_path), false);
@@ -245,9 +240,9 @@ fn main() -> anyhow::Result<()> {
 
 fn check_features() {
     tracing::debug!(
-        "FEATURES: json5_config: {}, generate_config_command: {}, debug_command: {}, launcher_calc: {}, clipboard_compress_lz4: {}, clipboard_compress_zstd: {}, clipboard_compress_brotli: {}, clipboard_encrypt_chacha20poly1305: {}, clipboard_encrypt_aes_gcm: {}",
+        "FEATURES: json5_config: {}, gui_settings_editor: {}, debug_command: {}, launcher_calc: {}, clipboard_compress_lz4: {}, clipboard_compress_zstd: {}, clipboard_compress_brotli: {}, clipboard_encrypt_chacha20poly1305: {}, clipboard_encrypt_aes_gcm: {}",
         cfg!(feature = "json5_config"),
-        cfg!(feature = "generate_config_command"),
+        cfg!(feature = "gui_settings_editor"),
         cfg!(feature = "debug_command"),
         cfg!(feature = "launcher_calc"),
         cfg!(feature = "clipboard_compress_lz4"),

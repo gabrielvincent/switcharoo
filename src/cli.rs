@@ -96,13 +96,8 @@ pub enum Command {
 
 #[derive(Subcommand, Debug, Clone)]
 pub enum ConfigCommand {
-    /// Generate a default config file
-    #[cfg(feature = "generate_config_command")]
-    Generate {
-        /// Force overwrite of a config file, can be used multiple times
-        #[arg(short = 'f', long, default_missing_value = "all", value_parser = ["config", "css", "all"], num_args(0..=1))]
-        force: Vec<String>,
-    },
+    /// Generate a default config file (just opens GUI editor)
+    Generate {},
 
     /// Edit the config file with a GUI
     Edit {},

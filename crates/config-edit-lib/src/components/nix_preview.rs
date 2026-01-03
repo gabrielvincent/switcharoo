@@ -1,6 +1,6 @@
-use adw::gtk;
-use adw::prelude::*;
+use relm4::adw::prelude::*;
 use relm4::{ComponentParts, ComponentSender, RelmWidgetExt, SimpleComponent};
+use relm4::{adw, gtk};
 
 #[derive(Debug)]
 pub struct NixPreview {}

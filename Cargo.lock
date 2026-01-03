@@ -1590,7 +1590,6 @@ dependencies = [
 name = "hyprshell-config-edit-lib"
 version = "4.8.2"
 dependencies = [
- "anyhow",
  "hyprshell-config-lib",
  "hyprshell-core-lib",
  "libadwaita",

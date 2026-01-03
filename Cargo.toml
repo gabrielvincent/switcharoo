@@ -27,11 +27,7 @@ gtk4-layer-shell = { version = "0.7.0" }
 config-lib = { path = "crates/config-lib", package = "hyprshell-config-lib", version = "=4.8.2" }
 core-lib = { path = "crates/core-lib", package = "hyprshell-core-lib", version = "=4.8.2" }
 exec-lib = { path = "crates/exec-lib", package = "hyprshell-exec-lib", version = "=4.8.2" }
-clipboard-lib = { path = "crates/clipboard-lib", package = "hyprshell-clipboard-lib", version = "=4.8.2" }
-windows-lib = { path = "crates/windows-lib", package = "hyprshell-windows-lib", version = "=4.8.2" }
-launcher-lib = { path = "crates/launcher-lib", package = "hyprshell-launcher-lib", version = "=4.8.2" }
 hyprland-plugin = { path = "crates/hyprland-plugin", package = "hyprshell-hyprland-plugin", version = "=4.8.2" }
-config-edit-lib = { path = "crates/config-edit-lib", package = "hyprshell-config-edit-lib", version = "=4.8.2" }
 
 [package]
 name = "hyprshell"
@@ -62,20 +58,20 @@ signal-hook = { version = "0.3.18" }
 config-lib.workspace = true
 core-lib.workspace = true
 exec-lib.workspace = true
-windows-lib.workspace = true
-launcher-lib.workspace = true
-clipboard-lib.workspace = true
-config-edit-lib.workspace = true
+clipboard-lib = { path = "crates/clipboard-lib", package = "hyprshell-clipboard-lib", version = "=4.8.2" }
+windows-lib = { path = "crates/windows-lib", package = "hyprshell-windows-lib", version = "=4.8.2" }
+launcher-lib = { path = "crates/launcher-lib", package = "hyprshell-launcher-lib", version = "=4.8.2" }
+config-edit-lib = { path = "crates/config-edit-lib", package = "hyprshell-config-edit-lib", version = "=4.8.2", optional = true }
 
 [dev-dependencies]
 test-log.workspace = true
 
 [features]
-default = ["json5_config", "generate_config_command", "launcher_calc", "debug_command", "clipboard_compress_lz4", "clipboard_compress_zstd", "clipboard_compress_brotli", "clipboard_encrypt_chacha20poly1305", "clipboard_encrypt_aes_gcm"]
-slim = ["generate_config_command", "debug_command", "clipboard_compress_lz4"]
+default = ["json5_config", "gui_settings_editor", "launcher_calc", "debug_command", "clipboard_compress_lz4", "clipboard_compress_zstd", "clipboard_compress_brotli", "clipboard_encrypt_chacha20poly1305", "clipboard_encrypt_aes_gcm"]
+slim = ["gui_settings_editor", "debug_command", "clipboard_compress_lz4"]
 json5_config = ["config-lib/json5_config"]
-generate_config_command = ["config-lib/generate_config"]
-launcher_calc = ["launcher-lib/calc", "config-lib/launcher_calc_plugin", "config-edit-lib/launcher_calc_plugin"]
+gui_settings_editor = ["dep:config-edit-lib"]
+launcher_calc = ["launcher-lib/calc", "config-lib/launcher_calc_plugin", "config-edit-lib?/launcher_calc_plugin"]
 debug_command = []
 ci_config_check = ["config-lib/ci_no_default_config_values"]
 clipboard_compress_lz4 = ["clipboard-lib/compress_lz4"]

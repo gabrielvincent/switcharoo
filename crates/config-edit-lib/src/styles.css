@@ -108,6 +108,10 @@
     color: color-mix(in srgb, currentColor 40%, #464444 60%);
 }
 
+.generate-min-width {
+    min-width: 270px;
+}
+
 button.active {
     border: 2px solid #62a600;
     box-shadow: inset 0 0 12px #62a600;

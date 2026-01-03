@@ -7,7 +7,7 @@ use relm4::adw::gtk::{
 };
 use std::path::PathBuf;
 
-pub fn start(config_path: PathBuf, css_path: PathBuf, system_data_dir: PathBuf) {
+pub fn start(config_path: PathBuf, css_path: PathBuf, system_data_dir: PathBuf, generate: bool) {
     let relm = RelmApp::new(&format!(
         "{}{}",
         APPLICATION_EDIT_ID,
@@ -27,5 +27,6 @@ pub fn start(config_path: PathBuf, css_path: PathBuf, system_data_dir: PathBuf) 
         config_path: config_path.into_boxed_path(),
         system_data_dir: system_data_dir.into_boxed_path(),
         css_path: css_path.into_boxed_path(),
+        generate,
     });
 }

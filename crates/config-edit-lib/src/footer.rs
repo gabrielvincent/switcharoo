@@ -1,7 +1,7 @@
-use relm4::adw::gtk;
 use relm4::adw::gtk::Orientation;
 use relm4::adw::prelude::*;
 use relm4::{ComponentParts, ComponentSender, SimpleComponent};
+use relm4::{adw, gtk};
 use std::path::Path;
 
 pub struct Footer {

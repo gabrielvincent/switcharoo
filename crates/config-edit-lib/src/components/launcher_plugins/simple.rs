@@ -1,8 +1,8 @@
 use crate::util::SetCursor;
-use adw::gtk;
-use adw::prelude::*;
+use relm4::adw::prelude::*;
 use relm4::gtk::Align;
 use relm4::{ComponentParts, ComponentSender, SimpleComponent};
+use relm4::{adw, gtk};
 use tracing::trace;
 
 #[derive(Debug)]

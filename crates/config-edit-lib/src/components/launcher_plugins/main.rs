@@ -4,11 +4,12 @@ use crate::components::launcher_plugins::applications::{
 use crate::components::launcher_plugins::simple::{
     SimplePlugin, SimplePluginInit, SimplePluginInput, SimplePluginOutput,
 };
-use adw::prelude::*;
+use relm4::ComponentController;
+use relm4::adw::prelude::*;
 use relm4::{
     Component, ComponentParts, ComponentSender, Controller, RelmWidgetExt, SimpleComponent,
 };
-use relm4::{ComponentController, gtk};
+use relm4::{adw, gtk};
 use tracing::trace;
 
 #[derive(Debug)]

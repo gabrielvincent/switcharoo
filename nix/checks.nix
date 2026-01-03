@@ -113,7 +113,7 @@ rec {
       ++ buildLib.commonArgs.nativeBuildInputs;
       cargoClippyExtraArgs = "";
       buildPhaseCargoCommand = ''
-        bash ${../scripts/nix/check-all-feature-combinations.sh}
+        bash ${../scripts/check-all-feature-combinations.sh}
       '';
     }
   );

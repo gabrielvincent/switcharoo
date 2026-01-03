@@ -4,12 +4,12 @@ use crate::shortcut_dialog::{
 };
 use crate::structs::ConfigModifier;
 use crate::util::{SetCursor, SetTextIfDifferent, mod_key_to_accelerator};
-use relm4::adw::gtk;
+use relm4::Component;
 use relm4::adw::prelude::*;
 use relm4::gtk::Align;
-use relm4::{Component, adw};
 use relm4::{ComponentController, Controller};
 use relm4::{ComponentParts, ComponentSender, SimpleComponent};
+use relm4::{adw, gtk};
 use tracing::trace;
 
 #[derive(Debug)]
@@ -209,10 +209,10 @@ impl SimpleComponent for WindowsOverview {
             }
             WindowsOverviewInput::OpenKeyboardShortcut => {
                 self.keyboard_shortcut
-                    .emit(KeyboardShortcutInput::ShowKeyboardShortcutDialog(Some((
-                        self.config.modifier,
-                        self.config.key.clone(),
-                    ))));
+                    .emit(KeyboardShortcutInput::ShowKeyboardShortcutDialog(
+                        Some((self.config.modifier, self.config.key.clone())),
+                        None,
+                    ));
             }
         }
     }
