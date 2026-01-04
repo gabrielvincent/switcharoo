@@ -69,7 +69,7 @@ fix:
 
 [group('develop')]
 build profile="dev":
-    cargo build --profile {{ profile }} --locked
+    cargo build --profile {{ profile }}
 
 [group('checks')]
 lint profile="dev":
