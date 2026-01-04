@@ -1,7 +1,7 @@
-use crate::flags_csv;
-use crate::shortcut_dialog::{
+use crate::components::shortcut_dialog::{
     KeyboardShortcut, KeyboardShortcutInit, KeyboardShortcutInput, KeyboardShortcutOutput,
 };
+use crate::flags_csv;
 use crate::structs::ConfigModifier;
 use crate::util::{SetCursor, SetTextIfDifferent, mod_key_to_accelerator};
 use relm4::adw::gtk::Align;
@@ -70,24 +70,24 @@ impl SimpleComponent for Switch {
                     #[watch]
                     set_sensitive: model.config.enabled,
                 },
-                adw::ShortcutLabel::new(&mod_key_to_accelerator(model.config.modifier, &model.config.key).unwrap_or_default()) {
+                _adw::ShortcutLabel::new(&mod_key_to_accelerator(model.config.modifier, &model.config.key).unwrap_or_default()) {
                     #[watch]
                     set_accelerator: &mod_key_to_accelerator(model.config.modifier, &model.config.key).unwrap_or_default(),
                     #[watch]
-                    set_css_classes: if !model.config.enabled {
-                        &["gray-label"]
-                    } else {
+                    set_css_classes: if model.config.enabled {
                         if mod_key_to_accelerator(model.config.modifier, &model.config.key) == mod_key_to_accelerator(model.prev_config.modifier, &model.prev_config.key)
                             { &[] }
                         else
                             { &["blue-label"] }
+                    } else {
+                        &["gray-label"]
                     },
                 },
             },
             #[watch]
             #[block_signal(h)]
             set_enable_expansion: model.config.enabled,
-            connect_enable_expansion_notify[sender] => move |e| {sender.output(SwitchOutput::Enabled(e.enables_expansion())).unwrap()} @h,
+            connect_enable_expansion_notify[sender] => move |e| {sender.output_sender().emit(SwitchOutput::Enabled(e.enables_expansion()));} @h,
             #[watch]
             set_expanded: model.config.enabled,
             add_row = &gtk::Box {
@@ -118,21 +118,21 @@ impl SimpleComponent for Switch {
                             #[watch]
                             #[block_signal(h_2)]
                             set_active: model.config.same_class,
-                            connect_active_notify[sender] => move |c| { sender.output(SwitchOutput::FilterSameClass(c.is_active())).unwrap() } @h_2,
+                            connect_active_notify[sender] => move |c| { sender.output_sender().emit(SwitchOutput::FilterSameClass(c.is_active())); } @h_2,
                             set_title: "Same class",
                         },
                         add_row = &adw::SwitchRow {
                             #[watch]
                             #[block_signal(h_3)]
                             set_active: model.config.current_workspace,
-                            connect_active_notify[sender] => move |c| { sender.output(SwitchOutput::FilterWorkspace(c.is_active())).unwrap() } @h_3,
+                            connect_active_notify[sender] => move |c| { sender.output_sender().emit(SwitchOutput::FilterWorkspace(c.is_active())); } @h_3,
                             set_title: "Current workspace",
                         },
                         add_row = &adw::SwitchRow {
                             #[watch]
                             #[block_signal(h_4)]
                             set_active: model.config.current_monitor,
-                            connect_active_notify[sender] => move |c| { sender.output(SwitchOutput::FilterMonitor(c.is_active())).unwrap() } @h_4,
+                            connect_active_notify[sender] => move |c| { sender.output_sender().emit(SwitchOutput::FilterMonitor(c.is_active())); } @h_4,
                             set_title: "Current monitor",
                         }
                     }
@@ -153,7 +153,7 @@ impl SimpleComponent for Switch {
                         #[watch]
                         #[block_signal(h_5)]
                         set_active: model.config.switch_workspaces,
-                        connect_active_notify[sender] => move |e| { sender.output(SwitchOutput::SwitchWorkspaces(e.is_active())).unwrap() } @h_5,
+                        connect_active_notify[sender] => move |e| { sender.output_sender().emit(SwitchOutput::SwitchWorkspaces(e.is_active())); } @h_5,
                         set_valign: Align::Center,
                     },
                 },
@@ -177,7 +177,7 @@ impl SimpleComponent for Switch {
                         #[watch]
                         #[block_signal(h_6)]
                         set_text_if_different: &model.config.exclude_special_workspaces,
-                        connect_changed[sender] => move |e| { sender.output(SwitchOutput::ExcludeSpecialWorkspaces(e.text().into())).unwrap() } @h_6,
+                        connect_changed[sender] => move |e| { sender.output_sender().emit(SwitchOutput::ExcludeSpecialWorkspaces(e.text().into())) } @h_6,
                     }
                 },
             }
@@ -195,20 +195,23 @@ impl SimpleComponent for Switch {
             .launch(KeyboardShortcutInit {
                 label: None,
                 icon: Some("keyboard-layout".to_string()),
-                init: Some((init.config.modifier.clone(), init.config.key.clone())),
+                init: Some((init.config.modifier, init.config.key.clone())),
             })
-            .connect_receiver(move |_, out| match out {
-                KeyboardShortcutOutput::SetKey(r#mod, key) => {
-                    outs.emit(SwitchOutput::Key(key));
-                    outs.emit(SwitchOutput::Modifier(r#mod));
+            .connect_receiver(move |_, out| {
+                #[allow(clippy::match_wildcard_for_single_variants)]
+                match out {
+                    KeyboardShortcutOutput::SetKey(r#mod, key) => {
+                        outs.emit(SwitchOutput::Key(key));
+                        outs.emit(SwitchOutput::Modifier(r#mod));
+                    }
+                    KeyboardShortcutOutput::OpenRequest => {
+                        ins.emit(SwitchInput::OpenKeyboardShortcut);
+                    }
+                    _ => {}
                 }
-                KeyboardShortcutOutput::OpenRequest => {
-                    ins.emit(SwitchInput::OpenKeyboardShortcut);
-                }
-                _ => {}
             });
 
-        let model = Switch {
+        let model = Self {
             name: init.name,
             config: init.config.clone(),
             prev_config: init.config,

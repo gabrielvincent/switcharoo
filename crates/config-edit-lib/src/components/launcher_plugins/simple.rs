@@ -14,9 +14,9 @@ pub struct SimplePlugin {
 
 #[derive(Debug)]
 pub enum SimplePluginInput {
-    SetSimplePluginConfig(crate::EmptyConfig),
-    SetPrevSimplePluginConfig(crate::EmptyConfig),
-    ResetSimplePluginConfig,
+    Set(crate::EmptyConfig),
+    SetPrev(crate::EmptyConfig),
+    Reset,
 }
 
 #[derive(Debug)]
@@ -62,7 +62,7 @@ impl SimpleComponent for SimplePlugin {
             #[watch]
             #[block_signal(h)]
             set_enable_expansion: !model.todo && model.config.enabled,
-            connect_enable_expansion_notify[sender] => move |e| {sender.output(SimplePluginOutput::Enabled(e.enables_expansion())).unwrap()} @h,
+            connect_enable_expansion_notify[sender] => move |e| {sender.output_sender().emit(SimplePluginOutput::Enabled(e.enables_expansion()))} @h,
             #[watch]
             set_expanded: !model.todo && model.config.enabled,
         }
@@ -73,7 +73,7 @@ impl SimpleComponent for SimplePlugin {
         root: Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
-        let model = SimplePlugin {
+        let model = Self {
             config: init.config.clone(),
             prev_config: init.config,
             todo: init.todo,
@@ -86,13 +86,13 @@ impl SimpleComponent for SimplePlugin {
     fn update(&mut self, message: Self::Input, _sender: ComponentSender<Self>) {
         trace!("launcher_plugins::simple::update: {message:?}");
         match message {
-            SimplePluginInput::SetSimplePluginConfig(config) => {
+            SimplePluginInput::Set(config) => {
                 self.config = config;
             }
-            SimplePluginInput::SetPrevSimplePluginConfig(config) => {
+            SimplePluginInput::SetPrev(config) => {
                 self.prev_config = config;
             }
-            SimplePluginInput::ResetSimplePluginConfig => {
+            SimplePluginInput::Reset => {
                 self.config = self.prev_config.clone();
             }
         }

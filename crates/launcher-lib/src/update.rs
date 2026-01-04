@@ -14,7 +14,7 @@ use relm4::adw::gtk::{
     Align, Button, IconSize, Image, Label, ListBox, ListBoxRow, Orientation, Overflow, Popover,
     SelectionMode, glib,
 };
-use relm4::{adw, gtk};
+use relm4::gtk;
 use std::collections::HashMap;
 use std::path::Path;
 use tracing::{debug, debug_span, warn};

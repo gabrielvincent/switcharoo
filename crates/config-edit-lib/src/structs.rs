@@ -75,6 +75,7 @@ pub struct ApplicationsPluginConfig {
 }
 
 #[derive(Debug, Clone)]
+#[allow(clippy::struct_field_names)]
 pub struct Switch {
     pub enabled: bool,
     pub modifier: ConfigModifier,
@@ -96,10 +97,10 @@ pub enum ConfigModifier {
 
 #[allow(dead_code)]
 impl ConfigModifier {
-    pub fn strings() -> &'static [&'static str] {
+    pub const fn strings() -> &'static [&'static str] {
         &["Alt", "Super", "Ctrl"]
     }
-    pub fn strings_with_none() -> &'static [&'static str] {
+    pub const fn strings_with_none() -> &'static [&'static str] {
         &["None", "Alt", "Super", "Ctrl"]
     }
 }
@@ -107,10 +108,10 @@ impl ConfigModifier {
 impl fmt::Display for ConfigModifier {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         match self {
-            ConfigModifier::None => write!(f, ""),
-            ConfigModifier::Alt => write!(f, "Alt"),
-            ConfigModifier::Super => write!(f, "Super"),
-            ConfigModifier::Ctrl => write!(f, "Ctrl"),
+            Self::None => write!(f, ""),
+            Self::Alt => write!(f, "Alt"),
+            Self::Super => write!(f, "Super"),
+            Self::Ctrl => write!(f, "Ctrl"),
         }
     }
 }
@@ -129,7 +130,7 @@ impl TryFrom<u32> for ConfigModifier {
 }
 
 impl From<ConfigModifier> for u32 {
-    fn from(value: ConfigModifier) -> u32 {
+    fn from(value: ConfigModifier) -> Self {
         match value {
             ConfigModifier::None => 0,
             ConfigModifier::Super => 1,
@@ -151,12 +152,12 @@ impl From<config_lib::Modifier> for ConfigModifier {
 }
 
 impl From<ConfigModifier> for config_lib::Modifier {
-    fn from(value: ConfigModifier) -> config_lib::Modifier {
+    fn from(value: ConfigModifier) -> Self {
         match value {
-            ConfigModifier::None => config_lib::Modifier::None,
-            ConfigModifier::Alt => config_lib::Modifier::Alt,
-            ConfigModifier::Super => config_lib::Modifier::Super,
-            ConfigModifier::Ctrl => config_lib::Modifier::Ctrl,
+            ConfigModifier::None => Self::None,
+            ConfigModifier::Alt => Self::Alt,
+            ConfigModifier::Super => Self::Super,
+            ConfigModifier::Ctrl => Self::Ctrl,
         }
     }
 }
@@ -170,8 +171,8 @@ impl From<config_lib::Config> for Config {
 }
 
 impl From<Config> for config_lib::Config {
-    fn from(value: Config) -> config_lib::Config {
-        config_lib::Config {
+    fn from(value: Config) -> Self {
+        Self {
             version: Some(config_lib::CURRENT_CONFIG_VERSION),
             windows: value.windows.into(),
         }
@@ -194,7 +195,7 @@ impl From<Option<config_lib::Windows>> for Windows {
 }
 
 impl From<Windows> for Option<config_lib::Windows> {
-    fn from(value: Windows) -> Option<config_lib::Windows> {
+    fn from(value: Windows) -> Self {
         if value.enabled {
             Some(config_lib::Windows {
                 scale: value.scale,
@@ -224,13 +225,13 @@ impl From<Option<config_lib::Switch>> for Switch {
             current_monitor: v.filter_by.contains(&config_lib::FilterBy::CurrentMonitor),
             switch_workspaces: v.switch_workspaces,
             // TODO
-            exclude_special_workspaces: "".to_string(),
+            exclude_special_workspaces: String::new(),
         }
     }
 }
 
 impl From<Switch> for Option<config_lib::Switch> {
-    fn from(value: Switch) -> Option<config_lib::Switch> {
+    fn from(value: Switch) -> Self {
         if value.enabled {
             let mut vec = vec![];
             if value.same_class {
@@ -270,13 +271,13 @@ impl From<Option<config_lib::Overview>> for Overview {
                 .contains(&config_lib::FilterBy::CurrentWorkspace),
             current_monitor: v.filter_by.contains(&config_lib::FilterBy::CurrentMonitor),
             // TODO
-            exclude_special_workspaces: "".to_string(),
+            exclude_special_workspaces: String::new(),
         }
     }
 }
 
 impl From<Overview> for Option<config_lib::Overview> {
-    fn from(value: Overview) -> Option<config_lib::Overview> {
+    fn from(value: Overview) -> Self {
         if value.enabled {
             let mut vec = vec![];
             if value.same_class {
@@ -316,8 +317,8 @@ impl From<config_lib::Launcher> for Launcher {
 }
 
 impl From<Launcher> for config_lib::Launcher {
-    fn from(value: Launcher) -> config_lib::Launcher {
-        config_lib::Launcher {
+    fn from(value: Launcher) -> Self {
+        Self {
             default_terminal: value.default_terminal.map(Box::from),
             launch_modifier: value.launch_modifier.into(),
             width: value.width,
@@ -336,7 +337,7 @@ impl From<Option<config_lib::EmptyConfig>> for EmptyConfig {
 }
 
 impl From<EmptyConfig> for Option<config_lib::EmptyConfig> {
-    fn from(value: EmptyConfig) -> Option<config_lib::EmptyConfig> {
+    fn from(value: EmptyConfig) -> Self {
         if value.enabled {
             Some(config_lib::EmptyConfig {})
         } else {
@@ -357,7 +358,7 @@ impl From<Option<config_lib::ActionsPluginConfig>> for ActionsPluginConfig {
 }
 
 impl From<ActionsPluginConfig> for Option<config_lib::ActionsPluginConfig> {
-    fn from(value: ActionsPluginConfig) -> Option<config_lib::ActionsPluginConfig> {
+    fn from(value: ActionsPluginConfig) -> Self {
         if value.enabled {
             Some(config_lib::ActionsPluginConfig {
                 actions: value.actions,
@@ -382,7 +383,7 @@ impl From<Option<config_lib::ApplicationsPluginConfig>> for ApplicationsPluginCo
 }
 
 impl From<ApplicationsPluginConfig> for Option<config_lib::ApplicationsPluginConfig> {
-    fn from(value: ApplicationsPluginConfig) -> Option<config_lib::ApplicationsPluginConfig> {
+    fn from(value: ApplicationsPluginConfig) -> Self {
         if value.enabled {
             Some(config_lib::ApplicationsPluginConfig {
                 run_cache_weeks: value.run_cache_weeks,
@@ -407,7 +408,7 @@ impl From<Option<config_lib::WebSearchConfig>> for WebSearchConfig {
 }
 
 impl From<WebSearchConfig> for Option<config_lib::WebSearchConfig> {
-    fn from(value: WebSearchConfig) -> Option<config_lib::WebSearchConfig> {
+    fn from(value: WebSearchConfig) -> Self {
         if value.enabled {
             Some(config_lib::WebSearchConfig {
                 engines: value.engines,
@@ -433,8 +434,8 @@ impl From<config_lib::Plugins> for Plugins {
 }
 
 impl From<Plugins> for config_lib::Plugins {
-    fn from(value: Plugins) -> config_lib::Plugins {
-        config_lib::Plugins {
+    fn from(value: Plugins) -> Self {
+        Self {
             applications: value.applications.into(),
             terminal: value.terminal.into(),
             shell: value.shell.into(),

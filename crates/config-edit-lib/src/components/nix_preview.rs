@@ -1,6 +1,6 @@
 use relm4::adw::prelude::*;
+use relm4::gtk;
 use relm4::{ComponentParts, ComponentSender, RelmWidgetExt, SimpleComponent};
-use relm4::{adw, gtk};
 
 #[derive(Debug)]
 pub struct NixPreview {}
@@ -35,7 +35,7 @@ impl SimpleComponent for NixPreview {
         root: Self::Root,
         _sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
-        let model = NixPreview {};
+        let model = Self {};
 
         let widgets = view_output!();
         ComponentParts { model, widgets }

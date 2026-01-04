@@ -1,6 +1,7 @@
 use crate::components::changes::{
     Changes, ChangesInit, ChangesInput, ChangesOutput, generate_items,
 };
+use crate::components::footer::{Footer, FooterInit, FooterInput, FooterOutput};
 use crate::components::generate::{Generate, GenerateInit, GenerateInput, GenerateOutput};
 use crate::components::launcher::{Launcher, LauncherInit, LauncherInput, LauncherOutput};
 use crate::components::launcher_plugins::LauncherPluginsOutput;
@@ -11,7 +12,6 @@ use crate::components::switch::SwitchOutput;
 use crate::components::theme::{Style, StyleInit, StyleInput, StyleOutput};
 use crate::components::windows::{Windows, WindowsInit, WindowsInput, WindowsOutput};
 use crate::components::windows_overview::WindowsOverviewOutput;
-use crate::footer::{Footer, FooterInput, FooterOutput};
 use crate::structs;
 use crate::util::default_config;
 use relm4::ComponentController;
@@ -26,26 +26,6 @@ use std::path::Path;
 use tracing::{debug, error, info, trace, warn};
 
 #[derive(Debug)]
-pub enum Msg {
-    Ignore,
-    Reload(bool),
-    CloseRequest,
-    Close,
-    Save(bool),
-    Regenerate,
-    AbortGenerate,
-
-    Reset,
-    SetConfig(crate::Config),
-    SetPrevConfig(crate::Config),
-
-    Windows(WindowsOutput),
-    Launcher(LauncherOutput),
-    Style(StyleOutput),
-    Changes(ChangesOutput),
-    Generate(GenerateOutput),
-}
-
 pub struct Root {
     config_path: Box<Path>,
     css_path: Box<Path>,
@@ -69,18 +49,44 @@ pub struct Root {
     toaster: Toaster,
 }
 
-pub struct InitRoot {
+#[derive(Debug)]
+pub enum RootInput {
+    Ignore,
+    Reload(bool),
+    CloseRequest,
+    Close,
+    Save(bool),
+    Regenerate,
+    AbortGenerate,
+
+    Reset,
+    SetConfig(crate::Config),
+    SetPrevConfig(crate::Config),
+
+    Windows(WindowsOutput),
+    Launcher(LauncherOutput),
+    Style(StyleOutput),
+    Changes(ChangesOutput),
+    Generate(GenerateOutput),
+}
+
+#[derive(Debug)]
+pub struct RootInit {
     pub config_path: Box<Path>,
     pub system_data_dir: Box<Path>,
     pub css_path: Box<Path>,
     pub generate: bool,
 }
 
+#[derive(Debug)]
+pub enum RootOutput {}
+
+#[allow(unused_assignments)]
 #[relm4::component(pub)]
 impl SimpleComponent for Root {
-    type Input = Msg;
-    type Output = ();
-    type Init = InitRoot;
+    type Init = RootInit;
+    type Input = RootInput;
+    type Output = RootOutput;
 
     view! {
         #[root]
@@ -126,19 +132,20 @@ impl SimpleComponent for Root {
                             #[watch]
                             set_visible: !model.is_generate_mode,
                             connect_clicked[sender] => move |_| {
-                                sender.input(Msg::Regenerate)
+                                sender.input(RootInput::Regenerate);
                             }
                         }
                     }
                 },
             },
             connect_close_request[sender] => move |_| {
-                sender.input(Msg::CloseRequest);
+                sender.input(RootInput::CloseRequest);
                 glib::Propagation::Stop
             }
         }
     }
 
+    #[allow(clippy::too_many_lines)]
     fn init(
         init: Self::Init,
         root: Self::Root,
@@ -148,13 +155,15 @@ impl SimpleComponent for Root {
         let config = structs::Config::from(config);
 
         let footer: Controller<Footer> = Footer::builder()
-            .launch(init.config_path.clone())
+            .launch(FooterInit {
+                config_path: init.config_path.clone(),
+            })
             .forward(sender.input_sender(), |msg| match msg {
-                FooterOutput::Reset => Msg::Reset,
-                FooterOutput::Close => Msg::CloseRequest,
-                FooterOutput::Save => Msg::Save(false),
-                FooterOutput::Reload => Msg::Reload(false),
-                FooterOutput::Abort => Msg::AbortGenerate,
+                FooterOutput::Reset => RootInput::Reset,
+                FooterOutput::Close => RootInput::CloseRequest,
+                FooterOutput::Save => RootInput::Save(false),
+                FooterOutput::Reload => RootInput::Reload(false),
+                FooterOutput::Abort => RootInput::AbortGenerate,
             });
 
         let changes_list = gtk::ListBox::builder()
@@ -179,42 +188,41 @@ impl SimpleComponent for Root {
                 extra_child: Some(changes_list.clone().into()),
             })
             .forward(sender.input_sender(), |res| match res {
-                AlertResponse::Confirm => Msg::Close,
-                AlertResponse::Option => Msg::Save(true),
-                AlertResponse::Cancel => Msg::Ignore,
+                AlertResponse::Confirm => RootInput::Close,
+                AlertResponse::Option => RootInput::Save(true),
+                AlertResponse::Cancel => RootInput::Ignore,
             });
         let style = Style::builder()
             .launch(StyleInit {
                 system_data_dir: init.system_data_dir.clone(),
                 css_path: init.css_path.clone(),
             })
-            .forward(sender.input_sender(), Msg::Style);
+            .forward(sender.input_sender(), RootInput::Style);
         let windows = Windows::builder()
             .launch(WindowsInit {
                 config: config.windows.clone(),
             })
-            .forward(sender.input_sender(), Msg::Windows);
+            .forward(sender.input_sender(), RootInput::Windows);
         let launcher = Launcher::builder()
             .launch(LauncherInit {
                 config: config.windows.overview.launcher.clone(),
             })
-            .forward(sender.input_sender(), Msg::Launcher);
+            .forward(sender.input_sender(), RootInput::Launcher);
         let nix_preview = NixPreview::builder().launch(NixPreviewInit {}).detach();
         let changes = Changes::builder()
             .launch(ChangesInit {
                 config: config.clone(),
             })
-            .forward(sender.input_sender(), Msg::Changes);
+            .forward(sender.input_sender(), RootInput::Changes);
         let generate = Generate::builder()
             .launch(GenerateInit {
                 system_data_dir: init.system_data_dir,
-                config_path: init.config_path.clone(),
             })
-            .forward(sender.input_sender(), Msg::Generate);
+            .forward(sender.input_sender(), RootInput::Generate);
 
         let view_stack = adw::ViewStack::builder().build();
         let toaster = Toaster::default();
-        let model = Root {
+        let model = Self {
             config_path: init.config_path,
             css_path: init.css_path.clone(),
             config: config.clone(),
@@ -273,15 +281,16 @@ impl SimpleComponent for Root {
         widgets
             .view_stack_switcher
             .set_stack(Some(&model.view_stack));
-        sender.input(Msg::Reload(true));
+        sender.input(RootInput::Reload(true));
         ComponentParts { model, widgets }
     }
 
+    #[allow(clippy::too_many_lines)]
     fn update(&mut self, message: Self::Input, sender: ComponentSender<Self>) {
         trace!("root::update: {message:?}");
         match message {
-            Msg::Ignore => (),
-            Msg::CloseRequest => {
+            RootInput::Ignore => (),
+            RootInput::CloseRequest => {
                 debug!("close request");
                 let changes = generate_items(
                     &self.alert_dialog_changes_list,
@@ -292,14 +301,13 @@ impl SimpleComponent for Root {
                     self.alert_dialog.emit(AlertMsg::Show);
                     self.alert_dialog.widgets().gtk_window_12.set_modal(true); // TODO remove if https://github.com/Relm4/Relm4/issues/837 fixed
                 } else {
-                    sender.input(Msg::Close);
+                    sender.input(RootInput::Close);
                 }
             }
-            Msg::Close => {
+            RootInput::Close => {
                 relm4::main_application().quit();
             }
-            Msg::Regenerate => {
-                // TODO check for changes. dont check for changes if window is being closed
+            RootInput::Regenerate => {
                 self.is_generate_mode = true;
                 self.footer.emit(FooterInput::GenerateMode(true));
                 self.generate.emit(GenerateInput::Start);
@@ -316,7 +324,7 @@ impl SimpleComponent for Root {
                 }
                 self.view_stack.set_visible_child_name("generate");
             }
-            Msg::AbortGenerate => {
+            RootInput::AbortGenerate => {
                 self.is_generate_mode = false;
                 self.footer.emit(FooterInput::GenerateMode(false));
                 if let Some(ch) = self.view_stack.child_by_name("generate") {
@@ -324,46 +332,25 @@ impl SimpleComponent for Root {
                 }
                 self.view_stack.set_visible_child_name("overview");
             }
-            Msg::Generate(msg) => match msg {
+            RootInput::Generate(msg) => match msg {
                 GenerateOutput::Finish(out) => {
                     self.is_generate_mode = false;
-                    sender.input(Msg::SetConfig(out));
+                    sender.input(RootInput::SetConfig(out));
                     self.footer.emit(FooterInput::GenerateMode(false));
                     if let Some(ch) = self.view_stack.child_by_name("generate") {
                         self.view_stack.remove(&ch);
                     }
                     self.view_stack.set_visible_child_name("overview");
+                    sender.input(RootInput::Save(false));
                 }
             },
-            Msg::Reload(initial) => {
-                if !self.config_path.exists() {
-                    if initial {
-                        warn!("Config file doesnt exist");
-                        sender.input(Msg::Regenerate)
-                    } else {
-                        warn!("Config file was deleted");
-                        let button = adw::Toast::builder()
-                            .title("Config file missing")
-                            .button_label("Generate new")
-                            .timeout(0)
-                            .build();
-                        let s = sender.clone();
-                        button.connect_button_clicked(move |_| {
-                            s.input(Msg::Regenerate);
-                        });
-                        self.toaster.add_toast(button);
-
-                        let config = default_config();
-                        let config = structs::Config::from(config);
-                        sender.input(Msg::SetConfig(config.clone()));
-                        sender.input(Msg::SetPrevConfig(config.clone()));
-                    }
-                } else {
+            RootInput::Reload(initial) => {
+                if self.config_path.exists() {
                     match config_lib::load_and_migrate_config(&self.config_path, true) {
                         Ok(c) => {
                             let config = structs::Config::from(c);
-                            sender.input(Msg::SetConfig(config.clone()));
-                            sender.input(Msg::SetPrevConfig(config.clone()));
+                            sender.input(RootInput::SetConfig(config.clone()));
+                            sender.input(RootInput::SetPrevConfig(config));
                         }
                         Err(err) => {
                             warn!("Failed to load config: {err:#}");
@@ -375,9 +362,29 @@ impl SimpleComponent for Root {
                             );
                         }
                     }
+                } else if initial {
+                    warn!("Config file doesnt exist");
+                    sender.input(RootInput::Regenerate);
+                } else {
+                    warn!("Config file was deleted");
+                    let button = adw::Toast::builder()
+                        .title("Config file missing")
+                        .button_label("Generate new")
+                        .timeout(0)
+                        .build();
+                    let s = sender.clone();
+                    button.connect_button_clicked(move |_| {
+                        s.input(RootInput::Regenerate);
+                    });
+                    self.toaster.add_toast(button);
+
+                    let config = default_config();
+                    let config = structs::Config::from(config);
+                    sender.input(RootInput::SetConfig(config.clone()));
+                    sender.input(RootInput::SetPrevConfig(config));
                 }
             }
-            Msg::SetConfig(config) => {
+            RootInput::SetConfig(config) => {
                 self.config = config;
 
                 if self.config.windows.overview.enabled {
@@ -392,39 +399,36 @@ impl SimpleComponent for Root {
                     } else {
                         trace!("Launcher tab already exists");
                     }
-                } else {
-                    if let Some(ch) = self.view_stack.child_by_name("launcher") {
-                        self.view_stack.remove(&ch);
-                    }
+                } else if let Some(ch) = self.view_stack.child_by_name("launcher") {
+                    self.view_stack.remove(&ch);
                 }
 
                 self.windows
-                    .emit(WindowsInput::SetWindows(self.config.windows.clone()));
-                self.launcher.emit(LauncherInput::SetLauncher(
+                    .emit(WindowsInput::Set(self.config.windows.clone()));
+                self.launcher.emit(LauncherInput::Set(
                     self.config.windows.overview.launcher.clone(),
                 ));
                 self.changes
                     .emit(ChangesInput::SetConfig(self.config.clone()));
             }
-            Msg::SetPrevConfig(config) => {
+            RootInput::SetPrevConfig(config) => {
                 self.prev_config = config;
 
-                self.windows.emit(WindowsInput::SetPrevWindows(
-                    self.prev_config.windows.clone(),
-                ));
-                self.launcher.emit(LauncherInput::SetPrevLauncher(
+                self.windows
+                    .emit(WindowsInput::SetPrev(self.prev_config.windows.clone()));
+                self.launcher.emit(LauncherInput::SetPrev(
                     self.prev_config.windows.overview.launcher.clone(),
                 ));
                 self.changes
                     .emit(ChangesInput::SetPrevConfig(self.prev_config.clone()));
             }
-            Msg::Save(close) => {
+            RootInput::Save(close) => {
                 match config_lib::write_config(
                     &self.config_path,
                     &(self.config.clone().into()),
                     true,
                 ) {
-                    Ok(_) => {
+                    Ok(()) => {
                         info!("Saved config to {}", self.config_path.display());
                         self.toaster.add_toast(
                             adw::Toast::builder()
@@ -445,27 +449,27 @@ impl SimpleComponent for Root {
                 }
 
                 if close {
-                    sender.input(Msg::Close);
+                    sender.input(RootInput::Close);
                 }
-                sender.input(Msg::SetPrevConfig(self.config.clone()));
+                sender.input(RootInput::SetPrevConfig(self.config.clone()));
             }
-            Msg::Reset => {
+            RootInput::Reset => {
                 self.config = self.prev_config.clone();
 
-                self.windows.emit(WindowsInput::ResetWindows);
-                self.launcher.emit(LauncherInput::ResetLauncher);
+                self.windows.emit(WindowsInput::Reset);
+                self.launcher.emit(LauncherInput::Reset);
                 self.changes
                     .emit(ChangesInput::SetConfig(self.config.clone()));
             }
-            Msg::Changes(msg) => match msg {
+            RootInput::Changes(msg) => match msg {
                 ChangesOutput::ChangesExist(changes_exist) => {
-                    self.footer.emit(FooterInput::ChangesExist(changes_exist))
+                    self.footer.emit(FooterInput::ChangesExist(changes_exist));
                 }
             },
-            Msg::Style(msg) => match msg {
+            RootInput::Style(msg) => match msg {
                 StyleOutput::Apply((name, content)) => {
                     match std::fs::write(&self.css_path, content) {
-                        Ok(_) => {
+                        Ok(()) => {
                             info!("Saved css from {name} to {}", self.css_path.display());
                             self.toaster.add_toast(
                                 adw::Toast::builder()
@@ -487,7 +491,7 @@ impl SimpleComponent for Root {
                     self.style.emit(StyleInput::Reload);
                 }
             },
-            Msg::Launcher(msg) => {
+            RootInput::Launcher(msg) => {
                 let r#ref = &mut self.config.windows.overview.launcher;
                 match msg {
                     LauncherOutput::Modifier(modifier) => {
@@ -545,9 +549,9 @@ impl SimpleComponent for Root {
                     },
                 }
                 // propagate event back
-                sender.input(Msg::SetConfig(self.config.clone()))
+                sender.input(RootInput::SetConfig(self.config.clone()));
             }
-            Msg::Windows(msg) => {
+            RootInput::Windows(msg) => {
                 let r#ref = &mut self.config.windows;
                 match msg {
                     WindowsOutput::Enabled(enabled) => {
@@ -654,9 +658,9 @@ impl SimpleComponent for Root {
                             r#ref.switch_2.exclude_special_workspaces = exclude_special_workspaces;
                         }
                     },
-                };
+                }
                 // propagate event back
-                sender.input(Msg::SetConfig(self.config.clone()))
+                sender.input(RootInput::SetConfig(self.config.clone()));
             }
         }
     }

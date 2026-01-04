@@ -27,9 +27,9 @@ pub struct LauncherPlugins {
 
 #[derive(Debug)]
 pub enum LauncherPluginsInput {
-    SetLauncherPlugins(crate::Plugins),
-    SetPrevLauncherPlugins(crate::Plugins),
-    ResetLauncherPlugins,
+    Set(crate::Plugins),
+    SetPrev(crate::Plugins),
+    Reset,
 }
 
 #[derive(Debug)]
@@ -151,7 +151,7 @@ impl SimpleComponent for LauncherPlugins {
             })
             .detach();
 
-        let model = LauncherPlugins {
+        let model = Self {
             config: init.config.clone(),
             prev_config: init.config,
             applications: launcher_plugins,
@@ -170,64 +170,41 @@ impl SimpleComponent for LauncherPlugins {
     fn update(&mut self, message: Self::Input, _sender: ComponentSender<Self>) {
         trace!("launcher_plugins::main::update: {message:?}");
         match message {
-            LauncherPluginsInput::SetLauncherPlugins(config) => {
+            LauncherPluginsInput::Set(config) => {
                 self.config = config;
                 self.applications
-                    .emit(ApplicationsInput::SetApplicationsPluginConfig(
-                        self.config.applications.clone(),
-                    ));
+                    .emit(ApplicationsInput::Set(self.config.applications.clone()));
                 self.run_in_terminal
-                    .emit(SimplePluginInput::SetSimplePluginConfig(
-                        self.config.terminal.clone(),
-                    ));
+                    .emit(SimplePluginInput::Set(self.config.terminal.clone()));
                 self.run_in_shell
-                    .emit(SimplePluginInput::SetSimplePluginConfig(
-                        self.config.shell.clone(),
-                    ));
+                    .emit(SimplePluginInput::Set(self.config.shell.clone()));
                 self.calculator
-                    .emit(SimplePluginInput::SetSimplePluginConfig(
-                        self.config.calc.clone(),
-                    ));
+                    .emit(SimplePluginInput::Set(self.config.calc.clone()));
                 self.file_path
-                    .emit(SimplePluginInput::SetSimplePluginConfig(
-                        self.config.path.clone(),
-                    ));
+                    .emit(SimplePluginInput::Set(self.config.path.clone()));
             }
-            LauncherPluginsInput::SetPrevLauncherPlugins(config) => {
+            LauncherPluginsInput::SetPrev(config) => {
                 self.prev_config = config;
-                self.applications
-                    .emit(ApplicationsInput::SetPrevApplicationsPluginConfig(
-                        self.prev_config.applications.clone(),
-                    ));
-                self.run_in_terminal
-                    .emit(SimplePluginInput::SetPrevSimplePluginConfig(
-                        self.prev_config.terminal.clone(),
-                    ));
+                self.applications.emit(ApplicationsInput::SetPrev(
+                    self.prev_config.applications.clone(),
+                ));
+                self.run_in_terminal.emit(SimplePluginInput::SetPrev(
+                    self.prev_config.terminal.clone(),
+                ));
                 self.run_in_shell
-                    .emit(SimplePluginInput::SetPrevSimplePluginConfig(
-                        self.prev_config.shell.clone(),
-                    ));
+                    .emit(SimplePluginInput::SetPrev(self.prev_config.shell.clone()));
                 self.calculator
-                    .emit(SimplePluginInput::SetPrevSimplePluginConfig(
-                        self.prev_config.calc.clone(),
-                    ));
+                    .emit(SimplePluginInput::SetPrev(self.prev_config.calc.clone()));
                 self.file_path
-                    .emit(SimplePluginInput::SetPrevSimplePluginConfig(
-                        self.prev_config.path.clone(),
-                    ));
+                    .emit(SimplePluginInput::SetPrev(self.prev_config.path.clone()));
             }
-            LauncherPluginsInput::ResetLauncherPlugins => {
+            LauncherPluginsInput::Reset => {
                 self.config = self.prev_config.clone();
-                self.applications
-                    .emit(ApplicationsInput::ResetApplicationsPluginConfig);
-                self.run_in_terminal
-                    .emit(SimplePluginInput::ResetSimplePluginConfig);
-                self.run_in_shell
-                    .emit(SimplePluginInput::ResetSimplePluginConfig);
-                self.calculator
-                    .emit(SimplePluginInput::ResetSimplePluginConfig);
-                self.file_path
-                    .emit(SimplePluginInput::ResetSimplePluginConfig);
+                self.applications.emit(ApplicationsInput::Reset);
+                self.run_in_terminal.emit(SimplePluginInput::Reset);
+                self.run_in_shell.emit(SimplePluginInput::Reset);
+                self.calculator.emit(SimplePluginInput::Reset);
+                self.file_path.emit(SimplePluginInput::Reset);
             }
         }
     }

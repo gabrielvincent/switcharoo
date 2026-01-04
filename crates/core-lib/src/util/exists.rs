@@ -31,6 +31,7 @@ const NIX_DIRS: &[&str] = &[
 ///   - NixOS-specific locations (`/run/current-system/sw/bin`, `$HOME/.nix-profile/bin`, `/nix/var/nix/profiles/default/bin`)
 ///
 /// Returns `Some(PathBuf)` of the first found executable, or `None`.
+#[must_use]
 pub fn find_command(name: &str) -> Option<PathBuf> {
     if name.is_empty() {
         return None;
@@ -61,10 +62,7 @@ pub fn find_command(name: &str) -> Option<PathBuf> {
 
     // User Nix profile if HOME is present.
     if let Some(home) = env::var_os("HOME") {
-        let mut p = PathBuf::from(home);
-        p.push(".nix-profile");
-        p.push("bin");
-        candidates.push(p);
+        candidates.push(PathBuf::from(home).join(".nix-profile").join("bin"));
     }
 
     // Check each candidate directory for the executable.
@@ -72,8 +70,7 @@ pub fn find_command(name: &str) -> Option<PathBuf> {
         if dir.as_os_str().is_empty() {
             continue;
         }
-        let mut candidate = dir.clone();
-        candidate.push(name);
+        let candidate = dir.clone().join(name);
         if is_executable(&candidate) {
             return Some(candidate);
         }
@@ -83,6 +80,7 @@ pub fn find_command(name: &str) -> Option<PathBuf> {
 }
 
 /// Convenience wrapper that returns true if the command exists somewhere.
+#[must_use]
 pub fn command_exists(name: &str) -> bool {
     find_command(name).is_some()
 }

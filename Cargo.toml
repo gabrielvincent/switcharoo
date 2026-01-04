@@ -53,7 +53,7 @@ semver.workspace = true
 clap = { version = "4.5.47", features = ["derive"] }
 clap_complete = "4.5.57"
 tracing-subscriber = { version = "0.3.20", features = ["fmt", "env-filter", "ansi"], default-features = false }
-signal-hook = { version = "0.3.18" }
+signal-hook = { version = "0.4.1" }
 
 config-lib.workspace = true
 core-lib.workspace = true
@@ -94,6 +94,9 @@ all = { level = "warn", priority = -1 }
 pedantic = { level = "warn", priority = -1 }
 nursery = { level = "warn", priority = -1 }
 unwrap_used = "deny"
+single_match = "allow"
+match_wildcard_for_single_variants = "allow"
+struct_excessive_bools = "allow"
 missing_errors_doc = "allow"
 cast_possible_truncation = "allow"
 # This is broken

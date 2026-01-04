@@ -1,6 +1,6 @@
 use core_lib::{Active, ClientId, HyprlandData, MonitorId, WorkspaceId};
 use relm4::adw::gtk::{ApplicationWindow, Button, FlowBox};
-use relm4::{adw, gtk};
+use relm4::gtk;
 use std::collections::HashMap;
 
 #[derive(Debug)]

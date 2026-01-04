@@ -14,7 +14,7 @@ pub fn explain_config(config_path: &Path, add_how_to_explain_again: bool) {
             return;
         }
     };
-    let info = explain(&config, config_path, true, true);
+    let info = explain(&config, Some(config_path), true);
     println!("{info}");
 
     if daemon_running() {

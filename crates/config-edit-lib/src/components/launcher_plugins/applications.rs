@@ -13,9 +13,9 @@ pub struct Applications {
 
 #[derive(Debug)]
 pub enum ApplicationsInput {
-    SetApplicationsPluginConfig(crate::ApplicationsPluginConfig),
-    SetPrevApplicationsPluginConfig(crate::ApplicationsPluginConfig),
-    ResetApplicationsPluginConfig,
+    Set(crate::ApplicationsPluginConfig),
+    SetPrev(crate::ApplicationsPluginConfig),
+    Reset,
 }
 
 #[derive(Debug)]
@@ -60,7 +60,7 @@ impl SimpleComponent for Applications {
             #[watch]
             #[block_signal(h)]
             set_enable_expansion: model.config.enabled,
-            connect_enable_expansion_notify[sender] => move |e| {sender.output(ApplicationsOutput::Enabled(e.enables_expansion())).unwrap()} @h,
+            connect_enable_expansion_notify[sender] => move |e| {sender.output_sender().emit(ApplicationsOutput::Enabled(e.enables_expansion()));} @h,
             #[watch]
             set_expanded: model.config.enabled,
             add_row = &gtk::Box {
@@ -85,9 +85,8 @@ impl SimpleComponent for Applications {
                         set_hexpand: true,
                         #[watch]
                         #[block_signal(h_1)]
-                        set_value: model.config.run_cache_weeks as f64,
-                        connect_value_changed[sender] => move |e| { sender.output(ApplicationsOutput::CacheWeeks(e.value() as u8)).unwrap() } @h_1,
-
+                        set_value: f64::from(model.config.run_cache_weeks),
+                        connect_value_changed[sender] => move |e| { sender.output_sender().emit(ApplicationsOutput::CacheWeeks(e.value() as u8)); } @h_1,
                     }
                 },
                 gtk::Box {
@@ -107,7 +106,7 @@ impl SimpleComponent for Applications {
                         #[watch]
                         #[block_signal(h_2)]
                         set_active: model.config.show_execs,
-                        connect_active_notify[sender] => move |e| { sender.output(ApplicationsOutput::ShowExecs(e.is_active())).unwrap() } @h_2,
+                        connect_active_notify[sender] => move |e| { sender.output_sender().emit(ApplicationsOutput::ShowExecs(e.is_active())) } @h_2,
                     },
                 },
                 gtk::Box {
@@ -127,19 +126,20 @@ impl SimpleComponent for Applications {
                         #[watch]
                         #[block_signal(h_3)]
                         set_active: model.config.show_actions_submenu,
-                        connect_active_notify[sender] => move |e| { sender.output(ApplicationsOutput::ShowActions(e.is_active())).unwrap() } @h_3,
+                        connect_active_notify[sender] => move |e| { sender.output_sender().emit(ApplicationsOutput::ShowActions(e.is_active())); } @h_3,
                     },
                 },
             }
         }
     }
 
+    #[allow(clippy::cast_sign_loss)]
     fn init(
         init: Self::Init,
         root: Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
-        let model = Applications {
+        let model = Self {
             config: init.config.clone(),
             prev_config: init.config,
         };
@@ -151,13 +151,13 @@ impl SimpleComponent for Applications {
     fn update(&mut self, message: Self::Input, _sender: ComponentSender<Self>) {
         trace!("launcher_plugins::application::update: {message:?}");
         match message {
-            ApplicationsInput::SetApplicationsPluginConfig(config) => {
+            ApplicationsInput::Set(config) => {
                 self.config = config;
             }
-            ApplicationsInput::SetPrevApplicationsPluginConfig(config) => {
+            ApplicationsInput::SetPrev(config) => {
                 self.prev_config = config;
             }
-            ApplicationsInput::ResetApplicationsPluginConfig => {
+            ApplicationsInput::Reset => {
                 self.config = self.prev_config.clone();
             }
         }

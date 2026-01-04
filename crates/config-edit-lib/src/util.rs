@@ -46,9 +46,10 @@ impl ScrollToPosition for adw::Carousel {
         if let Some(wdg) = self.observe_children().into_iter().flatten().nth(pos) {
             if let Ok(widget) = wdg.downcast::<gtk::Widget>() {
                 let s2 = self.clone();
-                // scuffed method to select new widget (else it doesnt work on first render)
+                // scuffed method to select a new widget (else it doesn't work on the first render)
                 gtk::glib::idle_add_local(move || {
                     s2.scroll_to(&widget, animate);
+                    #[allow(clippy::cast_sign_loss)]
                     if s2.position() as usize == pos {
                         gtk::glib::ControlFlow::Break
                     } else {
@@ -60,6 +61,7 @@ impl ScrollToPosition for adw::Carousel {
     }
 }
 
+#[allow(dead_code)]
 pub trait SelectRow {
     fn select_row_index_opt(&self, index: Option<i32>);
     fn select_row_index(&self, index: i32);
@@ -90,38 +92,34 @@ pub fn handle_key(
     state: ModifierType,
     id: u32,
 ) -> Option<(String, ConfigModifier, String)> {
-    if let Some(key_name) = val.name() {
-        if let Some(modifier) = match val {
-            Key::Alt_L | Key::Alt_R => Some(ConfigModifier::Alt),
-            Key::Control_L | Key::Control_R => Some(ConfigModifier::Ctrl),
-            Key::Super_L | Key::Super_R => Some(ConfigModifier::Super),
-            _ => match state {
-                ModifierType::NO_MODIFIER_MASK => Some(ConfigModifier::None),
-                ModifierType::ALT_MASK => Some(ConfigModifier::Alt),
-                ModifierType::CONTROL_MASK => Some(ConfigModifier::Ctrl),
-                ModifierType::SUPER_MASK => Some(ConfigModifier::Super),
-                _ => None,
-            },
-        } {
-            let label = if modifier == ConfigModifier::None {
-                key_name.to_string()
-            } else {
-                format!("{modifier} + {key_name}")
-            };
-            Some((format!("code:{id}"), modifier, label))
-        } else {
-            None
-        }
+    let key_name = val.name()?;
+    let modifier = match val {
+        Key::Alt_L | Key::Alt_R => ConfigModifier::Alt,
+        Key::Control_L | Key::Control_R => ConfigModifier::Ctrl,
+        Key::Super_L | Key::Super_R => ConfigModifier::Super,
+        _ => match state {
+            ModifierType::NO_MODIFIER_MASK => ConfigModifier::None,
+            ModifierType::ALT_MASK => ConfigModifier::Alt,
+            ModifierType::CONTROL_MASK => ConfigModifier::Ctrl,
+            ModifierType::SUPER_MASK => ConfigModifier::Super,
+            _ => return None,
+        },
+    };
+
+    let label = if modifier == ConfigModifier::None {
+        key_name.to_string()
     } else {
-        None
-    }
+        format!("{modifier} + {key_name}")
+    };
+
+    Some((format!("code:{id}"), modifier, label))
 }
 
 pub fn default_config() -> config_lib::Config {
-    let mut conf = config_lib::Config::default();
-    conf.windows = Some(config_lib::Windows::default());
-    // conf.windows.as_mut().unwrap().overview = Some(config_lib::Overview::default());
-    conf
+    config_lib::Config {
+        windows: Some(config_lib::Windows::default()),
+        ..Default::default()
+    }
 }
 
 #[instrument(level = "trace", ret(level = "trace"))]
@@ -135,14 +133,14 @@ pub fn mod_key_to_accelerator(modifier: ConfigModifier, key: &str) -> Option<Str
 }
 
 #[instrument(level = "trace", ret(level = "trace"))]
-pub fn mod_key_to_string(modifier: &ConfigModifier, key: &str) -> String {
-    if *modifier == ConfigModifier::None {
-        key_to_name(key).unwrap_or("---".to_string())
+pub fn mod_key_to_string(modifier: ConfigModifier, key: &str) -> String {
+    if modifier == ConfigModifier::None {
+        key_to_name(key).unwrap_or_else(|| "---".to_string())
     } else {
         format!(
             "{} + {}",
             modifier,
-            key_to_name(key).unwrap_or("---".to_string())
+            key_to_name(key).unwrap_or_else(|| "---".to_string())
         )
     }
 }

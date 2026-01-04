@@ -1,6 +1,6 @@
 use config_lib::{Modifier, Plugins};
 use core_lib::transfer::Identifier;
-use relm4::{adw, gtk};
+use relm4::gtk;
 use std::collections::HashMap;
 use std::path::Path;
 

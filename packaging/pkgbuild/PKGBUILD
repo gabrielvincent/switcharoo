@@ -27,10 +27,17 @@ build() {
 }
 
 package() {
-    install -Dm755 "hyprshell-$pkgver/target/release/hyprshell"    "$pkgdir/usr/bin/hyprshell"
-    install -Dm644 "hyprshell-$pkgver/LICENSE"                     "$pkgdir/usr/share/licenses/hyprshell/LICENSE"
-    install -Dm644 "hyprshell-$pkgver/README.md"                   "$pkgdir/usr/share/doc/hyprshell/README.md"
-	install -Dm644 "hyprshell-$pkgver/packaging/hyprshell.service" "$pkgdir/usr/lib/systemd/system/"
+    install -Dm755 "hyprshell-$pkgver/target/release/hyprshell"           "$pkgdir/usr/bin/hyprshell"
+    install -Dm644 "hyprshell-$pkgver/LICENSE"                            "$pkgdir/usr/share/licenses/hyprshell/LICENSE"
+    install -Dm644 "hyprshell-$pkgver/README.md"                          "$pkgdir/usr/share/doc/hyprshell/README.md"
+    install -Dm644 "hyprshell-$pkgver/docs/CONFIGURE.md"                  "$pkgdir/usr/share/doc/hyprshell/CONFIGURE.md"
+    install -Dm644 "hyprshell-$pkgver/docs/DEBUG.md"                      "$pkgdir/usr/share/doc/hyprshell/DEBUG.md"
+	install -Dm644 "hyprshell-$pkgver/packaging/hyprshell.service"        "$pkgdir/usr/lib/systemd/user/hyprshell.service"
+	install -Dm644 "hyprshell-$pkgver/packaging/hyprshell-settings.png"   "$pkgdir/usr/share/pixmaps/hyprshell.png"
+	install -Dm644 "hyprshell-$pkgver/packaging/hyprshell-config.desktop" "$pkgdir/usr/share/applications/hyprshell-config.desktop"
+
+    mkdir "$pkgdir/usr/share/hyprshell"
+    tar -xvf "hyprshell-$pkgver/packaging/usr-share.tar" -C "$pkgdir/usr/share/hyprshell"
 
     "$pkgdir/usr/bin/hyprshell" completions bash -p  "$pkgdir/usr/share/bash-completion/completions"
     "$pkgdir/usr/bin/hyprshell" completions fish -p  "$pkgdir/usr/share/fish/vendor_completions.d"

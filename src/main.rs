@@ -63,9 +63,9 @@ fn main() -> anyhow::Result<()> {
 
     let data_dir = cli.global_opts.data_dir;
     let cache_dir = cli.global_opts.cache_dir;
-    let system_data_dir = None;
     let css_file = cli.global_opts.css_file;
     let config_path = cli.global_opts.config_file;
+    let system_data_dir = get_default_system_data_dir();
 
     match cli.command {
         cli::Command::Run {} => {
@@ -93,7 +93,6 @@ fn main() -> anyhow::Result<()> {
             cli::ConfigCommand::Edit {} => {
                 let config_path = config_path.unwrap_or_else(get_default_config_path);
                 let css_path = css_file.unwrap_or_else(get_default_css_path);
-                let system_data_dir = system_data_dir.unwrap_or_else(get_default_system_data_dir);
                 #[cfg(feature = "gui_settings_editor")]
                 config_edit_lib::start(config_path, css_path, system_data_dir, false);
                 #[cfg(not(feature = "gui_settings_editor"))]
@@ -104,7 +103,6 @@ fn main() -> anyhow::Result<()> {
             cli::ConfigCommand::Generate {} => {
                 let config_path = config_path.unwrap_or_else(get_default_config_path);
                 let css_path = css_file.unwrap_or_else(get_default_css_path);
-                let system_data_dir = system_data_dir.unwrap_or_else(get_default_system_data_dir);
                 #[cfg(feature = "gui_settings_editor")]
                 config_edit_lib::start(config_path, css_path, system_data_dir, true);
                 #[cfg(not(feature = "gui_settings_editor"))]

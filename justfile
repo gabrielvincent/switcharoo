@@ -45,6 +45,20 @@ shear:
     fi
     cargo shear
 
+[group('security')]
+bloat:
+    #!/usr/bin/env bash
+    if ! command -v cargo-bloat >/dev/null 2>&1; then
+        echo "cargo-bloat not found, installing..."
+        if ! command -v cargo binstall >/dev/null 2>&1; then
+          cargo install --locked cargo-bloat
+        else
+          echo "installing with cargo binstall"
+          cargo binstall cargo-bloat
+        fi
+    fi
+    cargo bloat --release
+
 [group('develop')]
 format:
     cargo +nightly fmt --all
@@ -74,22 +88,30 @@ check-feature-combinations:
 check-default-nix-features:
     nix build '.#checks.x86_64-linux.hyprshell-check-nix-configs' -L
 
-check target: (build target) (lint target) (test target) check-default-nix-features check-feature-combinations
+[group('checks')]
+check profile="dev": (build profile) (lint profile) (test profile)
 
 pre-release: (check "release")
 
 [group('run')]
-run *args="":
-    cargo run -- {{ args }}
+run profile="dev" *args="":
+    cargo run --profile {{ profile }} -- {{ args }}
 
 [group('run')]
-run-run *args="-vv": (run "run" args)
+run-run profile="dev" *args="-vv": (run profile "run" args)
 
 [group('run')]
-run-edit-config *args="-vv": (run "config edit" args)
+run-edit-config profile="dev" *args="-vv": (run profile "config edit" args)
 
 [group('run')]
-run-explain-config *args="-vv": (run "config explain" args)
+run-explain-config profile="dev" *args="-vv": (run profile "config explain" args)
 
 [group('run')]
-run-debug *args="": (run "debug" args)
+run-debug profile="dev" *args="": (run profile "debug" args)
+
+[group('dist')]
+package-usr-lib:
+    ch /usr/share
+    sudo tar -cvzf ar.tar.gz -C ./hyprshell.debug setup_preview themes
+    sudo mv ar.tar.gz ./packaging/usr-share.tar
+    sudo chmod user:user ./packaging/usr-share.tar

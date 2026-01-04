@@ -3,34 +3,21 @@ use crate::components::generate::step1::{LauncherPlugins, Step1, Step1Init, Step
 use crate::components::generate::step2::{Step2, Step2Init, Step2Input};
 use crate::components::generate::step3::{SearchEngines, Step3, Step3Init, Step3Input};
 use crate::components::generate::step4::{Step4, Step4Init, Step4Input};
-use crate::shortcut_dialog::{
-    KeyboardShortcut, KeyboardShortcutInit, KeyboardShortcutInput, KeyboardShortcutOutput,
-};
 use crate::structs::ConfigModifier;
-use crate::util::{
-    ScrollToPosition, SelectRow, SetTextIfDifferent, default_config, mod_key_to_string,
-};
+use crate::util::{ScrollToPosition, default_config};
 use config_lib::SearchEngine;
-use core_lib::util::find_command;
-use relm4::adw::prelude::Cast;
-use relm4::adw::prelude::CheckButtonExt;
-use relm4::adw::prelude::EntryRowExt;
-use relm4::adw::prelude::ListBoxRowExt;
-use relm4::adw::prelude::{ActionRowExt, PreferencesRowExt};
-use relm4::gtk::prelude::{BoxExt, ButtonExt, EditableExt, EntryExt, OrientableExt, WidgetExt};
-use relm4::gtk::{Align, Justification, SelectionMode, gio};
+use relm4::gtk::prelude::{BoxExt, ButtonExt, OrientableExt, WidgetExt};
+use relm4::gtk::{Align, Justification};
 use relm4::{
     Component, ComponentController, ComponentParts, ComponentSender, Controller, RelmWidgetExt,
-    SimpleComponent, WidgetRef,
+    SimpleComponent,
 };
 use relm4::{adw, gtk};
-use std::path::{Path, PathBuf};
-use std::sync::{OnceLock, RwLock};
+use std::path::Path;
 use tracing::trace;
 
 #[derive(Debug)]
 pub struct Generate {
-    config_path: Box<Path>,
     themes_carousel: adw::Carousel,
 
     step: usize,
@@ -63,7 +50,6 @@ pub enum GenerateInput {
 
 #[derive(Debug)]
 pub struct GenerateInit {
-    pub config_path: Box<Path>,
     pub system_data_dir: Box<Path>,
 }
 
@@ -72,7 +58,6 @@ pub enum GenerateOutput {
     Finish(crate::Config),
 }
 
-#[derive(Debug)]
 struct Out {
     overview: Option<(ConfigModifier, String)>,
     launcher: LauncherPlugins,
@@ -83,6 +68,7 @@ struct Out {
 
 const MAX_STEP: usize = 5;
 
+#[allow(unused_assignments)]
 #[relm4::component(pub)]
 impl SimpleComponent for Generate {
     type Init = GenerateInit;
@@ -121,12 +107,24 @@ impl SimpleComponent for Generate {
                     2 => *model.step2.widget(),
                     3 => *model.step3.widget(),
                     4 => *model.step4.widget(),
-                    5 => model.explain_label.clone(),
+                    5 => {
+                        gtk::Box {
+                            set_orientation: gtk::Orientation::Vertical,
+                            set_hexpand: true,
+                            set_spacing: 20,
+                            #[local_ref]
+                            explain_label -> gtk::Label {
+                                set_css_classes: &[],
+                                set_align: Align::Center,
+                                set_justify: Justification::Left,
+                            },
+                        }
+                    },
                     _ => gtk::Label::new(Some("INVALID GENERATE STEP")) {}
                 },
             },
             adw::CarouselIndicatorDots {
-                set_carousel: Some(&themes_carousel),
+                set_carousel: Some(themes_carousel),
             },
             gtk::Box {
                 set_spacing: 25,
@@ -180,8 +178,7 @@ impl SimpleComponent for Generate {
 
         let explain_label = gtk::Label::default();
 
-        let model = Generate {
-            config_path: init.config_path,
+        let model = Self {
             step: 0,
             step_boxes,
             step0,
@@ -206,29 +203,31 @@ impl SimpleComponent for Generate {
         let step3 = &model.step_boxes[3];
         let step4 = &model.step_boxes[4];
         let step5 = &model.step_boxes[5];
+        let explain_label = &model.explain_label;
         let widgets = view_output!();
 
         widgets.step0_stack.set_transition_duration(500);
         ComponentParts { model, widgets }
     }
 
+    #[allow(clippy::too_many_lines)]
     fn update(&mut self, message: Self::Input, sender: ComponentSender<Self>) {
         trace!("launcher::update: {message:?}");
         match message {
             GenerateInput::Advance(by) => {
                 if self.step + by <= MAX_STEP {
                     self.step += by;
-                    self.themes_carousel.scroll_to_pos(self.step, false)
+                    self.themes_carousel.scroll_to_pos(self.step, false);
                 } else {
                     let conf = Out {
                         overview: self.step0_data.clone(),
-                        launcher: self.step1_data.clone(),
+                        launcher: self.step1_data,
                         default_terminal: self.step2_data.clone(),
-                        launcher_websearch_plugin: self.step3_data.clone(),
+                        launcher_websearch_plugin: self.step3_data,
                         switch: self.step4_data.clone(),
                     }
                     .into();
-                    sender.output(GenerateOutput::Finish(conf)).unwrap();
+                    sender.output_sender().emit(GenerateOutput::Finish(conf));
                 }
                 match self.step {
                     // advanced to the launcher setup
@@ -248,24 +247,24 @@ impl SimpleComponent for Generate {
                     5 => {
                         let conf: crate::Config = Out {
                             overview: self.step0_data.clone(),
-                            launcher: self.step1_data.clone(),
+                            launcher: self.step1_data,
                             default_terminal: self.step2_data.clone(),
-                            launcher_websearch_plugin: self.step3_data.clone(),
+                            launcher_websearch_plugin: self.step3_data,
                             switch: self.step4_data.clone(),
                         }
                         .into();
                         let conf: config_lib::Config = conf.into();
-                        let explanation =
-                            config_lib::explain(&conf, &self.config_path, false, false);
+                        let explanation = config_lib::explain(&conf, None, false);
                         self.explain_label.set_label(&explanation);
                     }
                     _ => {}
                 }
             }
             GenerateInput::Back(by) => {
-                if (self.step as isize) - (by as isize) >= 0 {
+                #[allow(clippy::cast_possible_wrap)]
+                if (self.step as i64) - (by as i64) >= 0 {
                     self.step -= by;
-                    self.themes_carousel.scroll_to_pos(self.step, false)
+                    self.themes_carousel.scroll_to_pos(self.step, false);
                 }
                 match self.step {
                     // stepped back to launcher setup
@@ -298,12 +297,10 @@ impl SimpleComponent for Generate {
                     Some((default.windows.switch.modifier, default.windows.switch.key));
                 self.step0
                     .emit(Step0Input::SetData(self.step0_data.clone()));
-                self.step1
-                    .emit(Step1Input::SetData(self.step1_data.clone()));
+                self.step1.emit(Step1Input::SetData(self.step1_data));
                 self.step2
                     .emit(Step2Input::SetData(self.step2_data.clone()));
-                self.step3
-                    .emit(Step3Input::SetData(self.step3_data.clone()));
+                self.step3.emit(Step3Input::SetData(self.step3_data));
                 self.step4
                     .emit(Step4Input::SetData(self.step4_data.clone()));
             }
@@ -326,13 +323,13 @@ impl SimpleComponent for Generate {
     }
 }
 
-impl Into<crate::Config> for Out {
-    fn into(self) -> crate::Config {
-        let mut config = crate::Config::from(default_config());
-        if let Some(overview) = &self.overview {
+impl From<Out> for crate::Config {
+    fn from(val: Out) -> Self {
+        let mut config = Self::from(default_config());
+        if let Some(overview) = &val.overview {
             config.windows.overview.enabled = true;
             config.windows.overview.modifier = overview.0;
-            config.windows.overview.key = overview.1.clone();
+            config.windows.overview.key.clone_from(&overview.1);
 
             config
                 .windows
@@ -340,74 +337,74 @@ impl Into<crate::Config> for Out {
                 .launcher
                 .plugins
                 .applications
-                .enabled = self.launcher.launch_applications;
+                .enabled = val.launcher.launch_applications;
             config.windows.overview.launcher.plugins.terminal.enabled =
-                self.launcher.run_commands_in_terminal;
+                val.launcher.run_commands_in_terminal;
             config.windows.overview.launcher.plugins.shell.enabled =
-                self.launcher.run_commands_in_background;
+                val.launcher.run_commands_in_background;
             config.windows.overview.launcher.plugins.websearch.enabled =
-                self.launcher.search_the_web;
+                val.launcher.search_the_web;
             config.windows.overview.launcher.plugins.calc.enabled =
-                self.launcher.calculate_math_expressions;
-            config.windows.overview.launcher.plugins.actions.enabled = self.launcher.run_actions;
+                val.launcher.calculate_math_expressions;
+            config.windows.overview.launcher.plugins.actions.enabled = val.launcher.run_actions;
 
-            config.windows.overview.launcher.default_terminal = self.default_terminal;
+            config.windows.overview.launcher.default_terminal = val.default_terminal;
 
             let mut vec = vec![];
-            if self.launcher_websearch_plugin.google {
+            if val.launcher_websearch_plugin.google {
                 vec.push(WEB_SEARCH_ENGINES
                     .iter()
                     .find(|(n, _)| *n == "Google")
-                    .unwrap()
+                    .expect("engine not found: Google")
                     .1());
             }
-            if self.launcher_websearch_plugin.startpage {
+            if val.launcher_websearch_plugin.startpage {
                 vec.push(WEB_SEARCH_ENGINES
                     .iter()
                     .find(|(n, _)| *n == "Startpage")
-                    .unwrap()
+                    .expect("engine not found: Startpage")
                     .1());
             }
-            if self.launcher_websearch_plugin.duckduckgo {
+            if val.launcher_websearch_plugin.duckduckgo {
                 vec.push(WEB_SEARCH_ENGINES
                     .iter()
                     .find(|(n, _)| *n == "DuckDuckGo")
-                    .unwrap()
+                    .expect("engine not found: DuckDuckGo")
                     .1());
             }
-            if self.launcher_websearch_plugin.bing {
+            if val.launcher_websearch_plugin.bing {
                 vec.push(WEB_SEARCH_ENGINES
                     .iter()
                     .find(|(n, _)| *n == "Bing")
-                    .unwrap()
+                    .expect("engine not found: Bing")
                     .1());
             }
-            if self.launcher_websearch_plugin.wikipedia {
+            if val.launcher_websearch_plugin.wikipedia {
                 vec.push(WEB_SEARCH_ENGINES
                     .iter()
                     .find(|(n, _)| *n == "Wikipedia")
-                    .unwrap()
+                    .expect("engine not found: Wikipedia")
                     .1());
             }
-            if self.launcher_websearch_plugin.chatgpt {
+            if val.launcher_websearch_plugin.chatgpt {
                 vec.push(WEB_SEARCH_ENGINES
                     .iter()
                     .find(|(n, _)| *n == "ChatGpt")
-                    .unwrap()
+                    .expect("engine not found: ChatGpt")
                     .1());
             }
-            if self.launcher_websearch_plugin.youtube {
+            if val.launcher_websearch_plugin.youtube {
                 vec.push(WEB_SEARCH_ENGINES
                     .iter()
                     .find(|(n, _)| *n == "YouTube")
-                    .unwrap()
+                    .expect("engine not found: YouTube")
                     .1());
             }
-            if self.launcher_websearch_plugin.reddit {
+            if val.launcher_websearch_plugin.reddit {
                 vec.push(WEB_SEARCH_ENGINES
                     .iter()
                     .find(|(n, _)| *n == "Reddit")
-                    .unwrap()
+                    .expect("engine not found: Reddit")
                     .1());
             }
             config.windows.overview.launcher.plugins.websearch.engines = vec;
@@ -415,10 +412,10 @@ impl Into<crate::Config> for Out {
             config.windows.overview.enabled = false;
         }
 
-        if let Some(switch) = &self.overview {
+        if let Some(switch) = &val.switch {
             config.windows.switch.enabled = true;
             config.windows.switch.modifier = switch.0;
-            config.windows.switch.key = switch.1.clone();
+            config.windows.switch.key.clone_from(&switch.1);
         } else {
             config.windows.switch.enabled = false;
         }
@@ -426,6 +423,7 @@ impl Into<crate::Config> for Out {
     }
 }
 
+#[allow(clippy::type_complexity)]
 pub const WEB_SEARCH_ENGINES: &[(&str, fn() -> SearchEngine)] = &[
     ("Google", || SearchEngine {
         url: "https://www.google.com/search?q={}".into(),

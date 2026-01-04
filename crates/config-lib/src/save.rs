@@ -9,8 +9,7 @@ use std::io::Write;
 use std::path::Path;
 use tracing::{debug, debug_span, info};
 
-const CONFIG_EXPLANATION: &str =
-    "Edit via `hyprshell config edit`, generate via `hyprshell config generate`";
+const CONFIG_EXPLANATION: &str = "Edit with `hyprshell config edit`";
 
 pub fn write_config(
     config_path: &Path,

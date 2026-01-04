@@ -9,7 +9,7 @@ use exec_lib::set_no_follow_mouse;
 use relm4::adw::gtk::gdk::Cursor;
 use relm4::adw::gtk::prelude::*;
 use relm4::adw::gtk::{Button, Fixed, Frame, Image, Label, Overflow, Overlay, pango};
-use relm4::{adw, gtk};
+use relm4::gtk;
 use std::borrow::Cow;
 use tracing::{debug, debug_span, trace};
 

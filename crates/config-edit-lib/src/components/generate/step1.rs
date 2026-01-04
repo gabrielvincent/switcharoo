@@ -48,6 +48,7 @@ pub enum Step1Input {
 #[derive(Debug)]
 pub struct Step1Init {}
 
+#[allow(unused_assignments)]
 #[relm4::component(pub)]
 impl SimpleComponent for Step1 {
     type Init = Step1Init;
@@ -128,7 +129,7 @@ impl SimpleComponent for Step1 {
         let calculate_math_expressions = adw::SwitchRow::default();
         let run_actions = adw::SwitchRow::default();
 
-        let model = Step1 {
+        let model = Self {
             launch_apps: launch_apps.clone(),
             run_commands_in_background: run_commands_in_background.clone(),
             run_commands_in_terminal: run_commands_in_terminal.clone(),

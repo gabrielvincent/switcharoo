@@ -54,6 +54,7 @@ pub enum Step3Input {
 #[derive(Debug)]
 pub struct Step3Init {}
 
+#[allow(unused_assignments)]
 #[relm4::component(pub)]
 impl SimpleComponent for Step3 {
     type Init = Step3Init;
@@ -148,7 +149,7 @@ impl SimpleComponent for Step3 {
         let youtube = adw::SwitchRow::default();
         let reddit = adw::SwitchRow::default();
 
-        let model = Step3 {
+        let model = Self {
             google: google.clone(),
             startpage: startpage.clone(),
             duckduckgo: duckduckgo.clone(),

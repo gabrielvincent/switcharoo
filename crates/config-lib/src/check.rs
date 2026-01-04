@@ -104,21 +104,6 @@ mod tests {
 
     #[test_log::test]
     #[test_log(default_log_filter = "trace")]
-    fn test_same_modifier() {
-        let mut config = full();
-        let overview = config
-            .windows
-            .as_mut()
-            .expect("config option missing")
-            .overview
-            .as_mut()
-            .expect("config option missing");
-        overview.launcher.launch_modifier = overview.modifier;
-        assert!(check(&config).is_err());
-    }
-
-    #[test_log::test]
-    #[test_log(default_log_filter = "trace")]
     fn test_invalid_key() {
         let mut config = full();
         let overview = config

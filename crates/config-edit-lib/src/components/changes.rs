@@ -4,16 +4,16 @@ use crate::util::key_to_name;
 use relm4::adw::ActionRow;
 use relm4::adw::gtk::SelectionMode;
 use relm4::adw::prelude::*;
-use relm4::gtk::ListBox;
+use relm4::gtk;
 use relm4::{ComponentParts, ComponentSender, RelmWidgetExt, SimpleComponent};
-use relm4::{adw, gtk};
 use tracing::trace;
 
 #[derive(Debug)]
 pub struct Changes {
     config: Config,
     prev_config: Config,
-    list: ListBox,
+    list: gtk::ListBox,
+    how_to_use: gtk::TextView,
 }
 
 #[derive(Debug)]
@@ -32,6 +32,7 @@ pub enum ChangesOutput {
     ChangesExist(bool),
 }
 
+#[allow(unused_assignments)]
 #[relm4::component(pub)]
 impl SimpleComponent for Changes {
     type Init = ChangesInit;
@@ -43,14 +44,24 @@ impl SimpleComponent for Changes {
         gtk::Box {
             set_orientation: gtk::Orientation::Vertical,
             set_margin_all: 10,
+            set_spacing: 15,
             #[name="list"]
-            ListBox {
+            gtk::ListBox {
                 set_show_separators: false,
                 set_halign: gtk::Align::Center,
                 set_valign: gtk::Align::Start,
                 set_hexpand: true,
                 set_selection_mode: SelectionMode::None,
                 set_css_classes: &["items-list", "boxed-list"]
+            },
+            #[name="how_to_use"]
+            gtk::TextView {
+                set_editable: false,
+                set_sensitive: false,
+                set_align: gtk::Align::Fill,
+                set_hexpand: true,
+                set_vexpand: true,
+                set_css_classes: &["changes-text"]
             }
         }
     }
@@ -62,10 +73,11 @@ impl SimpleComponent for Changes {
     ) -> ComponentParts<Self> {
         #[allow(unused_assignments)]
         let widgets = view_output!();
-        let model = Changes {
+        let model = Self {
             config: init.config.clone(),
             prev_config: init.config,
             list: widgets.list.clone(),
+            how_to_use: widgets.how_to_use.clone(),
         };
         ComponentParts { model, widgets }
     }
@@ -80,24 +92,19 @@ impl SimpleComponent for Changes {
                 self.prev_config = config;
             }
         }
-        let changes = generate_items(
-            &self.list,
-            // TODO
-            &self.config,
-            &self.prev_config,
-            // TODO
-        );
-        sender.output(ChangesOutput::ChangesExist(changes)).unwrap();
+        let changes = generate_items(&self.list, &self.config, &self.prev_config);
+
+        let text = config_lib::explain(&(self.config.clone().into()), None, false);
+        self.how_to_use.buffer().set_text(&text);
+
+        sender
+            .output_sender()
+            .emit(ChangesOutput::ChangesExist(changes));
     }
 }
 
-pub fn generate_items(
-    changes: &ListBox,
-    // how_to_use: &TextView,
-    config: &Config,
-    prev_config: &Config,
-    // path: &Path,
-) -> bool {
+#[allow(clippy::too_many_lines)]
+pub fn generate_items(changes: &gtk::ListBox, config: &Config, prev_config: &Config) -> bool {
     while let Some(child) = changes.first_child() {
         changes.remove(&child);
     }
@@ -410,20 +417,15 @@ pub fn generate_items(
         }
     }
 
-    let changes_exist = if changes.first_child().is_none() {
+    if changes.first_child().is_none() {
         add_info(changes, "No changes");
         false
     } else {
         true
-    };
-
-    // let text = config_lib::explain(config, path, false, false);
-    // how_to_use.buffer().set_text(&text);
-
-    changes_exist
+    }
 }
 
-fn add_plugin_changes(changes: &ListBox, prev: &Plugins, current: &Plugins) {
+fn add_plugin_changes(changes: &gtk::ListBox, prev: &Plugins, current: &Plugins) {
     match (&prev.applications.enabled, &current.applications.enabled) {
         (false, false) => {}
         (true, false) => {
@@ -491,12 +493,12 @@ fn add_plugin_changes(changes: &ListBox, prev: &Plugins, current: &Plugins) {
     }
 }
 
-fn add_info(changes: &ListBox, text: &str) {
+fn add_info(changes: &gtk::ListBox, text: &str) {
     let label = ActionRow::builder().title(text).build();
     changes.append(&label);
 }
 
-fn add_info_subtitle(changes: &ListBox, text: &str, subtitle: String) {
+fn add_info_subtitle(changes: &gtk::ListBox, text: &str, subtitle: String) {
     let label = ActionRow::builder().title(text).subtitle(subtitle).build();
     changes.append(&label);
 }

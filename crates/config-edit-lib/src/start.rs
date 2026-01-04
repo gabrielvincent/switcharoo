@@ -1,5 +1,5 @@
 use crate::APPLICATION_EDIT_ID;
-use crate::components::root::InitRoot;
+use crate::components::root::{Root, RootInit};
 use relm4::RelmApp;
 use relm4::adw::gdk::Display;
 use relm4::adw::gtk::{
@@ -7,6 +7,8 @@ use relm4::adw::gtk::{
 };
 use std::path::PathBuf;
 
+/// # Panics
+/// if no display was found
 pub fn start(config_path: PathBuf, css_path: PathBuf, system_data_dir: PathBuf, generate: bool) {
     let relm = RelmApp::new(&format!(
         "{}{}",
@@ -23,7 +25,7 @@ pub fn start(config_path: PathBuf, css_path: PathBuf, system_data_dir: PathBuf, 
         STYLE_PROVIDER_PRIORITY_APPLICATION,
     );
 
-    relm.run::<crate::components::root::Root>(InitRoot {
+    relm.run::<Root>(RootInit {
         config_path: config_path.into_boxed_path(),
         system_data_dir: system_data_dir.into_boxed_path(),
         css_path: css_path.into_boxed_path(),

@@ -15,14 +15,14 @@ use tracing::trace;
 pub struct Launcher {
     config: crate::Launcher,
     prev_config: crate::Launcher,
-    launcher_plugins: Controller<LauncherPlugins>,
+    plugins: Controller<LauncherPlugins>,
 }
 
 #[derive(Debug)]
 pub enum LauncherInput {
-    SetLauncher(crate::Launcher),
-    SetPrevLauncher(crate::Launcher),
-    ResetLauncher,
+    Set(crate::Launcher),
+    SetPrev(crate::Launcher),
+    Reset,
 }
 
 #[derive(Debug)]
@@ -77,7 +77,7 @@ impl SimpleComponent for Launcher {
                             #[watch]
                             #[block_signal(h_1)]
                             set_selected: model.config.launch_modifier.into(),
-                            connect_selected_notify[sender] => move |e| {sender.output(LauncherOutput::Modifier(e.selected().try_into().expect("invalid modifier"))).unwrap() } @ h_1,
+                            connect_selected_notify[sender] => move |e| {sender.output_sender().emit(LauncherOutput::Modifier(e.selected().try_into().expect("invalid modifier")));} @ h_1,
                             set_hexpand: true,
                         }
                     },
@@ -99,8 +99,8 @@ impl SimpleComponent for Launcher {
                             set_digits: 0,
                             #[watch]
                             #[block_signal(h_2)]
-                            set_value: model.config.width as f64,
-                            connect_value_changed[sender] => move |e| { sender.output(LauncherOutput::Width(e.value() as u32)).unwrap() } @h_2,
+                            set_value: f64::from(model.config.width),
+                            connect_value_changed[sender] => move |e| { sender.output_sender().emit(LauncherOutput::Width(e.value() as u32)); } @h_2,
                         }
                     },
                     gtk::Box {
@@ -121,8 +121,8 @@ impl SimpleComponent for Launcher {
                             set_digits: 0,
                             #[watch]
                             #[block_signal(h_3)]
-                            set_value: model.config.max_items as f64,
-                            connect_value_changed[sender] => move |e| { sender.output(LauncherOutput::MaxItems(e.value() as u8)).unwrap() } @h_3,
+                            set_value: f64::from(model.config.max_items),
+                            connect_value_changed[sender] => move |e| { sender.output_sender().emit(LauncherOutput::MaxItems(e.value() as u8)); } @h_3,
                         }
                     }
                 },
@@ -141,9 +141,9 @@ impl SimpleComponent for Launcher {
                         gtk::Switch {
                             #[watch]
                             #[block_signal(h_4)]
-                            set_active: !model.config.default_terminal.is_some(),
+                            set_active: model.config.default_terminal.is_none(),
                             set_valign: gtk::Align::Center,
-                            connect_active_notify[sender] => move |e| { sender.output(LauncherOutput::DefaultTerminal(if e.is_active() { None } else { Some("".to_string()) })).unwrap() } @h_4,
+                            connect_active_notify[sender] => move |e| { sender.output_sender().emit(LauncherOutput::DefaultTerminal(if e.is_active() { None } else { Some(String::new()) })); } @h_4,
                         },
                         gtk::Image::from_icon_name("dialog-information-symbolic") {
                             set_cursor_by_name: "help",
@@ -154,19 +154,20 @@ impl SimpleComponent for Launcher {
                             set_sensitive: model.config.default_terminal.is_some(),
                             #[watch]
                             #[block_signal(h_5)]
-                            set_text_if_different: &model.config.default_terminal.as_ref().unwrap_or(&"".to_string()),
-                            connect_changed[sender] => move |e| { sender.output(LauncherOutput::DefaultTerminal(Some(e.text().into()))).unwrap()} @h_5,
+                            set_text_if_different: &model.config.default_terminal.as_ref().unwrap_or(&String::new()),
+                            connect_changed[sender] => move |e| { sender.output_sender().emit(LauncherOutput::DefaultTerminal(Some(e.text().into())))} @h_5,
                             set_input_purpose: gtk::InputPurpose::FreeForm,
                             set_placeholder_text: Some("kitty"),
                             set_hexpand: true,
                         }
                     },
                 },
-                add_row = model.launcher_plugins.widget(),
+                add_row = model.plugins.widget(),
             }
         }
     }
 
+    #[allow(clippy::cast_sign_loss, clippy::cast_precision_loss)]
     fn init(
         init: Self::Init,
         root: Self::Root,
@@ -178,10 +179,10 @@ impl SimpleComponent for Launcher {
             })
             .forward(sender.output_sender(), LauncherOutput::LauncherPlugins);
 
-        let model = Launcher {
+        let model = Self {
             config: init.config.clone(),
             prev_config: init.config,
-            launcher_plugins,
+            plugins: launcher_plugins,
         };
         let widgets = view_output!();
         ComponentParts { model, widgets }
@@ -190,24 +191,20 @@ impl SimpleComponent for Launcher {
     fn update(&mut self, message: Self::Input, _sender: ComponentSender<Self>) {
         trace!("launcher::update: {message:?}");
         match message {
-            LauncherInput::SetLauncher(config) => {
+            LauncherInput::Set(config) => {
                 self.config = config;
-                self.launcher_plugins
-                    .emit(LauncherPluginsInput::SetLauncherPlugins(
-                        self.config.plugins.clone(),
-                    ));
+                self.plugins
+                    .emit(LauncherPluginsInput::Set(self.config.plugins.clone()));
             }
-            LauncherInput::SetPrevLauncher(config) => {
+            LauncherInput::SetPrev(config) => {
                 self.prev_config = config;
-                self.launcher_plugins
-                    .emit(LauncherPluginsInput::SetPrevLauncherPlugins(
-                        self.prev_config.plugins.clone(),
-                    ));
+                self.plugins.emit(LauncherPluginsInput::SetPrev(
+                    self.prev_config.plugins.clone(),
+                ));
             }
-            LauncherInput::ResetLauncher => {
+            LauncherInput::Reset => {
                 self.config = self.prev_config.clone();
-                self.launcher_plugins
-                    .emit(LauncherPluginsInput::ResetLauncherPlugins)
+                self.plugins.emit(LauncherPluginsInput::Reset);
             }
         }
     }

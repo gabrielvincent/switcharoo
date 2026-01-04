@@ -13,7 +13,7 @@ use tracing::trace;
 
 #[derive(Debug)]
 pub struct Windows {
-    pub windows_overview: Controller<WindowsOverview>,
+    pub overview: Controller<WindowsOverview>,
     pub config: crate::Windows,
     pub prev_config: crate::Windows,
     pub switch: Controller<Switch>,
@@ -22,9 +22,9 @@ pub struct Windows {
 
 #[derive(Debug)]
 pub enum WindowsInput {
-    SetWindows(crate::Windows),
-    SetPrevWindows(crate::Windows),
-    ResetWindows,
+    Set(crate::Windows),
+    SetPrev(crate::Windows),
+    Reset,
 }
 
 #[derive(Debug)]
@@ -62,7 +62,7 @@ impl SimpleComponent for Windows {
                 #[watch]
                 #[block_signal(h)]
                 set_enable_expansion: model.config.enabled,
-                connect_enable_expansion_notify[sender] => move |e| {sender.output(WindowsOutput::Enabled(e.enables_expansion())).unwrap()} @h,
+                connect_enable_expansion_notify[sender] => move |e| {sender.output_sender().emit(WindowsOutput::Enabled(e.enables_expansion())); } @h,
                 #[watch]
                 set_expanded: model.config.enabled,
                 add_row = &gtk::Box {
@@ -74,7 +74,7 @@ impl SimpleComponent for Windows {
                         set_spacing: 10,
                         gtk::Label {
                             #[watch]
-                            set_css_classes: if model.config.scale == model.prev_config.scale { &[] } else { &["blue-label"]  },
+                            set_css_classes: if (model.config.scale - model.prev_config.scale).abs() < 0.01 { &[] } else { &["blue-label"]  },
                             set_label: "Scale",
                         },
                         gtk::Image::from_icon_name("dialog-information-symbolic") {
@@ -88,7 +88,7 @@ impl SimpleComponent for Windows {
                             #[watch]
                             #[block_signal(h_2)]
                             set_value: model.config.scale,
-                            connect_value_changed[sender] => move |e| { sender.output(WindowsOutput::Scale((e.value() * 100.0).round() / 100.0)).unwrap() } @h_2,
+                            connect_value_changed[sender] => move |e| { sender.output_sender().emit(WindowsOutput::Scale((e.value() * 100.0).round() / 100.0)); } @h_2,
                         }
                     },
                     gtk::Box {
@@ -109,18 +109,19 @@ impl SimpleComponent for Windows {
                             set_digits: 0,
                             #[watch]
                             #[block_signal(h_3)]
-                            set_value: model.config.items_per_row as f64,
-                            connect_value_changed[sender] => move |e| { sender.output(WindowsOutput::ItemsPerRow(e.value() as u8)).unwrap() } @h_3,
+                            set_value: f64::from(model.config.items_per_row),
+                            connect_value_changed[sender] => move |e| { sender.output_sender().emit(WindowsOutput::ItemsPerRow(e.value() as u8)) } @h_3,
                         }
                     }
                 },
-                add_row = model.windows_overview.widget(),
+                add_row = model.overview.widget(),
                 add_row = model.switch.widget(),
                 add_row = model.switch_2.widget(),
             }
         }
     }
 
+    #[allow(clippy::cast_sign_loss)]
     fn init(
         init: Self::Init,
         root: Self::Root,
@@ -144,8 +145,8 @@ impl SimpleComponent for Windows {
             })
             .forward(sender.output_sender(), WindowsOutput::Switch2);
 
-        let model = Windows {
-            windows_overview,
+        let model = Self {
+            overview: windows_overview,
             switch,
             switch_2,
             config: init.config.clone(),
@@ -159,33 +160,30 @@ impl SimpleComponent for Windows {
     fn update(&mut self, message: WindowsInput, _sender: ComponentSender<Self>) {
         trace!("windows::update: {message:?}");
         match message {
-            WindowsInput::SetWindows(config) => {
+            WindowsInput::Set(config) => {
                 self.config = config;
-                self.windows_overview
-                    .emit(WindowsOverviewInput::SetOverview(
-                        self.config.overview.clone(),
-                    ));
+                self.overview.emit(WindowsOverviewInput::SetOverview(
+                    self.config.overview.clone(),
+                ));
                 self.switch
                     .emit(SwitchInput::SetSwitch(self.config.switch.clone()));
                 self.switch_2
                     .emit(SwitchInput::SetSwitch(self.config.switch_2.clone()));
             }
-            WindowsInput::SetPrevWindows(config) => {
+            WindowsInput::SetPrev(config) => {
                 self.prev_config = config;
-                self.windows_overview
-                    .emit(WindowsOverviewInput::SetPrevOverview(
-                        self.prev_config.overview.clone(),
-                    ));
+                self.overview.emit(WindowsOverviewInput::SetPrevOverview(
+                    self.prev_config.overview.clone(),
+                ));
                 self.switch
                     .emit(SwitchInput::SetPrevSwitch(self.prev_config.switch.clone()));
                 self.switch_2.emit(SwitchInput::SetPrevSwitch(
                     self.prev_config.switch_2.clone(),
                 ));
             }
-            WindowsInput::ResetWindows => {
+            WindowsInput::Reset => {
                 self.config = self.prev_config.clone();
-                self.windows_overview
-                    .emit(WindowsOverviewInput::ResetOverview);
+                self.overview.emit(WindowsOverviewInput::ResetOverview);
                 self.switch.emit(SwitchInput::ResetSwitch);
                 self.switch_2.emit(SwitchInput::ResetSwitch);
             }

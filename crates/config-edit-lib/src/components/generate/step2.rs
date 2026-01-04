@@ -19,12 +19,13 @@ pub enum Step2Input {
     // external set method
     SetData(Option<String>),
     // internal set method
-    _SetData(Option<String>),
+    ISetData(Option<String>),
 }
 
 #[derive(Debug)]
 pub struct Step2Init {}
 
+#[allow(unused_assignments)]
 #[relm4::component(pub)]
 impl SimpleComponent for Step2 {
     type Init = Step2Init;
@@ -54,34 +55,34 @@ impl SimpleComponent for Step2 {
                         trace!("press title: {title}");
                         match &*title {
                             "Autodetect" => {
-                                sender.input(Step2Input::_SetData(None))
+                                sender.input(Step2Input::ISetData(None));
                             }
                             "Alacritty" => {
-                                sender.input(Step2Input::_SetData(Some("alacritty".to_string())))
+                                sender.input(Step2Input::ISetData(Some("alacritty".to_string())));
                             }
                             "Kitty" => {
-                                sender.input(Step2Input::_SetData(Some("kitty".to_string())))
+                                sender.input(Step2Input::ISetData(Some("kitty".to_string())));
                             }
                             "Wezterm" => {
-                                sender.input(Step2Input::_SetData(Some("wezterm".to_string())))
+                                sender.input(Step2Input::ISetData(Some("wezterm".to_string())));
                             }
                             "Foot" => {
-                                sender.input(Step2Input::_SetData(Some("foot".to_string())))
+                                sender.input(Step2Input::ISetData(Some("foot".to_string())));
                             }
                             "QTerminal" => {
-                                sender.input(Step2Input::_SetData(Some("qterminal".to_string())))
+                                sender.input(Step2Input::ISetData(Some("qterminal".to_string())));
                             }
                             "Lilyterm" => {
-                                sender.input(Step2Input::_SetData(Some("lilyterm".to_string())))
+                                sender.input(Step2Input::ISetData(Some("lilyterm".to_string())));
                             }
                             "Tilix" => {
-                                sender.input(Step2Input::_SetData(Some("tilix".to_string())))
+                                sender.input(Step2Input::ISetData(Some("tilix".to_string())));
                             }
                             "Terminix" => {
-                                sender.input(Step2Input::_SetData(Some("terminix".to_string())))
+                                sender.input(Step2Input::ISetData(Some("terminix".to_string())));
                             }
                             "Konsole" => {
-                                sender.input(Step2Input::_SetData(Some("konsole".to_string())))
+                                sender.input(Step2Input::ISetData(Some("konsole".to_string())));
                             }
                             _ => {}
                         }
@@ -95,61 +96,61 @@ impl SimpleComponent for Step2 {
                 adw::ActionRow {
                     set_title: "Alacritty",
                     set_activatable: true,
-                    set_css_classes: if get_terminals().iter().find(|(name, _)| *name == "alacritty").is_some() {&[]} else {&["gray-label"]},
+                    set_css_classes: if get_terminals().iter().any(|(name, _)| *name == "alacritty") {&[]} else {&["gray-label"]},
                     set_subtitle: &get_terminals().iter().find(|(name, _)| *name == "alacritty").map(|(_, path)| path.display().to_string()).unwrap_or_default()
                 },
                 adw::ActionRow {
                     set_title: "Kitty",
                     set_activatable: true,
-                    set_css_classes: if get_terminals().iter().find(|(name, _)| *name == "kitty").is_some() {&[]} else {&["gray-label"]},
+                    set_css_classes: if get_terminals().iter().any(|(name, _)| *name == "kitty") {&[]} else {&["gray-label"]},
                     set_subtitle: &get_terminals().iter().find(|(name, _)| *name == "kitty").map(|(_, path)| path.display().to_string()).unwrap_or_default()
                 },
                 adw::ActionRow {
                     set_title: "Wezterm",
                     set_activatable: true,
-                    set_css_classes: if get_terminals().iter().find(|(name, _)| *name == "wezterm").is_some() {&[]} else {&["gray-label"]},
+                    set_css_classes: if get_terminals().iter().any(|(name, _)| *name == "wezterm") {&[]} else {&["gray-label"]},
                     set_subtitle: &get_terminals().iter().find(|(name, _)| *name == "wezterm").map(|(_, path)| path.display().to_string()).unwrap_or_default()
                 },
                 adw::ActionRow {
                     set_title: "Foot",
                     set_activatable: true,
-                    set_css_classes: if get_terminals().iter().find(|(name, _)| *name == "foot").is_some() {&[]} else {&["gray-label"]},
+                    set_css_classes: if get_terminals().iter().any(|(name, _)| *name == "foot") {&[]} else {&["gray-label"]},
                     set_subtitle: &get_terminals().iter().find(|(name, _)| *name == "foot").map(|(_, path)| path.display().to_string()).unwrap_or_default()
                 },
                 adw::ActionRow {
                     set_title: "QTerminal",
                     set_activatable: true,
-                    set_css_classes: if get_terminals().iter().find(|(name, _)| *name == "qterminal").is_some() {&[]} else {&["gray-label"]},
+                    set_css_classes: if get_terminals().iter().any(|(name, _)| *name == "qterminal") {&[]} else {&["gray-label"]},
                     set_subtitle: &get_terminals().iter().find(|(name, _)| *name == "qterminal").map(|(_, path)| path.display().to_string()).unwrap_or_default()
                 },
                 adw::ActionRow {
                     set_title: "Lilyterm",
                     set_activatable: true,
-                    set_css_classes: if get_terminals().iter().find(|(name, _)| *name == "lilyterm").is_some() {&[]} else {&["gray-label"]},
+                    set_css_classes: if get_terminals().iter().any(|(name, _)| *name == "lilyterm") {&[]} else {&["gray-label"]},
                     set_subtitle: &get_terminals().iter().find(|(name, _)| *name == "lilyterm").map(|(_, path)| path.display().to_string()).unwrap_or_default()
                 },
                 adw::ActionRow {
                     set_title: "Tilix",
                     set_activatable: true,
-                    set_css_classes: if get_terminals().iter().find(|(name, _)| *name == "tilix").is_some() {&[]} else {&["gray-label"]},
+                    set_css_classes: if get_terminals().iter().any(|(name, _)| *name == "tilix") {&[]} else {&["gray-label"]},
                     set_subtitle: &get_terminals().iter().find(|(name, _)| *name == "tilix").map(|(_, path)| path.display().to_string()).unwrap_or_default()
                 },
                 adw::ActionRow {
                     set_title: "Terminix",
                     set_activatable: true,
-                    set_css_classes: if get_terminals().iter().find(|(name, _)| *name == "terminix").is_some() {&[]} else {&["gray-label"]},
+                    set_css_classes: if get_terminals().iter().any(|(name, _)| *name == "terminix") {&[]} else {&["gray-label"]},
                     set_subtitle: &get_terminals().iter().find(|(name, _)| *name == "terminix").map(|(_, path)| path.display().to_string()).unwrap_or_default()
                 },
                 adw::ActionRow {
                     set_title: "Konsole",
                     set_activatable: true,
-                    set_css_classes: if get_terminals().iter().find(|(name, _)| *name == "konsole").is_some() {&[]} else {&["gray-label"]},
+                    set_css_classes: if get_terminals().iter().any(|(name, _)| *name == "konsole") {&[]} else {&["gray-label"]},
                     set_subtitle: &get_terminals().iter().find(|(name, _)| *name == "konsole").map(|(_, path)| path.display().to_string()).unwrap_or_default()
                 },
                 #[local_ref]
                 entry -> adw::EntryRow {
                     set_title: "Custom",
-                    connect_changed[sender] => move |e| { sender.input(Step2Input::_SetData(Some(e.text().into())))} @h_20,
+                    connect_changed[sender] => move |e| { sender.input(Step2Input::ISetData(Some(e.text().into())))} @h_20,
                     set_input_purpose: gtk::InputPurpose::FreeForm,
                 },
             },
@@ -169,7 +170,7 @@ impl SimpleComponent for Step2 {
     ) -> ComponentParts<Self> {
         let list_box = gtk::ListBox::default();
         let entry = adw::EntryRow::default();
-        let model = Step2 {
+        let model = Self {
             list_box: list_box.clone(),
             entry: entry.clone(),
         };
@@ -181,27 +182,26 @@ impl SimpleComponent for Step2 {
     fn update(&mut self, message: Self::Input, sender: ComponentSender<Self>) {
         trace!("launcher::step2:update: {message:?}");
         match message {
-            Step2Input::_SetData(data) => {
+            Step2Input::ISetData(data) => {
                 sender.input(Step2Input::SetData(data.clone()));
                 sender.output_sender().emit(data);
             }
             Step2Input::SetData(data) => {
-                self.list_box
-                    .select_row_index(match data.as_ref().map(String::as_str) {
-                        None => 0,
-                        Some("alacritty") => 1,
-                        Some("kitty") => 2,
-                        Some("wezterm") => 3,
-                        Some("foot") => 4,
-                        Some("qterminal") => 5,
-                        Some("lilyterm") => 6,
-                        Some("tilix") => 7,
-                        Some("terminix") => 8,
-                        Some("konsole") => 9,
-                        _ => 10,
-                    });
+                self.list_box.select_row_index(match data.as_deref() {
+                    None => 0,
+                    Some("alacritty") => 1,
+                    Some("kitty") => 2,
+                    Some("wezterm") => 3,
+                    Some("foot") => 4,
+                    Some("qterminal") => 5,
+                    Some("lilyterm") => 6,
+                    Some("tilix") => 7,
+                    Some("terminix") => 8,
+                    Some("konsole") => 9,
+                    _ => 10,
+                });
                 self.entry.set_text_if_different(
-                    if data != None
+                    if data.is_some()
                         && data != Some("alacritty".to_string())
                         && data != Some("kitty".to_string())
                         && data != Some("wezterm".to_string())
@@ -212,7 +212,7 @@ impl SimpleComponent for Step2 {
                         && data != Some("terminix".to_string())
                         && data != Some("konsole".to_string())
                     {
-                        &data.as_ref().map_or("", |v| v)
+                        data.as_ref().map_or("", |v| v)
                     } else {
                         ""
                     },
@@ -234,13 +234,13 @@ const TERMINALS: &[&str] = &[
     "konsole",
 ];
 
-fn get_terminals<'a>() -> &'static Vec<(&'static str, PathBuf)> {
+fn get_terminals() -> &'static Vec<(&'static str, PathBuf)> {
     static TERMS: OnceLock<Vec<(&'static str, PathBuf)>> = OnceLock::new();
     TERMS.get_or_init(|| {
         let mut out = vec![];
         for terminal in TERMINALS {
             trace!("terminal: {terminal}");
-            if let Some(path) = find_command(&terminal) {
+            if let Some(path) = find_command(terminal) {
                 out.push((*terminal, path));
             }
         }

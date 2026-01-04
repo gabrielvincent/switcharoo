@@ -1,4 +1,4 @@
-use crate::shortcut_dialog::{
+use crate::components::shortcut_dialog::{
     KeyboardShortcut, KeyboardShortcutInit, KeyboardShortcutInput, KeyboardShortcutOutput,
 };
 use crate::structs::ConfigModifier;
@@ -25,7 +25,7 @@ pub enum Step4Input {
     // external set method
     SetData(Option<(ConfigModifier, String)>),
     // internal set method
-    _SetData(Option<(ConfigModifier, String)>),
+    ISetData(Option<(ConfigModifier, String)>),
     OpenKeyboardShortcut(gtk::Widget),
 }
 
@@ -34,6 +34,7 @@ pub struct Step4Init {
     pub system_data_dir: Box<Path>,
 }
 
+#[allow(unused_assignments)]
 #[relm4::component(pub)]
 impl SimpleComponent for Step4 {
     type Init = Step4Init;
@@ -65,25 +66,25 @@ impl SimpleComponent for Step4 {
                         trace!("press title: {title}");
                         match &*title {
                             "Disabled" => {
-                                sender.input(Step4Input::_SetData(None))
+                                sender.input(Step4Input::ISetData(None));
                             }
                             "Super" => {
-                                sender.input(Step4Input::_SetData(Some((ConfigModifier::Super, "Super_L".to_string()))))
+                                sender.input(Step4Input::ISetData(Some((ConfigModifier::Super, "Super_L".to_string()))));
                             }
                             "Super + Tab" => {
-                                sender.input(Step4Input::_SetData(Some((ConfigModifier::Super, "Tab".to_string()))))
+                                sender.input(Step4Input::ISetData(Some((ConfigModifier::Super, "Tab".to_string()))));
                             }
                             "Ctrl" => {
-                                sender.input(Step4Input::_SetData(Some((ConfigModifier::Ctrl, "Ctrl_L".to_string()))))
+                                sender.input(Step4Input::ISetData(Some((ConfigModifier::Ctrl, "Ctrl_L".to_string()))));
                             }
                             "Ctrl + Tab" => {
-                                sender.input(Step4Input::_SetData(Some((ConfigModifier::Ctrl, "Tab".to_string()))))
+                                sender.input(Step4Input::ISetData(Some((ConfigModifier::Ctrl, "Tab".to_string()))));
                             }
                             "Alt" => {
-                                sender.input(Step4Input::_SetData(Some((ConfigModifier::Alt, "Alt_L".to_string()))))
+                                sender.input(Step4Input::ISetData(Some((ConfigModifier::Alt, "Alt_L".to_string()))));
                             }
                             "Alt + Tab" => {
-                                sender.input(Step4Input::_SetData(Some((ConfigModifier::Alt, "Tab".to_string()))))
+                                sender.input(Step4Input::ISetData(Some((ConfigModifier::Alt, "Tab".to_string()))));
                             }
                             _ => {}
                         }
@@ -121,7 +122,7 @@ impl SimpleComponent for Step4 {
                 button -> adw::ButtonRow {
                     connect_activated[sender] => move |b| {
                         trace!("Generate: step0_keyboard_button toggled");
-                        sender.input(Step4Input::OpenKeyboardShortcut(b.widget_ref().clone()))
+                        sender.input(Step4Input::OpenKeyboardShortcut(b.widget_ref().clone()));
                     }
                 },
             },
@@ -154,17 +155,17 @@ impl SimpleComponent for Step4 {
                 icon: None,
                 init: None,
             })
-            .connect_receiver(move |send, out| match out {
+            .connect_receiver(move |_send, out| match out {
                 KeyboardShortcutOutput::SetKey(r#mod, key) => {
                     // updates the label
-                    ins.emit(Step4Input::_SetData(Some((r#mod, key.clone()))));
+                    ins.emit(Step4Input::ISetData(Some((r#mod, key))));
                 }
                 _ => {}
             });
 
         let list_box = gtk::ListBox::default();
         let button = adw::ButtonRow::default();
-        let model = Step4 {
+        let model = Self {
             keyboard_shortcut,
             button: button.clone(),
             list_box: list_box.clone(),
@@ -177,7 +178,7 @@ impl SimpleComponent for Step4 {
     fn update(&mut self, message: Self::Input, sender: ComponentSender<Self>) {
         trace!("launcher::step4:update: {message:?}");
         match message {
-            Step4Input::_SetData(data) => {
+            Step4Input::ISetData(data) => {
                 sender.input(Step4Input::SetData(data.clone()));
                 sender.output_sender().emit(data);
             }
@@ -195,7 +196,7 @@ impl SimpleComponent for Step4 {
                     });
                 self.button.set_title(&format!(
                     "Custom: {}",
-                    if data != None
+                    if data.is_some()
                         && data != Some((ConfigModifier::Super, "Super_L".to_string()))
                         && data != Some((ConfigModifier::Super, "Tab".to_string()))
                         && data != Some((ConfigModifier::Ctrl, "Ctrl_L".to_string()))
@@ -204,10 +205,10 @@ impl SimpleComponent for Step4 {
                         && data != Some((ConfigModifier::Alt, "Tab".to_string()))
                     {
                         data.as_ref()
-                            .map(|(r#mod, key)| mod_key_to_string(r#mod, key))
+                            .map(|(r#mod, key)| mod_key_to_string(*r#mod, key))
                             .unwrap_or_default()
                     } else {
-                        "".to_string()
+                        String::new()
                     }
                 ));
             }

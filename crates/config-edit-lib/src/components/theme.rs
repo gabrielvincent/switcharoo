@@ -3,8 +3,8 @@ use config_lib::style::Theme;
 use relm4::abstractions::Toaster;
 use relm4::adw::gtk::Orientation;
 use relm4::adw::prelude::*;
-use relm4::factory::*;
 use relm4::gtk::{Align, Justification, gio};
+use relm4::prelude::*;
 use relm4::{ComponentParts, ComponentSender, RelmWidgetExt, SimpleComponent};
 use relm4::{adw, gtk};
 use std::fs;
@@ -77,7 +77,7 @@ impl FactoryComponent for ThemeCarousel {
                     gtk::Button {
                         set_label: "Apply",
                         set_css_classes: &["suggested-action", "pill"],
-                        connect_clicked[sender, style = self.theme.style.clone(), name = self.theme.name.clone()] => move |_| sender.output(ThemeCarouselOutput::Apply((name.clone(), style.clone()))).unwrap(),
+                        connect_clicked[sender, style = self.theme.style.clone(), name = self.theme.name.clone()] => move |_| sender.output_sender().emit(ThemeCarouselOutput::Apply((name.clone(), style.clone()))),
                     }
                 },
             },
@@ -88,7 +88,7 @@ impl FactoryComponent for ThemeCarousel {
                 set_margin_bottom: 10,
             },
             gtk::Picture {
-                set_file:  self.theme.image_path.as_ref().map(|path| gio::File::for_path(path)).as_ref(),
+                set_file:  self.theme.image_path.as_ref().map(gio::File::for_path).as_ref(),
                 set_css_classes: &["theme-image"],
                 set_vexpand: true,
                 set_hexpand: false,
@@ -133,6 +133,7 @@ pub enum StyleOutput {
     Apply((String, String)),
 }
 
+#[allow(unused_assignments)]
 #[relm4::component(pub)]
 impl SimpleComponent for Style {
     type Init = StyleInit;
@@ -174,7 +175,7 @@ impl SimpleComponent for Style {
                         }
                     },
                     adw::CarouselIndicatorDots {
-                        set_carousel: Some(&themes_carousel),
+                        set_carousel: Some(themes_carousel),
                     }
                 }
             }
@@ -207,7 +208,7 @@ impl SimpleComponent for Style {
                 for err in errors {
                     toaster.add_toast(adw::Toast::builder().title(err).timeout(0).build());
                 }
-                Style {
+                Self {
                     toaster,
                     err: None,
                     themes_list,
@@ -218,7 +219,7 @@ impl SimpleComponent for Style {
             }
             Err(err) => {
                 warn!("Failed to load themes: {err}");
-                Style {
+                Self {
                     toaster: Toaster::default(),
                     err: Some(err),
                     themes_list,
@@ -281,7 +282,7 @@ fn load_themes(
     match themes {
         Ok((themes, errors)) => {
             debug!("Loaded {} themes, {} errors", themes.len(), errors.len());
-            Ok((themes, errors.iter().map(|e| e.to_string()).collect()))
+            Ok((themes, errors.iter().map(ToString::to_string).collect()))
         }
         Err(err) => {
             warn!("Failed to load themes: {err}");
