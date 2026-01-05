@@ -43,20 +43,20 @@ pub trait ScrollToPosition {
 
 impl ScrollToPosition for adw::Carousel {
     fn scroll_to_pos(&self, pos: usize, animate: bool) {
-        if let Some(wdg) = self.observe_children().into_iter().flatten().nth(pos) {
-            if let Ok(widget) = wdg.downcast::<gtk::Widget>() {
-                let s2 = self.clone();
-                // scuffed method to select a new widget (else it doesn't work on the first render)
-                gtk::glib::idle_add_local(move || {
-                    s2.scroll_to(&widget, animate);
-                    #[allow(clippy::cast_sign_loss)]
-                    if s2.position() as usize == pos {
-                        gtk::glib::ControlFlow::Break
-                    } else {
-                        gtk::glib::ControlFlow::Continue
-                    }
-                });
-            }
+        if let Some(wdg) = self.observe_children().into_iter().flatten().nth(pos)
+            && let Ok(widget) = wdg.downcast::<gtk::Widget>()
+        {
+            let s2 = self.clone();
+            // scuffed method to select a new widget (else it doesn't work on the first render)
+            gtk::glib::idle_add_local(move || {
+                s2.scroll_to(&widget, animate);
+                #[allow(clippy::cast_sign_loss)]
+                if s2.position() as usize == pos {
+                    gtk::glib::ControlFlow::Break
+                } else {
+                    gtk::glib::ControlFlow::Continue
+                }
+            });
         }
     }
 }

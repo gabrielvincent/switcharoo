@@ -26,10 +26,10 @@ pub fn check(config: &Config) -> anyhow::Result<()> {
         .as_ref()
         .and_then(|w| w.overview.as_ref().map(|o| &o.launcher))
     {
-        if let Some(dt) = &l.default_terminal {
-            if dt.is_empty() {
-                bail!("Default terminal command cannot be empty");
-            }
+        if let Some(dt) = &l.default_terminal
+            && dt.is_empty()
+        {
+            bail!("Default terminal command cannot be empty");
         }
 
         let mut used: Vec<char> = vec![];

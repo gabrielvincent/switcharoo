@@ -72,7 +72,7 @@ Fedora: `sudo dnf install gtk4-layer-shell-devel libadwaita-devel hyprland-devel
 
 Arch: `sudo pacman -Sy gtk4-layer-shell libadwaita hyprland`
 
-Minimum required rustc version: `1.87.0`
+Minimum required rustc version: `1.92.0`
 
 ## Usage
 

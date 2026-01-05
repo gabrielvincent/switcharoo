@@ -91,16 +91,16 @@ pub fn deduplicate_clipboard_entries(
         }
         if dedup {
             for (f_mime, f_dt) in map.iter().filter(|(m, _)| !m.starts_with("image/")) {
-                if let ClipboardDataType::Data(check_data) = f_dt {
-                    if data.eq(check_data) {
-                        trace!("Deduped MIME type {mime} to {f_mime}");
-                        map.insert(
-                            mime.into_boxed_str(),
-                            ClipboardDataType::Alias(f_mime.clone()),
-                        );
-                        dedupted += 1;
-                        continue 'outer;
-                    }
+                if let ClipboardDataType::Data(check_data) = f_dt
+                    && data.eq(check_data)
+                {
+                    trace!("Deduped MIME type {mime} to {f_mime}");
+                    map.insert(
+                        mime.into_boxed_str(),
+                        ClipboardDataType::Alias(f_mime.clone()),
+                    );
+                    dedupted += 1;
+                    continue 'outer;
                 }
             }
         }

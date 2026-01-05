@@ -56,11 +56,11 @@ pub fn get_calc_options(matches: &mut Vec<SortableLaunchOption>, text: &str) {
 }
 
 pub fn copy_result(data: Option<&str>) -> bool {
-    if let Some(data) = data {
-        if let Some(clipboard) = Display::default().map(|display| display.clipboard()) {
-            debug!("Copying result to clipboard: {}", data);
-            clipboard.set_text(data.as_ref());
-        }
+    if let Some(data) = data
+        && let Some(clipboard) = Display::default().map(|display| display.clipboard())
+    {
+        debug!("Copying result to clipboard: {}", data);
+        clipboard.set_text(data.as_ref());
     }
     false
 }
