@@ -86,6 +86,7 @@ in
             "super"
           ]) "super";
 
+          exclude_special_workspaces = mkOpt "Exclude special workspaces regex" str "";
           filter_by = mkOpt "Filter by" (listOf (enum [
             "same_class"
             "current_monitor"
@@ -230,6 +231,23 @@ in
             "current_workspace"
           ])) [ "current_monitor" ];
           switch_workspaces = mkOpt "Switch workspaces" bool false;
+          exclude_special_workspaces = mkOpt "Exclude special workspaces regex" str "";
+        };
+        switch_2 = {
+          enable = mkOpt "Enable recent window switcher" bool false;
+          key = mkOpt "Key to open switch" str "Tab";
+          modifier = mkOpt "Modifier key" (enum [
+            "alt"
+            "ctrl"
+            "super"
+          ]) "alt";
+          filter_by = mkOpt "Filter by" (listOf (enum [
+            "same_class"
+            "current_monitor"
+            "current_workspace"
+          ])) [ "current_monitor" ];
+          switch_workspaces = mkOpt "Switch workspaces" bool false;
+          exclude_special_workspaces = mkOpt "Exclude special workspaces regex" str "";
         };
       };
     };
