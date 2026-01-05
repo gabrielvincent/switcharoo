@@ -14,5 +14,4 @@ pub use modifier::*;
 pub use save::write_config;
 pub use structs::*;
 
-// TODO inc
 pub const CURRENT_CONFIG_VERSION: u16 = 3;

@@ -93,9 +93,9 @@ impl SimpleComponent for KeyboardShortcut {
         let entry_2 = entry.clone();
         let window = dialog.widgets().gtk_window_12.clone();
         let send = sender.clone();
-        key_controller.connect_key_pressed(move |_, val, id, state| {
+        key_controller.connect_key_pressed(move |_, val, _, state| {
             debug!("Raw key event - val: {}, state: {:?}", val, state);
-            match handle_key(val, state, id) {
+            match handle_key(val, state) {
                 Some((key, r#mod, label)) => {
                     entry.set_text(&label);
                     send.input(KeyboardShortcutInput::UpdateKey(key));

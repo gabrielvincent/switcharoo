@@ -29,6 +29,7 @@ impl From<old_structs::Overview> for crate::Overview {
             filter_by: value.filter_by,
             hide_filtered: value.hide_filtered,
             launcher: value.launcher.into(),
+            exclude_special_workspaces: "".into(),
         }
     }
 }

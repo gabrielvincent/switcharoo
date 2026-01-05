@@ -248,7 +248,7 @@ impl From<Switch> for Option<config_lib::Switch> {
                 key: Box::from(value.key),
                 filter_by: vec,
                 switch_workspaces: value.switch_workspaces,
-                // TODO exclude_special_workspaces
+                exclude_special_workspaces: Box::from(value.exclude_special_workspaces),
             })
         } else {
             None
@@ -295,7 +295,7 @@ impl From<Overview> for Option<config_lib::Overview> {
                 modifier: value.modifier.into(),
                 filter_by: vec,
                 hide_filtered: false,
-                // TODO exclude_special_workspaces
+                exclude_special_workspaces: Box::from(value.exclude_special_workspaces),
             })
         } else {
             None

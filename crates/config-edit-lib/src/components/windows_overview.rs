@@ -68,9 +68,9 @@ impl SimpleComponent for WindowsOverview {
                     #[watch]
                     set_sensitive: model.config.enabled,
                 },
-                _adw::ShortcutLabel::new(&mod_key_to_accelerator(model.config.modifier, &model.config.key).unwrap_or_default()) {
+                _adw::ShortcutLabel::new(&mod_key_to_accelerator(model.config.modifier, &model.config.key)) {
                     #[watch]
-                    set_accelerator: &mod_key_to_accelerator(model.config.modifier, &model.config.key).unwrap_or_default(),
+                    set_accelerator: &mod_key_to_accelerator(model.config.modifier, &model.config.key),
                     #[watch]
                     set_css_classes: if model.config.enabled {
                         if mod_key_to_accelerator(model.config.modifier, &model.config.key) == mod_key_to_accelerator(model.prev_config.modifier, &model.prev_config.key)

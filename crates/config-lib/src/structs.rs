@@ -45,6 +45,8 @@ pub struct Overview {
     pub filter_by: Vec<FilterBy>,
     #[default = false]
     pub hide_filtered: bool,
+    #[default = ""]
+    pub exclude_special_workspaces: Box<str>,
 }
 
 #[derive(SmartDefault, Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]
@@ -188,6 +190,8 @@ pub struct Switch {
     pub filter_by: Vec<FilterBy>,
     #[default = false]
     pub switch_workspaces: bool,
+    #[default = ""]
+    pub exclude_special_workspaces: Box<str>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]

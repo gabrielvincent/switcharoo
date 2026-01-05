@@ -1,6 +1,6 @@
 use crate::structs::ConfigModifier;
-use relm4::gtk::gdk::{Cursor, Display, Key, ModifierType};
-use relm4::gtk::prelude::{Cast, DisplayExtManual, EditableExt, WidgetExt};
+use relm4::gtk::gdk::{Cursor, Key, ModifierType};
+use relm4::gtk::prelude::{Cast, EditableExt, WidgetExt};
 use relm4::{adw, gtk};
 // use relm4::tokio::time::sleep;
 use tracing::{instrument, warn};
@@ -87,11 +87,7 @@ impl SelectRow for gtk::ListBox {
     }
 }
 
-pub fn handle_key(
-    val: Key,
-    state: ModifierType,
-    id: u32,
-) -> Option<(String, ConfigModifier, String)> {
+pub fn handle_key(val: Key, state: ModifierType) -> Option<(String, ConfigModifier, String)> {
     let key_name = val.name()?;
     let modifier = match val {
         Key::Alt_L | Key::Alt_R => ConfigModifier::Alt,
@@ -112,7 +108,7 @@ pub fn handle_key(
         format!("{modifier} + {key_name}")
     };
 
-    Some((format!("code:{id}"), modifier, label))
+    Some((key_name.to_string(), modifier, label))
 }
 
 pub fn default_config() -> config_lib::Config {
@@ -123,39 +119,31 @@ pub fn default_config() -> config_lib::Config {
 }
 
 #[instrument(level = "trace", ret(level = "trace"))]
-pub fn mod_key_to_accelerator(modifier: ConfigModifier, key: &str) -> Option<String> {
-    let key = key_to_name(key)?;
+pub fn mod_key_to_accelerator(modifier: ConfigModifier, key: &str) -> String {
+    // correct some keys that can sometimes have wrong capitalization
+    let key = match &*key.to_lowercase() {
+        "super_l" => "Super_L",
+        "super_r" => "Super_R",
+        "alt_l" => "Alt_L",
+        "alt_r" => "Alt_R",
+        "control_l" => "Control_L",
+        "control_r" => "Control_R",
+        _ => key,
+    };
+
     if modifier == ConfigModifier::None {
-        Some(key)
+        key.to_string()
     } else {
-        Some(format!("<{modifier}>{key}"))
+        format!("<{modifier}>{key}")
     }
 }
 
 #[instrument(level = "trace", ret(level = "trace"))]
 pub fn mod_key_to_string(modifier: ConfigModifier, key: &str) -> String {
     if modifier == ConfigModifier::None {
-        key_to_name(key).unwrap_or_else(|| "---".to_string())
+        key.to_string()
     } else {
-        format!(
-            "{} + {}",
-            modifier,
-            key_to_name(key).unwrap_or_else(|| "---".to_string())
-        )
-    }
-}
-
-pub fn key_to_name(key: &str) -> Option<String> {
-    // key is keycode
-    if key.starts_with("code:") {
-        let key_id = key.split(':').nth(1)?;
-        let code = key_id.parse::<u32>().ok()?;
-        let display = &Display::default()?;
-        let data = display.map_keycode(code)?;
-        let (_, key) = data.iter().find(|(m, _k)| m.level() == 0)?;
-        Some(key.name()?.to_string())
-    } else {
-        Some(key.to_string())
+        format!("{modifier} + {key}")
     }
 }
 

@@ -79,7 +79,7 @@ in
         items_per_row = mkOpt "Workspaces per row" int 5;
         overview = {
           enable = lib.mkEnableOption "Enable overview";
-          key = mkOpt "Key to open overview" str "super_l";
+          key = mkOpt "Key to open overview" str "Super_L";
           modifier = mkOpt "Modifier key" (enum [
             "alt"
             "ctrl"
@@ -218,6 +218,7 @@ in
         };
         switch = {
           enable = mkOpt "Enable recent window switcher" bool true;
+          key = mkOpt "Key to open switch" str "Tab";
           modifier = mkOpt "Modifier key" (enum [
             "alt"
             "ctrl"

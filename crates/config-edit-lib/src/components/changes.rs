@@ -1,6 +1,5 @@
 use crate::flags_csv;
 use crate::structs::{Config, Plugins};
-use crate::util::key_to_name;
 use relm4::adw::ActionRow;
 use relm4::adw::gtk::SelectionMode;
 use relm4::adw::prelude::*;
@@ -165,13 +164,8 @@ pub fn generate_items(changes: &gtk::ListBox, config: &Config, prev_config: &Con
                             changes,
                             "Changed overview key",
                             format!(
-                                "{} ({}) -> {} ({})",
-                                prev_config.windows.overview.key,
-                                key_to_name(&prev_config.windows.overview.key)
-                                    .unwrap_or_else(|| String::from("---")),
-                                config.windows.overview.key,
-                                key_to_name(&config.windows.overview.key)
-                                    .unwrap_or_else(|| String::from("---")),
+                                "{} -> {}",
+                                prev_config.windows.overview.key, config.windows.overview.key,
                             ),
                         );
                     }
@@ -298,6 +292,16 @@ pub fn generate_items(changes: &gtk::ListBox, config: &Config, prev_config: &Con
                         add_info(changes, "Enabled Switch view");
                     }
 
+                    if prev_config.windows.switch.key != config.windows.switch.key {
+                        add_info_subtitle(
+                            changes,
+                            "Changed switch key",
+                            format!(
+                                "{} -> {}",
+                                prev_config.windows.switch.key, config.windows.switch.key
+                            ),
+                        );
+                    }
                     if prev_config.windows.switch.modifier != config.windows.switch.modifier {
                         add_info_subtitle(
                             changes,
@@ -362,6 +366,16 @@ pub fn generate_items(changes: &gtk::ListBox, config: &Config, prev_config: &Con
                         add_info(changes, "Enabled Switch 2 view");
                     }
 
+                    if prev_config.windows.switch_2.key != config.windows.switch_2.key {
+                        add_info_subtitle(
+                            changes,
+                            "Changed switch 2 key",
+                            format!(
+                                "{} -> {}",
+                                prev_config.windows.switch_2.key, config.windows.switch_2.key
+                            ),
+                        );
+                    }
                     if prev_config.windows.switch_2.modifier != config.windows.switch_2.modifier {
                         add_info_subtitle(
                             changes,

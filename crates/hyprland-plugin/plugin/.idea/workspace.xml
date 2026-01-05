@@ -32,7 +32,19 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="841e5689-e8a3-4a78-b7a4-76d1dbd901c1" name="Changes" comment="fix: cancel key events when opening hyprshell overview and switch" />
+    <list default="true" id="841e5689-e8a3-4a78-b7a4-76d1dbd901c1" name="Changes" comment="fix: cancel key events when opening hyprshell overview and switch">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Makefile" beforeDir="false" afterPath="$PROJECT_DIR$/Makefile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/defs-test.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/defs-test.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/defs.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/defs.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/globals.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/globals.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/handlers.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/handlers.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/init.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/init.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/key-press.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/key-press.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/keyboard-focus.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/keyboard-focus.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/layer-change.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/layer-change.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/mouse-button.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/mouse-button.cpp" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -426,7 +438,7 @@
       <workItem from="1757544657889" duration="7000" />
       <workItem from="1757544674626" duration="5012000" />
       <workItem from="1766704524077" duration="509000" />
-      <workItem from="1767562310610" duration="196000" />
+      <workItem from="1767562310610" duration="8026000" />
     </task>
     <task id="LOCAL-00001" summary="fix: cancel key events when opening hyprshell overview and switch">
       <option name="closed" value="true" />

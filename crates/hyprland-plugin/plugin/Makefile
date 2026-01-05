@@ -19,15 +19,14 @@ LDFLAGS := -shared --no-gnu-unique
 all: build
 
 # Build by compiling object files then linking into a shared object.
-BUILD_DIR := build
-OBJ := $(patsubst $(SRCS_DIR)/%.cpp,$(BUILD_DIR)/%.o,$(SRCS))
+OBJ := $(patsubst $(SRCS_DIR)/%.cpp,$(PREPAREDIR)/%.o,$(SRCS))
 
 build: $(TARGET)
 
 $(TARGET): $(OBJ)
 	$(CXX) $(LDFLAGS) -o $@ $^
 
-$(BUILD_DIR)/%.o: $(SRCS_DIR)/%.cpp
+$(PREPAREDIR)/%.o: $(SRCS_DIR)/%.cpp
 	@mkdir -p $(dir $@)
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
@@ -60,4 +59,4 @@ test-combined: build-combined
 
 clean:
 	@rm -f $(TARGET)
-	@rm -rf $(PREPAREDIR) $(BUILD_DIR)
+	@rm -rf $(PREPAREDIR)

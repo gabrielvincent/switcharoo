@@ -44,9 +44,10 @@ pub fn create_windows_switch_window(
         .default_width(10)
         .build();
 
+    let s_key = Key::from_name(switch.key.to_string()).context("invalid switch key")?;
     let key_controller = EventControllerKey::new();
     let event_sender_2 = event_sender.clone();
-    key_controller.connect_key_pressed(move |_, key, _, _| handle_key(key, &event_sender_2));
+    key_controller.connect_key_pressed(move |_, key, _, _| handle_key(key, s_key, &event_sender_2));
     let event_sender_3 = event_sender;
     let r#mod = switch.modifier;
     key_controller.connect_key_released(move |_, key, _, _| {
@@ -92,9 +93,9 @@ fn handle_release(key: Key, modifier: Modifier, event_sender: &Sender<TransferTy
     }
 }
 
-fn handle_key(key: Key, event_sender: &Sender<TransferType>) -> Propagation {
+fn handle_key(key: Key, s_key: Key, event_sender: &Sender<TransferType>) -> Propagation {
     match key {
-        Key::Tab | Key::l | Key::Right => {
+        k if k == s_key || k == Key::l || k == Key::Right => {
             event_sender
                 .send_blocking(TransferType::SwitchSwitch(SwitchSwitchConfig {
                     direction: Direction::Right,

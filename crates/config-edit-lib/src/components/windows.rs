@@ -141,7 +141,7 @@ impl SimpleComponent for Windows {
         let switch_2 = Switch::builder()
             .launch(SwitchInit {
                 config: init.config.switch_2.clone(),
-                name: "Switch 2",
+                name: "Switch 2 (TODO)",
             })
             .forward(sender.output_sender(), WindowsOutput::Switch2);
 
