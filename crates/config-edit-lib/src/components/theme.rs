@@ -113,7 +113,7 @@ pub struct Style {
     themes_list: FactoryVecDeque<ThemeCarousel>,
     toaster: Toaster,
     system_data_dir: Box<Path>,
-    css_path: Box<Path>,
+    css_file: Box<Path>,
     initial_position: Option<usize>,
 }
 
@@ -125,7 +125,7 @@ pub enum StyleInput {
 #[derive(Debug)]
 pub struct StyleInit {
     pub system_data_dir: Box<Path>,
-    pub css_path: Box<Path>,
+    pub css_file: Box<Path>,
 }
 
 #[derive(Debug)]
@@ -193,7 +193,7 @@ impl SimpleComponent for Style {
                 ThemeCarouselOutput::Apply(content) => StyleOutput::Apply(content),
             });
 
-        let model = match load_themes(&init.system_data_dir, &init.css_path) {
+        let model = match load_themes(&init.system_data_dir, &init.css_file) {
             Ok((themes, errors)) => {
                 let mut v = themes_list.guard();
                 let mut index = 0;
@@ -212,7 +212,7 @@ impl SimpleComponent for Style {
                     toaster,
                     err: None,
                     themes_list,
-                    css_path: init.css_path,
+                    css_file: init.css_file,
                     system_data_dir: init.system_data_dir,
                     initial_position: Some(index),
                 }
@@ -223,7 +223,7 @@ impl SimpleComponent for Style {
                     toaster: Toaster::default(),
                     err: Some(err),
                     themes_list,
-                    css_path: init.css_path,
+                    css_file: init.css_file,
                     system_data_dir: init.system_data_dir,
                     initial_position: None,
                 }
@@ -239,7 +239,7 @@ impl SimpleComponent for Style {
     fn update(&mut self, message: Self::Input, _sender: ComponentSender<Self>) {
         trace!("style::update: {message:?}");
         match message {
-            StyleInput::Reload => match load_themes(&self.system_data_dir, &self.css_path) {
+            StyleInput::Reload => match load_themes(&self.system_data_dir, &self.css_file) {
                 Ok((themes, errors)) => {
                     let mut v = self.themes_list.guard();
                     let mut index = 0;

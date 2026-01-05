@@ -34,12 +34,12 @@ use windows_lib::{
 };
 
 pub fn start(
-    config_path: PathBuf,
+    config_file: PathBuf,
     css_path: PathBuf,
     data_dir: PathBuf,
     cache_dir: PathBuf,
 ) -> anyhow::Result<()> {
-    let config_path = Rc::new(config_path);
+    let config_file = Rc::new(config_file);
     let css_path = Rc::new(css_path);
     let data_dir = Rc::new(data_dir);
     let cache_dir = Rc::new(cache_dir);
@@ -52,7 +52,7 @@ pub fn start(
     let (event_sender, event_receiver) = async_channel::unbounded();
 
     if env::var_os("HYPRSHELL_NO_LISTENERS").is_none() {
-        register_event_restarter(config_path.clone(), css_path.clone(), event_sender.clone());
+        register_event_restarter(config_file.clone(), css_path.clone(), event_sender.clone());
     }
 
     let event_sender_2 = event_sender.clone();
@@ -81,7 +81,7 @@ pub fn start(
         let application = Application::builder().application_id(id).build();
         debug!("Application created");
 
-        let config_path = config_path.clone();
+        let config_file = config_file.clone();
         let css_path = css_path.clone();
         let data_dir = data_dir.clone();
         let cache_dir = cache_dir.clone();
@@ -90,7 +90,7 @@ pub fn start(
         application.connect_activate(move |app| {
             activate(
                 app,
-                &config_path,
+                &config_file,
                 &css_path,
                 &data_dir,
                 &cache_dir,
@@ -117,7 +117,7 @@ pub struct WindowsGlobal {
 #[allow(clippy::cognitive_complexity)]
 fn activate(
     app: &Application,
-    config_path: &Path,
+    config_file: &Path,
     css_path: &Path,
     data_dir: &Path,
     cache_dir: &Path,
@@ -155,11 +155,11 @@ fn activate(
         }
     }
 
-    let config = match config_lib::load_and_migrate_config(config_path, true) {
+    let config = match config_lib::load_and_migrate_config(config_file, true) {
         Ok(config) => config,
         Err(err) => {
             notify_warn(&format!("Failed to load config: {err:?}"));
-            if let Err(err) = hyprshell_config_block(config_path) {
+            if let Err(err) = hyprshell_config_block(config_file) {
                 error!("Failed to block config: {err:?}",);
                 process::exit(1);
             }
@@ -173,7 +173,7 @@ fn activate(
         || matches!(&config.windows, Some(windows) if windows.overview.is_none() && windows.switch.is_none())
     {
         notify_warn("Nothing is enabled in the config");
-        if let Err(err) = hyprshell_config_block(config_path) {
+        if let Err(err) = hyprshell_config_block(config_file) {
             error!("Failed to block config: {err:?}",);
             process::exit(1);
         }
@@ -183,7 +183,7 @@ fn activate(
 
     if let Err(err) = configure_wm(&config) {
         notify_warn(&format!("Failed to configure wm: {err:?}"));
-        if let Err(err) = hyprshell_config_block(config_path) {
+        if let Err(err) = hyprshell_config_block(config_file) {
             error!("Failed to block config: {err:?}");
             process::exit(1);
         }
@@ -195,7 +195,7 @@ fn activate(
         Ok(data) => data,
         Err(err) => {
             notify_warn(&format!("Failed to create windows: {err:?}"));
-            if let Err(err) = hyprshell_config_block(config_path) {
+            if let Err(err) = hyprshell_config_block(config_file) {
                 error!("Failed to block config: {err:?}");
                 process::exit(1);
             }
@@ -281,7 +281,7 @@ fn apply_css(custom_css: &Path) -> anyhow::Result<()> {
 }
 
 pub fn register_event_restarter(
-    config_path: Rc<PathBuf>,
+    config_file: Rc<PathBuf>,
     css_path: Rc<PathBuf>,
     event_sender: Sender<TransferType>,
 ) {
@@ -292,7 +292,7 @@ pub fn register_event_restarter(
         .unwrap_or(1500);
     let (restart_sender, restart_receiver) = async_channel::unbounded();
     glib::timeout_add_local_once(Duration::from_millis(delay), move || {
-        setup_restart_listener(&config_path, &css_path, &restart_sender);
+        setup_restart_listener(&config_file, &css_path, &restart_sender);
     });
 
     // State to track the current debounce timer
@@ -336,9 +336,9 @@ pub fn register_event_restarter(
 
 static WATCHERS: OnceLock<Mutex<Vec<Box<dyn Any + Send>>>> = OnceLock::new();
 
-fn setup_restart_listener(config_path: &Path, css_path: &Path, restart_tx: &Sender<&'static str>) {
+fn setup_restart_listener(config_file: &Path, css_path: &Path, restart_tx: &Sender<&'static str>) {
     let tx = restart_tx.clone();
-    if let Ok(watcher) = hyprshell_config_listener(config_path, move |mess| {
+    if let Ok(watcher) = hyprshell_config_listener(config_file, move |mess| {
         let _ = tx.send_blocking(mess);
     }) {
         WATCHERS

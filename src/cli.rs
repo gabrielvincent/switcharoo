@@ -43,6 +43,10 @@ pub struct GlobalOpts {
     /// Path to cache directory [default: `$XDG_CACHE_HOME/hyprshell`]
     #[arg(long, global = true)]
     pub cache_dir: Option<PathBuf>,
+
+    /// Path to system data directory [default: `/usr/share/hyprshell`]
+    #[arg(long, global = true)]
+    pub system_data_dir: Option<PathBuf>,
 }
 
 #[derive(Subcommand, Debug, Clone)]
@@ -157,6 +161,9 @@ pub enum DebugCommand {
         #[clap(subcommand)]
         command: DefaultApplicationsCommand,
     },
+
+    /// print debug info
+    Info {},
 }
 
 #[derive(Subcommand, Debug, Clone)]

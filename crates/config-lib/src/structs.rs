@@ -6,12 +6,8 @@ use smart_default::SmartDefault;
 #[cfg_attr(not(feature = "ci_no_default_config_values"), serde(default))]
 #[serde(deny_unknown_fields)]
 pub struct Config {
-    #[cfg_attr(
-        not(feature = "ci_no_default_config_values"),
-        default(Some(crate::CURRENT_CONFIG_VERSION))
-    )]
-    #[cfg_attr(feature = "ci_no_default_config_values", default(None))]
-    pub version: Option<u16>,
+    #[default(crate::CURRENT_CONFIG_VERSION)]
+    pub version: u16,
     #[default(None)]
     pub windows: Option<Windows>,
 }

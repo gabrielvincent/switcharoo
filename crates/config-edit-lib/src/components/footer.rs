@@ -5,7 +5,7 @@ use std::path::Path;
 
 #[derive(Debug)]
 pub struct Footer {
-    config_path: Box<Path>,
+    config_file: Box<Path>,
     changes: bool,
     generate: bool,
 }
@@ -18,7 +18,7 @@ pub enum FooterInput {
 
 #[derive(Debug)]
 pub struct FooterInit {
-    pub config_path: Box<Path>,
+    pub config_file: Box<Path>,
 }
 
 #[derive(Debug)]
@@ -77,7 +77,7 @@ impl SimpleComponent for Footer {
                         #[watch]
                         set_sensitive: model.changes,
                         set_css_classes: &["suggested-action"],
-                        set_tooltip_text: Some(&format!("Config file: {}", model.config_path.display())),
+                        set_tooltip_text: Some(&format!("Config file: {}", model.config_file.display())),
                         connect_clicked[sender] => move |_| sender.output_sender().emit(FooterOutput::Save),
                     },
                     gtk::Button {
@@ -103,7 +103,7 @@ impl SimpleComponent for Footer {
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
         let model = Self {
-            config_path: init.config_path,
+            config_file: init.config_file,
             changes: false,
             generate: false,
         };

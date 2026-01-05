@@ -280,7 +280,7 @@ in
         }
       else
         {
-          text = builtins.toJSON (customLib.filterDisabledAndDropEnable cfg.settings);
+          text = builtins.toJSON ((customLib.filterDisabledAndDropEnable cfg.settings) // { version = 3; });
         };
 
     xdg.configFile."hyprshell/styles.css" =

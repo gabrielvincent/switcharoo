@@ -173,7 +173,7 @@ impl From<config_lib::Config> for Config {
 impl From<Config> for config_lib::Config {
     fn from(value: Config) -> Self {
         Self {
-            version: Some(config_lib::CURRENT_CONFIG_VERSION),
+            version: config_lib::CURRENT_CONFIG_VERSION,
             windows: value.windows.into(),
         }
     }

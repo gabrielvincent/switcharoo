@@ -27,8 +27,8 @@ use tracing::{debug, error, info, trace, warn};
 
 #[derive(Debug)]
 pub struct Root {
-    config_path: Box<Path>,
-    css_path: Box<Path>,
+    config_file: Box<Path>,
+    css_file: Box<Path>,
 
     is_generate_mode: bool,
 
@@ -72,9 +72,9 @@ pub enum RootInput {
 
 #[derive(Debug)]
 pub struct RootInit {
-    pub config_path: Box<Path>,
+    pub config_file: Box<Path>,
     pub system_data_dir: Box<Path>,
-    pub css_path: Box<Path>,
+    pub css_file: Box<Path>,
     pub generate: bool,
 }
 
@@ -156,7 +156,7 @@ impl SimpleComponent for Root {
 
         let footer: Controller<Footer> = Footer::builder()
             .launch(FooterInit {
-                config_path: init.config_path.clone(),
+                config_file: init.config_file.clone(),
             })
             .forward(sender.input_sender(), |msg| match msg {
                 FooterOutput::Reset => RootInput::Reset,
@@ -195,7 +195,7 @@ impl SimpleComponent for Root {
         let style = Style::builder()
             .launch(StyleInit {
                 system_data_dir: init.system_data_dir.clone(),
-                css_path: init.css_path.clone(),
+                css_file: init.css_file.clone(),
             })
             .forward(sender.input_sender(), RootInput::Style);
         let windows = Windows::builder()
@@ -223,8 +223,8 @@ impl SimpleComponent for Root {
         let view_stack = adw::ViewStack::builder().build();
         let toaster = Toaster::default();
         let model = Self {
-            config_path: init.config_path,
-            css_path: init.css_path.clone(),
+            config_file: init.config_file,
+            css_file: init.css_file.clone(),
             config: config.clone(),
             prev_config: config.clone(),
             is_generate_mode: init.generate,
@@ -345,8 +345,8 @@ impl SimpleComponent for Root {
                 }
             },
             RootInput::Reload(initial) => {
-                if self.config_path.exists() {
-                    match config_lib::load_and_migrate_config(&self.config_path, true) {
+                if self.config_file.exists() {
+                    match config_lib::load_and_migrate_config(&self.config_file, true) {
                         Ok(c) => {
                             let config = structs::Config::from(c);
                             sender.input(RootInput::SetConfig(config.clone()));
@@ -424,12 +424,12 @@ impl SimpleComponent for Root {
             }
             RootInput::Save(close) => {
                 match config_lib::write_config(
-                    &self.config_path,
+                    &self.config_file,
                     &(self.config.clone().into()),
                     true,
                 ) {
                     Ok(()) => {
-                        info!("Saved config to {}", self.config_path.display());
+                        info!("Saved config to {}", self.config_file.display());
                         self.toaster.add_toast(
                             adw::Toast::builder()
                                 .title("Saved".to_string())
@@ -468,9 +468,9 @@ impl SimpleComponent for Root {
             },
             RootInput::Style(msg) => match msg {
                 StyleOutput::Apply((name, content)) => {
-                    match std::fs::write(&self.css_path, content) {
+                    match std::fs::write(&self.css_file, content) {
                         Ok(()) => {
-                            info!("Saved css from {name} to {}", self.css_path.display());
+                            info!("Saved css from {name} to {}", self.css_file.display());
                             self.toaster.add_toast(
                                 adw::Toast::builder()
                                     .title("Saved".to_string())

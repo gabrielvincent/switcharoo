@@ -2,7 +2,7 @@ use std::env;
 use std::path::PathBuf;
 use tracing::trace;
 
-pub fn get_default_config_path() -> PathBuf {
+pub fn get_default_config_file() -> PathBuf {
     let mut path = get_config_home();
     #[cfg(debug_assertions)]
     path.push("hyprshell.debug/");
@@ -40,7 +40,7 @@ pub fn get_default_config_path() -> PathBuf {
 }
 
 #[must_use]
-pub fn get_default_css_path() -> PathBuf {
+pub fn get_default_css_file() -> PathBuf {
     let mut path = get_config_home();
 
     #[cfg(debug_assertions)]

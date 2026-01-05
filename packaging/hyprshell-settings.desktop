@@ -1,6 +1,6 @@
 [Desktop Entry]
-Name=Hyprshell config editor
-Comment=Configure Hyprshell
+Name=Hyprshell Settings editor
+Comment=Edit Hyprshell settings
 Exec=/usr/bin/hyprshell config edit
 Icon=hyprshell-settings
 Type=Application

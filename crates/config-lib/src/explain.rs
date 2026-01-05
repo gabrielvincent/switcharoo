@@ -9,17 +9,17 @@ const GREEN: &str = "\x1b[32m";
 const RESET: &str = "\x1b[0m";
 
 #[must_use]
-pub fn explain(config: &Config, config_path: Option<&Path>, enable_color: bool) -> String {
+pub fn explain(config: &Config, config_file: Option<&Path>, enable_color: bool) -> String {
     let (bold, italic, blue, green, reset) = if enable_color {
         (BOLD, ITALIC, BLUE, GREEN, RESET)
     } else {
         ("", "", "", "", "")
     };
 
-    let mut builder = config_path.map_or_else(String::new, |config_path| {
-        let config_path_display = config_path.display();
+    let mut builder = config_file.map_or_else(String::new, |config_file| {
+        let config_file_display = config_file.display();
         format!(
-            "{bold}{green}Config is valid{reset} ({config_path_display})\n{bold}Explanation{reset} ({blue}blue{reset} are keys, {bold}{blue}bold blue{reset} keys can be configured in config):{reset}\n",
+            "{bold}{green}Config is valid{reset} ({config_file_display})\n{bold}Explanation{reset} ({blue}blue{reset} are keys, {bold}{blue}bold blue{reset} keys can be configured in config):{reset}\n",
         )
     });
 

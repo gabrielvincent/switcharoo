@@ -81,7 +81,7 @@ rec {
 
   postInstall = ''
     # Desktop entry
-    install -Dm644 packaging/hyprshell-config.desktop $out/share/applications/hyprshell.desktop
+    install -Dm644 packaging/hyprshell-settings.desktop $out/share/applications/hyprshell-settings.desktop
 
     # Icon
     install -Dm644 packaging/hyprshell-settings.png $out/share/pixmaps/hyprshell-settings.png

@@ -14,14 +14,14 @@ source_x86_64=("https://github.com/H3rmt/hyprshell/releases/download/v$pkgver/hy
 source_aarch64=("https://github.com/H3rmt/hyprshell/releases/download/v$pkgver/hyprshell-$pkgver-aarch64.tar.zst")
 
 package() {
-    install -Dm755 "hyprshell"                "$pkgdir/usr/bin/hyprshell"
-    install -Dm644 "LICENSE"                  "$pkgdir/usr/share/licenses/hyprshell/LICENSE"
-    install -Dm644 "README.md"                "$pkgdir/usr/share/doc/hyprshell/README.md"
-    install -Dm644 "CONFIGURE.md"             "$pkgdir/usr/share/doc/hyprshell/CONFIGURE.md"
-    install -Dm644 "DEBUG.md"                 "$pkgdir/usr/share/doc/hyprshell/DEBUG.md"
-	install -Dm644 "hyprshell.service"        "$pkgdir/usr/lib/systemd/user/hyprshell.service"
-	install -Dm644 "hyprshell-settings.png"   "$pkgdir/usr/share/pixmaps/hyprshell.png"
-	install -Dm644 "hyprshell-config.desktop" "$pkgdir/usr/share/applications/hyprshell-config.desktop"
+    install -Dm755 "hyprshell"                  "$pkgdir/usr/bin/hyprshell"
+    install -Dm644 "LICENSE"                    "$pkgdir/usr/share/licenses/hyprshell/LICENSE"
+    install -Dm644 "README.md"                  "$pkgdir/usr/share/doc/hyprshell/README.md"
+    install -Dm644 "CONFIGURE.md"               "$pkgdir/usr/share/doc/hyprshell/CONFIGURE.md"
+    install -Dm644 "DEBUG.md"                   "$pkgdir/usr/share/doc/hyprshell/DEBUG.md"
+	install -Dm644 "hyprshell.service"          "$pkgdir/usr/lib/systemd/user/hyprshell.service"
+	install -Dm644 "hyprshell-settings.png"     "$pkgdir/usr/share/pixmaps/hyprshell.png"
+	install -Dm644 "hyprshell-settings.desktop" "$pkgdir/usr/share/applications/hyprshell-settings.desktop"
 
     mkdir "$pkgdir/usr/share/hyprshell"
     tar -xvf "usr-share.tar" -C "$pkgdir/usr/share/hyprshell"

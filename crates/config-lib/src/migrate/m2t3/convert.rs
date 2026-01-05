@@ -4,7 +4,7 @@ impl From<old_structs::Config> for crate::Config {
     fn from(value: old_structs::Config) -> Self {
         Self {
             windows: value.windows.map(old_structs::Windows::into),
-            version: Some(NEXT_CONFIG_VERSION),
+            version: NEXT_CONFIG_VERSION,
         }
     }
 }
