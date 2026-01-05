@@ -4,7 +4,6 @@ use clap::Parser;
 use core_lib::WarnWithDetails;
 use core_lib::path::{
     get_default_cache_dir, get_default_config_path, get_default_css_path, get_default_data_dir,
-    get_default_system_data_dir,
 };
 use core_lib::util::daemon_running;
 use std::{env, fs};
@@ -65,7 +64,6 @@ fn main() -> anyhow::Result<()> {
     let cache_dir = cli.global_opts.cache_dir;
     let css_file = cli.global_opts.css_file;
     let config_path = cli.global_opts.config_file;
-    let system_data_dir = get_default_system_data_dir();
 
     match cli.command {
         cli::Command::Run {} => {
@@ -91,20 +89,26 @@ fn main() -> anyhow::Result<()> {
         }
         cli::Command::Config { command } => match command {
             cli::ConfigCommand::Edit {} => {
-                let config_path = config_path.unwrap_or_else(get_default_config_path);
-                let css_path = css_file.unwrap_or_else(get_default_css_path);
                 #[cfg(feature = "gui_settings_editor")]
-                config_edit_lib::start(config_path, css_path, system_data_dir, false);
+                {
+                    let config_path = config_path.unwrap_or_else(get_default_config_path);
+                    let css_path = css_file.unwrap_or_else(get_default_css_path);
+                    let system_data_dir = core_lib::path::get_default_system_data_dir();
+                    config_edit_lib::start(config_path, css_path, system_data_dir, false);
+                }
                 #[cfg(not(feature = "gui_settings_editor"))]
                 core_lib::notify_warn(
                     "GUI settings editor not available, compile with `gui_settings_editor` feature",
                 );
             }
             cli::ConfigCommand::Generate {} => {
-                let config_path = config_path.unwrap_or_else(get_default_config_path);
-                let css_path = css_file.unwrap_or_else(get_default_css_path);
                 #[cfg(feature = "gui_settings_editor")]
-                config_edit_lib::start(config_path, css_path, system_data_dir, true);
+                {
+                    let config_path = config_path.unwrap_or_else(get_default_config_path);
+                    let css_path = css_file.unwrap_or_else(get_default_css_path);
+                    let system_data_dir = core_lib::path::get_default_system_data_dir();
+                    config_edit_lib::start(config_path, css_path, system_data_dir, true);
+                }
                 #[cfg(not(feature = "gui_settings_editor"))]
                 core_lib::notify_warn(
                     "GUI settings editor not available, compile with `gui_settings_editor` feature",
