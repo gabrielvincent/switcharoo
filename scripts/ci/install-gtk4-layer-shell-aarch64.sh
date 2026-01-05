@@ -15,5 +15,5 @@ sudo dpkg --add-architecture arm64 && sudo apt update
 sudo apt -y install --no-install-recommends \
   crossbuild-essential-arm64 \
   libgtk-4-dev:arm64 libadwaita-1-dev:arm64 libpango1.0-dev:arm64 \
-  libgirepository1.0-dev:arm64 libgtk4-layer-shell0:arm64 \
+  libgirepository1.0-dev:arm64 libgtk4-layer-shell-dev:arm64 \
   gobject-introspection
