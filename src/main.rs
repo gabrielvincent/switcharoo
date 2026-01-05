@@ -4,7 +4,6 @@ use clap::Parser;
 use core_lib::WarnWithDetails;
 use core_lib::path::{
     get_default_cache_dir, get_default_config_file, get_default_css_file, get_default_data_dir,
-    get_default_system_data_dir,
 };
 use core_lib::util::daemon_running;
 use std::{env, fs};
@@ -77,10 +76,11 @@ fn main() -> anyhow::Result<()> {
         .global_opts
         .config_file
         .unwrap_or_else(get_default_config_file);
+    #[cfg(any(feature = "gui_settings_editor", feature = "debug_command"))]
     let system_data_dir = cli
         .global_opts
         .system_data_dir
-        .unwrap_or_else(get_default_system_data_dir);
+        .unwrap_or_else(core_lib::path::get_default_system_data_dir);
 
     match cli.command {
         cli::Command::Run {} => {

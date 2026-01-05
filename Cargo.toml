@@ -8,7 +8,8 @@ license = "MIT"
 authors = ["h3rmt"]
 keywords = ["hyprland"]
 repository = "https://github.com/h3rmt/hyprshell/"
-rust-version = "1.92.0"
+# update when nixpkgs has a newer rustc
+rust-version = "1.91.0"
 edition = "2024"
 
 [workspace.dependencies]
@@ -20,8 +21,8 @@ async-channel = { version = "2.5.0", default-features = true }
 semver = { version = "1.0.27" }
 test-log = { version = "0.2.19", default-features = false, features = ["trace", "unstable"] }
 
-relm4 = { version = "0.10.1", default-features = false, features = ["libadwaita", "macros", "gnome_48"] }
-relm4-components = "0.10.1"
+relm4 = { version = "0.10.0", default-features = false, features = ["libadwaita", "macros", "gnome_48"] }
+relm4-components = "0.10.0"
 gtk4-layer-shell = { version = "0.7.1" }
 
 config-lib = { path = "crates/config-lib", package = "hyprshell-config-lib", version = "=4.8.3" }
