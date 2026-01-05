@@ -15,27 +15,5 @@ sudo dpkg --add-architecture arm64 && sudo apt update
 sudo apt -y install --no-install-recommends \
   crossbuild-essential-arm64 \
   libgtk-4-dev:arm64 libadwaita-1-dev:arm64 libpango1.0-dev:arm64 \
-  libgirepository1.0-dev:arm64 \
+  libgirepository1.0-dev:arm64 libgtk4-layer-shell0:arm64 \
   gobject-introspection
-
-
-cat <<'EOF' > /tmp/aarch64.txt
-[binaries]
-c = 'aarch64-linux-gnu-gcc'
-cpp = 'aarch64-linux-gnu-g++'
-ar = 'aarch64-linux-gnu-ar'
-strip = 'aarch64-linux-gnu-strip'
-pkgconfig = 'pkg-config'
-
-[host_machine]
-system = 'linux'
-cpu_family = 'aarch64'
-cpu = 'armv8'
-endian = 'little'
-EOF
-
-cd /tmp/gtk4-layer-shell
-meson setup build-arm64 --cross-file /tmp/aarch64.txt --prefix=/usr/aarch64-linux-gnu
-ninja -C build-arm64
-sudo ninja -C build-arm64 install
-sudo ldconfig

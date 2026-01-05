@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 set -euxo pipefail
 
-sudo apt install zstd
-
 rustup default stable && rustup target add x86_64-unknown-linux-gnu
 cargo build --release --target x86_64-unknown-linux-gnu
 ls -lh target/x86_64-unknown-linux-gnu/release/hyprshell
