@@ -14,12 +14,11 @@ jobs:
   check-nix:
     name: Run Nix Flake Check
     runs-on: "ubuntu-latest"
+    container:
+      image: ghcr.io/h3rmt/actions-image:latest
+      options: --privileged
     steps:
       - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
-      - uses: cachix/install-nix-action@0b0e072294b088b73964f1d72dfdac0951439dbd # v31.8.4
-        with:
-          github_access_token: ${{ secrets.GITHUB_TOKEN }}
-          extra_nix_config: "download-buffer-size = 5368709120"
       - uses: cachix/cachix-action@0fc020193b5a1fa3ac4575aa3a7d3aa6a35435ad # v16
         with:
           name: hyprshell-dev
@@ -44,15 +43,12 @@ jobs:
   check:
     name: Run build tests
     runs-on: "ubuntu-latest"
+    container:
+      image: ghcr.io/h3rmt/actions-image:latest
+      options: --privileged
     if: github.ref == 'refs/heads/hyprshell'
     steps:
       - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130 # v3
-      - name: install Rust stable
-        uses: dtolnay/rust-toolchain@f7ccc83f9ed1e5b9c81d8a67d7ad1a747e22a561
-        with:
-          toolchain: 'stable'
       - uses: Swatinem/rust-cache@f13886b937689c021905a6b90929199931d60db1 # v2.8.1
         with:
           prefix-key: hyprshell
