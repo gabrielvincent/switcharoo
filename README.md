@@ -54,13 +54,13 @@ More information can be found in the [NixOS](docs/NIX.md) section.
 
 ### From Source
 
-hyprland, libadwaita and [gtk4-layer-shell](https://github.com/wmww/gtk4-layer-shell)[1.1.1] must be installed
+hyprland, gtk4[v4_18], libadwaita[v1_8] and [gtk4-layer-shell](https://github.com/wmww/gtk4-layer-shell)[1.1.1] must be installed
 
 ```bash
 cargo install hyprshell
 ```
 
-Less features in [slim](#feature-flags) mode
+Build with less features in [slim](#feature-flags) mode
 
 ```bash
 cargo install hyprshell --no-default-features --features "slim"

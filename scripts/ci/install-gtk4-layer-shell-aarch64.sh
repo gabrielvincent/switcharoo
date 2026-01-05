@@ -4,14 +4,8 @@ set -euxo pipefail
 export PKG_CONFIG_ALLOW_CROSS=1
 export PKG_CONFIG_PATH=/usr/lib/aarch64-linux-gnu/pkgconfig
 
-if ! grep -q '^Architectures:' /etc/apt/sources.list.d/ubuntu.sources; then
-  sudo sed -i '/^Components:/a Architectures: amd64' /etc/apt/sources.list.d/ubuntu.sources
-fi
-sudo tee /etc/apt/sources.list.d/ubuntu-arm64.list >/dev/null <<'EOF'
-deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports noble main universe multiverse restricted
-deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports noble-updates main universe multiverse restricted
-deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports noble-security main universe multiverse restricted
-deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports noble-backports main universe multiverse restricted
+sudo tee /etc/apt/sources.list.d/debian-arm64.list >/dev/null <<'EOF'
+deb [arch=arm64] http://deb.debian.org/debian testing main contrib non-free
 EOF
 
 sudo apt remove -y libpango1.0-dev:amd64 libgtk-4-dev:amd64 libadwaita-1-dev:amd64
