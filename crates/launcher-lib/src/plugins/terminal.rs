@@ -1,5 +1,6 @@
-use crate::plugins::{Identifier, PluginNames, PluginReturn, StaticLaunchOption};
+use crate::plugins::{PluginReturn, StaticLaunchOption};
 use core_lib::WarnWithDetails;
+use core_lib::transfer::{Identifier, PluginNames};
 use exec_lib::run::run_program;
 use relm4::adw::gtk::gdk::Key;
 use std::path::PathBuf;

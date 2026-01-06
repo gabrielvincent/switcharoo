@@ -1,6 +1,6 @@
 use crate::LauncherData;
 use crate::plugins::{
-    SortableLaunchOption, StaticLaunchOption, get_sortable_launch_options,
+    SortableLaunchOption, SortedLaunchOption, StaticLaunchOption, get_sorted_launch_options,
     get_static_launch_options,
 };
 use async_channel::Sender;
@@ -35,9 +35,9 @@ pub fn update_launcher(data: &mut LauncherData, text: &str, event_sender: &Sende
     }
 
     let sortable_launch_options =
-        get_sortable_launch_options(&data.config.plugins, text, &data.config.data_dir);
+        get_sorted_launch_options(&data.config.plugins, text, &data.config.data_dir);
     let mut items = data.config.max_items.min(9);
-    for (index, opt) in sortable_launch_options.into_iter().enumerate() {
+    for (index, (_, opt)) in sortable_launch_options.into_iter().enumerate() {
         if items == 0 {
             break;
         }
@@ -134,7 +134,7 @@ fn create_static_plugin_box(
 
 #[allow(clippy::too_many_lines)]
 fn create_entry(
-    opt: &SortableLaunchOption,
+    opt: &SortedLaunchOption,
     key: impl Into<glib::GString>,
     event_sender: Sender<TransferType>,
 ) -> (gtk::Box, HashMap<Identifier, ListBoxRow>) {
@@ -192,52 +192,6 @@ fn create_entry(
     hbox.append(&exec);
 
     let mut details_list = HashMap::new();
-    if !opt.details_menu.is_empty() {
-        let button = Button::builder()
-            .css_classes(["launcher-other-menu-button"])
-            .icon_name("open-menu-symbolic")
-            .halign(Align::End)
-            .valign(Align::Center)
-            .build();
-        let menu = Popover::builder()
-            .css_classes(["launcher-other-menu"])
-            .has_arrow(false)
-            .can_focus(false)
-            .can_target(true)
-            .focus_on_click(false)
-            .overflow(Overflow::Hidden)
-            .build();
-        let menu_list_box = ListBox::builder()
-            .selection_mode(SelectionMode::None)
-            .build();
-
-        for item in &opt.details_menu {
-            let menu_item_text = Label::builder()
-                .css_classes(["underline"])
-                .label(format!("{}: {}", opt.name, item.text))
-                .build();
-            let menu_item_button = Button::builder()
-                .css_classes(["launcher-other-menu-item-inner"])
-                .child(&menu_item_text)
-                .tooltip_text(item.exec.clone())
-                .build();
-            let menu_item = ListBoxRow::builder()
-                .css_classes(["launcher-other-menu-item"])
-                .child(&menu_item_button)
-                .build();
-            menu_item.set_cursor(Cursor::from_name("pointer", None).as_ref());
-            click_details_entry(&menu_item_button, item.iden.clone(), event_sender.clone());
-            menu_list_box.append(&menu_item);
-            details_list.insert(item.iden.clone(), menu_item);
-        }
-        menu.set_parent(&button);
-        menu.set_child(Some(&menu_list_box));
-        button.connect_clicked(move |_button| {
-            menu.popup();
-        });
-        hbox.append(&button);
-    }
-
     let index_label = Label::builder()
         .halign(Align::End)
         .valign(Align::Center)
@@ -248,7 +202,7 @@ fn create_entry(
 
     let outer_box = gtk::Box::builder().css_classes(["launcher-item"]).build();
     outer_box.append(&hbox);
-    if opt.grayed {
+    if !opt.enabled {
         outer_box.add_css_class("monochrome");
     }
 

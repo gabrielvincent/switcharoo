@@ -1,9 +1,9 @@
+use crate::plugins::PluginReturn;
 use crate::plugins::applications::data::{get_stored_runs, save_run};
 use crate::plugins::applications::map::{DesktopEntry, get_all_desktop_entries};
-use crate::plugins::{
-    DetailsMenuItem, Identifier, PluginNames, PluginReturn, SortableLaunchOption,
-};
+use crate::plugins::main::SortableLaunchOption;
 use core_lib::WarnWithDetails;
+use core_lib::transfer::{Identifier, PluginNames};
 use core_lib::util::{ExecType, analyse_exec};
 use exec_lib::run::run_program;
 use std::collections::HashMap;
@@ -23,7 +23,6 @@ enum MatchType {
 impl SortableLaunchOption {
     fn from_desktop_entry(
         entry: &DesktopEntry,
-        r#match: MatchType,
         runs: &HashMap<Box<Path>, u64>,
         show_execs: bool,
         show_actions_submenu: bool,
@@ -45,40 +44,23 @@ impl SortableLaunchOption {
 
         let runs = runs.get(&entry.source).unwrap_or(&0);
         Self {
-            name: entry.name.clone(),
+            names: Box::from([entry.name.clone()]),
             icon: entry.icon.clone(),
             details,
             details_long,
-            score: r#match as u64 + runs,
+            bonus_score: *runs,
             iden: Identifier::data(
                 PluginNames::Applications,
                 Box::from(entry.source.to_string_lossy()),
             ),
-            grayed: false,
-            details_menu: if show_actions_submenu {
-                entry
-                    .other
-                    .iter()
-                    .map(|action| DetailsMenuItem {
-                        text: action.name.clone(),
-                        exec: action.exec.clone(),
-                        iden: Identifier::data_additional(
-                            PluginNames::Applications,
-                            Box::from(entry.source.to_string_lossy()),
-                            action.id.clone(),
-                        ),
-                    })
-                    .collect()
-            } else {
-                vec![]
-            },
+            takes_args: false,
+            subactions: vec![],
         }
     }
 }
 
 pub fn get_sortable_options(
     matches: &mut Vec<SortableLaunchOption>,
-    text: &str,
     run_cache_weeks: u8,
     show_execs: bool,
     show_actions_submenu: bool,
@@ -87,100 +69,16 @@ pub fn get_sortable_options(
     let entries = get_all_desktop_entries();
     let runs = get_stored_runs(run_cache_weeks, data_dir);
 
-    let mut count = 0;
-    if text.is_empty() {
-        for entry in entries.iter() {
-            matches.push(SortableLaunchOption::from_desktop_entry(
-                entry,
-                MatchType::Exact,
-                &runs,
-                show_execs,
-                show_actions_submenu,
-            ));
-            count += 1;
-        }
-        trace!("Added {count} applications to matches");
-        return;
-    }
-
-    let lower_text = text.to_ascii_lowercase();
     for entry in entries.iter() {
-        let opt = if entry.name.to_ascii_lowercase().contains(&lower_text) {
-            if entry.name.to_ascii_lowercase().starts_with(&lower_text) {
-                Some(SortableLaunchOption::from_desktop_entry(
-                    entry,
-                    MatchType::Exact,
-                    &runs,
-                    show_execs,
-                    show_actions_submenu,
-                ))
-            } else {
-                Some(SortableLaunchOption::from_desktop_entry(
-                    entry,
-                    MatchType::Name,
-                    &runs,
-                    show_execs,
-                    show_actions_submenu,
-                ))
-            }
-        } else if entry.exec_search.to_ascii_lowercase().contains(&lower_text) {
-            if entry
-                .exec_search
-                .to_ascii_lowercase()
-                .starts_with(&lower_text)
-            {
-                Some(SortableLaunchOption::from_desktop_entry(
-                    entry,
-                    MatchType::ExecExact,
-                    &runs,
-                    show_execs,
-                    show_actions_submenu,
-                ))
-            } else {
-                Some(SortableLaunchOption::from_desktop_entry(
-                    entry,
-                    MatchType::ExecName,
-                    &runs,
-                    show_execs,
-                    show_actions_submenu,
-                ))
-            }
-        } else if entry
-            .keywords
-            .iter()
-            .any(|k| k.to_ascii_lowercase().starts_with(&lower_text))
-        {
-            Some(SortableLaunchOption::from_desktop_entry(
-                entry,
-                MatchType::Keyword,
-                &runs,
-                show_execs,
-                show_actions_submenu,
-            ))
-        } else if entry.type_search.eq(&lower_text) {
-            Some(SortableLaunchOption::from_desktop_entry(
-                entry,
-                MatchType::AppType,
-                &runs,
-                show_execs,
-                show_actions_submenu,
-            ))
-        } else {
-            None
-        };
-
-        // push only if not already in matches
-        if let Some(opt) = opt
-            && !matches.iter().any(|m| {
-                m.name == opt.name && m.details == opt.details && m.details_long == opt.details_long
-            })
-        {
-            matches.push(opt);
-            count += 1;
-        }
+        matches.push(SortableLaunchOption::from_desktop_entry(
+            entry,
+            &runs,
+            show_execs,
+            show_actions_submenu,
+        ));
     }
     drop(entries);
-    trace!("Added {count} applications to matches");
+    // trace!("Added {count} applications to matches");
 }
 pub fn launch_option(
     data: Option<&str>,

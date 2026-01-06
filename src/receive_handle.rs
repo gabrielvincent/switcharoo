@@ -60,7 +60,7 @@ fn r#type(global: &mut Globals, text: &str, event_sender: &Sender<TransferType>)
     if let Some(windows) = &mut global.windows
         && let Some((_, launcher, launcher_active)) = &mut windows.overview
     {
-        *launcher_active = true;
+        *launcher_active = !text.is_empty();
         launcher_lib::update_launcher(launcher, text, event_sender);
     }
 }

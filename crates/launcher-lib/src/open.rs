@@ -1,6 +1,5 @@
 use crate::LauncherData;
 use gtk4_layer_shell::{KeyboardMode, LayerShell};
-use relm4::adw::gtk::glib;
 use relm4::adw::gtk::prelude::*;
 use tracing::{debug_span, trace};
 
@@ -19,11 +18,6 @@ pub fn open_launcher(data: &LauncherData) {
     data.entry.set_editable(true);
     data.entry.set_text("");
     data.window.set_keyboard_mode(KeyboardMode::Exclusive);
-    let window = data.window.clone();
-    glib::timeout_add_local(std::time::Duration::from_millis(300), move || {
-        window.set_keyboard_mode(KeyboardMode::OnDemand);
-        glib::ControlFlow::Break
-    });
 
     data.window.grab_focus();
     data.entry.grab_focus();

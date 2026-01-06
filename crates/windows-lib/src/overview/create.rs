@@ -56,7 +56,7 @@ pub fn create_windows_overview_window(
                 window.set_layer(Layer::Top);
                 window.set_anchor(Edge::Top, true);
                 window.set_margin(Edge::Top, 430i32);
-                window.set_keyboard_mode(KeyboardMode::None);
+                window.set_keyboard_mode(KeyboardMode::Exclusive);
                 window.set_monitor(Some(&gtk_monitor));
 
                 debug!(

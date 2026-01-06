@@ -5,7 +5,7 @@ use async_channel::Sender;
 use config_lib::{Launcher, Modifier};
 use core_lib::transfer::{CloseOverviewConfig, Direction, SwitchOverviewConfig, TransferType};
 use core_lib::{LAUNCHER_NAMESPACE, WarnWithDetails};
-use gtk4_layer_shell::{Edge, Layer, LayerShell};
+use gtk4_layer_shell::{Edge, KeyboardMode, Layer, LayerShell};
 use relm4::adw::gtk::gdk::{Key, ModifierType};
 use relm4::adw::gtk::glib::{ControlFlow, Propagation};
 use relm4::adw::gtk::prelude::*;
@@ -62,6 +62,7 @@ pub fn create_windows_overview_launcher_window(
         .default_width(10)
         .build();
     window.init_layer_shell();
+    window.set_keyboard_mode(KeyboardMode::Exclusive);
     window.set_namespace(Some(LAUNCHER_NAMESPACE));
     window.set_layer(Layer::Top);
     window.set_anchor(Edge::Top, true);

@@ -1,19 +1,11 @@
-use crate::plugins::{Identifier, PluginNames, PluginReturn, SortableLaunchOption};
+use crate::plugins::{PluginReturn, SortableLaunchOption};
 use config_lib::actions::ToAction;
 use config_lib::{ActionsPluginActionCustom, ActionsPluginConfig};
 use core_lib::WarnWithDetails;
-use tracing::{info, trace};
+use core_lib::transfer::{Identifier, PluginNames};
+use tracing::{error, info, trace};
 
-pub fn get_actions_options(
-    matches: &mut Vec<SortableLaunchOption>,
-    text: &str,
-    config: &ActionsPluginConfig,
-) {
-    if text.is_empty() {
-        return;
-    }
-    let lower_text = text.to_ascii_lowercase();
-
+pub fn get_actions_options(matches: &mut Vec<SortableLaunchOption>, config: &ActionsPluginConfig) {
     let actions = config
         .actions
         .iter()
@@ -22,62 +14,64 @@ pub fn get_actions_options(
         .collect::<Vec<ActionsPluginActionCustom>>();
 
     for action in actions {
-        if action.names.iter().any(|name| {
-            // searching ki should show kill, searching kill kitty should show kill
-            name.to_ascii_lowercase().starts_with(&lower_text)
-                || lower_text.starts_with(&name.to_ascii_lowercase())
-        }) || text.eq("actions")
-        {
-            let name = action
-                .names
-                .iter()
-                .find(|name| {
-                    name.to_ascii_lowercase().starts_with(&lower_text)
-                        || lower_text.starts_with(&name.to_ascii_lowercase())
+        let takes_args = action.command.contains("{}");
+        trace!("Added action option: {}", action.command);
+        if takes_args {
+            // we need to create actions with a single name, because the name needs to be removed later
+            for name in action.names.iter() {
+                matches.push(SortableLaunchOption {
+                    icon: Some(action.icon.clone()),
+                    names: Box::from([name.clone()]),
+                    details: action.details.clone(),
+                    details_long: Some(action.command.clone()),
+                    bonus_score: 0,
+                    takes_args: true,
+                    iden: Identifier::data_additional(
+                        PluginNames::Actions,
+                        action.command.clone(),
+                        name.clone(),
+                    ),
+                    subactions: vec![],
                 })
-                .expect("cant happen we already searched");
-            let name_lower = name.to_ascii_lowercase();
-            let mut command = action.command.clone();
-            let mut grayed = false;
-            if command.contains("{}") {
-                trace!(
-                    "Action command contains '{{}}', replacing <{text}> with stripped ({name_lower}) text"
-                );
-                let stripped_text = {
-                    let trimmed = text.trim_start_matches(&*name_lower).trim();
-                    if trimmed.len() == text.len() {
-                        ""
-                    } else {
-                        trimmed
-                    }
-                };
-                if stripped_text.is_empty() {
-                    grayed = true;
-                }
-                command = Box::from(command.replace("{}", stripped_text));
             }
-            trace!("Added action option: {}", command);
+        } else {
             matches.push(SortableLaunchOption {
                 icon: Some(action.icon),
-                name: name.clone(),
+                names: Box::from(action.names),
                 details: action.details,
-                details_long: Some(command.clone()),
-                score: 30,
-                grayed,
-                iden: Identifier::data(PluginNames::Actions, command),
-                details_menu: vec![],
+                details_long: Some(action.command.clone()),
+                bonus_score: 0,
+                takes_args: false,
+                iden: Identifier::data(PluginNames::Actions, action.command),
+                subactions: vec![],
             });
         }
     }
 }
 
-pub fn run_action(data: Option<&str>) -> PluginReturn {
-    if let Some(data) = data {
+pub fn run_action(data: Option<&str>, text: &str, data_additional: Option<&str>) -> PluginReturn {
+    if let Some(command) = data {
+        let mut command = command.to_string();
+        if command.contains("{}") {
+            if let Some(action_name) = data_additional {
+                let stripped_text = text[action_name.len()..].trim();
+                trace!(
+                    "Action command contains '{{}}', replacing {{}} in <{command}> with stripped ({stripped_text}) text extracted from <{text}>"
+                );
+                command = command.replace("{}", stripped_text);
+            } else {
+                error!("Action command contains '{{}}', but no additional data was provided");
+                return PluginReturn {
+                    show_animation: false,
+                };
+            }
+        }
+
         if cfg!(debug_assertions) && std::env::var("HYPRSHELL_RUN_ACTIONS_IN_DEBUG").is_err() {
-            info!("Not running action: {} (debug mode)", data);
+            info!("Not running action: {command} (debug mode)");
         } else {
-            info!("Running action: {}", data);
-            exec_lib::run::run_program(data, None, false, None)
+            info!("Running action: {command}");
+            exec_lib::run::run_program(&command, None, false, None)
                 .warn_details("Failed to run command");
         }
     }

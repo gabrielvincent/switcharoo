@@ -1,4 +1,4 @@
-use crate::plugins::{Identifier, PluginNames, PluginReturn, SortableLaunchOption};
+use crate::plugins::{PluginReturn, SortableLaunchOption};
 use core_lib::WarnWithDetails;
 use core_lib::default::get_default_desktop_file;
 use exec_lib::run::run_program;
@@ -6,28 +6,30 @@ use std::env;
 use std::path::Path;
 use tracing::{debug, trace, warn};
 
-pub fn get_path_options(matches: &mut Vec<SortableLaunchOption>, text: &str) {
-    if text.starts_with('/') || text.starts_with('~') {
-        // starting the file manager from bash works with ~,
-        // checking if a file exists doesn't work with ~ as it is not expanded without a shell
-        let text = if text.starts_with('~') {
-            text.replacen('~', &env::var("HOME").unwrap_or_default(), 1)
-        } else {
-            text.to_string()
-        };
-        let exists = Path::new(&text).exists();
-        let file_manager = get_file_manager_info();
-        matches.push(SortableLaunchOption {
-            icon: file_manager.icon.clone(),
-            name: format!("Open in {}", file_manager.name).into_boxed_str(),
-            details: Box::from(""),
-            details_long: None,
-            score: 100,
-            grayed: !exists,
-            iden: Identifier::plugin(PluginNames::Path),
-            details_menu: vec![],
-        });
-    }
+pub fn get_path_options(matches: &mut Vec<SortableLaunchOption>) {
+    return;
+    // TODO
+    // if text.starts_with('/') || text.starts_with('~') {
+    //     // starting the file manager from bash works with ~,
+    //     // checking if a file exists doesn't work with ~ as it is not expanded without a shell
+    //     let text = if text.starts_with('~') {
+    //         text.replacen('~', &env::var("HOME").unwrap_or_default(), 1)
+    //     } else {
+    //         text.to_string()
+    //     };
+    //     let exists = Path::new(&text).exists();
+    //     let file_manager = get_file_manager_info();
+    //     matches.push(SortableLaunchOption {
+    //         icon: file_manager.icon.clone(),
+    //         name: format!("Open in {}", file_manager.name).into_boxed_str(),
+    //         details: Box::from(""),
+    //         details_long: None,
+    //         score: 100,
+    //         grayed: !exists,
+    //         iden: Identifier::plugin(PluginNames::Path),
+    //         subactions: vec![],
+    //     });
+    // }
 }
 
 pub fn launch_option(text: &str) -> PluginReturn {
