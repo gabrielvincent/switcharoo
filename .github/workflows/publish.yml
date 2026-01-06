@@ -76,6 +76,28 @@ jobs:
           gh release edit ${{ github.ref_name }} --latest --draft=false --title "hyprshell ${{ github.ref_name }}"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Publish AUR package
+        uses: KSXGitHub/github-actions-deploy-aur@2ac5a4c1d7035885d46b10e3193393be8460b6f1 # v4.1.1
+        with:
+          pkgname: hyprshell
+          pkgbuild: ./packaging/pkgbuild/PKGBUILD
+          commit_username: ${{ secrets.AUR_USERNAME }}
+          commit_email: ${{ secrets.AUR_EMAIL }}
+          ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
+          commit_message: Update hyprshell AUR package
+          updpkgsums: true
+          ssh_keyscan_types: rsa,ecdsa,ed25519
+      - name: Publish AUR slim package
+        uses: KSXGitHub/github-actions-deploy-aur@2ac5a4c1d7035885d46b10e3193393be8460b6f1 # v4.1.1
+        with:
+          pkgname: hyprshell-slim
+          pkgbuild: ./packaging/pkgbuild/PKGBUILD-slim
+          commit_username: ${{ secrets.AUR_USERNAME }}
+          commit_email: ${{ secrets.AUR_EMAIL }}
+          ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
+          commit_message: Update hyprshell-slim AUR package
+          updpkgsums: true
+          ssh_keyscan_types: rsa,ecdsa,ed25519
       - name: Build binary for x86_64-unknown-linux-gnu
         run: |
           version=$(echo ${{ github.ref_name }} | sed 's/v//')
@@ -99,28 +121,6 @@ jobs:
           cargo clean
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Publish AUR package
-        uses: KSXGitHub/github-actions-deploy-aur@2ac5a4c1d7035885d46b10e3193393be8460b6f1 # v4.1.1
-        with:
-          pkgname: hyprshell
-          pkgbuild: ./packaging/pkgbuild/PKGBUILD
-          commit_username: ${{ secrets.AUR_USERNAME }}
-          commit_email: ${{ secrets.AUR_EMAIL }}
-          ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
-          commit_message: Update hyprshell AUR package
-          updpkgsums: true
-          ssh_keyscan_types: rsa,ecdsa,ed25519
-      - name: Publish AUR slim package
-        uses: KSXGitHub/github-actions-deploy-aur@2ac5a4c1d7035885d46b10e3193393be8460b6f1 # v4.1.1
-        with:
-          pkgname: hyprshell-slim
-          pkgbuild: ./packaging/pkgbuild/PKGBUILD-slim
-          commit_username: ${{ secrets.AUR_USERNAME }}
-          commit_email: ${{ secrets.AUR_EMAIL }}
-          ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
-          commit_message: Update hyprshell-slim AUR package
-          updpkgsums: true
-          ssh_keyscan_types: rsa,ecdsa,ed25519
       - name: Publish AUR bin package
         uses: KSXGitHub/github-actions-deploy-aur@2ac5a4c1d7035885d46b10e3193393be8460b6f1 # v4.1.1
         with:
@@ -139,4 +139,3 @@ jobs:
           authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
       - name: Run Nix Flake Build
         run: nix build '.#packages.x86_64-linux.hyprshell' -L
-
