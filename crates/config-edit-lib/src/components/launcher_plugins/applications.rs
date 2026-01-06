@@ -54,7 +54,7 @@ impl SimpleComponent for Applications {
                 },
                 gtk::Image::from_icon_name("dialog-information-symbolic") {
                     set_cursor_by_name: "help",
-                    set_tooltip_text: Some("TODO")
+                    set_tooltip_text: Some("Launch .desktop files, sorted based on recent usage")
                 },
             },
             #[watch]
@@ -77,7 +77,7 @@ impl SimpleComponent for Applications {
                     },
                     gtk::Image::from_icon_name("dialog-information-symbolic") {
                         set_cursor_by_name: "help",
-                        set_tooltip_text: Some("TODO")
+                        set_tooltip_text: Some("Number of weeks to retain run history; used to rank applications by usage.")
                     },
                     gtk::SpinButton {
                         set_adjustment: &Adjustment::new(0.0, 0.0, 52.0, 1.0, 8.0, 0.0),
@@ -99,7 +99,7 @@ impl SimpleComponent for Applications {
                     },
                     gtk::Image::from_icon_name("dialog-information-symbolic") {
                         set_cursor_by_name: "help",
-                        set_tooltip_text: Some("TODO")
+                        set_tooltip_text: Some("Show the exec line from the Desktop file. In the case of Flatpaks and PWAs these get shortened to the name of the app.")
                     },
                     gtk::Switch {
                         set_valign: Align::Center,
@@ -119,7 +119,7 @@ impl SimpleComponent for Applications {
                     },
                     gtk::Image::from_icon_name("dialog-information-symbolic") {
                         set_cursor_by_name: "help",
-                        set_tooltip_text: Some("TODO")
+                        set_tooltip_text: Some("Show a dropdown menu with all the desktop actions specified in the `.desktop` files of the applications, like `new private window`, etc.")
                     },
                     gtk::Switch {
                         set_valign: Align::Center,

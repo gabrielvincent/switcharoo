@@ -224,8 +224,7 @@ impl From<Option<config_lib::Switch>> for Switch {
                 .contains(&config_lib::FilterBy::CurrentWorkspace),
             current_monitor: v.filter_by.contains(&config_lib::FilterBy::CurrentMonitor),
             switch_workspaces: v.switch_workspaces,
-            // TODO
-            exclude_special_workspaces: String::new(),
+            exclude_special_workspaces: v.exclude_special_workspaces.to_string(),
         }
     }
 }
@@ -270,8 +269,7 @@ impl From<Option<config_lib::Overview>> for Overview {
                 .filter_by
                 .contains(&config_lib::FilterBy::CurrentWorkspace),
             current_monitor: v.filter_by.contains(&config_lib::FilterBy::CurrentMonitor),
-            // TODO
-            exclude_special_workspaces: String::new(),
+            exclude_special_workspaces: v.exclude_special_workspaces.to_string(),
         }
     }
 }

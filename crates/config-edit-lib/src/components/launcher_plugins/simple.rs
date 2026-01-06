@@ -9,7 +9,6 @@ use tracing::trace;
 pub struct SimplePlugin {
     config: crate::EmptyConfig,
     prev_config: crate::EmptyConfig,
-    todo: bool,
 }
 
 #[derive(Debug)]
@@ -23,7 +22,6 @@ pub enum SimplePluginInput {
 pub struct SimplePluginInit {
     pub name: &'static str,
     pub description: &'static str,
-    pub todo: bool,
     pub config: crate::EmptyConfig,
 }
 
@@ -42,7 +40,7 @@ impl SimpleComponent for SimplePlugin {
         #[root]
         adw::ExpanderRow {
             set_title_selectable: true,
-            set_show_enable_switch: !model.todo,
+            set_show_enable_switch: true,
             set_hexpand: true,
             set_css_classes: &["enable-frame"],
             add_prefix = &gtk::Box {
@@ -52,7 +50,6 @@ impl SimpleComponent for SimplePlugin {
                 set_spacing: 15,
                 gtk::Label {
                     set_label: init.name,
-                    set_css_classes: if init.todo { &["gray-label"] } else { &[] },
                 },
                 gtk::Image::from_icon_name("dialog-information-symbolic") {
                     set_cursor_by_name: "help",
@@ -61,10 +58,10 @@ impl SimpleComponent for SimplePlugin {
             },
             #[watch]
             #[block_signal(h)]
-            set_enable_expansion: !model.todo && model.config.enabled,
+            set_enable_expansion: model.config.enabled,
             connect_enable_expansion_notify[sender] => move |e| {sender.output_sender().emit(SimplePluginOutput::Enabled(e.enables_expansion()))} @h,
             #[watch]
-            set_expanded: !model.todo && model.config.enabled,
+            set_expanded: model.config.enabled,
         }
     }
 
@@ -76,7 +73,6 @@ impl SimpleComponent for SimplePlugin {
         let model = Self {
             config: init.config.clone(),
             prev_config: init.config,
-            todo: init.todo,
         };
 
         let widgets = view_output!();

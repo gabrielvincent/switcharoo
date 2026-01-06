@@ -8,7 +8,7 @@ use relm4::{
     SimpleComponent,
 };
 use relm4_components::alert::{Alert, AlertMsg, AlertResponse, AlertSettings};
-use tracing::{debug, warn};
+use tracing::{debug, trace, warn};
 
 #[derive(Debug)]
 pub struct KeyboardShortcut {
@@ -123,6 +123,7 @@ impl SimpleComponent for KeyboardShortcut {
     }
 
     fn update(&mut self, message: Self::Input, sender: ComponentSender<Self>) {
+        trace!("shortcut_dialog::update: {message:?}");
         match message {
             KeyboardShortcutInput::UpdateKey(key) => {
                 self.key = Some(key);

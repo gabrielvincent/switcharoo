@@ -1,6 +1,7 @@
 use crate::Modifier;
 use serde::{Deserialize, Serialize};
 use smart_default::SmartDefault;
+use std::path::Path;
 
 #[derive(SmartDefault, Debug, Clone, PartialEq, Deserialize, Serialize)]
 #[cfg_attr(not(feature = "ci_no_default_config_values"), serde(default))]
@@ -105,13 +106,13 @@ pub struct ActionsPluginConfig {
             names: vec!["Kill".into(), "Stop".into()],
             details: "Kill or stop a process by name".into(),
             command: "pkill \"{}\" && notify-send hyprshell \"stopped {}\"".into(),
-            icon: "remove".into(),
+            icon: Box::from(Path::new("remove")),
         }),
         ActionsPluginAction::Custom(ActionsPluginActionCustom {
             names: vec!["Reload Hyprshell".into()],
             details: "Reload Hyprshell".into(),
             command: "sleep 1; hyprshell socat '\"Restart\"'".into(),
-            icon: "system-restart".into(),
+            icon: Box::from(Path::new("system-restart")),
         }),
     ])]
     pub actions: Vec<ActionsPluginAction>,
@@ -147,7 +148,7 @@ pub struct ActionsPluginActionCustom {
     pub names: Vec<Box<str>>,
     pub details: Box<str>,
     pub command: Box<str>,
-    pub icon: Box<str>,
+    pub icon: Box<Path>,
 }
 
 #[derive(SmartDefault, Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]

@@ -5,8 +5,10 @@ use crate::components::footer::{Footer, FooterInit, FooterInput, FooterOutput};
 use crate::components::generate::{Generate, GenerateInit, GenerateInput, GenerateOutput};
 use crate::components::launcher::{Launcher, LauncherInit, LauncherInput, LauncherOutput};
 use crate::components::launcher_plugins::LauncherPluginsOutput;
+use crate::components::launcher_plugins::actions::ActionsOutput;
 use crate::components::launcher_plugins::applications::ApplicationsOutput;
 use crate::components::launcher_plugins::simple::SimplePluginOutput;
+use crate::components::launcher_plugins::websearch::WebSearchOutput;
 use crate::components::nix_preview::{NixPreview, NixPreviewInit};
 use crate::components::switch::SwitchOutput;
 use crate::components::theme::{Style, StyleInit, StyleInput, StyleOutput};
@@ -113,6 +115,9 @@ impl SimpleComponent for Root {
                             #[local_ref]
                             view_stack -> adw::ViewStack {
                                 set_enable_transitions: true,
+                                set_hhomogeneous: false,
+                                set_vhomogeneous: false,
+                                set_transition_duration: 150,
                             }
                         }
                     },
@@ -544,6 +549,22 @@ impl SimpleComponent for Root {
                         LauncherPluginsOutput::FilePath(msg) => match msg {
                             SimplePluginOutput::Enabled(enabled) => {
                                 r#ref.plugins.path.enabled = enabled;
+                            }
+                        },
+                        LauncherPluginsOutput::WebSearch(msg) => match msg {
+                            WebSearchOutput::Enabled(enabled) => {
+                                r#ref.plugins.websearch.enabled = enabled;
+                            }
+                            WebSearchOutput::Engines(engines) => {
+                                r#ref.plugins.websearch.engines = engines;
+                            }
+                        },
+                        LauncherPluginsOutput::Actions(msg) => match msg {
+                            ActionsOutput::Enabled(enabled) => {
+                                r#ref.plugins.actions.enabled = enabled;
+                            }
+                            ActionsOutput::Actions(actions) => {
+                                r#ref.plugins.actions.actions = actions;
                             }
                         },
                     },

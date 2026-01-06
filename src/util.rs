@@ -102,6 +102,10 @@ const NEW_VERSION_INFOS: &[(&str, &str)] = &[
         "4.8.0",
         "Version 4.8.0 adds a graphical settings Editor, support for special workspaces and vim motions",
     ),
+    (
+        "4.9.0",
+        "Version 4.9.0 adds a new Settings Editor, replaces tui config generation",
+    ),
 ];
 
 /// Checks if the current version is newer than the cached version.

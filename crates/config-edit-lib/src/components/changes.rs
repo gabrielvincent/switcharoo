@@ -5,6 +5,7 @@ use relm4::adw::gtk::SelectionMode;
 use relm4::adw::prelude::*;
 use relm4::gtk;
 use relm4::{ComponentParts, ComponentSender, RelmWidgetExt, SimpleComponent};
+use std::collections::HashSet;
 use tracing::trace;
 
 #[derive(Debug)]
@@ -439,6 +440,7 @@ pub fn generate_items(changes: &gtk::ListBox, config: &Config, prev_config: &Con
     }
 }
 
+#[allow(clippy::too_many_lines)]
 fn add_plugin_changes(changes: &gtk::ListBox, prev: &Plugins, current: &Plugins) {
     match (&prev.applications.enabled, &current.applications.enabled) {
         (false, false) => {}
@@ -504,6 +506,60 @@ fn add_plugin_changes(changes: &gtk::ListBox, prev: &Plugins, current: &Plugins)
             add_info(changes, "Enabled Shell Plugin");
         }
         _ => {}
+    }
+
+    match (&prev.calc.enabled, &current.calc.enabled) {
+        (true, false) => {
+            add_info(changes, "Disabled Calculator Plugin");
+        }
+        (false, true) => {
+            add_info(changes, "Enabled Calculator Plugin");
+        }
+        _ => {}
+    }
+
+    match (&prev.path.enabled, &current.path.enabled) {
+        (true, false) => {
+            add_info(changes, "Disabled Path Plugin");
+        }
+        (false, true) => {
+            add_info(changes, "Enabled Path Plugin");
+        }
+        _ => {}
+    }
+
+    match (&prev.websearch.enabled, &current.websearch.enabled) {
+        (false, false) => {}
+        (true, false) => {
+            add_info(changes, "Disabled Websearch Plugin");
+        }
+        (_, true) => {
+            if !prev.websearch.enabled {
+                add_info(changes, "Enabled Websearch Plugin");
+            }
+
+            let prev_engines = &prev.websearch.engines;
+            let cur_engines = &current.websearch.engines;
+
+            let prev_keys: HashSet<_> = prev_engines.iter().map(|e| e.key).collect();
+            let cur_keys: HashSet<_> = cur_engines.iter().map(|e| e.key).collect();
+
+            for e in cur_engines.iter().filter(|e| !prev_keys.contains(&e.key)) {
+                add_info_subtitle(
+                    changes,
+                    "Added Websearch engine",
+                    format!("{} ({})", e.name, e.key),
+                );
+            }
+
+            for e in prev_engines.iter().filter(|e| !cur_keys.contains(&e.key)) {
+                add_info_subtitle(
+                    changes,
+                    "Removed Websearch engine",
+                    format!("{} ({})", e.name, e.key),
+                );
+            }
+        }
     }
 }
 

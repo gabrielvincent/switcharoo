@@ -1,8 +1,14 @@
+use crate::components::launcher_plugins::actions::{
+    Actions, ActionsInit, ActionsInput, ActionsOutput,
+};
 use crate::components::launcher_plugins::applications::{
     Applications, ApplicationsInit, ApplicationsInput, ApplicationsOutput,
 };
 use crate::components::launcher_plugins::simple::{
     SimplePlugin, SimplePluginInit, SimplePluginInput, SimplePluginOutput,
+};
+use crate::components::launcher_plugins::websearch::{
+    WebSearch, WebSearchInit, WebSearchInput, WebSearchOutput,
 };
 use relm4::ComponentController;
 use relm4::adw::prelude::*;
@@ -21,8 +27,8 @@ pub struct LauncherPlugins {
     run_in_shell: Controller<SimplePlugin>,
     calculator: Controller<SimplePlugin>,
     file_path: Controller<SimplePlugin>,
-    web_search: Controller<SimplePlugin>,
-    actions: Controller<SimplePlugin>,
+    web_search: Controller<WebSearch>,
+    actions: Controller<Actions>,
 }
 
 #[derive(Debug)]
@@ -44,6 +50,8 @@ pub enum LauncherPluginsOutput {
     Shell(SimplePluginOutput),
     Calculator(SimplePluginOutput),
     FilePath(SimplePluginOutput),
+    WebSearch(WebSearchOutput),
+    Actions(ActionsOutput),
 }
 
 #[relm4::component(pub)]
@@ -106,50 +114,40 @@ impl SimpleComponent for LauncherPlugins {
             .launch(SimplePluginInit {
                 config: init.config.terminal.clone(),
                 name: "Run in Terminal",
-                description: "TODO",
-                todo: false,
+                description: "Open a terminal and run the typed command in it. The terminal is defined in the `default_terminal` config option.",
             })
             .forward(sender.output_sender(), LauncherPluginsOutput::Terminal);
         let run_in_shell = SimplePlugin::builder()
             .launch(SimplePluginInit {
                 config: init.config.shell.clone(),
                 name: "Run in Shell",
-                description: "TODO",
-                todo: false,
+                description: "Run the typed command in a shell (in the background).",
             })
             .forward(sender.output_sender(), LauncherPluginsOutput::Shell);
         let calculator = SimplePlugin::builder()
             .launch(SimplePluginInit {
                 config: init.config.calc.clone(),
                 name: "Calculator",
-                description: "TODO",
-                todo: false,
+                description: "Calculates any mathematical expression typed into the launcher.",
             })
             .forward(sender.output_sender(), LauncherPluginsOutput::Calculator);
         let file_path = SimplePlugin::builder()
             .launch(SimplePluginInit {
                 config: init.config.path.clone(),
                 name: "Open Filepath",
-                description: "TODO",
-                todo: false,
+                description: "Opens the typed path in the default file manager.",
             })
             .forward(sender.output_sender(), LauncherPluginsOutput::FilePath);
-        let web_search = SimplePlugin::builder()
-            .launch(SimplePluginInit {
-                config: init.config.path.clone(),
-                name: "Websearch (TODO)",
-                description: "TODO",
-                todo: true,
+        let web_search = WebSearch::builder()
+            .launch(WebSearchInit {
+                config: init.config.websearch.clone(),
             })
-            .detach();
-        let actions = SimplePlugin::builder()
-            .launch(SimplePluginInit {
-                config: init.config.path.clone(),
-                name: "Actions (TODO)",
-                description: "TODO",
-                todo: true,
+            .forward(sender.output_sender(), LauncherPluginsOutput::WebSearch);
+        let actions = Actions::builder()
+            .launch(ActionsInit {
+                config: init.config.actions.clone(),
             })
-            .detach();
+            .forward(sender.output_sender(), LauncherPluginsOutput::Actions);
 
         let model = Self {
             config: init.config.clone(),
@@ -182,6 +180,10 @@ impl SimpleComponent for LauncherPlugins {
                     .emit(SimplePluginInput::Set(self.config.calc.clone()));
                 self.file_path
                     .emit(SimplePluginInput::Set(self.config.path.clone()));
+                self.web_search
+                    .emit(WebSearchInput::Set(self.config.websearch.clone()));
+                self.actions
+                    .emit(ActionsInput::Set(self.config.actions.clone()));
             }
             LauncherPluginsInput::SetPrev(config) => {
                 self.prev_config = config;
@@ -197,6 +199,10 @@ impl SimpleComponent for LauncherPlugins {
                     .emit(SimplePluginInput::SetPrev(self.prev_config.calc.clone()));
                 self.file_path
                     .emit(SimplePluginInput::SetPrev(self.prev_config.path.clone()));
+                self.web_search
+                    .emit(WebSearchInput::SetPrev(self.prev_config.websearch.clone()));
+                self.actions
+                    .emit(ActionsInput::SetPrev(self.prev_config.actions.clone()));
             }
             LauncherPluginsInput::Reset => {
                 self.config = self.prev_config.clone();
@@ -205,6 +211,8 @@ impl SimpleComponent for LauncherPlugins {
                 self.run_in_shell.emit(SimplePluginInput::Reset);
                 self.calculator.emit(SimplePluginInput::Reset);
                 self.file_path.emit(SimplePluginInput::Reset);
+                self.web_search.emit(WebSearchInput::Reset);
+                self.actions.emit(ActionsInput::Reset);
             }
         }
     }

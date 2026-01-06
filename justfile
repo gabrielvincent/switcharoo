@@ -111,7 +111,8 @@ run-debug profile="dev" *args="": (run profile "debug" args)
 
 [group('dist')]
 package-usr-lib:
-    ch /usr/share
-    sudo tar -cvzf ar.tar.gz -C ./hyprshell.debug setup_preview themes
-    sudo mv ar.tar.gz ./packaging/usr-share.tar
-    sudo chmod user:user ./packaging/usr-share.tar
+    #!/usr/bin/env bash
+    sudo tar -cvf ar.tar -C /usr/share/hyprshell.debug setup_preview themes
+    ls -lah ar.tar
+    sudo mv ar.tar ./packaging/usr-share.tar
+    sudo chown user:user ./packaging/usr-share.tar

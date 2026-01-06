@@ -2,6 +2,7 @@ use relm4::adw::prelude::*;
 use relm4::gtk::Orientation;
 use relm4::{ComponentParts, ComponentSender, SimpleComponent, gtk};
 use std::path::Path;
+use tracing::trace;
 
 #[derive(Debug)]
 pub struct Footer {
@@ -112,6 +113,7 @@ impl SimpleComponent for Footer {
     }
 
     fn update(&mut self, message: Self::Input, _sender: ComponentSender<Self>) {
+        trace!("footer::update: {message:?}");
         match message {
             FooterInput::ChangesExist(changes) => {
                 self.changes = changes;

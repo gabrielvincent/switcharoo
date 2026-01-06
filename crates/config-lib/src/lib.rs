@@ -1,3 +1,4 @@
+pub mod actions;
 mod check;
 mod explain;
 mod load;

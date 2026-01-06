@@ -57,7 +57,8 @@ jobs:
           git switch hyprshell-release
           
           current_sha=$(git rev-parse HEAD)
-          jq --arg sha "$current_sha" '.["last-release-sha"]=$sha' release-please-config.json > tmp.json && mv tmp.json release-please-config.json
+          jq --arg sha "$current_sha" '.["last-release-sha"]=$sha' release-please-config.json > tmp.json
+          mv tmp.json release-please-config.json
           git add release-please-config.json
           git commit -m "chore(release): update last-release-sha"
           git push origin hyprshell-release
