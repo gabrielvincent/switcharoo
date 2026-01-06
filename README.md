@@ -2,7 +2,7 @@
 
 [![crates.io](https://img.shields.io/crates/v/hyprshell.svg)](https://crates.io/crates/hyprshell) [![Docs](https://docs.rs/built/badge.svg)](https://docs.rs/hyprshell)
 
-![img.png](.github/imgs/img-3.png)
+![img.png](.github/imgs/img.png)
 
 ## Overview
 
@@ -14,11 +14,10 @@ The application also includes a launcher for running applications, doing calcula
 
 - **Window Switching**: Switch between windows using keyboard shortcuts in a GUI.
 - **Customizable Keybindings**: Define your own keybindings for window switching and GUI interactions.
-- **Config**: Interactive [config file](docs/CONFIGURE.md) generation for easy setup.
+- **Settings App**: Customize the application using a settings app.
 - **Launcher Integration**: Launch applications directly from the GUI, sorted by usage frequency.
 - **Launcher Plugins**: Different plugins like Web search, actions or calculations can be enabled.
 - **Theming**: Customize the GUI appearance (gtk4) using [CSS](docs/CONFIGURE.md).
-- **Settings App**: Customize the application using a settings app.
 - **Dynamic Configuration**: Automatically reloads configuration/style changes without restarting the application.
 - **Debug commands**: Many [Commands](docs/DEBUG.md) to debug desktop files, icons and default applications.
 
@@ -80,26 +79,12 @@ Run `hyprshell --help` to see available commands and options.
 
 ### Config
 
-To generate a default configuration file, run:
+To generate or edit a configuration, run `hyprshell config generate` or launch the `Hyprshell Settings Editor` App.
 
-```bash
-hyprshell config generate
-```
-
-This launches an interactive prompt to set up your configuration.
-The generated file will be located at `~/.config/hyprshell/config.ron`.
-If you want to modify these settings, look at the [Documentation](docs/CONFIGURE.md) for the config file.
-
-To validate your configuration file, run:
-
-```bash
-hyprshell config explain
-```
-
-This checks for any syntax errors or issues in your configuration file and shows a `explanation` of how to use hyprshell.
-
-To edit the configuration file run `hyprshell config edit`. This launches the settings editor.
-
+<div style="display:flex;gap:8px;align-items:flex-start">
+  <img src=".github/imgs/generate.png" alt="preview" style="max-width:58%;height:auto"/>
+  <img src=".github/imgs/generate-2.png" alt="preview-2" style="max-width:38%;height:auto"/>
+</div>
 ### Initialization
 
 Enable the systemd service (generated with `hyprshell config generate`) [recommended]:
@@ -114,8 +99,8 @@ Or add the following to your Hyprland configuration (`~/.config/hypr/hyprland.co
 exec-once = hyprshell run &
 ```
 
-![image.png](.github/imgs/swappy-20250420_000818.png)
-![img.png](.github/imgs/img-2.png)
+![image.png](.github/imgs/switch.png)
+![img.png](.github/imgs/calc.png)
 
 ### Debugging
 

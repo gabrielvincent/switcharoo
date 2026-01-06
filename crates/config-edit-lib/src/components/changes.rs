@@ -1,5 +1,6 @@
 use crate::flags_csv;
 use crate::structs::{Config, Plugins};
+use config_lib::actions::ToAction;
 use relm4::adw::ActionRow;
 use relm4::adw::gtk::SelectionMode;
 use relm4::adw::prelude::*;
@@ -352,6 +353,16 @@ pub fn generate_items(changes: &gtk::ListBox, config: &Config, prev_config: &Con
                             ),
                         );
                     }
+                    if prev_config.windows.switch.kill_key != config.windows.switch.kill_key {
+                        add_info_subtitle(
+                            changes,
+                            "Changed switch kill key",
+                            format!(
+                                "{} -> {}",
+                                prev_config.windows.switch.kill_key, config.windows.switch.kill_key
+                            ),
+                        );
+                    }
                 }
             }
             match (
@@ -424,6 +435,17 @@ pub fn generate_items(changes: &gtk::ListBox, config: &Config, prev_config: &Con
                                 "{} -> {}",
                                 prev_config.windows.switch_2.switch_workspaces,
                                 config.windows.switch_2.switch_workspaces
+                            ),
+                        );
+                    }
+                    if prev_config.windows.switch_2.kill_key != config.windows.switch_2.kill_key {
+                        add_info_subtitle(
+                            changes,
+                            "Changed switch 2 kill key",
+                            format!(
+                                "{} -> {}",
+                                prev_config.windows.switch_2.kill_key,
+                                config.windows.switch_2.kill_key
                             ),
                         );
                     }
@@ -557,6 +579,62 @@ fn add_plugin_changes(changes: &gtk::ListBox, prev: &Plugins, current: &Plugins)
                     changes,
                     "Removed Websearch engine",
                     format!("{} ({})", e.name, e.key),
+                );
+            }
+        }
+    }
+
+    match (&prev.actions.enabled, &current.actions.enabled) {
+        (false, false) => {}
+        (true, false) => {
+            add_info(changes, "Disabled Actions Plugin");
+        }
+        (_, true) => {
+            if !prev.actions.enabled {
+                add_info(changes, "Enabled Actions Plugin");
+            }
+
+            let prev_engines = &prev.actions.actions;
+            let cur_engines = &current.actions.actions;
+
+            let prev_keys: HashSet<_> = prev_engines
+                .iter()
+                .map(|e| e.clone().to_action().command)
+                .collect();
+            let cur_keys: HashSet<_> = cur_engines
+                .iter()
+                .map(|e| e.clone().to_action().command)
+                .collect();
+
+            for e in cur_engines
+                .iter()
+                .filter(|e| !prev_keys.contains(&(*e).clone().to_action().command))
+            {
+                let a = e.clone().to_action();
+                add_info_subtitle(
+                    changes,
+                    "Added Action",
+                    format!(
+                        "{} ({})",
+                        a.names.first().cloned().unwrap_or_default(),
+                        a.details
+                    ),
+                );
+            }
+
+            for e in prev_engines
+                .iter()
+                .filter(|e| !cur_keys.contains(&(*e).clone().to_action().command))
+            {
+                let a = e.clone().to_action();
+                add_info_subtitle(
+                    changes,
+                    "Removed Action",
+                    format!(
+                        "{} ({})",
+                        a.names.first().cloned().unwrap_or_default(),
+                        a.details
+                    ),
                 );
             }
         }

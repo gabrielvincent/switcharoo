@@ -1,4 +1,4 @@
-use crate::to_client_id;
+use crate::util::to_client_id;
 use anyhow::Context;
 use core_lib::{
     ClientData, ClientId, FindByFirst, MonitorData, MonitorId, WorkspaceData, WorkspaceId,
@@ -54,11 +54,13 @@ pub fn collect_hypr_data() -> anyhow::Result<(
             md.push((
                 monitor.id,
                 MonitorData {
+                    id: monitor.id,
                     x: monitor.x,
                     y: monitor.y,
                     width: (f32::from(monitor.width) / monitor.scale) as u16,
                     height: (f32::from(monitor.height) / monitor.scale) as u16,
                     connector: monitor.name.clone(),
+                    scale: monitor.scale,
                 },
             ));
         }
@@ -148,4 +150,41 @@ pub fn collect_hypr_data() -> anyhow::Result<(
         active_ws,
         active_monitor,
     ))
+}
+
+pub fn get_monitors() -> Vec<MonitorData> {
+    Monitors::get()
+        .map_or(vec![], HyprDataVec::to_vec)
+        .iter()
+        .map(|m| MonitorData {
+            id: m.id,
+            x: m.x,
+            y: m.y,
+            width: m.width,
+            height: m.height,
+            connector: m.name.clone(),
+            scale: m.scale,
+        })
+        .collect()
+}
+
+#[must_use]
+pub fn get_current_monitor() -> Option<MonitorData> {
+    Monitor::get_active().ok().map(|m| MonitorData {
+        id: m.id,
+        x: m.x,
+        y: m.y,
+        width: m.width,
+        height: m.height,
+        connector: m.name.clone(),
+        scale: m.scale,
+    })
+}
+
+pub fn get_client_classes() -> Vec<String> {
+    Clients::get()
+        .map_or(vec![], HyprDataVec::to_vec)
+        .iter()
+        .map(|client| client.class.clone())
+        .collect()
 }

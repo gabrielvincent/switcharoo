@@ -21,8 +21,7 @@ pub fn check_class(class: Option<String>) -> anyhow::Result<()> {
         check_icon(&class);
     } else {
         println!("no class provided, iterating over all clients");
-        for client in exec_lib::get_clients() {
-            let class = client.class;
+        for class in exec_lib::collect::get_client_classes() {
             debug!("checking {class}");
             check_icon(&class);
         }

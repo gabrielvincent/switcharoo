@@ -646,6 +646,9 @@ impl SimpleComponent for Root {
                         SwitchOutput::ExcludeSpecialWorkspaces(exclude_special_workspaces) => {
                             r#ref.switch.exclude_special_workspaces = exclude_special_workspaces;
                         }
+                        SwitchOutput::KillKey(key) => {
+                            r#ref.switch.kill_key = key;
+                        }
                     },
                     WindowsOutput::Switch2(msg) => match msg {
                         SwitchOutput::Enabled(enabled) => {
@@ -677,6 +680,9 @@ impl SimpleComponent for Root {
                         }
                         SwitchOutput::ExcludeSpecialWorkspaces(exclude_special_workspaces) => {
                             r#ref.switch_2.exclude_special_workspaces = exclude_special_workspaces;
+                        }
+                        SwitchOutput::KillKey(key) => {
+                            r#ref.switch_2.kill_key = key;
                         }
                     },
                 }

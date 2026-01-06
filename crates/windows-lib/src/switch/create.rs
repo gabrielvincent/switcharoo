@@ -45,9 +45,11 @@ pub fn create_windows_switch_window(
         .build();
 
     let s_key = Key::from_name(switch.key.to_string()).context("invalid switch key")?;
+    let kill_key = Key::from_name(switch.kill_key.to_string()).context("invalid kill key")?;
     let key_controller = EventControllerKey::new();
     let event_sender_2 = event_sender.clone();
-    key_controller.connect_key_pressed(move |_, key, _, _| handle_key(key, s_key, &event_sender_2));
+    key_controller
+        .connect_key_pressed(move |_, key, _, _| handle_key(key, s_key, kill_key, &event_sender_2));
     let event_sender_3 = event_sender;
     let r#mod = switch.modifier;
     key_controller.connect_key_released(move |_, key, _, _| {
@@ -93,7 +95,12 @@ fn handle_release(key: Key, modifier: Modifier, event_sender: &Sender<TransferTy
     }
 }
 
-fn handle_key(key: Key, s_key: Key, event_sender: &Sender<TransferType>) -> Propagation {
+fn handle_key(
+    key: Key,
+    s_key: Key,
+    kill_key: Key,
+    event_sender: &Sender<TransferType>,
+) -> Propagation {
     match key {
         k if k == s_key || k == Key::l || k == Key::Right => {
             event_sender
@@ -127,9 +134,9 @@ fn handle_key(key: Key, s_key: Key, event_sender: &Sender<TransferType>) -> Prop
                 .warn_details("unable to send");
             Propagation::Stop
         }
-        Key::w => {
+        k if k == kill_key || k == Key::Delete => {
             event_sender
-                .send_blocking(TransferType::CloseSwitchItem)
+                .send_blocking(TransferType::CloseClientSwitch)
                 .warn_details("unable to send");
             Propagation::Stop
         }

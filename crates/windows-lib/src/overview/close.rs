@@ -1,8 +1,8 @@
 use crate::global::WindowsOverviewData;
 use core_lib::transfer::WindowsOverride;
 use core_lib::{FindByFirst, WarnWithDetails};
+use exec_lib::reset_no_follow_mouse;
 use exec_lib::switch::{switch_client, switch_workspace};
-use exec_lib::{reset_no_follow_mouse, to_client_address};
 use relm4::adw::gtk::glib;
 use relm4::adw::gtk::prelude::*;
 use tracing::{debug, debug_span, trace};
@@ -45,7 +45,7 @@ pub fn close_overview(data: &mut WindowsOverviewData, ids: Option<Option<Windows
                         .map_or_else(|| "<Unknown>".to_string(), |c| c.title.clone())
                 );
                 glib::idle_add_local(move || {
-                    switch_client(to_client_address(client_id))
+                    switch_client(client_id)
                         .warn_details(&format!("Failed to execute with id {client_id:?}"));
                     glib::ControlFlow::Break
                 });

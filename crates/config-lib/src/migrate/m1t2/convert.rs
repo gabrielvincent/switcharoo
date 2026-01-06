@@ -43,6 +43,7 @@ impl From<old_structs::Switch> for crate::Switch {
             key: "tab".into(),
             switch_workspaces: value.show_workspaces,
             exclude_special_workspaces: "".into(),
+            kill_key: 'q',
         }
     }
 }

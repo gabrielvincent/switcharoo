@@ -43,6 +43,7 @@ pub enum SwitchOutput {
     FilterMonitor(bool),
     SwitchWorkspaces(bool),
     ExcludeSpecialWorkspaces(String),
+    KillKey(char),
 }
 
 #[relm4::component(pub)]
@@ -178,6 +179,29 @@ impl SimpleComponent for Switch {
                         #[block_signal(h_6)]
                         set_text_if_different: &model.config.exclude_special_workspaces,
                         connect_changed[sender] => move |e| { sender.output_sender().emit(SwitchOutput::ExcludeSpecialWorkspaces(e.text().into())) } @h_6,
+                    }
+                },
+                gtk::Box {
+                    set_orientation: gtk::Orientation::Horizontal,
+                    set_spacing: 10,
+                    gtk::Label {
+                        set_label: "Key to kill window",
+                        #[watch]
+                        set_css_classes: if model.config.kill_key == model.prev_config.kill_key { &[] } else { &["blue-label"] },
+                    },
+                    gtk::Image::from_icon_name("dialog-information-symbolic") {
+                        set_cursor_by_name: "help",
+                        set_tooltip_text: Some("Press this key to kill the focused window")
+                    },
+                    gtk::Entry {
+                        set_input_purpose: gtk::InputPurpose::FreeForm,
+                        set_placeholder_text: Some("q"),
+                        set_hexpand: true,
+                        set_valign: Align::Center,
+                        #[watch]
+                        #[block_signal(h_7)]
+                        set_text_if_different: &model.config.kill_key.to_string(),
+                        connect_changed[sender] => move |e| { sender.output_sender().emit(SwitchOutput::KillKey(e.text().to_string().chars().next().unwrap_or('q'))) } @h_7,
                     }
                 },
             }

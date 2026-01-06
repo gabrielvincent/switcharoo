@@ -2,7 +2,7 @@ use crate::global::{WindowsOverviewConfig, WindowsOverviewData, WindowsOverviewM
 use anyhow::Context;
 use config_lib::{FilterBy, Overview, Windows};
 use core_lib::{HyprlandData, OVERVIEW_NAMESPACE};
-use exec_lib::{get_initial_active, get_monitors};
+use exec_lib::{collect, get_initial_active};
 use gtk4_layer_shell::{Edge, KeyboardMode, Layer, LayerShell};
 use relm4::adw::gtk::gdk::{Display, Monitor};
 use relm4::adw::gtk::prelude::*;
@@ -20,7 +20,7 @@ pub fn create_windows_overview_window(
     let _span = debug_span!("create_windows_overview_window").entered();
     let mut window_list = HashMap::new();
 
-    let monitors = get_monitors();
+    let monitors = collect::get_monitors();
     if let Ok(display) = Display::default().context("Could not connect to a display") {
         let gtk_monitors = display
             .monitors()
@@ -30,7 +30,7 @@ pub fn create_windows_overview_window(
 
         for gtk_monitor in gtk_monitors {
             let monitor_name = gtk_monitor.connector().unwrap_or_default();
-            if let Some(monitor) = monitors.iter().find(|m| m.name == monitor_name) {
+            if let Some(monitor) = monitors.iter().find(|m| m.connector == monitor_name) {
                 let workspaces_flow = FlowBox::builder()
                     .selection_mode(SelectionMode::None)
                     .orientation(Orientation::Horizontal)

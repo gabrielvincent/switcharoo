@@ -11,10 +11,14 @@ pub enum TransferType {
     SwitchOverview(SwitchOverviewConfig),
     /// send from the keybinds like arrow keys or tab on switch
     SwitchSwitch(SwitchSwitchConfig),
+    /// send from the gui itself when closing the overview
     CloseOverview(CloseOverviewConfig),
+    /// send from the gui itself when closing the switch
     CloseSwitch,
-    CloseSwitchItem,
-    RefreshSwitch(Box<TransferType>),
+    /// send from the gui itself when closing a client (Blocking)
+    CloseClientSwitch,
+    /// send from the gui itself when closing a client (Blocking)
+    CloseClientOverview,
     /// send from the gui itself when typing the launcher
     Type(String),
     /// send from pressing ESC or repressing openOverview

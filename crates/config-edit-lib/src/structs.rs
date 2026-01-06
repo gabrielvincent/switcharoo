@@ -85,6 +85,7 @@ pub struct Switch {
     pub current_monitor: bool,
     pub switch_workspaces: bool,
     pub exclude_special_workspaces: String,
+    pub kill_key: char,
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
@@ -225,6 +226,7 @@ impl From<Option<config_lib::Switch>> for Switch {
             current_monitor: v.filter_by.contains(&config_lib::FilterBy::CurrentMonitor),
             switch_workspaces: v.switch_workspaces,
             exclude_special_workspaces: v.exclude_special_workspaces.to_string(),
+            kill_key: v.kill_key,
         }
     }
 }
@@ -248,6 +250,7 @@ impl From<Switch> for Option<config_lib::Switch> {
                 filter_by: vec,
                 switch_workspaces: value.switch_workspaces,
                 exclude_special_workspaces: Box::from(value.exclude_special_workspaces),
+                kill_key: value.kill_key,
             })
         } else {
             None

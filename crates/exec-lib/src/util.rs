@@ -1,7 +1,7 @@
 use anyhow::{Context, anyhow};
 use core_lib::{Active, ClientId, notify_warn};
 use hyprland::ctl::reload;
-use hyprland::data::{Client, Clients, Monitor, Monitors, Workspace};
+use hyprland::data::{Client, Monitor, Workspace};
 use hyprland::keyword::Keyword;
 use hyprland::prelude::*;
 use semver::Version;
@@ -9,24 +9,6 @@ use std::sync::{Mutex, OnceLock};
 use std::thread;
 use std::time::Duration;
 use tracing::{debug, info, trace, warn};
-
-pub fn get_clients() -> Vec<Client> {
-    Clients::get().map_or(vec![], HyprDataVec::to_vec)
-}
-
-pub fn get_monitors() -> Vec<Monitor> {
-    Monitors::get().map_or(vec![], HyprDataVec::to_vec)
-}
-
-#[must_use]
-pub fn get_current_monitor() -> Option<Monitor> {
-    Monitor::get_active().ok()
-}
-
-pub fn reload_hyprland_config() -> anyhow::Result<()> {
-    debug!("Reloading hyprland config");
-    reload::call().context("Failed to reload hyprland config")
-}
 
 /// trim 0x from hexadecimal (base-16) string and convert to id
 ///
@@ -42,6 +24,11 @@ pub fn to_client_id(id: &hyprland::shared::Address) -> ClientId {
 #[must_use]
 pub fn to_client_address(id: ClientId) -> hyprland::shared::Address {
     hyprland::shared::Address::new(format!("{id:x}"))
+}
+
+pub fn reload_hyprland_config() -> anyhow::Result<()> {
+    debug!("Reloading hyprland config");
+    reload::call().context("Failed to reload hyprland config")
 }
 
 fn get_prev_follow_mouse() -> &'static Mutex<Option<String>> {

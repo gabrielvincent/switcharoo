@@ -1,7 +1,7 @@
 use crate::global::WindowsSwitchData;
 use core_lib::{FindByFirst, WarnWithDetails};
+use exec_lib::reset_no_follow_mouse;
 use exec_lib::switch::{switch_client, switch_workspace};
-use exec_lib::{reset_no_follow_mouse, to_client_address};
 use relm4::adw::gtk::glib;
 use relm4::adw::gtk::prelude::*;
 use tracing::{debug, debug_span, trace};
@@ -32,8 +32,7 @@ pub fn close_switch(data: &mut WindowsSwitchData, switch: bool) {
             );
             // we need to do this because the window might still be visible and have KeyboardMode::Exclusive
             glib::idle_add_local(move || {
-                switch_client(to_client_address(id))
-                    .warn_details(&format!("Failed to execute with id {id:?}"));
+                switch_client(id).warn_details(&format!("Failed to execute with id {id:?}"));
                 glib::ControlFlow::Break
             });
         } else {

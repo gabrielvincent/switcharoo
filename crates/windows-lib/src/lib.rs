@@ -5,19 +5,11 @@ mod global;
 mod icon;
 mod keybinds;
 mod next;
-mod overview;
+pub mod overview;
 mod sort;
-mod switch;
+pub mod switch;
 
 pub use css::get_css;
 pub use desktop_map::{get_icon_name_by_name_from_desktop_files, reload_class_to_icon_map};
 pub use global::{WindowsOverviewData, WindowsSwitchData};
 pub use keybinds::generate_open_keybinds;
-pub use overview::{
-    close_overview, create_windows_overview_window, open_overview, overview_already_hidden,
-    overview_already_open, stop_overview, update_overview,
-};
-pub use switch::{
-    close_switch, close_switch_item, create_windows_switch_window, open_switch, refresh_switch,
-    render_switch, stop_switch, switch_already_hidden, switch_already_open, update_switch,
-};

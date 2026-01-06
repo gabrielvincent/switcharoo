@@ -1,23 +1,26 @@
+use crate::util::to_client_address;
 use anyhow::Context;
-use core_lib::Warn;
+use core_lib::{ClientId, Warn};
 use hyprland::data::{Client, Monitors, Workspace, Workspaces};
 use hyprland::dispatch::{
     Dispatch, DispatchType, WindowIdentifier, WorkspaceIdentifierWithSpecial,
 };
 use hyprland::prelude::*;
-use hyprland::shared::{Address, WorkspaceId};
-use tracing::{debug, trace};
+use hyprland::shared::WorkspaceId;
+use tracing::{debug, instrument, trace};
 
-pub fn switch_client(address: Address) -> anyhow::Result<()> {
+#[instrument(level = "debug", ret(level = "trace"))]
+pub fn switch_client(address: ClientId) -> anyhow::Result<()> {
     debug!("execute switch to client: {address}");
     deactivate_special_workspace_if_needed().warn();
     Dispatch::call(DispatchType::FocusWindow(WindowIdentifier::Address(
-        address,
+        to_client_address(address),
     )))?;
     Dispatch::call(DispatchType::BringActiveToTop)?;
     Ok(())
 }
 
+#[instrument(level = "debug", ret(level = "trace"))]
 pub fn switch_client_by_initial_class(class: &str) -> anyhow::Result<()> {
     debug!("execute switch to client: {class} by initial_class");
     deactivate_special_workspace_if_needed().warn();
@@ -31,13 +34,7 @@ pub fn switch_client_by_initial_class(class: &str) -> anyhow::Result<()> {
     Ok(())
 }
 
-pub fn kill_client(address: Address) -> anyhow::Result<()> {
-    Dispatch::call(DispatchType::CloseWindow(WindowIdentifier::Address(
-        address,
-    )))?;
-    Ok(())
-}
-
+#[instrument(level = "debug", ret(level = "trace"))]
 pub fn switch_workspace(workspace_id: WorkspaceId) -> anyhow::Result<()> {
     deactivate_special_workspace_if_needed().warn();
 
@@ -62,6 +59,7 @@ pub fn switch_workspace(workspace_id: WorkspaceId) -> anyhow::Result<()> {
     Ok(())
 }
 
+#[instrument(level = "debug", ret(level = "trace"))]
 fn switch_special_workspace(workspace_id: WorkspaceId) -> anyhow::Result<()> {
     let special = Monitors::get()?
         .into_iter()
@@ -80,6 +78,7 @@ fn switch_special_workspace(workspace_id: WorkspaceId) -> anyhow::Result<()> {
     .context("failed to execute toggle special workspace")
 }
 
+#[instrument(level = "debug", ret(level = "trace"))]
 fn switch_normal_workspace(workspace_id: WorkspaceId) -> anyhow::Result<()> {
     debug!("execute switch to workspace {workspace_id}");
     Dispatch::call(DispatchType::Workspace(WorkspaceIdentifierWithSpecial::Id(
@@ -91,6 +90,7 @@ fn switch_normal_workspace(workspace_id: WorkspaceId) -> anyhow::Result<()> {
 /// always run when changing client or workspace
 ///
 /// if client on special workspace is opened the workspace is activated
+#[instrument(level = "debug", ret(level = "trace"))]
 fn deactivate_special_workspace_if_needed() -> anyhow::Result<()> {
     let active_ws = Workspace::get_active()
         .map(|w| w.name)

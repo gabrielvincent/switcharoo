@@ -28,10 +28,7 @@ use std::sync::{Mutex, OnceLock};
 use std::time::Duration;
 use std::{env, process, thread};
 use tracing::{debug, debug_span, error, info, trace};
-use windows_lib::{
-    WindowsOverviewData, WindowsSwitchData, create_windows_overview_window,
-    create_windows_switch_window,
-};
+use windows_lib::{WindowsOverviewData, WindowsSwitchData};
 
 pub fn start(
     config_file: PathBuf,
@@ -225,8 +222,9 @@ fn create_windows(
     if let Some(windows) = &config.windows {
         let mut windows_data = WindowsGlobal::default();
         if let Some(overview) = &windows.overview {
-            let overview_data = create_windows_overview_window(app, overview, windows)
-                .context("failed to create overview window")?;
+            let overview_data =
+                windows_lib::overview::create_windows_overview_window(app, overview, windows)
+                    .context("failed to create overview window")?;
             let launcher_data = create_windows_overview_launcher_window(
                 app,
                 &overview.launcher,
@@ -239,8 +237,13 @@ fn create_windows(
             debug!("Windows overview disabled");
         }
         if let Some(switch) = &windows.switch {
-            let switch_data = create_windows_switch_window(app, switch, windows, event_sender)
-                .context("failed to create switch window")?;
+            let switch_data = windows_lib::switch::create_windows_switch_window(
+                app,
+                switch,
+                windows,
+                event_sender,
+            )
+            .context("failed to create switch window")?;
             windows_data.switch = Some(switch_data);
         } else {
             debug!("Windows switch disabled");
