@@ -19,7 +19,7 @@ core-lib.workspace = true
 exec-lib.workspace = true
 async-channel.workspace = true
 config-lib.workspace = true
-regex = { version = "1.11.1" }
+regex.workspace = true
 
 [lints]
 workspace = true

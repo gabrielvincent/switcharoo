@@ -27,6 +27,7 @@ pub fn open_overview(
         filter_current_workspace: data.config.filter_current_workspace,
         filter_same_class: data.config.filter_same_class,
         sort_recent: false,
+        exclude_workspaces: data.config.exclude_workspaces.clone(),
     })
     .context("Failed to collect data")?;
     let remove_html = regex::Regex::new(r"<[^>]*>").context("Invalid regex")?;

@@ -1624,6 +1624,7 @@ dependencies = [
  "hyprshell-core-lib",
  "hyprshell-hyprland",
  "hyprshell-hyprland-plugin",
+ "regex",
  "semver",
  "tracing",
 ]

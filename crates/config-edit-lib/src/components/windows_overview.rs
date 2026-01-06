@@ -40,7 +40,7 @@ pub enum WindowsOverviewOutput {
     FilterSameClass(bool),
     FilterWorkspace(bool),
     FilterMonitor(bool),
-    ExcludeSpecialWorkspaces(String),
+    ExcludeWorkspaces(String),
 }
 
 #[relm4::component(pub)]
@@ -139,23 +139,23 @@ impl SimpleComponent for WindowsOverview {
                     set_orientation: gtk::Orientation::Horizontal,
                     set_spacing: 10,
                     gtk::Label {
-                        set_label: "Exclude special workspaces (TODO)",
+                        set_label: "Exclude workspaces",
                         #[watch]
-                        set_css_classes: if model.config.exclude_special_workspaces == model.prev_config.exclude_special_workspaces { &[] } else { &["blue-label"] },
+                        set_css_classes: if model.config.exclude_workspaces == model.prev_config.exclude_workspaces { &[] } else { &["blue-label"] },
                     },
                     gtk::Image::from_icon_name("dialog-information-symbolic") {
                         set_cursor_by_name: "help",
-                        set_tooltip_text: Some("Exclude special workspaces by regex \n(hyprctl workspaces -j | jq \".[].name\")")
+                        set_tooltip_text: Some("Exclude workspaces by regex \n(hyprctl workspaces -j | jq \".[].name\")")
                     },
                     gtk::Entry {
                         set_input_purpose: gtk::InputPurpose::FreeForm,
-                        set_placeholder_text: Some("special:(monitor|second)"),
+                        set_placeholder_text: Some("special:.*"),
                         set_hexpand: true,
                         set_valign: Align::Center,
                         #[watch]
                         #[block_signal(h_4)]
-                        set_text_if_different: &model.config.exclude_special_workspaces,
-                        connect_changed[sender] => move |e| { sender.output_sender().emit(WindowsOverviewOutput::ExcludeSpecialWorkspaces(e.text().into())); } @h_4,
+                        set_text_if_different: &model.config.exclude_workspaces,
+                        connect_changed[sender] => move |e| { sender.output_sender().emit(WindowsOverviewOutput::ExcludeWorkspaces(e.text().into())); } @h_4,
                     }
                 }
             }

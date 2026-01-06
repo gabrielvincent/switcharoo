@@ -1,3 +1,4 @@
+use crate::migrate::m3t4;
 use serde::Deserialize;
 use smart_default::SmartDefault;
 
@@ -24,7 +25,7 @@ pub struct Windows {
     #[default(None)]
     pub overview: Option<Overview>,
     #[default(None)]
-    pub switch: Option<crate::Switch>,
+    pub switch: Option<m3t4::Switch>,
 }
 
 #[derive(SmartDefault, Debug, Clone, PartialEq, Eq, Deserialize)]

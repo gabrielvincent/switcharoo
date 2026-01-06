@@ -15,7 +15,7 @@ fn scale<T: Into<f64>>(value: T, scale: f64) -> i32 {
     (value.into() / (15f64 - scale)) as i32
 }
 
-#[instrument(level = "debug")]
+#[instrument(level = "debug", skip_all)]
 #[allow(clippy::too_many_lines)]
 pub fn render_overview(
     data: &mut WindowsOverviewData,
@@ -63,7 +63,7 @@ pub fn render_overview(
                 }
                 button
             };
-            if workspace.name.starts_with("special:") {
+            if *wid < 0 {
                 workspace_button.add_css_class("special");
             }
             monitor_data.workspaces_flow.insert(&workspace_button, -1);

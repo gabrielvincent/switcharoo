@@ -52,13 +52,14 @@ pub fn switch_to_next(data: &mut WindowsSwitchData, config: &SwitchSwitchConfig)
     }
 }
 
-#[instrument(level = "debug", ret(level = "trace"))]
+#[instrument(level = "debug", skip_all)]
 pub fn update_data(data: &mut WindowsSwitchData) -> anyhow::Result<()> {
     let (clients_data, _) = collect_data(&SortConfig {
         filter_current_monitor: data.config.filter_current_monitor,
         filter_current_workspace: data.config.filter_current_workspace,
         filter_same_class: data.config.filter_same_class,
         sort_recent: true,
+        exclude_workspaces: data.config.exclude_workspaces.clone(),
     })
     .context("Failed to collect data")?;
 

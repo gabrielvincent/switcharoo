@@ -25,7 +25,7 @@ pub struct Overview {
     pub same_class: bool,
     pub current_workspace: bool,
     pub current_monitor: bool,
-    pub exclude_special_workspaces: String,
+    pub exclude_workspaces: String,
 }
 
 #[derive(Debug, Clone)]
@@ -84,7 +84,7 @@ pub struct Switch {
     pub current_workspace: bool,
     pub current_monitor: bool,
     pub switch_workspaces: bool,
-    pub exclude_special_workspaces: String,
+    pub exclude_workspaces: String,
     pub kill_key: char,
 }
 
@@ -225,7 +225,7 @@ impl From<Option<config_lib::Switch>> for Switch {
                 .contains(&config_lib::FilterBy::CurrentWorkspace),
             current_monitor: v.filter_by.contains(&config_lib::FilterBy::CurrentMonitor),
             switch_workspaces: v.switch_workspaces,
-            exclude_special_workspaces: v.exclude_special_workspaces.to_string(),
+            exclude_workspaces: v.exclude_workspaces.to_string(),
             kill_key: v.kill_key,
         }
     }
@@ -249,7 +249,7 @@ impl From<Switch> for Option<config_lib::Switch> {
                 key: Box::from(value.key),
                 filter_by: vec,
                 switch_workspaces: value.switch_workspaces,
-                exclude_special_workspaces: Box::from(value.exclude_special_workspaces),
+                exclude_workspaces: Box::from(value.exclude_workspaces),
                 kill_key: value.kill_key,
             })
         } else {
@@ -272,7 +272,7 @@ impl From<Option<config_lib::Overview>> for Overview {
                 .filter_by
                 .contains(&config_lib::FilterBy::CurrentWorkspace),
             current_monitor: v.filter_by.contains(&config_lib::FilterBy::CurrentMonitor),
-            exclude_special_workspaces: v.exclude_special_workspaces.to_string(),
+            exclude_workspaces: v.exclude_workspaces.to_string(),
         }
     }
 }
@@ -295,8 +295,7 @@ impl From<Overview> for Option<config_lib::Overview> {
                 key: Box::from(value.key),
                 modifier: value.modifier.into(),
                 filter_by: vec,
-                hide_filtered: false,
-                exclude_special_workspaces: Box::from(value.exclude_special_workspaces),
+                exclude_workspaces: Box::from(value.exclude_workspaces),
             })
         } else {
             None

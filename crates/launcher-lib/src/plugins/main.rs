@@ -85,7 +85,9 @@ pub fn get_sorted_launch_options(
         nucleo::pattern::Normalization::Smart,
     );
     let mut buf = Vec::new();
-    'outer: for mut r#match in matches {
+
+    // TODO add matching of keywords and execs but reduce their scores
+    'outer: for r#match in matches {
         if r#match.takes_args {
             for name in r#match.names {
                 if text

@@ -5,7 +5,8 @@ use core_lib::{
 };
 use hyprland::data::{Client, Clients, Monitor, Monitors, Workspace, Workspaces};
 use hyprland::prelude::*;
-use tracing::{debug_span, warn};
+use regex::Regex;
+use tracing::{debug_span, instrument, trace, warn};
 
 fn get_hypr_data() -> anyhow::Result<(Vec<Monitor>, Vec<Workspace>, Vec<Client>)> {
     let _span = debug_span!("get_hypr_data").entered();
@@ -31,7 +32,10 @@ fn get_hypr_data() -> anyhow::Result<(Vec<Monitor>, Vec<Workspace>, Vec<Client>)
 }
 
 #[allow(clippy::type_complexity)]
-pub fn collect_hypr_data() -> anyhow::Result<(
+#[instrument(level = "debug")]
+pub fn collect_hypr_data(
+    exclude_workspaces: Option<Regex>,
+) -> anyhow::Result<(
     Vec<(ClientId, ClientData)>,
     Vec<(WorkspaceId, WorkspaceData)>,
     Vec<(MonitorId, MonitorData)>,
@@ -39,8 +43,6 @@ pub fn collect_hypr_data() -> anyhow::Result<(
     WorkspaceId,
     MonitorId,
 )> {
-    let _span = debug_span!("convert_hypr_data").entered();
-
     let (monitors, workspaces, clients) =
         get_hypr_data().context("loading hyprland data failed")?;
 
@@ -91,7 +93,7 @@ pub fn collect_hypr_data() -> anyhow::Result<(
         wd
     };
 
-    let client_data = {
+    let mut client_data = {
         let mut cd: Vec<(ClientId, ClientData)> = Vec::with_capacity(clients.len());
 
         for client in clients {
@@ -125,6 +127,27 @@ pub fn collect_hypr_data() -> anyhow::Result<(
         }
         cd
     };
+
+    // we do this after the initial collection because then clients would complain
+    // about missing workspace
+    trace!(
+        "workspaces bevore filter by regex: {}",
+        workspace_data.len()
+    );
+    workspace_data = workspace_data
+        .into_iter()
+        .filter(|(_, ws)| {
+            exclude_workspaces
+                .as_ref()
+                .map(|reg| !reg.is_match(&ws.name))
+                .unwrap_or(true)
+        })
+        .collect();
+    trace!("workspaces after filter by regex: {}", workspace_data.len());
+    client_data = client_data
+        .into_iter()
+        .filter(|(_id, cl)| workspace_data.find_by_first(&cl.workspace).is_some())
+        .collect();
 
     workspace_data.sort_by(|a, b| a.0.cmp(&b.0));
     monitor_data.sort_by(|a, b| a.0.cmp(&b.0));

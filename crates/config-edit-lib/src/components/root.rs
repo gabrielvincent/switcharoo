@@ -609,10 +609,8 @@ impl SimpleComponent for Root {
                                 r#ref.overview.current_workspace = false;
                             }
                         }
-                        WindowsOverviewOutput::ExcludeSpecialWorkspaces(
-                            exclude_special_workspaces,
-                        ) => {
-                            r#ref.overview.exclude_special_workspaces = exclude_special_workspaces;
+                        WindowsOverviewOutput::ExcludeWorkspaces(exclude_workspaces) => {
+                            r#ref.overview.exclude_workspaces = exclude_workspaces;
                         }
                     },
                     WindowsOutput::Switch(msg) => match msg {
@@ -643,8 +641,8 @@ impl SimpleComponent for Root {
                         SwitchOutput::SwitchWorkspaces(enabled) => {
                             r#ref.switch.switch_workspaces = enabled;
                         }
-                        SwitchOutput::ExcludeSpecialWorkspaces(exclude_special_workspaces) => {
-                            r#ref.switch.exclude_special_workspaces = exclude_special_workspaces;
+                        SwitchOutput::ExcludeWorkspaces(exclude_special_workspaces) => {
+                            r#ref.switch.exclude_workspaces = exclude_special_workspaces;
                         }
                         SwitchOutput::KillKey(key) => {
                             r#ref.switch.kill_key = key;
@@ -678,8 +676,8 @@ impl SimpleComponent for Root {
                         SwitchOutput::SwitchWorkspaces(enabled) => {
                             r#ref.switch_2.switch_workspaces = enabled;
                         }
-                        SwitchOutput::ExcludeSpecialWorkspaces(exclude_special_workspaces) => {
-                            r#ref.switch_2.exclude_special_workspaces = exclude_special_workspaces;
+                        SwitchOutput::ExcludeWorkspaces(exclude_workspaces) => {
+                            r#ref.switch_2.exclude_workspaces = exclude_workspaces;
                         }
                         SwitchOutput::KillKey(key) => {
                             r#ref.switch_2.kill_key = key;

@@ -61,7 +61,7 @@ pub fn switch_to_next(data: &mut WindowsOverviewData, config: &SwitchOverviewCon
     }
 }
 
-#[instrument(level = "debug", ret(level = "trace"))]
+#[instrument(level = "debug", skip_all)]
 pub fn update_data(
     data: &mut WindowsOverviewData,
     event_sender: &Sender<TransferType>,
@@ -71,6 +71,7 @@ pub fn update_data(
         filter_current_workspace: data.config.filter_current_workspace,
         filter_same_class: data.config.filter_same_class,
         sort_recent: false,
+        exclude_workspaces: data.config.exclude_workspaces.clone(),
     })
     .context("Failed to collect data")?;
 

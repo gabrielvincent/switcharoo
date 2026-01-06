@@ -79,6 +79,9 @@ pub fn render_switch(
                 }
                 button
             };
+            if *wid < 0 {
+                workspace_button.add_css_class("special");
+            }
             data.main_flow.insert(&workspace_button, -1);
             data.workspaces.insert(*wid, workspace_button);
 

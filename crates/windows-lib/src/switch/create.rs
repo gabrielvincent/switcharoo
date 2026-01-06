@@ -74,6 +74,11 @@ pub fn create_windows_switch_window(
             filter_current_monitor: switch.filter_by.contains(&FilterBy::CurrentMonitor),
             filter_same_class: switch.filter_by.contains(&FilterBy::SameClass),
             switch_workspaces: switch.switch_workspaces,
+            exclude_workspaces: if switch.exclude_workspaces.is_empty() {
+                None
+            } else {
+                Some(switch.exclude_workspaces.clone())
+            },
         },
         window,
         main_flow: clients_flow,

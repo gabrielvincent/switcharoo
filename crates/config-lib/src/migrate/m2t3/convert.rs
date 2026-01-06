@@ -1,6 +1,7 @@
 use crate::migrate::m2t3::{NEXT_CONFIG_VERSION, old_structs};
+use crate::migrate::m3t4;
 
-impl From<old_structs::Config> for crate::Config {
+impl From<old_structs::Config> for m3t4::Config {
     fn from(value: old_structs::Config) -> Self {
         Self {
             windows: value.windows.map(old_structs::Windows::into),
@@ -9,7 +10,7 @@ impl From<old_structs::Config> for crate::Config {
     }
 }
 
-impl From<old_structs::Windows> for crate::Windows {
+impl From<old_structs::Windows> for m3t4::Windows {
     fn from(value: old_structs::Windows) -> Self {
         Self {
             scale: value.scale,
@@ -21,7 +22,7 @@ impl From<old_structs::Windows> for crate::Windows {
     }
 }
 
-impl From<old_structs::Overview> for crate::Overview {
+impl From<old_structs::Overview> for m3t4::Overview {
     fn from(value: old_structs::Overview) -> Self {
         Self {
             key: value.key,

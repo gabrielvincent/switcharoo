@@ -1,7 +1,6 @@
 use crate::LauncherData;
 use crate::plugins::{
-    SortableLaunchOption, SortedLaunchOption, StaticLaunchOption, get_sorted_launch_options,
-    get_static_launch_options,
+    SortedLaunchOption, StaticLaunchOption, get_sorted_launch_options, get_static_launch_options,
 };
 use async_channel::Sender;
 use config_lib::Modifier;
@@ -10,10 +9,7 @@ use core_lib::{WarnWithDetails, default};
 use relm4::adw::gtk::gdk::Cursor;
 use relm4::adw::gtk::pango::EllipsizeMode;
 use relm4::adw::gtk::prelude::*;
-use relm4::adw::gtk::{
-    Align, Button, IconSize, Image, Label, ListBox, ListBoxRow, Orientation, Overflow, Popover,
-    SelectionMode, glib,
-};
+use relm4::adw::gtk::{Align, Button, IconSize, Image, Label, ListBoxRow, Orientation, glib};
 use relm4::gtk;
 use std::collections::HashMap;
 use std::path::Path;
@@ -191,7 +187,7 @@ fn create_entry(
     }
     hbox.append(&exec);
 
-    let mut details_list = HashMap::new();
+    let details_list = HashMap::new();
     let index_label = Label::builder()
         .halign(Align::End)
         .valign(Align::Center)

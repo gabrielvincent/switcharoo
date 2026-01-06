@@ -2,9 +2,13 @@ use crate::sort::{
     sort_clients_by_position, sort_clients_by_recent, sort_monitor_by_x,
     sort_workspaces_by_position, sort_workspaces_by_recent,
 };
-use core_lib::{Active, ClientData, ClientId, FindByFirst, HyprlandData, MonitorData, MonitorId};
+use core_lib::{
+    Active, ClientData, ClientId, FindByFirst, HyprlandData, MonitorData, MonitorId,
+    WarnWithDetails,
+};
 use exec_lib::collect::collect_hypr_data;
-use tracing::{debug_span, trace, warn};
+use regex::Regex;
+use tracing::{debug, debug_span, trace, warn};
 
 #[allow(clippy::struct_excessive_bools)]
 #[derive(Debug, Clone, Default)]
@@ -13,10 +17,17 @@ pub struct SortConfig {
     pub filter_current_workspace: bool,
     pub filter_current_monitor: bool,
     pub filter_same_class: bool,
+    pub exclude_workspaces: Option<Box<str>>,
 }
 
 pub fn collect_data(config: &SortConfig) -> anyhow::Result<(HyprlandData, Active)> {
     let _span = debug_span!("collect_data").entered();
+
+    let exclude_workspaces = config.exclude_workspaces.as_ref().and_then(|reg| {
+        let reg = Regex::new(&reg).warn_details("invalid regex");
+        debug!("filtering special workspaces with regex: {reg:?}");
+        reg
+    });
 
     let (
         mut client_data,
@@ -25,7 +36,7 @@ pub fn collect_data(config: &SortConfig) -> anyhow::Result<(HyprlandData, Active
         active_client,
         active_ws,
         active_monitor,
-    ) = collect_hypr_data()?;
+    ) = collect_hypr_data(exclude_workspaces)?;
     client_data = update_client_position(client_data, &monitor_data);
     sort_monitor_by_x(&mut monitor_data);
     if config.sort_recent {

@@ -1,5 +1,5 @@
 use crate::migrate::m1t2::{NEXT_CONFIG_VERSION, old_structs};
-use crate::migrate::m2t3;
+use crate::migrate::{m2t3, m3t4};
 
 impl From<old_structs::Config> for m2t3::Config {
     fn from(value: old_structs::Config) -> Self {
@@ -35,7 +35,7 @@ impl From<old_structs::Overview> for m2t3::Overview {
     }
 }
 
-impl From<old_structs::Switch> for crate::Switch {
+impl From<old_structs::Switch> for m3t4::Switch {
     fn from(value: old_structs::Switch) -> Self {
         Self {
             filter_by: value.filter_by,
@@ -43,7 +43,6 @@ impl From<old_structs::Switch> for crate::Switch {
             key: "tab".into(),
             switch_workspaces: value.show_workspaces,
             exclude_special_workspaces: "".into(),
-            kill_key: 'q',
         }
     }
 }

@@ -79,6 +79,11 @@ pub fn create_windows_overview_window(
             filter_current_workspace: overview.filter_by.contains(&FilterBy::CurrentWorkspace),
             filter_current_monitor: overview.filter_by.contains(&FilterBy::CurrentMonitor),
             filter_same_class: overview.filter_by.contains(&FilterBy::SameClass),
+            exclude_workspaces: if overview.exclude_workspaces.is_empty() {
+                None
+            } else {
+                Some(overview.exclude_workspaces.clone())
+            },
         },
         window_list,
         active,

@@ -85,14 +85,13 @@ in
             "ctrl"
             "super"
           ]) "super";
-
-          exclude_special_workspaces = mkOpt "Exclude special workspaces regex" str "";
+          exclude_workspaces = mkOpt "Exclude workspaces regex" str "special:.*";
           filter_by = mkOpt "Filter by" (listOf (enum [
             "same_class"
             "current_monitor"
             "current_workspace"
           ])) [ ];
-          hide_filtered = mkOpt "Hide filtered windows" bool false;
+
           launcher = {
             width = mkOpt "Launcher width" int 650;
             launch_modifier = mkOpt "Launch modifier" (enum [
@@ -231,7 +230,8 @@ in
             "current_workspace"
           ])) [ "current_monitor" ];
           switch_workspaces = mkOpt "Switch workspaces" bool false;
-          exclude_special_workspaces = mkOpt "Exclude special workspaces regex" str "";
+          kill_key = mkOpt "Key to kill window" str "q";
+          exclude_workspaces = mkOpt "Exclude workspaces regex" str "";
         };
         switch_2 = {
           enable = mkOpt "Enable recent window switcher" bool false;
@@ -247,7 +247,8 @@ in
             "current_workspace"
           ])) [ "current_monitor" ];
           switch_workspaces = mkOpt "Switch workspaces" bool false;
-          exclude_special_workspaces = mkOpt "Exclude special workspaces regex" str "";
+          kill_key = mkOpt "Key to kill window" str "q";
+          exclude_workspaces = mkOpt "Exclude workspaces regex" str "";
         };
       };
     };
@@ -280,7 +281,7 @@ in
         }
       else
         {
-          text = builtins.toJSON ((customLib.filterDisabledAndDropEnable cfg.settings) // { version = 3; });
+          text = builtins.toJSON ((customLib.filterDisabledAndDropEnable cfg.settings) // { version = 4; });
         };
 
     xdg.configFile."hyprshell/styles.css" =

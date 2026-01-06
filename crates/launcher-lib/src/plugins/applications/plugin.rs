@@ -25,7 +25,7 @@ impl SortableLaunchOption {
         entry: &DesktopEntry,
         runs: &HashMap<Box<Path>, u64>,
         show_execs: bool,
-        show_actions_submenu: bool,
+        _show_actions_submenu: bool,
     ) -> Self {
         let (details, details_long) = if show_execs {
             match analyse_exec(&entry.exec) {

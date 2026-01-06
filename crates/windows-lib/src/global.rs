@@ -20,6 +20,7 @@ pub struct WindowsOverviewConfig {
     pub filter_current_workspace: bool,
     pub filter_current_monitor: bool,
     pub filter_same_class: bool,
+    pub exclude_workspaces: Option<Box<str>>,
 }
 
 #[derive(Debug)]
@@ -42,6 +43,7 @@ pub struct WindowsSwitchConfig {
     pub filter_current_monitor: bool,
     pub filter_same_class: bool,
     pub switch_workspaces: bool,
+    pub exclude_workspaces: Option<Box<str>>,
 }
 
 #[derive(Debug)]

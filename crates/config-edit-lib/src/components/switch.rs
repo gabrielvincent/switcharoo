@@ -42,7 +42,7 @@ pub enum SwitchOutput {
     FilterWorkspace(bool),
     FilterMonitor(bool),
     SwitchWorkspaces(bool),
-    ExcludeSpecialWorkspaces(String),
+    ExcludeWorkspaces(String),
     KillKey(char),
 }
 
@@ -51,6 +51,65 @@ impl SimpleComponent for Switch {
     type Init = SwitchInit;
     type Input = SwitchInput;
     type Output = SwitchOutput;
+
+    fn init(
+        init: Self::Init,
+        root: Self::Root,
+        sender: ComponentSender<Self>,
+    ) -> ComponentParts<Self> {
+        let outs = sender.output_sender().clone();
+        let ins = sender.input_sender().clone();
+        let keyboard_shortcut = KeyboardShortcut::builder()
+            .launch(KeyboardShortcutInit {
+                label: None,
+                icon: Some("keyboard-layout".to_string()),
+                init: Some((init.config.modifier, init.config.key.clone())),
+            })
+            .connect_receiver(move |_, out| {
+                #[allow(clippy::match_wildcard_for_single_variants)]
+                match out {
+                    KeyboardShortcutOutput::SetKey(r#mod, key) => {
+                        outs.emit(SwitchOutput::Key(key));
+                        outs.emit(SwitchOutput::Modifier(r#mod));
+                    }
+                    KeyboardShortcutOutput::OpenRequest => {
+                        ins.emit(SwitchInput::OpenKeyboardShortcut);
+                    }
+                    _ => {}
+                }
+            });
+
+        let model = Self {
+            name: init.name,
+            config: init.config.clone(),
+            prev_config: init.config,
+            keyboard_shortcut,
+        };
+        let widgets = view_output!();
+        ComponentParts { model, widgets }
+    }
+
+    fn update(&mut self, message: Self::Input, _sender: ComponentSender<Self>) {
+        trace!("switch::update: {message:?}");
+        match message {
+            SwitchInput::SetSwitch(config) => {
+                self.config = config;
+            }
+            SwitchInput::SetPrevSwitch(config) => {
+                self.prev_config = config;
+            }
+            SwitchInput::ResetSwitch => {
+                self.config = self.prev_config.clone();
+            }
+            SwitchInput::OpenKeyboardShortcut => {
+                self.keyboard_shortcut
+                    .emit(KeyboardShortcutInput::ShowKeyboardShortcutDialog(
+                        Some((self.config.modifier, self.config.key.clone())),
+                        None,
+                    ));
+            }
+        }
+    }
 
     view! {
         #[root]
@@ -158,27 +217,32 @@ impl SimpleComponent for Switch {
                         set_valign: Align::Center,
                     },
                 },
+            },
+            add_row = &gtk::Box {
+                set_orientation: gtk::Orientation::Horizontal,
+                set_css_classes: &["frame-row"],
+                set_spacing: 30,
                 gtk::Box {
                     set_orientation: gtk::Orientation::Horizontal,
                     set_spacing: 10,
                     gtk::Label {
-                        set_label: "Exclude special workspaces (TODO)",
+                        set_label: "Exclude workspaces",
                         #[watch]
-                        set_css_classes: if model.config.exclude_special_workspaces == model.prev_config.exclude_special_workspaces { &[] } else { &["blue-label"] },
+                        set_css_classes: if model.config.exclude_workspaces == model.prev_config.exclude_workspaces { &[] } else { &["blue-label"] },
                     },
                     gtk::Image::from_icon_name("dialog-information-symbolic") {
                         set_cursor_by_name: "help",
-                        set_tooltip_text: Some("Exclude special workspaces by regex \n(hyprctl workspaces -j | jq \".[].name\")")
+                        set_tooltip_text: Some("Exclude workspaces by regex \n(hyprctl workspaces -j | jq \".[].name\")")
                     },
                     gtk::Entry {
                         set_input_purpose: gtk::InputPurpose::FreeForm,
-                        set_placeholder_text: Some("special:(monitor|second)"),
+                        set_placeholder_text: Some("special:(htop)|irrelevant"),
                         set_hexpand: true,
                         set_valign: Align::Center,
                         #[watch]
                         #[block_signal(h_6)]
-                        set_text_if_different: &model.config.exclude_special_workspaces,
-                        connect_changed[sender] => move |e| { sender.output_sender().emit(SwitchOutput::ExcludeSpecialWorkspaces(e.text().into())) } @h_6,
+                        set_text_if_different: &model.config.exclude_workspaces,
+                        connect_changed[sender] => move |e| { sender.output_sender().emit(SwitchOutput::ExcludeWorkspaces(e.text().into())) } @h_6,
                     }
                 },
                 gtk::Box {
@@ -204,65 +268,6 @@ impl SimpleComponent for Switch {
                         connect_changed[sender] => move |e| { sender.output_sender().emit(SwitchOutput::KillKey(e.text().to_string().chars().next().unwrap_or('q'))) } @h_7,
                     }
                 },
-            }
-        }
-    }
-
-    fn init(
-        init: Self::Init,
-        root: Self::Root,
-        sender: ComponentSender<Self>,
-    ) -> ComponentParts<Self> {
-        let outs = sender.output_sender().clone();
-        let ins = sender.input_sender().clone();
-        let keyboard_shortcut = KeyboardShortcut::builder()
-            .launch(KeyboardShortcutInit {
-                label: None,
-                icon: Some("keyboard-layout".to_string()),
-                init: Some((init.config.modifier, init.config.key.clone())),
-            })
-            .connect_receiver(move |_, out| {
-                #[allow(clippy::match_wildcard_for_single_variants)]
-                match out {
-                    KeyboardShortcutOutput::SetKey(r#mod, key) => {
-                        outs.emit(SwitchOutput::Key(key));
-                        outs.emit(SwitchOutput::Modifier(r#mod));
-                    }
-                    KeyboardShortcutOutput::OpenRequest => {
-                        ins.emit(SwitchInput::OpenKeyboardShortcut);
-                    }
-                    _ => {}
-                }
-            });
-
-        let model = Self {
-            name: init.name,
-            config: init.config.clone(),
-            prev_config: init.config,
-            keyboard_shortcut,
-        };
-        let widgets = view_output!();
-        ComponentParts { model, widgets }
-    }
-
-    fn update(&mut self, message: Self::Input, _sender: ComponentSender<Self>) {
-        trace!("switch::update: {message:?}");
-        match message {
-            SwitchInput::SetSwitch(config) => {
-                self.config = config;
-            }
-            SwitchInput::SetPrevSwitch(config) => {
-                self.prev_config = config;
-            }
-            SwitchInput::ResetSwitch => {
-                self.config = self.prev_config.clone();
-            }
-            SwitchInput::OpenKeyboardShortcut => {
-                self.keyboard_shortcut
-                    .emit(KeyboardShortcutInput::ShowKeyboardShortcutDialog(
-                        Some((self.config.modifier, self.config.key.clone())),
-                        None,
-                    ));
             }
         }
     }

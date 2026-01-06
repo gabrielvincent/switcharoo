@@ -40,10 +40,8 @@ pub struct Overview {
     pub modifier: Modifier,
     #[default(Vec::new())]
     pub filter_by: Vec<FilterBy>,
-    #[default = false]
-    pub hide_filtered: bool,
-    #[default = ""]
-    pub exclude_special_workspaces: Box<str>,
+    #[default = "special:.*"]
+    pub exclude_workspaces: Box<str>,
 }
 
 #[derive(SmartDefault, Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]
@@ -188,7 +186,7 @@ pub struct Switch {
     #[default = false]
     pub switch_workspaces: bool,
     #[default = ""]
-    pub exclude_special_workspaces: Box<str>,
+    pub exclude_workspaces: Box<str>,
     #[default = 'q']
     pub kill_key: char,
 }

@@ -2,11 +2,10 @@ use crate::plugins::{PluginReturn, SortableLaunchOption};
 use core_lib::WarnWithDetails;
 use core_lib::default::get_default_desktop_file;
 use exec_lib::run::run_program;
-use std::env;
 use std::path::Path;
 use tracing::{debug, trace, warn};
 
-pub fn get_path_options(matches: &mut Vec<SortableLaunchOption>) {
+pub fn get_path_options(_matches: &mut Vec<SortableLaunchOption>) {
     return;
     // TODO
     // if text.starts_with('/') || text.starts_with('~') {

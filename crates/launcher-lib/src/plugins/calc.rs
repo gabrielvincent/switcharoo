@@ -3,7 +3,7 @@ use core_lib::WarnWithDetails;
 use relm4::adw::gtk::gdk::Display;
 use relm4::adw::gtk::prelude::DisplayExt;
 use std::sync::{OnceLock, RwLock};
-use tracing::{debug, trace};
+use tracing::debug;
 
 fn get_context() -> Option<&'static RwLock<rink_core::Context>> {
     static MAP_LOCK: OnceLock<Option<RwLock<rink_core::Context>>> = OnceLock::new();
@@ -20,7 +20,7 @@ pub fn init_context() {
     get_context();
 }
 
-pub fn get_calc_options(matches: &mut Vec<SortableLaunchOption>) {
+pub fn get_calc_options(_matches: &mut Vec<SortableLaunchOption>) {
     return;
     // TODO
     // let Some(context_lock) = get_context() else {
