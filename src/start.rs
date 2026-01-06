@@ -13,6 +13,7 @@ use core_lib::transfer::TransferType;
 use core_lib::{WarnWithDetails, notify, notify_resident, notify_warn};
 use exec_lib::listener::{hyprland_config_listener, monitor_listener};
 use launcher_lib::{LauncherData, create_windows_overview_launcher_window};
+use relm4::adw::gio;
 use relm4::adw::gtk::gdk::Display;
 use relm4::adw::gtk::prelude::*;
 use relm4::adw::gtk::{
@@ -103,11 +104,13 @@ pub fn start(
 pub struct Globals {
     pub windows: Option<WindowsGlobal>,
     pub app: Application,
+    pub active: bool,
 }
 
 #[derive(Debug, Default)]
 pub struct WindowsGlobal {
-    pub overview: Option<(WindowsOverviewData, LauncherData)>,
+    // bool ise used to indicate that the launcher is active
+    pub overview: Option<(WindowsOverviewData, LauncherData, bool)>,
     pub switch: Option<WindowsSwitchData>,
 }
 
@@ -201,6 +204,14 @@ fn activate(
         }
     };
 
+    let event_sender_2 = event_sender.clone();
+    gio::spawn_blocking(move || {
+        thread::sleep(Duration::from_millis(500));
+        event_sender_2
+            .send_blocking(TransferType::SetActive)
+            .warn_details("unable to send");
+    });
+
     glib::spawn_future_local(async move {
         event_handler(globals, event_receiver, event_sender).await;
         info!("Application exited, restarting");
@@ -218,6 +229,7 @@ fn create_windows(
     let mut global = Globals {
         windows: None,
         app: app.clone(),
+        active: false,
     };
     if let Some(windows) = &config.windows {
         let mut windows_data = WindowsGlobal::default();
@@ -232,7 +244,7 @@ fn create_windows(
                 &event_sender,
             )
             .context("failed to create launcher window")?;
-            windows_data.overview = Some((overview_data, launcher_data));
+            windows_data.overview = Some((overview_data, launcher_data, false));
         } else {
             debug!("Windows overview disabled");
         }

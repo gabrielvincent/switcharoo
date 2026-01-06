@@ -6,34 +6,47 @@ use core_lib::transfer::{
     CloseOverviewConfig, Direction, OpenSwitch, SwitchOverviewConfig, SwitchSwitchConfig,
     TransferType,
 };
-use relm4::adw::gtk::prelude::{ApplicationExt, EntryExt};
+use relm4::adw::gtk::prelude::ApplicationExt;
 use relm4::adw::gtk::{gio, glib};
-use tracing::{debug, trace, warn};
+use std::thread;
+use std::time::Duration;
+use tracing::{debug, info, instrument, trace, warn};
 
 #[allow(clippy::future_not_send)]
+#[instrument(level = "trace", skip_all)]
 pub async fn event_handler(
     mut globals: Globals,
     event_receiver: Receiver<TransferType>,
     event_sender: Sender<TransferType>,
 ) {
-    let _span = tracing::span!(tracing::Level::TRACE, "event_handler").entered();
     loop {
         if let Ok(transfer) = event_receiver.recv().await {
             let close_socket = matches!(transfer, TransferType::Restart);
             trace!("handling event: {transfer:?}");
+            if !globals.active
+                && transfer != TransferType::SetActive
+                && transfer != TransferType::Restart
+            {
+                debug!("Application is not active, ignoring event");
+                continue;
+            }
             match transfer {
                 TransferType::OpenOverview => open_overview(&mut globals, &event_sender),
                 TransferType::OpenSwitch(config) => open_switch(&mut globals, &config),
                 TransferType::SwitchOverview(config) => switch_overview(&mut globals, &config),
                 TransferType::SwitchSwitch(config) => switch_switch(&mut globals, &config),
-                TransferType::Exit => exit(&mut globals),
-                TransferType::Type(text) => r#type(&mut globals, &text, &event_sender),
-                TransferType::CloseOverview(config) => close_overview(&mut globals, config),
-                TransferType::CloseSwitch => close_switch(&mut globals),
-                TransferType::Restart => restart(&globals),
                 TransferType::CloseClientSwitch => close_client_switch(&mut globals, &event_sender),
                 TransferType::CloseClientOverview => {
                     close_client_overview(&mut globals, &event_sender);
+                }
+                TransferType::Type(text) => r#type(&mut globals, &text, &event_sender),
+                TransferType::CloseOverview(config) => close_overview(&mut globals, config),
+                TransferType::CloseSwitch => close_switch(&mut globals),
+                TransferType::CloseAll => close_all(&mut globals),
+                TransferType::Restart => restart(&mut globals),
+                TransferType::SetActive => {
+                    globals.active = true;
+                    info!("Application is now active");
                 }
             }
             if close_socket {
@@ -45,15 +58,17 @@ pub async fn event_handler(
 
 fn r#type(global: &mut Globals, text: &str, event_sender: &Sender<TransferType>) {
     if let Some(windows) = &mut global.windows
-        && let Some((_overview, launcher)) = &mut windows.overview
+        && let Some((_, launcher, launcher_active)) = &mut windows.overview
     {
+        *launcher_active = true;
         launcher_lib::update_launcher(launcher, text, event_sender);
     }
 }
 
 fn open_overview(global: &mut Globals, event_sender: &Sender<TransferType>) {
     if let Some(windows) = &mut global.windows {
-        if let Some((overview, launcher)) = &mut windows.overview {
+        if let Some((overview, launcher, launcher_active)) = &mut windows.overview {
+            *launcher_active = false;
             if !windows_lib::overview::overview_already_open(overview)
                 && !&windows
                     .switch
@@ -91,7 +106,7 @@ fn open_switch(global: &mut Globals, config: &OpenSwitch) {
                 && !&windows
                     .overview
                     .as_ref()
-                    .is_some_and(|(o, _)| windows_lib::overview::overview_already_open(o))
+                    .is_some_and(|(o, _, _)| windows_lib::overview::overview_already_open(o))
             {
                 windows_lib::switch::open_switch(switch, config)
                     .warn_details("Failed to open switch window");
@@ -131,7 +146,7 @@ fn switch_switch(global: &mut Globals, config: &SwitchSwitchConfig) {
 fn close_client_switch(global: &mut Globals, _event_sender: &Sender<TransferType>) {
     if let Some(windows) = &mut global.windows {
         if let Some(switch) = &mut windows.switch {
-            let success = windows_lib::switch::close_client_switch(switch)
+            let success = windows_lib::switch::close_item(switch)
                 .warn_details("Failed to close switch item")
                 .unwrap_or(false);
             if success {
@@ -154,10 +169,25 @@ fn close_client_switch(global: &mut Globals, _event_sender: &Sender<TransferType
     }
 }
 
-fn close_client_overview(global: &mut Globals, _event_sender: &Sender<TransferType>) {
+fn close_client_overview(global: &mut Globals, event_sender: &Sender<TransferType>) {
     if let Some(windows) = &mut global.windows {
-        if let Some(_overview) = &mut windows.overview {
-            // TODO
+        if let Some((overview, _, _)) = &mut windows.overview {
+            let success = windows_lib::overview::close_client(overview)
+                .warn_details("Failed to close switch item")
+                .unwrap_or(false);
+            if success {
+                windows_lib::overview::switch_to_next(
+                    overview,
+                    &SwitchOverviewConfig {
+                        direction: Direction::Right,
+                        workspace: false,
+                    },
+                );
+                windows_lib::overview::update_data(overview, event_sender)
+                    .warn_details("unable to update switch data");
+            } else {
+                windows_lib::overview::close_overview(overview, Some(None));
+            }
         } else {
             warn!("Window overview not active");
         }
@@ -168,11 +198,9 @@ fn close_client_overview(global: &mut Globals, _event_sender: &Sender<TransferTy
 
 fn switch_overview(global: &mut Globals, config: &SwitchOverviewConfig) {
     if let Some(windows) = &mut global.windows {
-        if let Some((overview, launcher)) = &mut windows.overview {
-            // don't switch selected window if launcher is active
-            let launch = launcher.entry.text_length() > 0;
-            if !launch {
-                windows_lib::overview::update_overview(overview, config);
+        if let Some((overview, _, launcher_active)) = &mut windows.overview {
+            if !*launcher_active {
+                windows_lib::overview::switch_to_next(overview, config);
             }
         } else {
             warn!("Window switch not active");
@@ -182,9 +210,9 @@ fn switch_overview(global: &mut Globals, config: &SwitchOverviewConfig) {
     }
 }
 
-fn exit(global: &mut Globals) {
+fn close_all(global: &mut Globals) {
     if let Some(windows) = &mut global.windows {
-        if let Some((overview, launcher)) = &mut windows.overview {
+        if let Some((overview, launcher, _)) = &mut windows.overview {
             windows_lib::overview::close_overview(overview, None);
             launcher_lib::close_launcher_by_char(launcher, None); // this will never open a program and need the default terminal
         }
@@ -196,7 +224,7 @@ fn exit(global: &mut Globals) {
 
 fn close_overview(global: &mut Globals, config: CloseOverviewConfig) {
     if let Some(windows) = &mut global.windows
-        && let Some((overview, launcher)) = &mut windows.overview
+        && let Some((overview, launcher, launcher_active)) = &mut windows.overview
     {
         if windows_lib::overview::overview_already_hidden(overview) {
             debug!("Overview is already closed");
@@ -205,19 +233,18 @@ fn close_overview(global: &mut Globals, config: CloseOverviewConfig) {
         match config {
             // return (focus active)
             CloseOverviewConfig::None => {
-                let launcher_empty = launcher.entry.text_length() == 0;
-                let other_active = overview.active != overview.initial_active;
-                let launcher_no_items = launcher.sorted_matches.is_empty();
-                if launcher_empty && other_active {
+                if *launcher_active {
+                    if launcher.sorted_matches.is_empty() {
+                        debug!("Launcher is empty, not closing");
+                    } else {
+                        // kill overview, close launcher
+                        windows_lib::overview::close_overview(overview, None);
+                        launcher_lib::close_launcher_by_char(launcher, Some('0'));
+                    }
+                } else {
                     // close overview, kill launcher
                     windows_lib::overview::close_overview(overview, Some(None));
                     launcher_lib::close_launcher_by_char(launcher, None);
-                } else if launcher_no_items {
-                    debug!("Launcher is empty, not closing");
-                } else {
-                    // kill overview, close launcher
-                    windows_lib::overview::close_overview(overview, None);
-                    launcher_lib::close_launcher_by_char(launcher, Some('0'));
                 }
             }
             // clicked on launcher item
@@ -251,10 +278,10 @@ fn close_switch(global: &mut Globals) {
     }
 }
 
-fn restart(global: &Globals) {
-    // TODO block some time after recreating windows
+fn restart(global: &mut Globals) {
+    global.active = false;
     if let Some(windows) = &global.windows {
-        if let Some((overview, launcher)) = &windows.overview {
+        if let Some((overview, launcher, _)) = &windows.overview {
             windows_lib::overview::stop_overview(overview);
             launcher_lib::stop_launcher(launcher);
         }
@@ -263,7 +290,9 @@ fn restart(global: &Globals) {
         }
     }
     let app = global.app.clone();
+    thread::sleep(Duration::from_millis(500));
     glib::idle_add_local_once(move || {
         app.quit();
+        debug!("application closed");
     });
 }

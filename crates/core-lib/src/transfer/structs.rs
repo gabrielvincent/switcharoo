@@ -1,7 +1,7 @@
 use crate::{ClientId, WorkspaceId};
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub enum TransferType {
     /// send from the keybind to open the overview
     OpenOverview,
@@ -22,27 +22,29 @@ pub enum TransferType {
     /// send from the gui itself when typing the launcher
     Type(String),
     /// send from pressing ESC or repressing openOverview
-    Exit,
+    CloseAll,
     /// send from the app itself when new monitor / config changes detected
     Restart,
+    /// send from the app itself, 500ms after starting
+    SetActive,
 }
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub struct OpenSwitch {
     pub reverse: bool,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub struct SwitchOverviewConfig {
     pub direction: Direction,
     pub workspace: bool,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub struct SwitchSwitchConfig {
     pub direction: Direction,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub enum CloseOverviewConfig {
     LauncherClick(Identifier),
     LauncherPress(char),
@@ -50,7 +52,7 @@ pub enum CloseOverviewConfig {
     None,
 }
 
-#[derive(Debug, Copy, Clone, Eq, PartialEq, Hash, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Copy, Clone, Eq, PartialEq, Hash)]
 pub enum PluginNames {
     Applications,
     Shell,
@@ -103,7 +105,7 @@ impl Identifier {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub enum WindowsOverride {
     ClientId(ClientId),
     WorkspaceID(WorkspaceId),

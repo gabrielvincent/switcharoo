@@ -6,7 +6,7 @@ use tracing::debug;
 
 const TIMEOUT: Duration = Duration::from_millis(100);
 
-pub fn close_client_switch(data: &WindowsSwitchData) -> anyhow::Result<bool> {
+pub fn close_item(data: &WindowsSwitchData) -> anyhow::Result<bool> {
     if data.config.switch_workspaces {
         kill_switch_workspace(data)
     } else {

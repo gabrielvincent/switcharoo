@@ -80,7 +80,7 @@ pub fn get_initial_active() -> anyhow::Result<Active> {
                 if tries > 40 {
                     break Err(e);
                 }
-                warn!("waiting for correct initial active state: {e:?}");
+                warn!("waiting for correct initial active state from hyprland: {e:?}");
                 thread::sleep(Duration::from_millis(500));
             }
         }
@@ -144,7 +144,7 @@ fn get_version() -> anyhow::Result<hyprland::data::Version> {
                 if tries > 40 {
                     break Err(anyhow!(e));
                 }
-                warn!("waiting for correct initial active state: {e:?}");
+                warn!("waiting for correct version from hyprland: {e:?}");
                 thread::sleep(Duration::from_millis(500));
             }
         }

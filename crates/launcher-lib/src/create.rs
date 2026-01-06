@@ -168,7 +168,7 @@ fn handle_key(
     match (launch_mod, key) {
         (_, Key::Escape) => {
             event_sender
-                .send_blocking(TransferType::Exit)
+                .send_blocking(TransferType::CloseAll)
                 .warn_details("unable to send");
             Propagation::Stop
         }

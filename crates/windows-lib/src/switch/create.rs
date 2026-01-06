@@ -102,6 +102,12 @@ fn handle_key(
     event_sender: &Sender<TransferType>,
 ) -> Propagation {
     match key {
+        Key::Escape => {
+            event_sender
+                .send_blocking(TransferType::CloseAll)
+                .warn_details("unable to send");
+            Propagation::Stop
+        }
         k if k == s_key || k == Key::l || k == Key::Right => {
             event_sender
                 .send_blocking(TransferType::SwitchSwitch(SwitchSwitchConfig {

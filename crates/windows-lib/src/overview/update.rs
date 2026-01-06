@@ -1,11 +1,15 @@
+use crate::data::{SortConfig, collect_data};
 use crate::global::WindowsOverviewData;
 use crate::next::{find_next_client, find_next_workspace};
-use core_lib::transfer::{Direction, SwitchOverviewConfig};
+use crate::overview::render::render_overview;
+use anyhow::Context;
+use async_channel::Sender;
+use core_lib::transfer::{Direction, SwitchOverviewConfig, TransferType};
 use relm4::adw::gtk::prelude::*;
-use tracing::{debug_span, error};
+use tracing::{debug_span, error, instrument};
 
-pub fn update_overview(data: &mut WindowsOverviewData, config: &SwitchOverviewConfig) {
-    let _span = debug_span!("update_overview").entered();
+pub fn switch_to_next(data: &mut WindowsOverviewData, config: &SwitchOverviewConfig) {
+    let _span = debug_span!("switch_to_next").entered();
 
     let active = if config.workspace {
         find_next_workspace(
@@ -55,4 +59,22 @@ pub fn update_overview(data: &mut WindowsOverviewData, config: &SwitchOverviewCo
             }
         }
     }
+}
+
+#[instrument(level = "debug", ret(level = "trace"))]
+pub fn update_data(
+    data: &mut WindowsOverviewData,
+    event_sender: &Sender<TransferType>,
+) -> anyhow::Result<()> {
+    let (hypr_data, _) = collect_data(&SortConfig {
+        filter_current_monitor: data.config.filter_current_monitor,
+        filter_current_workspace: data.config.filter_current_workspace,
+        filter_same_class: data.config.filter_same_class,
+        sort_recent: false,
+    })
+    .context("Failed to collect data")?;
+
+    let remove_html = regex::Regex::new(r"<[^>]*>").context("Invalid regex")?;
+    render_overview(data, hypr_data, data.active, &remove_html, event_sender);
+    Ok(())
 }
