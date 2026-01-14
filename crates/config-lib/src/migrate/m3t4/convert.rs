@@ -27,7 +27,7 @@ impl From<old_structs::Overview> for crate::Overview {
             key: value.key,
             modifier: value.modifier,
             filter_by: value.filter_by,
-            launcher: value.launcher.into(),
+            launcher: value.launcher,
             exclude_workspaces: value.exclude_special_workspaces,
         }
     }

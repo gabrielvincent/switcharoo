@@ -43,6 +43,7 @@ pub struct Overview {
 
 #[derive(SmartDefault, Debug, Clone, PartialEq, Eq, Deserialize)]
 #[serde(default, deny_unknown_fields)]
+#[allow(clippy::struct_field_names)]
 pub struct Switch {
     #[default(crate::Modifier::Alt)]
     pub modifier: crate::Modifier,

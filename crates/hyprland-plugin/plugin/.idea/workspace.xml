@@ -33,17 +33,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="841e5689-e8a3-4a78-b7a4-76d1dbd901c1" name="Changes" comment="fix: cancel key events when opening hyprshell overview and switch">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Makefile" beforeDir="false" afterPath="$PROJECT_DIR$/Makefile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/defs-test.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/defs-test.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/defs.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/defs.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/globals.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/globals.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/handlers.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/handlers.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/init.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/init.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/key-press.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/key-press.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/keyboard-focus.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/keyboard-focus.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/layer-change.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/layer-change.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/mouse-button.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/mouse-button.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../config-lib/src/migrate/m3t4/convert.rs" beforeDir="false" afterPath="$PROJECT_DIR$/../../config-lib/src/migrate/m3t4/convert.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../config-lib/src/migrate/m3t4/old_structs.rs" beforeDir="false" afterPath="$PROJECT_DIR$/../../config-lib/src/migrate/m3t4/old_structs.rs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -142,7 +133,7 @@
     "SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "cf.first.check.clang-format": "false",
     "cidr.known.project.marker": "true",
-    "git-widget-placeholder": "hyprshell-conf-editor",
+    "git-widget-placeholder": "hyprshell",
     "last_opened_file_path": "/home/user/RustroverProjects/hyprshell/crates/hyprland-plugin/plugin",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
@@ -154,11 +145,6 @@
   }
 }]]></component>
   <component name="RunManager" selected="Makefile Target.build-combined">
-    <configuration default="true" type="CLionExternalRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true">
-      <method v="2">
-        <option name="CLION.EXTERNAL.BUILD" enabled="true" />
-      </method>
-    </configuration>
     <configuration name="all" type="CLionNativeAppRunConfigurationType" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="plugin" TARGET_NAME="all" CONFIG_NAME="all" version="1">
       <method v="2">
         <option name="CLION.COMPOUND.BUILD" enabled="true" />
@@ -439,6 +425,7 @@
       <workItem from="1757544674626" duration="5012000" />
       <workItem from="1766704524077" duration="509000" />
       <workItem from="1767562310610" duration="8026000" />
+      <workItem from="1768089070894" duration="9000" />
     </task>
     <task id="LOCAL-00001" summary="fix: cancel key events when opening hyprshell overview and switch">
       <option name="closed" value="true" />
