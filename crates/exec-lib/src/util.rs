@@ -107,7 +107,7 @@ fn internal_get_initial_active() -> anyhow::Result<Active> {
     })
 }
 
-pub fn check_version() -> anyhow::Result<()> {
+pub fn check_version() -> anyhow::Result<Version> {
     pub const MIN_VERSION: Version = Version::new(0, 52, 1);
 
     let version = get_version()
@@ -132,7 +132,7 @@ pub fn check_version() -> anyhow::Result<()> {
             "hyprland version {parsed_version} is too old or unknown, please update to at least {MIN_VERSION}",
         ));
     }
-    Ok(())
+    Ok(parsed_version)
 }
 
 fn get_version() -> anyhow::Result<hyprland::data::Version> {

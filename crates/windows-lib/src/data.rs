@@ -36,7 +36,7 @@ pub fn collect_data(config: &SortConfig) -> anyhow::Result<(HyprlandData, Active
         active_client,
         active_ws,
         active_monitor,
-    ) = collect_hypr_data(exclude_workspaces)?;
+    ) = collect_hypr_data(exclude_workspaces.as_ref())?;
     client_data = update_client_position(client_data, &monitor_data);
     sort_monitor_by_x(&mut monitor_data);
     if config.sort_recent {
