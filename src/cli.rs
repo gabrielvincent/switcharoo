@@ -7,7 +7,7 @@ use std::path::PathBuf;
     author,
     version,
     about,
-    long_about = "A modern GTK4-based window switcher and application launcher for Hyprland"
+    long_about = "A modern GTK4-based window switcher for Hyprland"
 )]
 pub struct App {
     #[clap(flatten)]
@@ -27,31 +27,31 @@ pub struct GlobalOpts {
     #[arg(short = 'q', long, global = true)]
     pub quiet: bool,
 
-    /// Path to config [default: `$XDG_CONFIG_HOME/hyprshell/config.ron`],
+    /// Path to config [default: `$XDG_CONFIG_HOME/switcharoo/config.ron`],
     /// allowed file types: ron, toml, json5
     #[arg(short = 'c', long, global = true)]
     pub config_file: Option<PathBuf>,
 
-    /// Path to css [default: `$XDG_CONFIG_HOME/hyprshell/styles.css`]
+    /// Path to css [default: `$XDG_CONFIG_HOME/switcharoo/styles.css`]
     #[arg(long, short = 's', global = true)]
     pub css_file: Option<PathBuf>,
 
-    /// Path to data directory [default: `$XDG_DATA_HOME/hyprshell`]
+    /// Path to data directory [default: `$XDG_DATA_HOME/switcharoo`]
     #[arg(long, global = true)]
     pub data_dir: Option<PathBuf>,
 
-    /// Path to cache directory [default: `$XDG_CACHE_HOME/hyprshell`]
+    /// Path to cache directory [default: `$XDG_CACHE_HOME/switcharoo`]
     #[arg(long, global = true)]
     pub cache_dir: Option<PathBuf>,
 
-    /// Path to system data directory [default: `/usr/share/hyprshell`]
+    /// Path to system data directory [default: `/usr/share/switcharoo`]
     #[arg(long, global = true)]
     pub system_data_dir: Option<PathBuf>,
 }
 
 #[derive(Subcommand, Debug, Clone)]
 pub enum Command {
-    /// Run the hyprshell daemon
+    /// Run the switcharoo daemon
     Run {},
 
     /// Generate or check the config file
@@ -67,13 +67,7 @@ pub enum Command {
         command: DebugCommand,
     },
 
-    /// Show data, like launch history, etc.
-    Data {
-        #[clap(subcommand)]
-        command: DataCommand,
-    },
-
-    /// Send json to the hyprshell socket
+    /// Send json to the switcharoo socket
     #[clap(hide = true)]
     Socat {
         /// JSON to send to the socket
@@ -100,12 +94,6 @@ pub enum Command {
 
 #[derive(Subcommand, Debug, Clone)]
 pub enum ConfigCommand {
-    /// Generate a default config file (just opens GUI editor)
-    Generate {},
-
-    /// Edit the config file with a GUI
-    Edit {},
-
     /// Check the config file for errors
     Check {},
 
@@ -122,15 +110,6 @@ pub enum ConfigCommand {
 }
 
 #[derive(Subcommand, Debug, Clone)]
-pub enum DataCommand {
-    /// Show the history of launched applications
-    LaunchHistory {
-        /// weeks to include in the history, defaults to set config value
-        run_cache_weeks: Option<u8>,
-    },
-}
-
-#[derive(Subcommand, Debug, Clone)]
 pub enum DebugCommand {
     /// List all icons in the theme
     ListIcons,
@@ -144,16 +123,6 @@ pub enum DebugCommand {
         ///
         /// If not provided, all open windows will be searched
         class: Option<String>,
-    },
-
-    /// simulate search in launcher and display search insights
-    Search {
-        /// text entered into the search box
-        text: String,
-
-        /// Show all matches, not just x ones like configured in config
-        #[arg(short = 'a', long)]
-        all: bool,
     },
 
     /// get or set default applications for different mime types
@@ -192,7 +161,7 @@ pub enum DefaultApplicationsCommand {
 
     /// List default apps for all mimetypes
     List {
-        /// Show all mimes instead of ony the ones used by hyprshell
+        /// Show all mimes instead of ony the ones used by switcharoo
         #[arg(short = 'a', long)]
         all: bool,
     },

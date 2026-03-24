@@ -10,7 +10,7 @@ pub const PLUGIN_NAME: &str = env!("CARGO_PKG_NAME");
 pub const PLUGIN_AUTHOR: &str = env!("CARGO_PKG_AUTHORS");
 pub const PLUGIN_DESC: &str = env!("CARGO_PKG_DESCRIPTION");
 pub const PLUGIN_VERSION: &str = env!("CARGO_PKG_VERSION");
-pub const PLUGIN_OUTPUT_PATH: &str = "/tmp/hyprshell.so";
+pub const PLUGIN_OUTPUT_PATH: &str = "/tmp/switcharoo.so";
 
 static ASSET_ZIP_52: &[u8] = include_bytes!(concat!(env!("OUT_DIR"), "/52/plugin.zip"));
 static ASSET_ZIP_54: &[u8] = include_bytes!(concat!(env!("OUT_DIR"), "/54/plugin.zip"));

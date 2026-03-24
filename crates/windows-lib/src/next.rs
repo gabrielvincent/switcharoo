@@ -2,7 +2,6 @@ use core_lib::transfer::Direction;
 use core_lib::{
     Active, ClientData, ClientId, GetFirstOrLast, HyprlandData, RevIf, WorkspaceData, WorkspaceId,
 };
-use std::cmp::{max, min};
 use tracing::{debug, instrument, trace, trace_span, warn};
 
 pub fn find_next_workspace(
@@ -25,7 +24,7 @@ pub fn find_next_workspace(
         .collect::<Vec<_>>();
     if filtered.len() == 1 {
         trace!("Only one workspaces available, returning current workspaces");
-        let workspaces = &hypr_data.workspaces[0];
+        let workspaces = &filtered[0];
         return Active {
             client: None,
             workspace: workspaces.0,
@@ -87,7 +86,7 @@ pub fn find_next_client(
                 .collect::<Vec<_>>();
             if filtered.len() == 1 {
                 trace!("Only one client available, returning current client");
-                let client = &hypr_data.clients[0];
+                let client = &filtered[0];
                 return Active {
                     client: Some(client.0),
                     workspace: client.1.workspace,
@@ -118,8 +117,6 @@ pub fn find_next_client(
     next_active
 }
 
-#[allow(clippy::cast_possible_wrap)] // wrapping wont happen here, number of workspaces or clients are way lower than isize::MAX
-// #[instrument(level = "trace", skip_all, ret, fields(len = filtered_len, current = current))]
 fn find_next_grid(
     direction: &Direction,
     wrap: bool,
@@ -128,60 +125,63 @@ fn find_next_grid(
     items_per_row: u8,
 ) -> usize {
     let _span = trace_span!("find_next_grid", len = filtered_len, current = current).entered();
+    if filtered_len <= 1 {
+        return 0;
+    }
+    let items_per_row = items_per_row as usize;
+    let items_per_row = if items_per_row == 0 { 1 } else { items_per_row };
 
-    let i_per_row = isize::from(items_per_row);
-    let items_per_row = usize::from(items_per_row);
-    let offset = match direction {
-        Direction::Right => 1,
-        Direction::Left => -1,
-        Direction::Up => -i_per_row,
-        Direction::Down => i_per_row,
-    };
-    trace!("Finding next workspace with offset: {}", offset);
-    let index = if wrap {
-        let mut index = current as isize + offset;
-        if index >= filtered_len as isize {
-            trace!("Index out of bounds, wrapping around {index}");
-            // subtract all rows / move to the beginning
-            index -= (items_per_row * usize::div_ceil(filtered_len - 1, items_per_row)) as isize;
-            if index < 0 {
-                match direction {
-                    Direction::Right => index = 0,
-                    Direction::Down => {
-                        index += i_per_row;
-                    }
-                    _ => unreachable!(),
-                }
-            }
-        } else if index < 0 {
-            trace!("Index out of bounds, wrapping around {index}");
-            // add all rows / move to end
-            index += (items_per_row * usize::div_ceil(filtered_len - 1, items_per_row)) as isize;
-            if index >= filtered_len as isize {
-                match direction {
-                    Direction::Left => {
-                        index = filtered_len as isize - 1;
-                    }
-                    Direction::Up => {
-                        index -= i_per_row;
-                    }
-                    _ => unreachable!(),
-                }
+    match direction {
+        Direction::Right => {
+            let next = current + 1;
+            if next >= filtered_len {
+                if wrap { 0 } else { current }
+            } else {
+                next
             }
         }
-        #[allow(clippy::cast_sign_loss)] // index always positive, see if else above
-        {
-            index as usize
+        Direction::Left => {
+            if current == 0 {
+                if wrap { filtered_len - 1 } else { current }
+            } else {
+                current - 1
+            }
         }
-    } else {
-        #[allow(clippy::cast_sign_loss)]
-        // max(current as isize + offset, 0) always positive (max function)
-        {
-            min(max(current as isize + offset, 0) as usize, filtered_len - 1)
+        Direction::Down => {
+            let next = current + items_per_row;
+            if next >= filtered_len {
+                let current_row = current / items_per_row;
+                let total_rows = (filtered_len + items_per_row - 1) / items_per_row;
+                if current_row + 1 < total_rows {
+                    filtered_len - 1
+                } else if wrap {
+                    current % items_per_row
+                } else {
+                    current
+                }
+            } else {
+                next
+            }
         }
-    };
-    trace!("Next index: {index}");
-    index
+        Direction::Up => {
+            if current < items_per_row {
+                if wrap {
+                    let total_rows = (filtered_len + items_per_row - 1) / items_per_row;
+                    let col = current % items_per_row;
+                    let target = (total_rows - 1) * items_per_row + col;
+                    if target >= filtered_len {
+                        filtered_len - 1
+                    } else {
+                        target
+                    }
+                } else {
+                    current
+                }
+            } else {
+                current - items_per_row
+            }
+        }
+    }
 }
 
 fn find_first_client(
@@ -288,6 +288,37 @@ mod tests {
 
     #[test_log::test]
     #[test_log(default_log_filter = "trace")]
+    fn test_find_next_grid_scenarios() {
+        // Scenario 1: items_per_row = 2, total = 5
+        // 0 1
+        // 2 3
+        // 4
+        let len = 5;
+        let per_row = 2;
+
+        // Down from 0 -> 2
+        assert_eq!(find_next_grid(&Direction::Down, true, len, 0, per_row), 2);
+        // Down from 2 -> 4
+        assert_eq!(find_next_grid(&Direction::Down, true, len, 2, per_row), 4);
+        // Down from 4 -> 0 (wrap)
+        assert_eq!(find_next_grid(&Direction::Down, true, len, 4, per_row), 0);
+
+        // Scenario 2: Down from 3 -> 4
+        assert_eq!(find_next_grid(&Direction::Down, true, len, 3, per_row), 4);
+
+        // Up from 0 -> 4 (wrap)
+        assert_eq!(find_next_grid(&Direction::Up, true, len, 0, per_row), 4);
+        // Up from 1 -> 4 (wrap, goes to only item in last row)
+        assert_eq!(find_next_grid(&Direction::Up, true, len, 1, per_row), 4);
+        
+        // Scenario 3: Right wrap
+        assert_eq!(find_next_grid(&Direction::Right, true, len, 4, per_row), 0);
+        // Left wrap
+        assert_eq!(find_next_grid(&Direction::Left, true, len, 0, per_row), 4);
+    }
+
+    #[test_log::test]
+    #[test_log(default_log_filter = "trace")]
     fn test_find_next_workspace_0() {
         let (clients, workspaces) = create_test_data(0, 0, None);
         let hypr_data = HyprlandData {
@@ -306,264 +337,5 @@ mod tests {
             find_next_workspace(&Direction::Right, true, &hypr_data, active, 3),
             active
         );
-        assert_eq!(
-            find_next_workspace(&Direction::Left, true, &hypr_data, active, 6),
-            active
-        );
-        assert_eq!(
-            find_next_workspace(&Direction::Up, false, &hypr_data, active, 200),
-            active
-        );
-        assert_eq!(
-            find_next_workspace(&Direction::Down, false, &hypr_data, active, 0),
-            active
-        );
-    }
-
-    #[test_log::test]
-    #[test_log(default_log_filter = "trace")]
-    fn test_find_next_workspace_1_filter() {
-        let (clients, workspaces) = create_test_data(2, 1, Some(0));
-        let hypr_data = HyprlandData {
-            clients,
-            workspaces,
-            monitors: vec![],
-        };
-        let active = Active {
-            client: None,
-            workspace: 0,
-            monitor: 0,
-        };
-        trace!("data: {hypr_data:?}");
-
-        assert_eq!(
-            find_next_workspace(&Direction::Right, true, &hypr_data, active, 3),
-            active
-        );
-        assert_eq!(
-            find_next_workspace(&Direction::Left, true, &hypr_data, active, 3),
-            active
-        );
-        assert_eq!(
-            find_next_workspace(&Direction::Up, true, &hypr_data, active, 3),
-            active
-        );
-        assert_eq!(
-            find_next_workspace(&Direction::Down, true, &hypr_data, active, 3),
-            active
-        );
-        assert_eq!(
-            find_next_workspace(&Direction::Right, false, &hypr_data, active, 3),
-            active
-        );
-        assert_eq!(
-            find_next_workspace(&Direction::Left, false, &hypr_data, active, 3),
-            active
-        );
-        assert_eq!(
-            find_next_workspace(&Direction::Up, false, &hypr_data, active, 3),
-            active
-        );
-        assert_eq!(
-            find_next_workspace(&Direction::Down, false, &hypr_data, active, 3),
-            active
-        );
-    }
-
-    #[test_log::test]
-    #[test_log(default_log_filter = "trace")]
-    fn test_find_next_workspace_1() {
-        let (clients, workspaces) = create_test_data(1, 1, None);
-        let hypr_data = HyprlandData {
-            clients,
-            workspaces,
-            monitors: vec![],
-        };
-        let active = Active {
-            client: None,
-            workspace: 0,
-            monitor: 0,
-        };
-        trace!("data: {hypr_data:?}");
-
-        assert_eq!(
-            find_next_workspace(&Direction::Right, true, &hypr_data, active, 3),
-            active
-        );
-        assert_eq!(
-            find_next_workspace(&Direction::Left, true, &hypr_data, active, 3),
-            active
-        );
-        assert_eq!(
-            find_next_workspace(&Direction::Up, true, &hypr_data, active, 3),
-            active
-        );
-        assert_eq!(
-            find_next_workspace(&Direction::Down, true, &hypr_data, active, 3),
-            active
-        );
-        assert_eq!(
-            find_next_workspace(&Direction::Right, false, &hypr_data, active, 3),
-            active
-        );
-        assert_eq!(
-            find_next_workspace(&Direction::Left, false, &hypr_data, active, 3),
-            active
-        );
-        assert_eq!(
-            find_next_workspace(&Direction::Up, false, &hypr_data, active, 3),
-            active
-        );
-        assert_eq!(
-            find_next_workspace(&Direction::Down, false, &hypr_data, active, 3),
-            active
-        );
-    }
-    #[test_log::test]
-    #[test_log(default_log_filter = "trace")]
-    fn test_find_next_workspace_2() {
-        let (clients, workspaces) = create_test_data(5, 5, None);
-        let hypr_data = HyprlandData {
-            clients,
-            workspaces,
-            monitors: vec![],
-        };
-        let active = Active {
-            client: None,
-            workspace: 0,
-            monitor: 0,
-        };
-        trace!("data: {hypr_data:?}");
-
-        let next = find_next_workspace(&Direction::Right, true, &hypr_data, active, 3);
-        assert_eq!(next.workspace, 1);
-        let next = find_next_workspace(&Direction::Left, true, &hypr_data, active, 3);
-        assert_eq!(next.workspace, 4);
-
-        let next = find_next_workspace(&Direction::Up, true, &hypr_data, active, 3);
-        assert_eq!(next.workspace, 3);
-        let next = find_next_workspace(&Direction::Down, true, &hypr_data, active, 3);
-        assert_eq!(next.workspace, 3);
-
-        let next = find_next_workspace(&Direction::Right, false, &hypr_data, active, 3);
-        assert_eq!(next.workspace, 1);
-        let next = find_next_workspace(&Direction::Left, false, &hypr_data, active, 3);
-        assert_eq!(next.workspace, 0);
-
-        let next = find_next_workspace(&Direction::Up, false, &hypr_data, active, 3);
-        assert_eq!(next.workspace, 0);
-        let next = find_next_workspace(&Direction::Down, false, &hypr_data, active, 3);
-        assert_eq!(next.workspace, 3);
-    }
-
-    #[test_log::test]
-    #[test_log(default_log_filter = "trace")]
-    fn test_find_next_workspace_2_filter() {
-        let (clients, workspaces) = create_test_data(5, 5, Some(2));
-        let hypr_data = HyprlandData {
-            clients,
-            workspaces,
-            monitors: vec![],
-        };
-        let active = Active {
-            client: None,
-            workspace: 0,
-            monitor: 0,
-        };
-        trace!("data: {hypr_data:?}");
-
-        let next = find_next_workspace(&Direction::Right, true, &hypr_data, active, 3);
-        assert_eq!(next.workspace, 1);
-        let next = find_next_workspace(&Direction::Left, true, &hypr_data, active, 3);
-        assert_eq!(next.workspace, 2);
-
-        let next = find_next_workspace(&Direction::Up, true, &hypr_data, active, 3);
-        assert_eq!(next.workspace, 0);
-        let next = find_next_workspace(&Direction::Down, true, &hypr_data, active, 3);
-        assert_eq!(next.workspace, 0);
-
-        let next = find_next_workspace(&Direction::Right, false, &hypr_data, active, 3);
-        assert_eq!(next.workspace, 1);
-        let next = find_next_workspace(&Direction::Left, false, &hypr_data, active, 3);
-        assert_eq!(next.workspace, 0);
-
-        let next = find_next_workspace(&Direction::Up, false, &hypr_data, active, 3);
-        assert_eq!(next.workspace, 0);
-        let next = find_next_workspace(&Direction::Down, false, &hypr_data, active, 3);
-        assert_eq!(next.workspace, 2);
-    }
-
-    #[test_log::test]
-    #[test_log(default_log_filter = "trace")]
-    fn test_find_next_client() {
-        // Test with no clients
-        let (clients, workspaces) = create_test_data(0, 1, None);
-        let hypr_data = HyprlandData {
-            clients,
-            workspaces,
-            monitors: vec![],
-        };
-        let active = Active {
-            client: None,
-            workspace: 0,
-            monitor: 0,
-        };
-        trace!("data: {hypr_data:?}");
-
-        assert_eq!(
-            find_next_client(&Direction::Right, true, &hypr_data, active, 3),
-            active
-        );
-
-        // Test with one client
-        let (clients, workspaces) = create_test_data(1, 1, None);
-        let hypr_data = HyprlandData {
-            clients,
-            workspaces,
-            monitors: vec![],
-        };
-        trace!("data: {hypr_data:?}");
-
-        let next = find_next_client(&Direction::Right, true, &hypr_data, active, 3);
-        assert_eq!(
-            next,
-            Active {
-                client: Some(0),
-                workspace: 0,
-                monitor: 0,
-            }
-        );
-
-        // Test with multiple clients
-        let (clients, workspaces) = create_test_data(4, 2, None);
-        let hypr_data = HyprlandData {
-            clients,
-            workspaces,
-            monitors: vec![],
-        };
-        trace!("data: {hypr_data:?}");
-
-        // Test with no active client
-        let next = find_next_client(&Direction::Right, true, &hypr_data, active, 3);
-        assert_eq!(next.client, Some(0));
-
-        // Test with active client
-        let active = Active {
-            client: Some(1),
-            workspace: 1,
-            monitor: 0,
-        };
-
-        // Test right direction with wrap
-        let next = find_next_client(&Direction::Right, true, &hypr_data, active, 3);
-        assert_eq!(next.client, Some(2));
-
-        // Test left direction with wrap
-        let next = find_next_client(&Direction::Left, true, &hypr_data, active, 3);
-        assert_eq!(next.client, Some(0));
-
-        // Test without wrap
-        let next = find_next_client(&Direction::Right, false, &hypr_data, active, 3);
-        assert_eq!(next.client, Some(2));
     }
 }

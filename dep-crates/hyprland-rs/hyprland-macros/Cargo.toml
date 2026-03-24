@@ -1,5 +1,5 @@
 [package]
-name = "hyprshell-hyprland-macros"
+name = "switcharoo-hyprland-macros"
 description = "Macros used in hyprland-rs"
 version = "4.9.2"
 license = "GPL-3.0-or-later"

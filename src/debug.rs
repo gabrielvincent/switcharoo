@@ -6,7 +6,7 @@ use core_lib::default;
 use core_lib::ini::IniFile;
 use std::fs;
 use std::path::Path;
-use tracing::{debug, warn};
+use tracing::debug;
 
 pub fn check_class(class: Option<String>) -> anyhow::Result<()> {
     util::init_gtk();
@@ -86,27 +86,11 @@ pub fn list_desktop_files() {
     }
 }
 
-pub fn search(text: &str, all: bool, config_file: &Path, data_dir: &Path) {
-    let (plugins, max_items) = config_lib::load_and_migrate_config(config_file, true)
-        .ok()
-        .and_then(|c| c.windows)
-        .and_then(|w| w.overview)
-        .map_or_else(
-            || {
-                warn!("Failed to get plugins from config, falling back to default");
-                (config_lib::Launcher::default().plugins, 5)
-            },
-            |o| (o.launcher.plugins, o.launcher.max_items),
-        );
-    launcher_lib::debug::get_matches(&plugins, text, all, max_items, data_dir);
-}
-
 pub fn info(
     data_dir: &Path,
     cache_dir: &Path,
     css_file: &Path,
     config_file: &Path,
-    system_data_dir: &Path,
 ) {
     println!("config version: {}", config_lib::CURRENT_CONFIG_VERSION);
 
@@ -114,12 +98,10 @@ pub fn info(
     println!("config_file: {}", config_file.display());
     println!("data_dir: {}", data_dir.display());
     println!("cache_dir: {}", cache_dir.display());
-    println!("system_data_dir: {}", system_data_dir.display());
 
     let dirs = [
         ("data_dir", data_dir),
         ("cache_dir", cache_dir),
-        ("system_data_dir", system_data_dir),
     ];
 
     for (name, path) in dirs {

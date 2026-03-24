@@ -1,45 +1,45 @@
-pkgname=hyprshell
+pkgname=switcharoo
 # x-release-please-start-version
 pkgver=4.9.2
 # x-release-please-end
 pkgrel=1
-pkgdesc="A modern GTK4-based window switcher and application launcher for Hyprland"
+pkgdesc="A modern GTK4-based window switcher for Hyprland"
 arch=('x86_64' 'aarch64')
-conflicts=('hyprshell')
-provides=('hyprshell')
-url="https://github.com/h3rmt/hyprshell/"
+conflicts=('switcharoo')
+provides=('switcharoo')
+url="https://github.com/h3rmt/switcharoo/"
 license=("MIT")
 makedepends=('cargo')
 depends=('hyprland' 'gtk4-layer-shell' 'gtk4' 'gcc' 'pixman' 'libadwaita' 'zstd')
-source=("hyprshell-$pkgver.tar.gz::https://static.crates.io/crates/hyprshell/hyprshell-$pkgver.crate")
+source=("switcharoo-$pkgver.tar.gz::https://static.crates.io/crates/switcharoo/switcharoo-$pkgver.crate")
 
 prepare() {
     export RUSTUP_TOOLCHAIN=stable
-    cd "hyprshell-$pkgver"
+    cd "switcharoo-$pkgver"
     cargo fetch --locked --target "$(rustc -vV | sed -n 's/host: //p')"
 }
 
 build() {
     export RUSTUP_TOOLCHAIN=stable
     export CARGO_TARGET_DIR=target
-    cd "hyprshell-$pkgver"
+    cd "switcharoo-$pkgver"
     cargo build --frozen --release
 }
 
 package() {
-    install -Dm755 "hyprshell-$pkgver/target/release/hyprshell"             "$pkgdir/usr/bin/hyprshell"
-    install -Dm644 "hyprshell-$pkgver/LICENSE"                              "$pkgdir/usr/share/licenses/hyprshell/LICENSE"
-    install -Dm644 "hyprshell-$pkgver/README.md"                            "$pkgdir/usr/share/doc/hyprshell/README.md"
-    install -Dm644 "hyprshell-$pkgver/docs/CONFIGURE.md"                    "$pkgdir/usr/share/doc/hyprshell/CONFIGURE.md"
-    install -Dm644 "hyprshell-$pkgver/docs/DEBUG.md"                        "$pkgdir/usr/share/doc/hyprshell/DEBUG.md"
-    install -Dm644 "hyprshell-$pkgver/packaging/hyprshell.service"          "$pkgdir/usr/lib/systemd/user/hyprshell.service"
-    install -Dm644 "hyprshell-$pkgver/packaging/hyprshell-settings.png"     "$pkgdir/usr/share/pixmaps/hyprshell.png"
-    install -Dm644 "hyprshell-$pkgver/packaging/hyprshell-settings.desktop" "$pkgdir/usr/share/applications/hyprshell-settings.desktop"
+    install -Dm755 "switcharoo-$pkgver/target/release/switcharoo"             "$pkgdir/usr/bin/switcharoo"
+    install -Dm644 "switcharoo-$pkgver/LICENSE"                              "$pkgdir/usr/share/licenses/switcharoo/LICENSE"
+    install -Dm644 "switcharoo-$pkgver/README.md"                            "$pkgdir/usr/share/doc/switcharoo/README.md"
+    install -Dm644 "switcharoo-$pkgver/docs/CONFIGURE.md"                    "$pkgdir/usr/share/doc/switcharoo/CONFIGURE.md"
+    install -Dm644 "switcharoo-$pkgver/docs/DEBUG.md"                        "$pkgdir/usr/share/doc/switcharoo/DEBUG.md"
+    install -Dm644 "switcharoo-$pkgver/packaging/switcharoo.service"          "$pkgdir/usr/lib/systemd/user/switcharoo.service"
+    install -Dm644 "switcharoo-$pkgver/packaging/switcharoo-settings.png"     "$pkgdir/usr/share/pixmaps/switcharoo.png"
+    install -Dm644 "switcharoo-$pkgver/packaging/switcharoo-settings.desktop" "$pkgdir/usr/share/applications/switcharoo-settings.desktop"
 
-    mkdir "$pkgdir/usr/share/hyprshell"
-    tar -xvf "hyprshell-$pkgver/packaging/usr-share.tar" -C "$pkgdir/usr/share/hyprshell"
+    mkdir "$pkgdir/usr/share/switcharoo"
+    tar -xvf "switcharoo-$pkgver/packaging/usr-share.tar" -C "$pkgdir/usr/share/switcharoo"
 
-    "$pkgdir/usr/bin/hyprshell" completions bash -p  "$pkgdir/usr/share/bash-completion/completions"
-    "$pkgdir/usr/bin/hyprshell" completions fish -p  "$pkgdir/usr/share/fish/vendor_completions.d"
-    "$pkgdir/usr/bin/hyprshell" completions zsh -p   "$pkgdir/usr/share/zsh/site-functions"
+    "$pkgdir/usr/bin/switcharoo" completions bash -p  "$pkgdir/usr/share/bash-completion/completions"
+    "$pkgdir/usr/bin/switcharoo" completions fish -p  "$pkgdir/usr/share/fish/vendor_completions.d"
+    "$pkgdir/usr/bin/switcharoo" completions zsh -p   "$pkgdir/usr/share/zsh/site-functions"
 }

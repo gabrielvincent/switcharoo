@@ -3,10 +3,10 @@ use crate::icon::set_icon;
 use anyhow::Context;
 use core_lib::{Active, HyprlandData};
 use exec_lib::collect::get_current_monitor;
-use relm4::adw::prelude::{FixedExt, FrameExt};
+use relm4::adw::prelude::FixedExt;
 use relm4::gtk::gdk::Cursor;
-use relm4::gtk::prelude::WidgetExt;
-use relm4::gtk::{Button, Fixed, Frame, Image, Label, Overflow, Overlay, pango};
+use relm4::gtk::prelude::{BoxExt, WidgetExt};
+use relm4::gtk::{Box, Button, Fixed, Frame, Image, Label, Orientation, Overflow, Overlay, pango};
 use std::borrow::Cow;
 use tracing::debug_span;
 
@@ -61,11 +61,15 @@ pub fn render_switch(
             } else {
                 remove_html.replace_all(&workspace.name, "")
             };
-            let workspace_frame = Frame::builder()
-                .label(title)
-                .label_xalign(0.5)
-                .child(&workspace_fixed)
-                .build();
+            let workspace_frame = {
+                let mut builder = Frame::builder()
+                    .label_xalign(0.5)
+                    .child(&workspace_fixed);
+                if data.config.show_workspace_number {
+                    builder = builder.label(title);
+                }
+                builder.build()
+            };
 
             let workspace_button = {
                 let workspace_overlay = Overlay::builder().child(&workspace_frame).build();
@@ -91,43 +95,43 @@ pub fn render_switch(
                 }
 
                 let client_button = {
-                    let title = if client.title.trim().is_empty() {
+                    let title_str = if client.title.trim().is_empty() {
                         &client.class
                     } else {
                         &client.title
                     };
                     let client_label = Label::builder()
-                        .label(title)
-                        .overflow(Overflow::Visible)
-                        .margin_start(6)
+                        .label(title_str)
+                        .overflow(Overflow::Hidden)
+                        .css_classes(["client-label"])
                         .ellipsize(pango::EllipsizeMode::End)
-                        .build();
-                    let client_frame = Frame::builder()
-                        .label_xalign(0.5)
-                        .label_widget(&client_label)
+                        .max_width_chars(15)
                         .build();
 
                     // hide picture if client so small
                     let client_h_w = scale(client.height, data.config.scale)
                         .min(scale(client.width, data.config.scale));
-                    if client_h_w > 70 {
-                        let image = Image::builder()
-                            .css_classes(["client-image"])
-                            .pixel_size((f64::from(client_h_w.clamp(50, 600)) / 1.6) as i32 - 20)
-                            .build();
-                        if !client.enabled {
-                            image.add_css_class("monochrome");
-                        }
-                        set_icon(&client.class, client.pid, &image);
-                        client_frame.set_child(Some(&image));
-                    }
-
-                    let client_overlay = Overlay::builder()
-                        .overflow(Overflow::Hidden)
-                        .child(&client_frame)
+                    
+                    let image = Image::builder()
+                        .css_classes(["client-image"])
+                        .pixel_size((f64::from(client_h_w.clamp(50, 600)) / 1.8) as i32 - 20)
                         .build();
+                    if !client.enabled {
+                        image.add_css_class("monochrome");
+                    }
+                    set_icon(&client.class, client.pid, &image);
+
+                    let client_box = Box::builder()
+                        .orientation(Orientation::Vertical)
+                        .valign(relm4::gtk::Align::Center)
+                        .halign(relm4::gtk::Align::Center)
+                        .spacing(4)
+                        .build();
+                    client_box.append(&image);
+                    client_box.append(&client_label);
+
                     let button = Button::builder()
-                        .child(&client_overlay)
+                        .child(&client_box)
                         .css_classes(["client", "no-hover"])
                         .width_request(scale(client.width, data.config.scale))
                         .height_request(scale(client.height, data.config.scale))
@@ -156,20 +160,17 @@ pub fn render_switch(
                 continue;
             }
             let client_button = {
-                let title = if client.title.trim().is_empty() {
+                let title_str = if client.title.trim().is_empty() {
                     &client.class
                 } else {
                     &client.title
                 };
                 let client_label = Label::builder()
-                    .label(title)
-                    .overflow(Overflow::Visible)
-                    .margin_start(6)
+                    .label(title_str)
+                    .overflow(Overflow::Hidden)
+                    .css_classes(["client-label"])
                     .ellipsize(pango::EllipsizeMode::End)
-                    .build();
-                let client_frame = Frame::builder()
-                    .label_xalign(0.5)
-                    .label_widget(&client_label)
+                    .max_width_chars(25)
                     .build();
 
                 // hide picture if client so small
@@ -178,24 +179,27 @@ pub fn render_switch(
                         (f32::from(current_monitor.height) / current_monitor.scale) as i16,
                         data.config.scale,
                     ));
-                if client_h_w > 70 {
-                    let image = Image::builder()
-                        .css_classes(["client-image"])
-                        .pixel_size((f64::from(client_h_w.clamp(50, 600)) / 1.5) as i32 - 20)
-                        .build();
-                    if !client.enabled {
-                        image.add_css_class("monochrome");
-                    }
-                    set_icon(&client.class, client.pid, &image);
-                    client_frame.set_child(Some(&image));
-                }
-
-                let client_overlay = Overlay::builder()
-                    .overflow(Overflow::Hidden)
-                    .child(&client_frame)
+                
+                let image = Image::builder()
+                    .css_classes(["client-image"])
+                    .pixel_size((f64::from(client_h_w.clamp(50, 600)) / 1.8) as i32 - 20)
                     .build();
+                if !client.enabled {
+                    image.add_css_class("monochrome");
+                }
+                set_icon(&client.class, client.pid, &image);
+
+                let client_box = Box::builder()
+                    .orientation(Orientation::Vertical)
+                    .valign(relm4::gtk::Align::Center)
+                    .halign(relm4::gtk::Align::Center)
+                    .spacing(8)
+                    .build();
+                client_box.append(&image);
+                client_box.append(&client_label);
+
                 let button = Button::builder()
-                    .child(&client_overlay)
+                    .child(&client_box)
                     .css_classes(["client", "no-hover"])
                     .width_request(scale(
                         (f32::from(current_monitor.width) / current_monitor.scale) as i16,

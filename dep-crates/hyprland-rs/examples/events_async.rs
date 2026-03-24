@@ -1,4 +1,4 @@
-use hyprshell_hyprland as hyprland;
+use switcharoo_hyprland as hyprland;
 
 use hyprland::event_listener::AsyncEventListener;
 /// Demostrats using hyprland-rs to asynchronously listen for events

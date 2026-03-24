@@ -1,481 +1,481 @@
 # Changelog
 
-## [4.9.2](https://github.com/H3rmt/hyprshell/compare/v4.9.1...v4.9.2) (2026-01-06)
+## [4.9.2](https://github.com/H3rmt/switcharoo/compare/v4.9.1...v4.9.2) (2026-01-06)
 
 
 ### Bug Fixes
 
-* fix release ci workflow ([eada938](https://github.com/H3rmt/hyprshell/commit/eada9385f52846c6468891cb061c5a879fd16098))
+* fix release ci workflow ([eada938](https://github.com/H3rmt/switcharoo/commit/eada9385f52846c6468891cb061c5a879fd16098))
 
-## [4.9.1](https://github.com/H3rmt/hyprshell/compare/v4.9.0...v4.9.1) (2026-01-06)
+## [4.9.1](https://github.com/H3rmt/switcharoo/compare/v4.9.0...v4.9.1) (2026-01-06)
 
 
 ### Bug Fixes
 
-* add websearch and actions configs ([923055e](https://github.com/H3rmt/hyprshell/commit/923055ea721fd01a3abce376564cb7b2f81449dd))
-* reduce image size ([923055e](https://github.com/H3rmt/hyprshell/commit/923055ea721fd01a3abce376564cb7b2f81449dd))
+* add websearch and actions configs ([923055e](https://github.com/H3rmt/switcharoo/commit/923055ea721fd01a3abce376564cb7b2f81449dd))
+* reduce image size ([923055e](https://github.com/H3rmt/switcharoo/commit/923055ea721fd01a3abce376564cb7b2f81449dd))
 
-## [4.9.0](https://github.com/H3rmt/hyprshell/compare/v4.8.3...v4.9.0) (2026-01-05)
+## [4.9.0](https://github.com/H3rmt/switcharoo/compare/v4.8.3...v4.9.0) (2026-01-05)
 
 
 ### Features
 
-* add generate page ([1f9cb52](https://github.com/H3rmt/hyprshell/commit/1f9cb52edf6f48c446b92ec3398e19fe3e5cb224))
-* add terminal settings and overview keyboard shortcut chooser to generate setup ([f7ae9bf](https://github.com/H3rmt/hyprshell/commit/f7ae9bf3d2b5769627faa2735fb7c6058a6de998))
-* added data file to themes ([9e13a4a](https://github.com/H3rmt/hyprshell/commit/9e13a4a3e2273cd9be56438f0b6515e3fa593c52))
-* added debug info command ([efa1010](https://github.com/H3rmt/hyprshell/commit/efa10109c0af9ed04912f1e2066632650d460494))
-* added theme chooser ([8deccc2](https://github.com/H3rmt/hyprshell/commit/8deccc2dba445411bca4f781b93d9ddab52ac942))
-* added theme settings to config editor ([178f60b](https://github.com/H3rmt/hyprshell/commit/178f60b975a85ec54840801d627bdfd0a1bfd0b3))
-* allow custom key for switch mode ([3d07d3c](https://github.com/H3rmt/hyprshell/commit/3d07d3ceac3f1233f58498e7725c34c867450016))
-* generate config from gui ([c6237a2](https://github.com/H3rmt/hyprshell/commit/c6237a25ef6d0b676aedd48aa5260fd12e6b39f8))
-* retry getting version for 40 times ([9207c2a](https://github.com/H3rmt/hyprshell/commit/9207c2a9485211b3ba8c86c5e15cac35ca5e7c1d))
+* add generate page ([1f9cb52](https://github.com/H3rmt/switcharoo/commit/1f9cb52edf6f48c446b92ec3398e19fe3e5cb224))
+* add terminal settings and overview keyboard shortcut chooser to generate setup ([f7ae9bf](https://github.com/H3rmt/switcharoo/commit/f7ae9bf3d2b5769627faa2735fb7c6058a6de998))
+* added data file to themes ([9e13a4a](https://github.com/H3rmt/switcharoo/commit/9e13a4a3e2273cd9be56438f0b6515e3fa593c52))
+* added debug info command ([efa1010](https://github.com/H3rmt/switcharoo/commit/efa10109c0af9ed04912f1e2066632650d460494))
+* added theme chooser ([8deccc2](https://github.com/H3rmt/switcharoo/commit/8deccc2dba445411bca4f781b93d9ddab52ac942))
+* added theme settings to config editor ([178f60b](https://github.com/H3rmt/switcharoo/commit/178f60b975a85ec54840801d627bdfd0a1bfd0b3))
+* allow custom key for switch mode ([3d07d3c](https://github.com/H3rmt/switcharoo/commit/3d07d3ceac3f1233f58498e7725c34c867450016))
+* generate config from gui ([c6237a2](https://github.com/H3rmt/switcharoo/commit/c6237a25ef6d0b676aedd48aa5260fd12e6b39f8))
+* retry getting version for 40 times ([9207c2a](https://github.com/H3rmt/switcharoo/commit/9207c2a9485211b3ba8c86c5e15cac35ca5e7c1d))
 
 
 ### Bug Fixes
 
-* **deps:** update rust crate ron to 0.12.0 ([1c6038a](https://github.com/H3rmt/hyprshell/commit/1c6038a3f546d56da6ce18a2cccdeaedc7fdd90b))
-* fix bin package for aur ([4906ccb](https://github.com/H3rmt/hyprshell/commit/4906ccb8344d3022298d225841276e89b703702a))
-* fix bin package for aur ([22a9b3b](https://github.com/H3rmt/hyprshell/commit/22a9b3b33e30ce810da9a806bbc61418f85537d9))
-* fix systemd unit generation ([4318bf5](https://github.com/H3rmt/hyprshell/commit/4318bf5442ac08dfde638caa97417d5ad67bd5c9))
-* **nix-flake:** update flake.lock ([54fb1d0](https://github.com/H3rmt/hyprshell/commit/54fb1d06a1e63a3abc3004caae96a306a0cdd98d))
-* **nix-flake:** update flake.lock ([cfe263a](https://github.com/H3rmt/hyprshell/commit/cfe263a09189d92c218f2223d6b4552200777410))
-* **nix-flake:** update flake.lock ([66e4a85](https://github.com/H3rmt/hyprshell/commit/66e4a85b98b06febd33036e8f14ed12bff923941))
-* update hyprland plugin ([3d07d3c](https://github.com/H3rmt/hyprshell/commit/3d07d3ceac3f1233f58498e7725c34c867450016))
+* **deps:** update rust crate ron to 0.12.0 ([1c6038a](https://github.com/H3rmt/switcharoo/commit/1c6038a3f546d56da6ce18a2cccdeaedc7fdd90b))
+* fix bin package for aur ([4906ccb](https://github.com/H3rmt/switcharoo/commit/4906ccb8344d3022298d225841276e89b703702a))
+* fix bin package for aur ([22a9b3b](https://github.com/H3rmt/switcharoo/commit/22a9b3b33e30ce810da9a806bbc61418f85537d9))
+* fix systemd unit generation ([4318bf5](https://github.com/H3rmt/switcharoo/commit/4318bf5442ac08dfde638caa97417d5ad67bd5c9))
+* **nix-flake:** update flake.lock ([54fb1d0](https://github.com/H3rmt/switcharoo/commit/54fb1d06a1e63a3abc3004caae96a306a0cdd98d))
+* **nix-flake:** update flake.lock ([cfe263a](https://github.com/H3rmt/switcharoo/commit/cfe263a09189d92c218f2223d6b4552200777410))
+* **nix-flake:** update flake.lock ([66e4a85](https://github.com/H3rmt/switcharoo/commit/66e4a85b98b06febd33036e8f14ed12bff923941))
+* update hyprland plugin ([3d07d3c](https://github.com/H3rmt/switcharoo/commit/3d07d3ceac3f1233f58498e7725c34c867450016))
 
 
 ### Code Refactoring
 
-* add remaining plugin options ([ad9359f](https://github.com/H3rmt/hyprshell/commit/ad9359f6fb99042dbc94d229a343a5dffb789186))
-* fix clippy fixes ([219f14c](https://github.com/H3rmt/hyprshell/commit/219f14c2d857975cdd6f9f6149df6085956e39ef))
-* use justfile ([c6237a2](https://github.com/H3rmt/hyprshell/commit/c6237a25ef6d0b676aedd48aa5260fd12e6b39f8))
-* use relm4 as base for adw and gtk ([d95e69e](https://github.com/H3rmt/hyprshell/commit/d95e69e783de3333458eb2aa112ed9a22844355c))
-* use relm4 as base for adw and gtk ([f2e158c](https://github.com/H3rmt/hyprshell/commit/f2e158c0611773cb96d288451b965421ee4d1b3c))
+* add remaining plugin options ([ad9359f](https://github.com/H3rmt/switcharoo/commit/ad9359f6fb99042dbc94d229a343a5dffb789186))
+* fix clippy fixes ([219f14c](https://github.com/H3rmt/switcharoo/commit/219f14c2d857975cdd6f9f6149df6085956e39ef))
+* use justfile ([c6237a2](https://github.com/H3rmt/switcharoo/commit/c6237a25ef6d0b676aedd48aa5260fd12e6b39f8))
+* use relm4 as base for adw and gtk ([d95e69e](https://github.com/H3rmt/switcharoo/commit/d95e69e783de3333458eb2aa112ed9a22844355c))
+* use relm4 as base for adw and gtk ([f2e158c](https://github.com/H3rmt/switcharoo/commit/f2e158c0611773cb96d288451b965421ee4d1b3c))
 
 
 ### Documentation
 
-* add minimum gtk and adwaita versions to README.md ([c33f431](https://github.com/H3rmt/hyprshell/commit/c33f431c3ef32e8530ca56589c5e107693ef4a2c))
+* add minimum gtk and adwaita versions to README.md ([c33f431](https://github.com/H3rmt/switcharoo/commit/c33f431c3ef32e8530ca56589c5e107693ef4a2c))
 
-## [4.8.3](https://github.com/H3rmt/hyprshell/compare/v4.8.2...v4.8.3) (2025-12-27)
-
-
-### Bug Fixes
-
-* fix bin package for aur ([443febe](https://github.com/H3rmt/hyprshell/commit/443febe5d54f2b32b3eb3c5c3b8d6f0af3e7276b))
-
-## [4.8.2](https://github.com/H3rmt/hyprshell/compare/v4.8.1...v4.8.2) (2025-12-25)
+## [4.8.3](https://github.com/H3rmt/switcharoo/compare/v4.8.2...v4.8.3) (2025-12-27)
 
 
 ### Bug Fixes
 
-* fix systemd unit generation ([f0fdc99](https://github.com/H3rmt/hyprshell/commit/f0fdc99832510eee5862df6b5826d07e8b16cb9e))
-* **nix-flake:** update flake.lock ([01531df](https://github.com/H3rmt/hyprshell/commit/01531df3820ab6346814f83abd5852a88ccf2c69))
-* **nix-flake:** update flake.lock ([b8827a3](https://github.com/H3rmt/hyprshell/commit/b8827a3b2e0528991b22eacf41ad9f07b4cbbc73))
+* fix bin package for aur ([443febe](https://github.com/H3rmt/switcharoo/commit/443febe5d54f2b32b3eb3c5c3b8d6f0af3e7276b))
 
-## [4.8.1](https://github.com/H3rmt/hyprshell/compare/v4.8.0...v4.8.1) (2025-11-17)
+## [4.8.2](https://github.com/H3rmt/switcharoo/compare/v4.8.1...v4.8.2) (2025-12-25)
 
 
 ### Bug Fixes
 
-* crash when filtering windows or clients ([#379](https://github.com/H3rmt/hyprshell/issues/379)) ([13e0105](https://github.com/H3rmt/hyprshell/commit/13e010558b47e416322c8961e5dd1a3e75008503))
-* dont check for a hyprland session on commands other than run ([c93b2dc](https://github.com/H3rmt/hyprshell/commit/c93b2dc95347f32904c45fe820fa5f9e596fcdc0))
-* increase waiting time if no initial workspace is being found ([b6e2782](https://github.com/H3rmt/hyprshell/commit/b6e27827f89670c90b11401d8931beea74dcf57c))
-* **nix-flake:** update flake.lock ([b166440](https://github.com/H3rmt/hyprshell/commit/b16644046b712881d8bafbdd99f8acda9f39b6d6))
-* use xdg notifications instead of hyprland notifications ([0db43a7](https://github.com/H3rmt/hyprshell/commit/0db43a7b905529bf5447fd373a01c78fb804972b))
+* fix systemd unit generation ([f0fdc99](https://github.com/H3rmt/switcharoo/commit/f0fdc99832510eee5862df6b5826d07e8b16cb9e))
+* **nix-flake:** update flake.lock ([01531df](https://github.com/H3rmt/switcharoo/commit/01531df3820ab6346814f83abd5852a88ccf2c69))
+* **nix-flake:** update flake.lock ([b8827a3](https://github.com/H3rmt/switcharoo/commit/b8827a3b2e0528991b22eacf41ad9f07b4cbbc73))
+
+## [4.8.1](https://github.com/H3rmt/switcharoo/compare/v4.8.0...v4.8.1) (2025-11-17)
+
+
+### Bug Fixes
+
+* crash when filtering windows or clients ([#379](https://github.com/H3rmt/switcharoo/issues/379)) ([13e0105](https://github.com/H3rmt/switcharoo/commit/13e010558b47e416322c8961e5dd1a3e75008503))
+* dont check for a hyprland session on commands other than run ([c93b2dc](https://github.com/H3rmt/switcharoo/commit/c93b2dc95347f32904c45fe820fa5f9e596fcdc0))
+* increase waiting time if no initial workspace is being found ([b6e2782](https://github.com/H3rmt/switcharoo/commit/b6e27827f89670c90b11401d8931beea74dcf57c))
+* **nix-flake:** update flake.lock ([b166440](https://github.com/H3rmt/switcharoo/commit/b16644046b712881d8bafbdd99f8acda9f39b6d6))
+* use xdg notifications instead of hyprland notifications ([0db43a7](https://github.com/H3rmt/switcharoo/commit/0db43a7b905529bf5447fd373a01c78fb804972b))
 
 
 ### Code Refactoring
 
-* update dependencies ([a1c00c7](https://github.com/H3rmt/hyprshell/commit/a1c00c782ae3ffac8b4a9f7c1793c5e8daddd061))
+* update dependencies ([a1c00c7](https://github.com/H3rmt/switcharoo/commit/a1c00c782ae3ffac8b4a9f7c1793c5e8daddd061))
 
 
 ### Documentation
 
-* updated nix docs ([facdf5a](https://github.com/H3rmt/hyprshell/commit/facdf5a3b40544b49d26886edb65b3726129ac9c))
+* updated nix docs ([facdf5a](https://github.com/H3rmt/switcharoo/commit/facdf5a3b40544b49d26886edb65b3726129ac9c))
 
-## [4.8.0](https://github.com/H3rmt/hyprshell/compare/v4.7.2...v4.8.0) (2025-11-09)
+## [4.8.0](https://github.com/H3rmt/switcharoo/compare/v4.7.2...v4.8.0) (2025-11-09)
 
 
 ### Features
 
-* add special workspace support ([0604d21](https://github.com/H3rmt/hyprshell/commit/0604d21371552666b8e62e29ef4a782948c864fc))
-* Add vim navigation to the switcher ([#360](https://github.com/H3rmt/hyprshell/issues/360)) ([cc0797d](https://github.com/H3rmt/hyprshell/commit/cc0797d8f18a970170619ad3b8e17ca8646d8d93))
-* added brotli compression to clipboard lib ([dd0fb3d](https://github.com/H3rmt/hyprshell/commit/dd0fb3d29939775807fa372e280b688c8001e0da))
-* added gui config editor ([bb29010](https://github.com/H3rmt/hyprshell/commit/bb29010eb262dc22335e2c51d7bc5b78042e7553))
-* added hyprshell-slim and hyprshell-bin aur packages ([bb29010](https://github.com/H3rmt/hyprshell/commit/bb29010eb262dc22335e2c51d7bc5b78042e7553))
-* added libadwaita instead of gtk4, added more config options ([bb29010](https://github.com/H3rmt/hyprshell/commit/bb29010eb262dc22335e2c51d7bc5b78042e7553))
-* remove nix wrapper fn and add hyprland input instead ([bb29010](https://github.com/H3rmt/hyprshell/commit/bb29010eb262dc22335e2c51d7bc5b78042e7553))
+* add special workspace support ([0604d21](https://github.com/H3rmt/switcharoo/commit/0604d21371552666b8e62e29ef4a782948c864fc))
+* Add vim navigation to the switcher ([#360](https://github.com/H3rmt/switcharoo/issues/360)) ([cc0797d](https://github.com/H3rmt/switcharoo/commit/cc0797d8f18a970170619ad3b8e17ca8646d8d93))
+* added brotli compression to clipboard lib ([dd0fb3d](https://github.com/H3rmt/switcharoo/commit/dd0fb3d29939775807fa372e280b688c8001e0da))
+* added gui config editor ([bb29010](https://github.com/H3rmt/switcharoo/commit/bb29010eb262dc22335e2c51d7bc5b78042e7553))
+* added switcharoo-slim and switcharoo-bin aur packages ([bb29010](https://github.com/H3rmt/switcharoo/commit/bb29010eb262dc22335e2c51d7bc5b78042e7553))
+* added libadwaita instead of gtk4, added more config options ([bb29010](https://github.com/H3rmt/switcharoo/commit/bb29010eb262dc22335e2c51d7bc5b78042e7553))
+* remove nix wrapper fn and add hyprland input instead ([bb29010](https://github.com/H3rmt/switcharoo/commit/bb29010eb262dc22335e2c51d7bc5b78042e7553))
 
 
 ### Bug Fixes
 
-* add `Edit via `hyprshell config edit`` to config file ([e9b9ca4](https://github.com/H3rmt/hyprshell/commit/e9b9ca40c705c050f91859ebe8984cf778494c7b))
-* disable hyprland plugin after loading fails once ([96cb6e6](https://github.com/H3rmt/hyprshell/commit/96cb6e6f2ab97fe4fc0f2d0eb53a13104c8685cf))
-* dont generate systemd file if config is generated in debug mode ([bb29010](https://github.com/H3rmt/hyprshell/commit/bb29010eb262dc22335e2c51d7bc5b78042e7553))
-* downgrad gtk version ([914bc34](https://github.com/H3rmt/hyprshell/commit/914bc34ceba8add1aec1691ace18740ef629b3da))
-* downgrad libadwaita version ([7b6cced](https://github.com/H3rmt/hyprshell/commit/7b6ccedb29db0af4af7ee4a96198ad41c6762ba6))
-* fix selecting client in a special workspace ([97d707c](https://github.com/H3rmt/hyprshell/commit/97d707cca2affd27f9a9cbc356224e96ecd831d2))
-* Fix version check for Hyprshell Plugin ([#373](https://github.com/H3rmt/hyprshell/issues/373)) ([da03596](https://github.com/H3rmt/hyprshell/commit/da035960aadb971c518e415ac273443eceaad19c))
-* **nix-flake:** update flake.lock ([2d6e0ee](https://github.com/H3rmt/hyprshell/commit/2d6e0eee010f88f67d97624a44ebe00abc00bd30))
-* **nix-flake:** update flake.lock ([67e720e](https://github.com/H3rmt/hyprshell/commit/67e720e953bfcd0e30fa53ba9abafbaf2dff8cd7))
+* add `Edit via `switcharoo config edit`` to config file ([e9b9ca4](https://github.com/H3rmt/switcharoo/commit/e9b9ca40c705c050f91859ebe8984cf778494c7b))
+* disable hyprland plugin after loading fails once ([96cb6e6](https://github.com/H3rmt/switcharoo/commit/96cb6e6f2ab97fe4fc0f2d0eb53a13104c8685cf))
+* dont generate systemd file if config is generated in debug mode ([bb29010](https://github.com/H3rmt/switcharoo/commit/bb29010eb262dc22335e2c51d7bc5b78042e7553))
+* downgrad gtk version ([914bc34](https://github.com/H3rmt/switcharoo/commit/914bc34ceba8add1aec1691ace18740ef629b3da))
+* downgrad libadwaita version ([7b6cced](https://github.com/H3rmt/switcharoo/commit/7b6ccedb29db0af4af7ee4a96198ad41c6762ba6))
+* fix selecting client in a special workspace ([97d707c](https://github.com/H3rmt/switcharoo/commit/97d707cca2affd27f9a9cbc356224e96ecd831d2))
+* Fix version check for Switcharoo Plugin ([#373](https://github.com/H3rmt/switcharoo/issues/373)) ([da03596](https://github.com/H3rmt/switcharoo/commit/da035960aadb971c518e415ac273443eceaad19c))
+* **nix-flake:** update flake.lock ([2d6e0ee](https://github.com/H3rmt/switcharoo/commit/2d6e0eee010f88f67d97624a44ebe00abc00bd30))
+* **nix-flake:** update flake.lock ([67e720e](https://github.com/H3rmt/switcharoo/commit/67e720e953bfcd0e30fa53ba9abafbaf2dff8cd7))
 
 
 ### Code Refactoring
 
-* use adw instead of gtk4 ([bb29010](https://github.com/H3rmt/hyprshell/commit/bb29010eb262dc22335e2c51d7bc5b78042e7553))
+* use adw instead of gtk4 ([bb29010](https://github.com/H3rmt/switcharoo/commit/bb29010eb262dc22335e2c51d7bc5b78042e7553))
 
 
 ### Documentation
 
-* add explanations to tooltips ([2d7009c](https://github.com/H3rmt/hyprshell/commit/2d7009c22efadcace58f099f7f86173ec1f8dbcb))
-* update readme ([bb29010](https://github.com/H3rmt/hyprshell/commit/bb29010eb262dc22335e2c51d7bc5b78042e7553))
+* add explanations to tooltips ([2d7009c](https://github.com/H3rmt/switcharoo/commit/2d7009c22efadcace58f099f7f86173ec1f8dbcb))
+* update readme ([bb29010](https://github.com/H3rmt/switcharoo/commit/bb29010eb262dc22335e2c51d7bc5b78042e7553))
 
-## [4.7.2](https://github.com/H3rmt/hyprshell/compare/v4.7.1...v4.7.2) (2025-10-14)
-
-
-### Bug Fixes
-
-* added more logging to creation of windows ([2c57b0f](https://github.com/H3rmt/hyprshell/commit/2c57b0ffb3213b164053090c7c6ef47e8ac0c0ed))
-
-## [4.7.1](https://github.com/H3rmt/hyprshell/compare/v4.7.0...v4.7.1) (2025-10-03)
+## [4.7.2](https://github.com/H3rmt/switcharoo/compare/v4.7.1...v4.7.2) (2025-10-14)
 
 
 ### Bug Fixes
 
-* docs mentioned style.css instead of styles.css as the default location for the CSS file ([a32a317](https://github.com/H3rmt/hyprshell/commit/a32a3171442357ae886fd5a07367a692097dccaf))
-* **nix-flake:** update flake.lock ([944c2b4](https://github.com/H3rmt/hyprshell/commit/944c2b4ad012d7ab963f20c73e6d310d94c1cb33))
+* added more logging to creation of windows ([2c57b0f](https://github.com/H3rmt/switcharoo/commit/2c57b0ffb3213b164053090c7c6ef47e8ac0c0ed))
 
-## [4.7.0](https://github.com/H3rmt/hyprshell/compare/v4.6.4...v4.7.0) (2025-09-23)
+## [4.7.1](https://github.com/H3rmt/switcharoo/compare/v4.7.0...v4.7.1) (2025-10-03)
+
+
+### Bug Fixes
+
+* docs mentioned style.css instead of styles.css as the default location for the CSS file ([a32a317](https://github.com/H3rmt/switcharoo/commit/a32a3171442357ae886fd5a07367a692097dccaf))
+* **nix-flake:** update flake.lock ([944c2b4](https://github.com/H3rmt/switcharoo/commit/944c2b4ad012d7ab963f20c73e6d310d94c1cb33))
+
+## [4.7.0](https://github.com/H3rmt/switcharoo/compare/v4.6.4...v4.7.0) (2025-09-23)
 
 
 ### Features
 
-* add actions plugin ([559cc8a](https://github.com/H3rmt/hyprshell/commit/559cc8a81e6a55a09c0f637b503e646e80fc2570))
-* add vim keybinds (https://github.com/H3rmt/hyprshell/issues/185) ([dca2dcc](https://github.com/H3rmt/hyprshell/commit/dca2dccc4199c5823959edfef56115d7b010c177))
+* add actions plugin ([559cc8a](https://github.com/H3rmt/switcharoo/commit/559cc8a81e6a55a09c0f637b503e646e80fc2570))
+* add vim keybinds (https://github.com/H3rmt/switcharoo/issues/185) ([dca2dcc](https://github.com/H3rmt/switcharoo/commit/dca2dccc4199c5823959edfef56115d7b010c177))
 
 
 ### Bug Fixes
 
-* **nix-flake:** update flake.lock ([590315d](https://github.com/H3rmt/hyprshell/commit/590315d396ff3811f9115f47dd52c228bd23e5bc))
-* remove and update options from homemanager module ([2ae00bf](https://github.com/H3rmt/hyprshell/commit/2ae00bf10c17ab64685fc7458b880b68b7eddf97))
+* **nix-flake:** update flake.lock ([590315d](https://github.com/H3rmt/switcharoo/commit/590315d396ff3811f9115f47dd52c228bd23e5bc))
+* remove and update options from homemanager module ([2ae00bf](https://github.com/H3rmt/switcharoo/commit/2ae00bf10c17ab64685fc7458b880b68b7eddf97))
 
-## [4.6.4](https://github.com/H3rmt/hyprshell/compare/v4.6.3...v4.6.4) (2025-09-14)
+## [4.6.4](https://github.com/H3rmt/switcharoo/compare/v4.6.3...v4.6.4) (2025-09-14)
 
 
 ### Bug Fixes
 
-* allow multiple instances (use wayland socket as part of APPID for gtk) ([8b8bce8](https://github.com/H3rmt/hyprshell/commit/8b8bce807a8d0ad9491396532f2bbfcde037ad0b))
-* allow setting custom hyprland package to fix nix plugin build ([28d0e67](https://github.com/H3rmt/hyprshell/commit/28d0e677eaa4f7032cdacee8fa9ff279188b797b))
-* always apply layerrules ([fbc9cb8](https://github.com/H3rmt/hyprshell/commit/fbc9cb853b986d82b4aac5307b5cb9e8465dcaab))
-* disable gestures disabling (changed in Hyprland 51) ([8b8bce8](https://github.com/H3rmt/hyprshell/commit/8b8bce807a8d0ad9491396532f2bbfcde037ad0b))
-* fix https://github.com/H3rmt/hyprshell/issues/336 by converting open to switch ([5c55ba6](https://github.com/H3rmt/hyprshell/commit/5c55ba6abcd5adb28eb9d216d80e300d942a6997))
-* fix meta for wrapped program ([eabdefb](https://github.com/H3rmt/hyprshell/commit/eabdefbe4ee1cd81c295e049bd3ab0473b5660d0))
-* reload follow mouse prev value on config reload ([8a43141](https://github.com/H3rmt/hyprshell/commit/8a431419941aa6641fc2abaf5e73b576d6f2c40a))
+* allow multiple instances (use wayland socket as part of APPID for gtk) ([8b8bce8](https://github.com/H3rmt/switcharoo/commit/8b8bce807a8d0ad9491396532f2bbfcde037ad0b))
+* allow setting custom hyprland package to fix nix plugin build ([28d0e67](https://github.com/H3rmt/switcharoo/commit/28d0e677eaa4f7032cdacee8fa9ff279188b797b))
+* always apply layerrules ([fbc9cb8](https://github.com/H3rmt/switcharoo/commit/fbc9cb853b986d82b4aac5307b5cb9e8465dcaab))
+* disable gestures disabling (changed in Hyprland 51) ([8b8bce8](https://github.com/H3rmt/switcharoo/commit/8b8bce807a8d0ad9491396532f2bbfcde037ad0b))
+* fix https://github.com/H3rmt/switcharoo/issues/336 by converting open to switch ([5c55ba6](https://github.com/H3rmt/switcharoo/commit/5c55ba6abcd5adb28eb9d216d80e300d942a6997))
+* fix meta for wrapped program ([eabdefb](https://github.com/H3rmt/switcharoo/commit/eabdefbe4ee1cd81c295e049bd3ab0473b5660d0))
+* reload follow mouse prev value on config reload ([8a43141](https://github.com/H3rmt/switcharoo/commit/8a431419941aa6641fc2abaf5e73b576d6f2c40a))
 
 
 ### Code Refactoring
 
-* move crates to crate folder ([68633c6](https://github.com/H3rmt/hyprshell/commit/68633c6d776383e2384af9faa7456f15f2fcda1d))
+* move crates to crate folder ([68633c6](https://github.com/H3rmt/switcharoo/commit/68633c6d776383e2384af9faa7456f15f2fcda1d))
 
-## [4.6.3](https://github.com/H3rmt/hyprshell/compare/v4.6.2...v4.6.3) (2025-09-11)
-
-
-### Bug Fixes
-
-* allow for removal of shell completions ([9699d32](https://github.com/H3rmt/hyprshell/commit/9699d32212ce1c58784d7c83f925ad043f359a4f))
-* cancel key events when opening hyprshell overview and switch ([92e4ea7](https://github.com/H3rmt/hyprshell/commit/92e4ea7a7990719071eae626feeb3f43911a4def))
-* check for nothing enabled in config ([66b6820](https://github.com/H3rmt/hyprshell/commit/66b682089fb94b426c3d8f7c615b097dfe9f40f4))
-* **deps:** update rust crate regex to v1.11.2 ([272fd94](https://github.com/H3rmt/hyprshell/commit/272fd94aeb8ae47ae7f3523e47ecd162e869cf15))
-* fix reload of hyprland if hyprland config was reloaded ([9c2dd76](https://github.com/H3rmt/hyprshell/commit/9c2dd76e4b0c2ee791f6b4fa80aeb6ea5ca017de))
-* ignore virtual keyboard inputs ([9699d32](https://github.com/H3rmt/hyprshell/commit/9699d32212ce1c58784d7c83f925ad043f359a4f))
-* include /usr/share/applications/mimeapps ([7022cb2](https://github.com/H3rmt/hyprshell/commit/7022cb2c4d5a436cd1ccd63b50b944265a40e9a3))
-* override of desktop files (https://github.com/H3rmt/hyprshell/issues/334) ([18fe033](https://github.com/H3rmt/hyprshell/commit/18fe03365799ce372af832a61335a5cf6f8f029c))
-* plugin now still works if overview or switch are disabled ([66b6820](https://github.com/H3rmt/hyprshell/commit/66b682089fb94b426c3d8f7c615b097dfe9f40f4))
-* print `No runs` if hyprshell data launch-history doesnt find any runs ([c67ab1b](https://github.com/H3rmt/hyprshell/commit/c67ab1b62c23cbf4f5f047a284f62b61a144adfa))
-* use Layer::Top for launcher (fix https://github.com/H3rmt/hyprshell/issues/327) ([8389d58](https://github.com/H3rmt/hyprshell/commit/8389d5871be307919dd0bb37cbc8bcf7f010b8aa))
-
-## [4.6.2](https://github.com/H3rmt/hyprshell/compare/v4.6.1...v4.6.2) (2025-09-07)
+## [4.6.3](https://github.com/H3rmt/switcharoo/compare/v4.6.2...v4.6.3) (2025-09-11)
 
 
 ### Bug Fixes
 
-* fix nix packaging ([efe38a2](https://github.com/H3rmt/hyprshell/commit/efe38a2508c50fc6eb9aecb39f1f65fe7047a28c))
-* remove zip dependencies ([efe38a2](https://github.com/H3rmt/hyprshell/commit/efe38a2508c50fc6eb9aecb39f1f65fe7047a28c))
-* use monochrome if path in launcher is a valid path but doesn't exist ([0f59ca3](https://github.com/H3rmt/hyprshell/commit/0f59ca33d4946e1247c5ca937d7f399a03a00f44))
+* allow for removal of shell completions ([9699d32](https://github.com/H3rmt/switcharoo/commit/9699d32212ce1c58784d7c83f925ad043f359a4f))
+* cancel key events when opening switcharoo overview and switch ([92e4ea7](https://github.com/H3rmt/switcharoo/commit/92e4ea7a7990719071eae626feeb3f43911a4def))
+* check for nothing enabled in config ([66b6820](https://github.com/H3rmt/switcharoo/commit/66b682089fb94b426c3d8f7c615b097dfe9f40f4))
+* **deps:** update rust crate regex to v1.11.2 ([272fd94](https://github.com/H3rmt/switcharoo/commit/272fd94aeb8ae47ae7f3523e47ecd162e869cf15))
+* fix reload of hyprland if hyprland config was reloaded ([9c2dd76](https://github.com/H3rmt/switcharoo/commit/9c2dd76e4b0c2ee791f6b4fa80aeb6ea5ca017de))
+* ignore virtual keyboard inputs ([9699d32](https://github.com/H3rmt/switcharoo/commit/9699d32212ce1c58784d7c83f925ad043f359a4f))
+* include /usr/share/applications/mimeapps ([7022cb2](https://github.com/H3rmt/switcharoo/commit/7022cb2c4d5a436cd1ccd63b50b944265a40e9a3))
+* override of desktop files (https://github.com/H3rmt/switcharoo/issues/334) ([18fe033](https://github.com/H3rmt/switcharoo/commit/18fe03365799ce372af832a61335a5cf6f8f029c))
+* plugin now still works if overview or switch are disabled ([66b6820](https://github.com/H3rmt/switcharoo/commit/66b682089fb94b426c3d8f7c615b097dfe9f40f4))
+* print `No runs` if switcharoo data launch-history doesnt find any runs ([c67ab1b](https://github.com/H3rmt/switcharoo/commit/c67ab1b62c23cbf4f5f047a284f62b61a144adfa))
+* use Layer::Top for launcher (fix https://github.com/H3rmt/switcharoo/issues/327) ([8389d58](https://github.com/H3rmt/switcharoo/commit/8389d5871be307919dd0bb37cbc8bcf7f010b8aa))
+
+## [4.6.2](https://github.com/H3rmt/switcharoo/compare/v4.6.1...v4.6.2) (2025-09-07)
+
+
+### Bug Fixes
+
+* fix nix packaging ([efe38a2](https://github.com/H3rmt/switcharoo/commit/efe38a2508c50fc6eb9aecb39f1f65fe7047a28c))
+* remove zip dependencies ([efe38a2](https://github.com/H3rmt/switcharoo/commit/efe38a2508c50fc6eb9aecb39f1f65fe7047a28c))
+* use monochrome if path in launcher is a valid path but doesn't exist ([0f59ca3](https://github.com/H3rmt/switcharoo/commit/0f59ca33d4946e1247c5ca937d7f399a03a00f44))
 
 
 ### Code Refactoring
 
-* better nix caching ([0f59ca3](https://github.com/H3rmt/hyprshell/commit/0f59ca33d4946e1247c5ca937d7f399a03a00f44))
+* better nix caching ([0f59ca3](https://github.com/H3rmt/switcharoo/commit/0f59ca33d4946e1247c5ca937d7f399a03a00f44))
 
-## [4.6.1](https://github.com/H3rmt/hyprshell/compare/v4.6.0...v4.6.1) (2025-09-04)
+## [4.6.1](https://github.com/H3rmt/switcharoo/compare/v4.6.0...v4.6.1) (2025-09-04)
 
 
 ### Bug Fixes
 
-* **deps:** update deps ([108057a](https://github.com/H3rmt/hyprshell/commit/108057aa10525cb710f7785bd7ed3221bbf7c0e8))
-* hyprland plugin now build without make in OUT_DIR ([31bdfb1](https://github.com/H3rmt/hyprshell/commit/31bdfb1392c4086ee6de6805826666ece2a0c18f))
+* **deps:** update deps ([108057a](https://github.com/H3rmt/switcharoo/commit/108057aa10525cb710f7785bd7ed3221bbf7c0e8))
+* hyprland plugin now build without make in OUT_DIR ([31bdfb1](https://github.com/H3rmt/switcharoo/commit/31bdfb1392c4086ee6de6805826666ece2a0c18f))
 
 
 ### Documentation
 
-* update nix docs ([eac79f1](https://github.com/H3rmt/hyprshell/commit/eac79f1b2dd2f3d5cc634d2cbcecdca40d8cdd4c))
+* update nix docs ([eac79f1](https://github.com/H3rmt/switcharoo/commit/eac79f1b2dd2f3d5cc634d2cbcecdca40d8cdd4c))
 
-## [4.6.0](https://github.com/H3rmt/hyprshell/compare/v4.5.0...v4.6.0) (2025-09-04)
+## [4.6.0](https://github.com/H3rmt/switcharoo/compare/v4.5.0...v4.6.0) (2025-09-04)
 
 
 ### Features
 
-* added shell completions ([a74fa47](https://github.com/H3rmt/hyprshell/commit/a74fa4777a2f905b6a0f0269401c564e60068692))
-* added toml to ron migration (toml dropped, as it can't store None values) ([9d1e370](https://github.com/H3rmt/hyprshell/commit/9d1e370b7c2223171a6fb92d0aba0f9cc2a9ca01))
-* better config migrations (allow multi version migrations) ([299d388](https://github.com/H3rmt/hyprshell/commit/299d38816d02dadd97160e7a13088f6aaca2d4ea))
-* enhance ini parsing and added new cli command to get, list and set default apps ([2036a3c](https://github.com/H3rmt/hyprshell/commit/2036a3cb1a3588b97eaea5967e8900cff73726c8))
-* show info when new version detected ([e80fe65](https://github.com/H3rmt/hyprshell/commit/e80fe65a86da07448936babfd4a59ee33340217f))
+* added shell completions ([a74fa47](https://github.com/H3rmt/switcharoo/commit/a74fa4777a2f905b6a0f0269401c564e60068692))
+* added toml to ron migration (toml dropped, as it can't store None values) ([9d1e370](https://github.com/H3rmt/switcharoo/commit/9d1e370b7c2223171a6fb92d0aba0f9cc2a9ca01))
+* better config migrations (allow multi version migrations) ([299d388](https://github.com/H3rmt/switcharoo/commit/299d38816d02dadd97160e7a13088f6aaca2d4ea))
+* enhance ini parsing and added new cli command to get, list and set default apps ([2036a3c](https://github.com/H3rmt/switcharoo/commit/2036a3cb1a3588b97eaea5967e8900cff73726c8))
+* show info when new version detected ([e80fe65](https://github.com/H3rmt/switcharoo/commit/e80fe65a86da07448936babfd4a59ee33340217f))
 
 
 ### Bug Fixes
 
-* apply user style with user priority ([b700ee0](https://github.com/H3rmt/hyprshell/commit/b700ee0e4954b9e463ba64263953dacfc36ad097))
-* close overview with open key ([aa5be3f](https://github.com/H3rmt/hyprshell/commit/aa5be3f560bd1fd7bf0026d8c9e09b3f4b4d15b4))
-* **deps:** update rust crate anyhow to v1.0.99 ([a7e96f3](https://github.com/H3rmt/hyprshell/commit/a7e96f388deb7c132bf5bd2f35e88be3f7d56d45))
-* **deps:** update rust crate notify to v8.1.0 ([611cde3](https://github.com/H3rmt/hyprshell/commit/611cde3cb681f030a038439f321421d4e875222e))
-* enable show_actions_submenu for nix users ([8c19498](https://github.com/H3rmt/hyprshell/commit/8c1949892c46da3ff24548ccd904741694339fb0))
-* exclude empty workspaces in switch mode ([10786eb](https://github.com/H3rmt/hyprshell/commit/10786eb5001f1ed7abc3bb2483741b30e410152f))
-* exit app when removing / adding monitors ([032a047](https://github.com/H3rmt/hyprshell/commit/032a047597cab6f2dbe0c6e4482c8d05eb7fbdca))
-* fix cargo install cargo-workspaces ([e62a334](https://github.com/H3rmt/hyprshell/commit/e62a33465633ae87653fed679549b4cfc988f73b))
-* fix cargo ws publish, allow buildscript to run make ([14b5b5a](https://github.com/H3rmt/hyprshell/commit/14b5b5a2ab9e6501c2c125203f44808a80314649))
-* fix missing version in dependency of custom hyprland-rs ([94747cc](https://github.com/H3rmt/hyprshell/commit/94747cc81f554faf034bb5b7c5ec04dcbad03119))
-* fix publish workflow check commit ([29e440f](https://github.com/H3rmt/hyprshell/commit/29e440f6f0685e93d24291196b16623d7721bcd6))
-* fixed select window in overview ([71080a9](https://github.com/H3rmt/hyprshell/commit/71080a9211bd63de4aa0c1405810dfa1126c180c))
-* **nix-flake:** update flake.lock ([918e40b](https://github.com/H3rmt/hyprshell/commit/918e40beb8e70649e52ffcf8dd21747bcdc3f27f))
-* **nix-flake:** update flake.lock ([4eeaa57](https://github.com/H3rmt/hyprshell/commit/4eeaa5710aa7503b9a1307c8016879fd8df664ec))
-* **plugin:** fix open overview after mouse button press ([bd03613](https://github.com/H3rmt/hyprshell/commit/bd0361332ca313d527daec85d7cfdc0d057a5fc1))
-* reload desktop files, etc. after opening launcher ([a679985](https://github.com/H3rmt/hyprshell/commit/a67998550abd8069c47a6d2bd762b72208a70b2f))
-* style changes, liquid gras css updated ([6871827](https://github.com/H3rmt/hyprshell/commit/687182774094aa572441ece0ad9b44c52612a196))
-* typos in home manager configuration ([a9fc51e](https://github.com/H3rmt/hyprshell/commit/a9fc51e6e8d1e23302e17cc905f2f8285744c9fc))
-* use bash to start apps ([c86dee1](https://github.com/H3rmt/hyprshell/commit/c86dee15733bc86f0ab81cceeb84bb1671876da3))
-* use new hyprland-rs Instance ([c519605](https://github.com/H3rmt/hyprshell/commit/c51960581592469653380adfc03d3ea2f78e2e3a))
-* use toml extension on lookup config file ([0ab9e9d](https://github.com/H3rmt/hyprshell/commit/0ab9e9dee21e70e80a815dbea7d833a32f5497cc))
+* apply user style with user priority ([b700ee0](https://github.com/H3rmt/switcharoo/commit/b700ee0e4954b9e463ba64263953dacfc36ad097))
+* close overview with open key ([aa5be3f](https://github.com/H3rmt/switcharoo/commit/aa5be3f560bd1fd7bf0026d8c9e09b3f4b4d15b4))
+* **deps:** update rust crate anyhow to v1.0.99 ([a7e96f3](https://github.com/H3rmt/switcharoo/commit/a7e96f388deb7c132bf5bd2f35e88be3f7d56d45))
+* **deps:** update rust crate notify to v8.1.0 ([611cde3](https://github.com/H3rmt/switcharoo/commit/611cde3cb681f030a038439f321421d4e875222e))
+* enable show_actions_submenu for nix users ([8c19498](https://github.com/H3rmt/switcharoo/commit/8c1949892c46da3ff24548ccd904741694339fb0))
+* exclude empty workspaces in switch mode ([10786eb](https://github.com/H3rmt/switcharoo/commit/10786eb5001f1ed7abc3bb2483741b30e410152f))
+* exit app when removing / adding monitors ([032a047](https://github.com/H3rmt/switcharoo/commit/032a047597cab6f2dbe0c6e4482c8d05eb7fbdca))
+* fix cargo install cargo-workspaces ([e62a334](https://github.com/H3rmt/switcharoo/commit/e62a33465633ae87653fed679549b4cfc988f73b))
+* fix cargo ws publish, allow buildscript to run make ([14b5b5a](https://github.com/H3rmt/switcharoo/commit/14b5b5a2ab9e6501c2c125203f44808a80314649))
+* fix missing version in dependency of custom hyprland-rs ([94747cc](https://github.com/H3rmt/switcharoo/commit/94747cc81f554faf034bb5b7c5ec04dcbad03119))
+* fix publish workflow check commit ([29e440f](https://github.com/H3rmt/switcharoo/commit/29e440f6f0685e93d24291196b16623d7721bcd6))
+* fixed select window in overview ([71080a9](https://github.com/H3rmt/switcharoo/commit/71080a9211bd63de4aa0c1405810dfa1126c180c))
+* **nix-flake:** update flake.lock ([918e40b](https://github.com/H3rmt/switcharoo/commit/918e40beb8e70649e52ffcf8dd21747bcdc3f27f))
+* **nix-flake:** update flake.lock ([4eeaa57](https://github.com/H3rmt/switcharoo/commit/4eeaa5710aa7503b9a1307c8016879fd8df664ec))
+* **plugin:** fix open overview after mouse button press ([bd03613](https://github.com/H3rmt/switcharoo/commit/bd0361332ca313d527daec85d7cfdc0d057a5fc1))
+* reload desktop files, etc. after opening launcher ([a679985](https://github.com/H3rmt/switcharoo/commit/a67998550abd8069c47a6d2bd762b72208a70b2f))
+* style changes, liquid gras css updated ([6871827](https://github.com/H3rmt/switcharoo/commit/687182774094aa572441ece0ad9b44c52612a196))
+* typos in home manager configuration ([a9fc51e](https://github.com/H3rmt/switcharoo/commit/a9fc51e6e8d1e23302e17cc905f2f8285744c9fc))
+* use bash to start apps ([c86dee1](https://github.com/H3rmt/switcharoo/commit/c86dee15733bc86f0ab81cceeb84bb1671876da3))
+* use new hyprland-rs Instance ([c519605](https://github.com/H3rmt/switcharoo/commit/c51960581592469653380adfc03d3ea2f78e2e3a))
+* use toml extension on lookup config file ([0ab9e9d](https://github.com/H3rmt/switcharoo/commit/0ab9e9dee21e70e80a815dbea7d833a32f5497cc))
 
 
 ### Code Refactoring
 
-* add hyprland plugin ([1412e7a](https://github.com/H3rmt/hyprshell/commit/1412e7a46a3945d7a2f76dd1d1c5ac675160a17e))
-* add hyprland plugin ([33ced1c](https://github.com/H3rmt/hyprshell/commit/33ced1cab64d2864de3f3b3d41f53484ec9adedb))
-* better animations for launcher ([9c2a71c](https://github.com/H3rmt/hyprshell/commit/9c2a71cb275516adbd98ef084a9f5dcd564dedb2))
-* build plugin at runtime ([400a93b](https://github.com/H3rmt/hyprshell/commit/400a93bbc340f933d473c393f4d71fcf2b5339ad))
-* check if set desktop file is valid ([b7cfa98](https://github.com/H3rmt/hyprshell/commit/b7cfa982a371300bf523e12dbfd06f2734bc7ebd))
-* fix nix wrap program ([5895432](https://github.com/H3rmt/hyprshell/commit/58954329f521daabaf67cb0c67a3f130ef9f26cc))
-* implement plugin for switch mode ([9e1193e](https://github.com/H3rmt/hyprshell/commit/9e1193e14b7335af4c017593b2bcafb0a1882f90))
-* more strict clippy rules ([fea4993](https://github.com/H3rmt/hyprshell/commit/fea4993df001461e1e0cc7ba64ccedfda605bb3c))
-* return Ok / Err from socket ([61e09b7](https://github.com/H3rmt/hyprshell/commit/61e09b799860451290d68f46a0b98dc279ae2962))
-* separate config crate ([9d1e370](https://github.com/H3rmt/hyprshell/commit/9d1e370b7c2223171a6fb92d0aba0f9cc2a9ca01))
-* split launcher plugin into 2 data ([c0ff0b7](https://github.com/H3rmt/hyprshell/commit/c0ff0b74cce58f0eec04f79754971863770ebac3))
-* store clippy lints in cargo.toml ([4387f52](https://github.com/H3rmt/hyprshell/commit/4387f52881a05780efa34de0457271363400c121))
-* use different dirs for debug mode ([045def3](https://github.com/H3rmt/hyprshell/commit/045def381c611950851d4819b973a791ea896a2c))
-* use global desktopfile and mime cache ([ea64c40](https://github.com/H3rmt/hyprshell/commit/ea64c408bbb4ca1d84eabadab3d6a9db9632b1de))
-* use keymaps in hyprland plugin ([e0cd4da](https://github.com/H3rmt/hyprshell/commit/e0cd4daae2ed88ab7129a1f2c4dffca98d78d371))
-* use make to improve plugin build time ([df032f4](https://github.com/H3rmt/hyprshell/commit/df032f4a1559dd13e60131a731e4d6e8d449de98))
-* using plugin for all keyboard interactions ([ae39988](https://github.com/H3rmt/hyprshell/commit/ae39988bc3206089fb1b729d98b1ead4df1f32b9))
-* using plugin for all keyboard interactions ([9dfa549](https://github.com/H3rmt/hyprshell/commit/9dfa5494bfd526d3acace3730f0edd9f7fbbe1eb))
+* add hyprland plugin ([1412e7a](https://github.com/H3rmt/switcharoo/commit/1412e7a46a3945d7a2f76dd1d1c5ac675160a17e))
+* add hyprland plugin ([33ced1c](https://github.com/H3rmt/switcharoo/commit/33ced1cab64d2864de3f3b3d41f53484ec9adedb))
+* better animations for launcher ([9c2a71c](https://github.com/H3rmt/switcharoo/commit/9c2a71cb275516adbd98ef084a9f5dcd564dedb2))
+* build plugin at runtime ([400a93b](https://github.com/H3rmt/switcharoo/commit/400a93bbc340f933d473c393f4d71fcf2b5339ad))
+* check if set desktop file is valid ([b7cfa98](https://github.com/H3rmt/switcharoo/commit/b7cfa982a371300bf523e12dbfd06f2734bc7ebd))
+* fix nix wrap program ([5895432](https://github.com/H3rmt/switcharoo/commit/58954329f521daabaf67cb0c67a3f130ef9f26cc))
+* implement plugin for switch mode ([9e1193e](https://github.com/H3rmt/switcharoo/commit/9e1193e14b7335af4c017593b2bcafb0a1882f90))
+* more strict clippy rules ([fea4993](https://github.com/H3rmt/switcharoo/commit/fea4993df001461e1e0cc7ba64ccedfda605bb3c))
+* return Ok / Err from socket ([61e09b7](https://github.com/H3rmt/switcharoo/commit/61e09b799860451290d68f46a0b98dc279ae2962))
+* separate config crate ([9d1e370](https://github.com/H3rmt/switcharoo/commit/9d1e370b7c2223171a6fb92d0aba0f9cc2a9ca01))
+* split launcher plugin into 2 data ([c0ff0b7](https://github.com/H3rmt/switcharoo/commit/c0ff0b74cce58f0eec04f79754971863770ebac3))
+* store clippy lints in cargo.toml ([4387f52](https://github.com/H3rmt/switcharoo/commit/4387f52881a05780efa34de0457271363400c121))
+* use different dirs for debug mode ([045def3](https://github.com/H3rmt/switcharoo/commit/045def381c611950851d4819b973a791ea896a2c))
+* use global desktopfile and mime cache ([ea64c40](https://github.com/H3rmt/switcharoo/commit/ea64c408bbb4ca1d84eabadab3d6a9db9632b1de))
+* use keymaps in hyprland plugin ([e0cd4da](https://github.com/H3rmt/switcharoo/commit/e0cd4daae2ed88ab7129a1f2c4dffca98d78d371))
+* use make to improve plugin build time ([df032f4](https://github.com/H3rmt/switcharoo/commit/df032f4a1559dd13e60131a731e4d6e8d449de98))
+* using plugin for all keyboard interactions ([ae39988](https://github.com/H3rmt/switcharoo/commit/ae39988bc3206089fb1b729d98b1ead4df1f32b9))
+* using plugin for all keyboard interactions ([9dfa549](https://github.com/H3rmt/switcharoo/commit/9dfa5494bfd526d3acace3730f0edd9f7fbbe1eb))
 
 
 ### Documentation
 
-* update CONFIGURE.md ([#304](https://github.com/H3rmt/hyprshell/issues/304)) ([9e590a0](https://github.com/H3rmt/hyprshell/commit/9e590a0339b547dfceea07ee8165eda649b1c8ec))
-* updated docs ([d713230](https://github.com/H3rmt/hyprshell/commit/d713230fe5435b1f75e78b53c8e749423283a8af))
+* update CONFIGURE.md ([#304](https://github.com/H3rmt/switcharoo/issues/304)) ([9e590a0](https://github.com/H3rmt/switcharoo/commit/9e590a0339b547dfceea07ee8165eda649b1c8ec))
+* updated docs ([d713230](https://github.com/H3rmt/switcharoo/commit/d713230fe5435b1f75e78b53c8e749423283a8af))
 
-## [4.5.0](https://github.com/H3rmt/hyprshell/compare/v4.4.3...v4.5.0) (2025-06-27)
+## [4.5.0](https://github.com/H3rmt/switcharoo/compare/v4.4.3...v4.5.0) (2025-06-27)
 
 
 ### Features
 
-* added path plugin ([910aa35](https://github.com/H3rmt/hyprshell/commit/910aa357abc27c4c6f801d19920feed4e05549f1))
+* added path plugin ([910aa35](https://github.com/H3rmt/switcharoo/commit/910aa357abc27c4c6f801d19920feed4e05549f1))
 
 
 ### Documentation
 
-* update screenshots ([e9b8c7c](https://github.com/H3rmt/hyprshell/commit/e9b8c7ce5b2915ec13adf2cbd8994a3eb669408f))
+* update screenshots ([e9b8c7c](https://github.com/H3rmt/switcharoo/commit/e9b8c7ce5b2915ec13adf2cbd8994a3eb669408f))
 
-## [4.4.3](https://github.com/H3rmt/hyprshell/compare/v4.4.2...v4.4.3) (2025-06-26)
-
-
-### Bug Fixes
-
-* fix modifier keys to launch again... ([d31ee66](https://github.com/H3rmt/hyprshell/commit/d31ee669c8da6460b1b0821b9b66783fd10c4a0e))
-* use correct keys for switch mode ([b1c3353](https://github.com/H3rmt/hyprshell/commit/b1c335325f68ca1c5810fac772072640d5db464f))
-
-
-### Code Refactoring
-
-* changed PKGBUILD ([b3f207d](https://github.com/H3rmt/hyprshell/commit/b3f207d7bc0c27892d30fa2420053f27b8e714e6))
-
-## [4.4.2](https://github.com/H3rmt/hyprshell/compare/v4.4.1...v4.4.2) (2025-06-26)
+## [4.4.3](https://github.com/H3rmt/switcharoo/compare/v4.4.2...v4.4.3) (2025-06-26)
 
 
 ### Bug Fixes
 
-* fix launcher keybinds ([05b2867](https://github.com/H3rmt/hyprshell/commit/05b28670edef4ca23e47100785b90b57b8311c06))
-* fix modifier keys to launch, added launch_modifier ([19ba571](https://github.com/H3rmt/hyprshell/commit/19ba57169ae4c77e1e5331c764828f7f67703b90))
-* **nix-flake:** update flake.lock ([abeaea5](https://github.com/H3rmt/hyprshell/commit/abeaea56cb568cb8e30ab8289e194ce10c46ec26))
-* run flake update ci on hyprshell branch ([b39d435](https://github.com/H3rmt/hyprshell/commit/b39d435af9ceb60b25667bf70965499828f1f719))
+* fix modifier keys to launch again... ([d31ee66](https://github.com/H3rmt/switcharoo/commit/d31ee669c8da6460b1b0821b9b66783fd10c4a0e))
+* use correct keys for switch mode ([b1c3353](https://github.com/H3rmt/switcharoo/commit/b1c335325f68ca1c5810fac772072640d5db464f))
 
 
 ### Code Refactoring
 
-* simplify flake ([431536c](https://github.com/H3rmt/hyprshell/commit/431536cddc88606ebe2246ddb755c10a2db51643))
+* changed PKGBUILD ([b3f207d](https://github.com/H3rmt/switcharoo/commit/b3f207d7bc0c27892d30fa2420053f27b8e714e6))
+
+## [4.4.2](https://github.com/H3rmt/switcharoo/compare/v4.4.1...v4.4.2) (2025-06-26)
+
+
+### Bug Fixes
+
+* fix launcher keybinds ([05b2867](https://github.com/H3rmt/switcharoo/commit/05b28670edef4ca23e47100785b90b57b8311c06))
+* fix modifier keys to launch, added launch_modifier ([19ba571](https://github.com/H3rmt/switcharoo/commit/19ba57169ae4c77e1e5331c764828f7f67703b90))
+* **nix-flake:** update flake.lock ([abeaea5](https://github.com/H3rmt/switcharoo/commit/abeaea56cb568cb8e30ab8289e194ce10c46ec26))
+* run flake update ci on switcharoo branch ([b39d435](https://github.com/H3rmt/switcharoo/commit/b39d435af9ceb60b25667bf70965499828f1f719))
+
+
+### Code Refactoring
+
+* simplify flake ([431536c](https://github.com/H3rmt/switcharoo/commit/431536cddc88606ebe2246ddb755c10a2db51643))
 
 
 ### Documentation
 
-* update nix docs ([d0f45f1](https://github.com/H3rmt/hyprshell/commit/d0f45f1fdaeac348e25d5c5f7c95f76cabefb3d0))
+* update nix docs ([d0f45f1](https://github.com/H3rmt/switcharoo/commit/d0f45f1fdaeac348e25d5c5f7c95f76cabefb3d0))
 
-## [4.4.1](https://github.com/H3rmt/hyprshell/compare/v4.4.0...v4.4.1) (2025-06-24)
+## [4.4.1](https://github.com/H3rmt/switcharoo/compare/v4.4.0...v4.4.1) (2025-06-24)
 
 
 ### Bug Fixes
 
-* run flake update ci on hyprshell branch ([b39d435](https://github.com/H3rmt/hyprshell/commit/b39d435af9ceb60b25667bf70965499828f1f719))
+* run flake update ci on switcharoo branch ([b39d435](https://github.com/H3rmt/switcharoo/commit/b39d435af9ceb60b25667bf70965499828f1f719))
 
 
 ### Code Refactoring
 
-* simplify flake ([431536c](https://github.com/H3rmt/hyprshell/commit/431536cddc88606ebe2246ddb755c10a2db51643))
+* simplify flake ([431536c](https://github.com/H3rmt/switcharoo/commit/431536cddc88606ebe2246ddb755c10a2db51643))
 
 
 ### Documentation
 
-* update nix docs ([d0f45f1](https://github.com/H3rmt/hyprshell/commit/d0f45f1fdaeac348e25d5c5f7c95f76cabefb3d0))
+* update nix docs ([d0f45f1](https://github.com/H3rmt/switcharoo/commit/d0f45f1fdaeac348e25d5c5f7c95f76cabefb3d0))
 
-## [4.4.0](https://github.com/H3rmt/hyprshell/compare/v4.3.1...v4.4.0) (2025-06-24)
+## [4.4.0](https://github.com/H3rmt/switcharoo/compare/v4.3.1...v4.4.0) (2025-06-24)
 
 
 ### Features
 
-* add tui question for switch&gt;show_workspaces ([8e0d925](https://github.com/H3rmt/hyprshell/commit/8e0d9254ec9e0556a1f7b214acbb70a98710c1ca))
-* added show_workspaces flag ([bbba547](https://github.com/H3rmt/hyprshell/commit/bbba5472ed493b4ce5f0b4efe47e98c303e734b6))
+* add tui question for switch&gt;show_workspaces ([8e0d925](https://github.com/H3rmt/switcharoo/commit/8e0d9254ec9e0556a1f7b214acbb70a98710c1ca))
+* added show_workspaces flag ([bbba547](https://github.com/H3rmt/switcharoo/commit/bbba5472ed493b4ce5f0b4efe47e98c303e734b6))
 
 
 ### Bug Fixes
 
-* dont allow opening overview and switch at the same time. ([7b61fd5](https://github.com/H3rmt/hyprshell/commit/7b61fd58627a7fe5be85c4322fd506b57b8685f0))
-* dont launch plugin entries when typing num instead of ctrl + num ([7b61fd5](https://github.com/H3rmt/hyprshell/commit/7b61fd58627a7fe5be85c4322fd506b57b8685f0))
-* fix nix strip_html_from_workspace_title ([e3f02ea](https://github.com/H3rmt/hyprshell/commit/e3f02ea902fd84fe6201fe29bf221e9804100f57))
-* fix nix version setting ([06fd3f7](https://github.com/H3rmt/hyprshell/commit/06fd3f7f0de5e3f8c7ae80eb99e98f953766c81e))
-* generate correct keybinds for opening overview with super + &lt;key&gt;, fix [#254](https://github.com/H3rmt/hyprshell/issues/254) ([9d52a57](https://github.com/H3rmt/hyprshell/commit/9d52a57baa17a0b41897073b3602619bc04f53d4))
-* mark the current workspace as active if the overview is opened without an active client ([f6eaa02](https://github.com/H3rmt/hyprshell/commit/f6eaa0212782e35d2d0d051f77da53b3efaeda7c))
-* removed old nix navigate assertions ([8151fba](https://github.com/H3rmt/hyprshell/commit/8151fba64718e69e7ed3a9d46bccfd54a84329d6))
+* dont allow opening overview and switch at the same time. ([7b61fd5](https://github.com/H3rmt/switcharoo/commit/7b61fd58627a7fe5be85c4322fd506b57b8685f0))
+* dont launch plugin entries when typing num instead of ctrl + num ([7b61fd5](https://github.com/H3rmt/switcharoo/commit/7b61fd58627a7fe5be85c4322fd506b57b8685f0))
+* fix nix strip_html_from_workspace_title ([e3f02ea](https://github.com/H3rmt/switcharoo/commit/e3f02ea902fd84fe6201fe29bf221e9804100f57))
+* fix nix version setting ([06fd3f7](https://github.com/H3rmt/switcharoo/commit/06fd3f7f0de5e3f8c7ae80eb99e98f953766c81e))
+* generate correct keybinds for opening overview with super + &lt;key&gt;, fix [#254](https://github.com/H3rmt/switcharoo/issues/254) ([9d52a57](https://github.com/H3rmt/switcharoo/commit/9d52a57baa17a0b41897073b3602619bc04f53d4))
+* mark the current workspace as active if the overview is opened without an active client ([f6eaa02](https://github.com/H3rmt/switcharoo/commit/f6eaa0212782e35d2d0d051f77da53b3efaeda7c))
+* removed old nix navigate assertions ([8151fba](https://github.com/H3rmt/switcharoo/commit/8151fba64718e69e7ed3a9d46bccfd54a84329d6))
 
 
 ### Code Refactoring
 
-* add better nix checks and switch to nix only for ci ([b5f8682](https://github.com/H3rmt/hyprshell/commit/b5f86823ed599f2f133b6cba8271248417fbe03f))
-* added check-if-default command for ci ([db912d1](https://github.com/H3rmt/hyprshell/commit/db912d1f1b6919e71288b9cc75e703071bce559e))
-* separate nix code utils ([a3b61e8](https://github.com/H3rmt/hyprshell/commit/a3b61e869c6ff60b4b755f4b2c977ffbc4d82d91))
+* add better nix checks and switch to nix only for ci ([b5f8682](https://github.com/H3rmt/switcharoo/commit/b5f86823ed599f2f133b6cba8271248417fbe03f))
+* added check-if-default command for ci ([db912d1](https://github.com/H3rmt/switcharoo/commit/db912d1f1b6919e71288b9cc75e703071bce559e))
+* separate nix code utils ([a3b61e8](https://github.com/H3rmt/switcharoo/commit/a3b61e869c6ff60b4b755f4b2c977ffbc4d82d91))
 
 
 ### Documentation
 
-* update CONFIGURE.md ([24b9799](https://github.com/H3rmt/hyprshell/commit/24b979918340dd76515686996cf836e61cd96694))
+* update CONFIGURE.md ([24b9799](https://github.com/H3rmt/switcharoo/commit/24b979918340dd76515686996cf836e61cd96694))
 
-## [4.3.1](https://github.com/H3rmt/hyprshell/compare/v4.3.0...v4.3.1) (2025-06-21)
+## [4.3.1](https://github.com/H3rmt/switcharoo/compare/v4.3.0...v4.3.1) (2025-06-21)
 
 
 ### Bug Fixes
 
-* repair launcher control keys ([78147fa](https://github.com/H3rmt/hyprshell/commit/78147fa354e3b961b19ce8a9a147601434d71d06))
+* repair launcher control keys ([78147fa](https://github.com/H3rmt/switcharoo/commit/78147fa354e3b961b19ce8a9a147601434d71d06))
 
-## [4.3.0](https://github.com/H3rmt/hyprshell/compare/v4.2.12...v4.3.0) (2025-06-21)
+## [4.3.0](https://github.com/H3rmt/switcharoo/compare/v4.2.12...v4.3.0) (2025-06-21)
 
 
 ### Features
 
-* switch to gtk key handling ([65a0ad5](https://github.com/H3rmt/hyprshell/commit/65a0ad5f482707cab8339c3c01195ff9b5557c1a))
+* switch to gtk key handling ([65a0ad5](https://github.com/H3rmt/switcharoo/commit/65a0ad5f482707cab8339c3c01195ff9b5557c1a))
 
 
 ### Bug Fixes
 
-* **deps:** update rust crate libc to v0.2.174 ([b6d1089](https://github.com/H3rmt/hyprshell/commit/b6d10891ce2bc1f649a6af7d62f2f7f2fa09d74b))
-* fix closing on mod keys other than open key ([d6aba16](https://github.com/H3rmt/hyprshell/commit/d6aba16a2eedfee40bd74feae95750d75c2edf85))
-* fix colored output for explain command ([5cbf8ed](https://github.com/H3rmt/hyprshell/commit/5cbf8ede5d3323b6d7484ab1b638f26842165e83))
+* **deps:** update rust crate libc to v0.2.174 ([b6d1089](https://github.com/H3rmt/switcharoo/commit/b6d10891ce2bc1f649a6af7d62f2f7f2fa09d74b))
+* fix closing on mod keys other than open key ([d6aba16](https://github.com/H3rmt/switcharoo/commit/d6aba16a2eedfee40bd74feae95750d75c2edf85))
+* fix colored output for explain command ([5cbf8ed](https://github.com/H3rmt/switcharoo/commit/5cbf8ede5d3323b6d7484ab1b638f26842165e83))
 
 
 ### Code Refactoring
 
-* remove launcher dependency of overview/switch crate ([df40faa](https://github.com/H3rmt/hyprshell/commit/df40faaec4bf5e5466575d6189194b97e303ac78))
-* remove submaps (10/10) ([c7551ea](https://github.com/H3rmt/hyprshell/commit/c7551ea526583841b5de1b8071ee22a6d5b158fd))
-* remove submaps (3/?) ([9f0c09e](https://github.com/H3rmt/hyprshell/commit/9f0c09e32d8a2ead763f38810f06b71e7dfa93e9))
-* remove submaps (4/?) ([765c88c](https://github.com/H3rmt/hyprshell/commit/765c88c331c3b0e7d834857ef8dc76f235a342ad))
-* remove submaps (5/?) ([65b31cf](https://github.com/H3rmt/hyprshell/commit/65b31cf95ec0edb16357cd865f8d2fa6a22f4e6a))
-* remove submaps (6/?) ([0bc4396](https://github.com/H3rmt/hyprshell/commit/0bc43963a7783a03fc0681f43549e2cd55a56bc7))
-* remove submaps (7/?) ([fdc797d](https://github.com/H3rmt/hyprshell/commit/fdc797d52cba759167a93f88e03b66609ef54f78))
-* remove submaps (8/?) ([9de4678](https://github.com/H3rmt/hyprshell/commit/9de46780f4b2cfeb0f5f4fe9e39c67aebc9e8730))
-* remove submaps (9/?) ([b3f0209](https://github.com/H3rmt/hyprshell/commit/b3f02096c69aa90ca49eebd02b922fb8a127c1b2))
+* remove launcher dependency of overview/switch crate ([df40faa](https://github.com/H3rmt/switcharoo/commit/df40faaec4bf5e5466575d6189194b97e303ac78))
+* remove submaps (10/10) ([c7551ea](https://github.com/H3rmt/switcharoo/commit/c7551ea526583841b5de1b8071ee22a6d5b158fd))
+* remove submaps (3/?) ([9f0c09e](https://github.com/H3rmt/switcharoo/commit/9f0c09e32d8a2ead763f38810f06b71e7dfa93e9))
+* remove submaps (4/?) ([765c88c](https://github.com/H3rmt/switcharoo/commit/765c88c331c3b0e7d834857ef8dc76f235a342ad))
+* remove submaps (5/?) ([65b31cf](https://github.com/H3rmt/switcharoo/commit/65b31cf95ec0edb16357cd865f8d2fa6a22f4e6a))
+* remove submaps (6/?) ([0bc4396](https://github.com/H3rmt/switcharoo/commit/0bc43963a7783a03fc0681f43549e2cd55a56bc7))
+* remove submaps (7/?) ([fdc797d](https://github.com/H3rmt/switcharoo/commit/fdc797d52cba759167a93f88e03b66609ef54f78))
+* remove submaps (8/?) ([9de4678](https://github.com/H3rmt/switcharoo/commit/9de46780f4b2cfeb0f5f4fe9e39c67aebc9e8730))
+* remove submaps (9/?) ([b3f0209](https://github.com/H3rmt/switcharoo/commit/b3f02096c69aa90ca49eebd02b922fb8a127c1b2))
 
-## [4.2.12](https://github.com/H3rmt/hyprshell/compare/v4.2.11...v4.2.12) (2025-06-20)
-
-
-### Bug Fixes
-
-* repair ci ([eaf5391](https://github.com/H3rmt/hyprshell/commit/eaf5391a28a9821caaec626baab2a78211ee7cdd))
-* repair ci ([e0f8af6](https://github.com/H3rmt/hyprshell/commit/e0f8af675a8702fa50c062030b00c51d2f0d4c30))
-* repair ci ([ca782ce](https://github.com/H3rmt/hyprshell/commit/ca782ce03493b3d01f1e30540b7869ff20b0ad1e))
-* repair ci ([761bd1b](https://github.com/H3rmt/hyprshell/commit/761bd1b3444f35c32924efbdd1fc375452600096))
-* repair ci ([0aadfcc](https://github.com/H3rmt/hyprshell/commit/0aadfcc95262f34f49fd535fc88a35f767997423))
-* show toast when using switch mode ([a34a9bb](https://github.com/H3rmt/hyprshell/commit/a34a9bbe2460dd44213fc5c15d7c34a140b19315))
-* use release branch in ci to create new commits ([d8a489e](https://github.com/H3rmt/hyprshell/commit/d8a489e80070f3a3c7d9d451a9f4b04f703fb2d9))
-
-## [4.2.11](https://github.com/H3rmt/hyprshell/compare/v4.2.10...v4.2.11) (2025-06-20)
+## [4.2.12](https://github.com/H3rmt/switcharoo/compare/v4.2.11...v4.2.12) (2025-06-20)
 
 
 ### Bug Fixes
 
-* repair ci ([ca782ce](https://github.com/H3rmt/hyprshell/commit/ca782ce03493b3d01f1e30540b7869ff20b0ad1e))
+* repair ci ([eaf5391](https://github.com/H3rmt/switcharoo/commit/eaf5391a28a9821caaec626baab2a78211ee7cdd))
+* repair ci ([e0f8af6](https://github.com/H3rmt/switcharoo/commit/e0f8af675a8702fa50c062030b00c51d2f0d4c30))
+* repair ci ([ca782ce](https://github.com/H3rmt/switcharoo/commit/ca782ce03493b3d01f1e30540b7869ff20b0ad1e))
+* repair ci ([761bd1b](https://github.com/H3rmt/switcharoo/commit/761bd1b3444f35c32924efbdd1fc375452600096))
+* repair ci ([0aadfcc](https://github.com/H3rmt/switcharoo/commit/0aadfcc95262f34f49fd535fc88a35f767997423))
+* show toast when using switch mode ([a34a9bb](https://github.com/H3rmt/switcharoo/commit/a34a9bbe2460dd44213fc5c15d7c34a140b19315))
+* use release branch in ci to create new commits ([d8a489e](https://github.com/H3rmt/switcharoo/commit/d8a489e80070f3a3c7d9d451a9f4b04f703fb2d9))
 
-## [4.2.10](https://github.com/H3rmt/hyprshell/compare/v4.2.9...v4.2.10) (2025-06-20)
-
-
-### Bug Fixes
-
-* repair ci ([761bd1b](https://github.com/H3rmt/hyprshell/commit/761bd1b3444f35c32924efbdd1fc375452600096))
-* repair ci ([0aadfcc](https://github.com/H3rmt/hyprshell/commit/0aadfcc95262f34f49fd535fc88a35f767997423))
-* show toast when using switch mode ([a34a9bb](https://github.com/H3rmt/hyprshell/commit/a34a9bbe2460dd44213fc5c15d7c34a140b19315))
-* use release branch in ci to create new commits ([d8a489e](https://github.com/H3rmt/hyprshell/commit/d8a489e80070f3a3c7d9d451a9f4b04f703fb2d9))
-
-## [4.2.9](https://github.com/H3rmt/hyprshell/compare/v4.2.8...v4.2.9) (2025-06-20)
+## [4.2.11](https://github.com/H3rmt/switcharoo/compare/v4.2.10...v4.2.11) (2025-06-20)
 
 
 ### Bug Fixes
 
-* repair ci ([0aadfcc](https://github.com/H3rmt/hyprshell/commit/0aadfcc95262f34f49fd535fc88a35f767997423))
+* repair ci ([ca782ce](https://github.com/H3rmt/switcharoo/commit/ca782ce03493b3d01f1e30540b7869ff20b0ad1e))
 
-## [4.2.8](https://github.com/H3rmt/hyprshell/compare/v4.2.7...v4.2.8) (2025-06-20)
-
-
-### Bug Fixes
-
-* use release branch in ci to create new commits ([d8a489e](https://github.com/H3rmt/hyprshell/commit/d8a489e80070f3a3c7d9d451a9f4b04f703fb2d9))
-
-## [4.2.7](https://github.com/H3rmt/hyprshell/compare/v4.2.6...v4.2.7) (2025-06-20)
+## [4.2.10](https://github.com/H3rmt/switcharoo/compare/v4.2.9...v4.2.10) (2025-06-20)
 
 
 ### Bug Fixes
 
-* show toast when using switch mode ([a34a9bb](https://github.com/H3rmt/hyprshell/commit/a34a9bbe2460dd44213fc5c15d7c34a140b19315))
+* repair ci ([761bd1b](https://github.com/H3rmt/switcharoo/commit/761bd1b3444f35c32924efbdd1fc375452600096))
+* repair ci ([0aadfcc](https://github.com/H3rmt/switcharoo/commit/0aadfcc95262f34f49fd535fc88a35f767997423))
+* show toast when using switch mode ([a34a9bb](https://github.com/H3rmt/switcharoo/commit/a34a9bbe2460dd44213fc5c15d7c34a140b19315))
+* use release branch in ci to create new commits ([d8a489e](https://github.com/H3rmt/switcharoo/commit/d8a489e80070f3a3c7d9d451a9f4b04f703fb2d9))
 
-## [4.2.6](https://github.com/H3rmt/hyprshell/compare/v4.2.5...v4.2.6) (2025-06-20)
-
-
-### Bug Fixes
-
-* show toast when using switch mode ([a34a9bb](https://github.com/H3rmt/hyprshell/commit/a34a9bbe2460dd44213fc5c15d7c34a140b19315))
-
-## [4.2.5](https://github.com/H3rmt/hyprshell/compare/v4.2.4...v4.2.5) (2025-06-11)
+## [4.2.9](https://github.com/H3rmt/switcharoo/compare/v4.2.8...v4.2.9) (2025-06-20)
 
 
 ### Bug Fixes
 
-* fix run programs ([3997d2a](https://github.com/H3rmt/hyprshell/commit/3997d2a85e77d2d0e3a6799b17518ad5886aca74))
+* repair ci ([0aadfcc](https://github.com/H3rmt/switcharoo/commit/0aadfcc95262f34f49fd535fc88a35f767997423))
+
+## [4.2.8](https://github.com/H3rmt/switcharoo/compare/v4.2.7...v4.2.8) (2025-06-20)
+
+
+### Bug Fixes
+
+* use release branch in ci to create new commits ([d8a489e](https://github.com/H3rmt/switcharoo/commit/d8a489e80070f3a3c7d9d451a9f4b04f703fb2d9))
+
+## [4.2.7](https://github.com/H3rmt/switcharoo/compare/v4.2.6...v4.2.7) (2025-06-20)
+
+
+### Bug Fixes
+
+* show toast when using switch mode ([a34a9bb](https://github.com/H3rmt/switcharoo/commit/a34a9bbe2460dd44213fc5c15d7c34a140b19315))
+
+## [4.2.6](https://github.com/H3rmt/switcharoo/compare/v4.2.5...v4.2.6) (2025-06-20)
+
+
+### Bug Fixes
+
+* show toast when using switch mode ([a34a9bb](https://github.com/H3rmt/switcharoo/commit/a34a9bbe2460dd44213fc5c15d7c34a140b19315))
+
+## [4.2.5](https://github.com/H3rmt/switcharoo/compare/v4.2.4...v4.2.5) (2025-06-11)
+
+
+### Bug Fixes
+
+* fix run programs ([3997d2a](https://github.com/H3rmt/switcharoo/commit/3997d2a85e77d2d0e3a6799b17518ad5886aca74))
 
 ## [4.2.4](https://github.com/H3rmt/hyprswitch/compare/v4.2.3...v4.2.4) (2025-06-11)
 
@@ -497,7 +497,7 @@
 
 ### Bug Fixes
 
-* add HYPRSHELL_RELOAD_TIMEOUT to change timeout ([764cbb2](https://github.com/H3rmt/hyprswitch/commit/764cbb211ee0a2a1382443b34e58e8a4a035fdb9))
+* add SWITCHAROO_RELOAD_TIMEOUT to change timeout ([764cbb2](https://github.com/H3rmt/hyprswitch/commit/764cbb211ee0a2a1382443b34e58e8a4a035fdb9))
 
 ## [4.2.1](https://github.com/H3rmt/hyprswitch/compare/v4.2.0...v4.2.1) (2025-06-11)
 
@@ -540,7 +540,7 @@
 
 ### Features
 
-* added kill_bind if hyprshell crashes ([5e0b0fa](https://github.com/H3rmt/hyprswitch/commit/5e0b0fa2cf8b7c7d4902fafff0b0dc4b2d03a84a))
+* added kill_bind if switcharoo crashes ([5e0b0fa](https://github.com/H3rmt/hyprswitch/commit/5e0b0fa2cf8b7c7d4902fafff0b0dc4b2d03a84a))
 * better parsing of desktop files(ini) to add DesktopActions in launcher ([a304809](https://github.com/H3rmt/hyprswitch/commit/a3048098b1702277cf25e0454e0a7dd3d48c61ee))
 * faster open speeds by applying submaps earlier ([a304809](https://github.com/H3rmt/hyprswitch/commit/a3048098b1702277cf25e0454e0a7dd3d48c61ee))
 
@@ -593,7 +593,7 @@
 * added `data` command to see LaunchHistory ([8e3de53](https://github.com/H3rmt/hyprswitch/commit/8e3de53b31834c8a034d28d26d72ebcbbd4d9815))
 * added click on clients and workspaces in overview and switch ([328fc3b](https://github.com/H3rmt/hyprswitch/commit/328fc3b432b28ad1e390be10f945e1425708d430))
 * added config file migrations ([db2f6cd](https://github.com/H3rmt/hyprswitch/commit/db2f6cd9fb3c08ab2f9858fb9c1dac61540353b5))
-* added custom args for hyprshell systemd ([aa01139](https://github.com/H3rmt/hyprswitch/commit/aa01139aebfe2dcd717b670ac6ce557f93c2f1d0))
+* added custom args for switcharoo systemd ([aa01139](https://github.com/H3rmt/hyprswitch/commit/aa01139aebfe2dcd717b670ac6ce557f93c2f1d0))
 * added show_when_empty ([6f916d5](https://github.com/H3rmt/hyprswitch/commit/6f916d5b0355293eb0d4007b3c996deddb943c0d))
 * added systemd generation (use --no-systemd to disable) ([97c2c7f](https://github.com/H3rmt/hyprswitch/commit/97c2c7f88c3ba221863a43b8adbfb50b444fa841))
 * better debug commands ([b17a393](https://github.com/H3rmt/hyprswitch/commit/b17a393b04201beab8b582a340d1bb80bef5cda2))

@@ -1,4 +1,4 @@
-use hyprshell_hyprland as hyprland;
+use switcharoo_hyprland as hyprland;
 
 /// Demonstrates usage of various asyncronous dispatch calls
 ///

@@ -1,4 +1,4 @@
-use hyprshell_hyprland as hyprland;
+use switcharoo_hyprland as hyprland;
 
 /// Demostrates how to fetch and set keywords asyncronously
 ///

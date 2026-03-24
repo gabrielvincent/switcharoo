@@ -4,7 +4,7 @@ use std::env;
 /// # Panics
 /// if the current executable couldn't be found
 #[must_use]
-pub fn get_hyprshell_path() -> String {
+pub fn get_switcharoo_path() -> String {
     env::current_exe()
         .expect("Current executable not found")
         .display()
@@ -18,7 +18,7 @@ pub fn get_hyprshell_path() -> String {
 pub fn generate_transfer_socat(transfer: &TransferType) -> String {
     format!(
         r"{} socat '{}'",
-        get_hyprshell_path(),
+        get_switcharoo_path(),
         generate_transfer(transfer)
     )
 }

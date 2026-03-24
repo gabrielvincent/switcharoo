@@ -1,6 +1,6 @@
 [package]
-name = "hyprshell-exec-lib"
-documentation = "https://docs.rs/hyprshell-exec-lib"
+name = "switcharoo-exec-lib"
+documentation = "https://docs.rs/switcharoo-exec-lib"
 version = "4.9.2"
 edition.workspace = true
 description.workspace = true
@@ -18,7 +18,7 @@ config-lib.workspace = true
 hyprland-plugin.workspace = true
 semver.workspace = true
 regex.workspace = true
-hyprland = { package = "hyprshell-hyprland", path = "../../dep-crates/hyprland-rs", features = ["async-lite", "dispatch", "keyword", "data", "listener", "ctl", "config"], default-features = false, version = "=4.9.2" }
+hyprland = { package = "switcharoo-hyprland", path = "../../dep-crates/hyprland-rs", features = ["async-lite", "dispatch", "keyword", "data", "listener", "ctl", "config"], default-features = false, version = "=4.9.2" }
 
 [lints]
 workspace = true

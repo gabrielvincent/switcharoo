@@ -7,14 +7,13 @@ use std::sync::OnceLock;
 use tracing::{debug, debug_span, info, trace};
 
 // info: trying to load a plugin causes hyprland to issue a reload
-// this will cause hyprshell to restart.
+// this will cause switcharoo to restart.
 // this second restart wont reload the plugin as the plugin config didnt change
 // if the plugin fails to load it however tries again which the triggers the next reload
 static PLUGIN_COULD_BE_BUILD: OnceLock<bool> = OnceLock::new();
 
 pub fn load_plugin(
     switch: Option<(Modifier, Box<str>)>,
-    overview: Option<(Modifier, Box<str>)>,
     version: &semver::Version,
 ) -> anyhow::Result<()> {
     let _span = debug_span!("load_plugin").entered();
@@ -28,10 +27,6 @@ pub fn load_plugin(
             .as_ref()
             .map(|(r#mod, _)| Box::from(mod_to_xkb_key(*r#mod))),
         xkb_key_switch_key: switch.map(|(_, key)| key),
-        xkb_key_overview_mod: overview
-            .as_ref()
-            .map(|(r#mod, _)| Box::from(r#mod.to_string())),
-        xkb_key_overview_key: overview.map(|(_, key)| key),
     };
 
     if check_new_plugin_needed(&config) {

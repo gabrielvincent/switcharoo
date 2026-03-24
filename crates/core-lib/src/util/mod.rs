@@ -28,7 +28,7 @@ pub fn get_daemon_socket_path_buff() -> PathBuf {
     } else {
         PathBuf::from("/tmp")
     };
-    buf.push("hyprshell.sock");
+    buf.push("switcharoo.sock");
     buf
 }
 

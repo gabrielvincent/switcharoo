@@ -5,9 +5,9 @@ use tracing::trace;
 pub fn get_default_config_file() -> PathBuf {
     let mut path = get_config_home();
     #[cfg(debug_assertions)]
-    path.push("hyprshell.debug/");
+    path.push("switcharoo.debug/");
     #[cfg(not(debug_assertions))]
-    path.push("hyprshell/");
+    path.push("switcharoo/");
     path.push("config.ron");
     if path.exists() {
         trace!("Found config file at {path:?}");
@@ -44,9 +44,9 @@ pub fn get_default_css_file() -> PathBuf {
     let mut path = get_config_home();
 
     #[cfg(debug_assertions)]
-    path.push("hyprshell.debug/styles.css");
+    path.push("switcharoo.debug/styles.css");
     #[cfg(not(debug_assertions))]
-    path.push("hyprshell/styles.css");
+    path.push("switcharoo/styles.css");
     path
 }
 
@@ -55,9 +55,9 @@ pub fn get_default_data_dir() -> PathBuf {
     let mut path = get_data_home();
 
     #[cfg(debug_assertions)]
-    path.push("hyprshell.debug");
+    path.push("switcharoo.debug");
     #[cfg(not(debug_assertions))]
-    path.push("hyprshell");
+    path.push("switcharoo");
     path
 }
 
@@ -66,9 +66,9 @@ pub fn get_default_cache_dir() -> PathBuf {
     let mut path = get_cache_home();
 
     #[cfg(debug_assertions)]
-    path.push("hyprshell.debug");
+    path.push("switcharoo.debug");
     #[cfg(not(debug_assertions))]
-    path.push("hyprshell");
+    path.push("switcharoo");
     path
 }
 
@@ -77,9 +77,9 @@ pub fn get_default_system_data_dir() -> PathBuf {
     let mut path = get_system_data_home();
 
     #[cfg(debug_assertions)]
-    path.push("hyprshell.debug");
+    path.push("switcharoo.debug");
     #[cfg(not(debug_assertions))]
-    path.push("hyprshell");
+    path.push("switcharoo");
     path
 }
 

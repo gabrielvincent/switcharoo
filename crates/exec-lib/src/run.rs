@@ -1,6 +1,4 @@
-use anyhow::{Context, bail};
-use core_lib::TERMINALS;
-use std::ffi::OsString;
+use anyhow::Context;
 use std::os::unix::prelude::CommandExt;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
@@ -10,42 +8,11 @@ use tracing::{debug, trace};
 pub fn run_program(
     run: &str,
     path: Option<&Path>,
-    terminal: bool,
-    default_terminal: Option<&str>,
 ) -> anyhow::Result<()> {
     debug!("Running: {run}");
     let home_path_buf = env::var_os("HOME").map(PathBuf::from);
     let path = path.map_or(home_path_buf.as_deref(), Some);
-    if terminal {
-        if let Some(term) = default_terminal {
-            let command = format!("{term} -e {run}");
-            run_command(&command, path).context("Failed to run command")?;
-        } else {
-            let env_path = env::var_os("PATH")
-                .unwrap_or_else(|| OsString::from("/usr/bin:/bin:/usr/local/bin"));
-            debug!(
-                "No default terminal found, searching common terminals in PATH. (Set default_terminal in config to avoid this search)"
-            );
-            trace!("PATH: {}", env_path.to_string_lossy());
-            let paths: Vec<_> = env::split_paths(&env_path).collect();
-            let mut found_terminal = false;
-            for term in TERMINALS {
-                if paths.iter().any(|p| p.join(term).exists()) {
-                    let command = format!("{term} -e {run}");
-                    if run_command(&command, path).is_ok() {
-                        trace!("Found and launched terminal: {term}");
-                        found_terminal = true;
-                        break;
-                    }
-                }
-            }
-            if !found_terminal {
-                bail!("Failed to find a terminal to run the command");
-            }
-        }
-    } else {
-        run_command(run, path).context("Failed to run command")?;
-    }
+    run_command(run, path).context("Failed to run command")?;
     Ok(())
 }
 

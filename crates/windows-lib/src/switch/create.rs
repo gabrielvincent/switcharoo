@@ -55,6 +55,8 @@ pub fn create_windows_switch_window(
     key_controller.connect_key_released(move |_, key, _, _| {
         handle_release(key, r#mod, &event_sender_3);
     });
+    window.set_focusable(true);
+    clients_flow.set_focusable(true);
     window.add_controller(key_controller);
 
     window.init_layer_shell();
@@ -74,6 +76,7 @@ pub fn create_windows_switch_window(
             filter_current_monitor: switch.filter_by.contains(&FilterBy::CurrentMonitor),
             filter_same_class: switch.filter_by.contains(&FilterBy::SameClass),
             switch_workspaces: switch.switch_workspaces,
+            show_workspace_number: switch.show_workspace_number,
             exclude_workspaces: if switch.exclude_workspaces.is_empty() {
                 None
             } else {
@@ -113,7 +116,7 @@ fn handle_key(
                 .warn_details("unable to send");
             Propagation::Stop
         }
-        k if k == s_key || k == Key::l || k == Key::Right => {
+        k if k == s_key || k == Key::l || k == Key::Right || k == Key::Tab => {
             event_sender
                 .send_blocking(TransferType::SwitchSwitch(SwitchSwitchConfig {
                     direction: Direction::Right,

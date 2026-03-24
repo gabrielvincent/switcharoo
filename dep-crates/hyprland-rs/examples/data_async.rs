@@ -1,4 +1,4 @@
-use hyprshell_hyprland as hyprland;
+use switcharoo_hyprland as hyprland;
 
 /// Demostrates asynchronously using Hyprland-rs to fetch information about your Hyprland environment
 ///

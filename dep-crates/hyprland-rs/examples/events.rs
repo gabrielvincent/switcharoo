@@ -1,4 +1,4 @@
-use hyprshell_hyprland as hyprland;
+use switcharoo_hyprland as hyprland;
 
 /// Demostrats using hyprland-rs to listen for events
 /// Usage: cargo run --example events

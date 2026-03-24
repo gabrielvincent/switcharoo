@@ -5,7 +5,7 @@
 
 void onMouseButton(IPointer::SButtonEvent event, Event::SCallbackInfo &info) {
     CHECK_NO_MOUSE_BUTTON_PRESSED = false;
-    // if constexpr (HYPRSHELL_PRINT_DEBUG == 1) {
-    //     HyprlandAPI::addNotification(PHANDLE, "[Hyprshell Plugin] Mouse button pressed", GREEN, 4000);
+    // if constexpr (SWITCHAROO_PRINT_DEBUG == 1) {
+    //     HyprlandAPI::addNotification(PHANDLE, "[Switcharoo Plugin] Mouse button pressed", GREEN, 4000);
     // }
 }

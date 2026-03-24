@@ -5,7 +5,7 @@ use notify::{Config, Event, EventKind, RecommendedWatcher, RecursiveMode, Watche
 use std::path::Path;
 use tracing::{debug, info, trace, warn};
 
-pub fn hyprshell_config_listener<F>(
+pub fn switcharoo_config_listener<F>(
     file_path: &Path,
     callback: F,
 ) -> anyhow::Result<RecommendedWatcher>
@@ -20,7 +20,7 @@ where
         move |res: notify::Result<Event>| match res {
             Ok(event) if event.kind == EventKind::Modify(ModifyKind::Data(DataChange::Any)) => {
                 trace!("Event: {event:?}");
-                callback("hyprshell config change");
+                callback("switcharoo config change");
             }
             Err(err) => {
                 warn!("Watch error: {err:?}");
@@ -31,15 +31,15 @@ where
     )
     .context("Failed to create watcher")?;
 
-    info!("Starting hyprshell config reload listener");
+    info!("Starting switcharoo config reload listener");
     watcher
         .watch(file_path, RecursiveMode::NonRecursive)
-        .context("Failed to start hyprshell config reload listener")?;
+        .context("Failed to start switcharoo config reload listener")?;
 
     Ok(watcher)
 }
 
-pub fn hyprshell_css_listener<F>(
+pub fn switcharoo_css_listener<F>(
     file_path: &Path,
     callback: F,
 ) -> anyhow::Result<RecommendedWatcher>
@@ -54,7 +54,7 @@ where
         move |res: notify::Result<Event>| match res {
             Ok(event) if event.kind == EventKind::Modify(ModifyKind::Data(DataChange::Any)) => {
                 trace!("Event: {event:?}");
-                callback("hyprshell css change");
+                callback("switcharoo css change");
             }
             Err(err) => {
                 warn!("Watch error: {err:?}");
@@ -65,15 +65,15 @@ where
     )
     .context("Failed to create watcher")?;
 
-    info!("Starting hyprshell css reload listener");
+    info!("Starting switcharoo css reload listener");
     watcher
         .watch(file_path.as_ref(), RecursiveMode::NonRecursive)
-        .context("Failed to start hyprshell css reload listener")?;
+        .context("Failed to start switcharoo css reload listener")?;
 
     Ok(watcher)
 }
 
-pub fn hyprshell_config_block(file_path: &Path) -> anyhow::Result<()> {
+pub fn switcharoo_config_block(file_path: &Path) -> anyhow::Result<()> {
     if !file_path.exists() {
         bail!("unable to watch for file changes as the file doesnt exist, exiting");
     }
@@ -93,11 +93,11 @@ pub fn hyprshell_config_block(file_path: &Path) -> anyhow::Result<()> {
         Config::default(),
     )
     .context("Failed to create watcher")?;
-    debug!("Starting hyprshell config reload blocker");
+    debug!("Starting switcharoo config reload blocker");
 
     watcher
         .watch(file_path.as_ref(), RecursiveMode::NonRecursive)
-        .context("Failed to start hyprshell config reload blocker")?;
+        .context("Failed to start switcharoo config reload blocker")?;
     rx.recv().warn_details("Failed to receive reload signal");
     Ok(())
 }

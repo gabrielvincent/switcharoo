@@ -1,4 +1,3 @@
-pub mod actions;
 mod check;
 mod explain;
 mod load;
@@ -15,4 +14,4 @@ pub use modifier::*;
 pub use save::write_config;
 pub use structs::*;
 
-pub const CURRENT_CONFIG_VERSION: u16 = 4;
+pub const CURRENT_CONFIG_VERSION: u16 = 5;

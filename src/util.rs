@@ -36,8 +36,6 @@ pub fn reload_desktop_data() -> anyhow::Result<()> {
     let start = time::Instant::now();
     default::reload_default_files().context("Failed to reload default files")?;
     windows_lib::reload_class_to_icon_map().context("Failed to reload class to icon map")?;
-    launcher_lib::reload_applications_desktop_entries_map()
-        .context("Failed to reload desktop entries")?;
     debug!("Reloaded desktop data in {:?}", start.elapsed());
     Ok(())
 }
@@ -95,16 +93,8 @@ fn get_icon_data() -> (Vec<String>, Vec<PathBuf>) {
 
 const NEW_VERSION_INFOS: &[(&str, &str)] = &[
     (
-        "4.7.0",
-        "Version 4.7.0 adds a hyprland plugin to register keypresses, adds shell completion, improves UI, adds usefull commands and much more.",
-    ),
-    (
-        "4.8.0",
-        "Version 4.8.0 adds a graphical settings Editor, support for special workspaces and vim motions",
-    ),
-    (
-        "4.9.0",
-        "Version 4.9.0 adds a new Settings Editor, replaces tui config generation",
+        "5.0.0",
+        "Switcharoo was refactored to focus solely on the window switcher. Launcher, clipboard, and overview features were removed.",
     ),
 ];
 

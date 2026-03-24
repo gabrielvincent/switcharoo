@@ -12,18 +12,14 @@ use tracing::debug_span;
 pub struct PluginConfig {
     pub xkb_key_switch_mod: Option<Box<str>>,
     pub xkb_key_switch_key: Option<Box<str>>,
-    pub xkb_key_overview_mod: Option<Box<str>>,
-    pub xkb_key_overview_key: Option<Box<str>>,
 }
 impl Display for PluginConfig {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
-            "{}|{}|{}|{}",
+            "{}|{}",
             self.xkb_key_switch_mod.as_deref().unwrap_or(""),
             self.xkb_key_switch_key.as_deref().unwrap_or(""),
-            self.xkb_key_overview_mod.as_deref().unwrap_or(""),
-            self.xkb_key_overview_key.as_deref().unwrap_or(""),
         )
     }
 }
@@ -50,61 +46,49 @@ pub fn configure(
         .context("unable to get daemon socket path")?;
     for replace in [
         ("#include \"defs-test.h\"", ""),
-        ("$HYPRSHELL_PLUGIN_NAME$", PLUGIN_NAME),
-        ("$HYPRSHELL_PLUGIN_AUTHOR$", PLUGIN_AUTHOR),
+        ("$SWITCHAROO_PLUGIN_NAME$", PLUGIN_NAME),
+        ("$SWITCHAROO_PLUGIN_AUTHOR$", PLUGIN_AUTHOR),
         (
-            "$HYPRSHELL_PLUGIN_DESC$",
+            "$SWITCHAROO_PLUGIN_DESC$",
             &format!("{PLUGIN_DESC} - {config}"),
         ),
         (
-            "$HYPRSHELL_PLUGIN_VERSION$",
+            "$SWITCHAROO_PLUGIN_VERSION$",
             &format!("{PLUGIN_VERSION}-{version}"),
         ),
         (
-            "$HYPRSHELL_PRINT_DEBUG$",
+            "$SWITCHAROO_PRINT_DEBUG$",
             if cfg!(debug_assertions) { "1" } else { "0" },
         ),
-        ("$HYPRSHELL_SOCKET_PATH$", &path),
+        ("$SWITCHAROO_SOCKET_PATH$", &path),
         (
-            "$HYPRSHELL_SWTICH_XKB_MOD_L$",
+            "$SWITCHAROO_SWTICH_XKB_MOD_L$",
             &config
                 .xkb_key_switch_mod
                 .as_deref()
                 .map_or_else(|| "-1".to_string(), |m| format!("{m}_L")),
         ),
         (
-            "$HYPRSHELL_SWTICH_XKB_MOD_R$",
+            "$SWITCHAROO_SWTICH_XKB_MOD_R$",
             &config
                 .xkb_key_switch_mod
                 .as_deref()
                 .map_or_else(|| "-1".to_string(), |m| format!("{m}_R")),
         ),
         (
-            "$HYPRSHELL_OVERVIEW_MOD$",
-            config.xkb_key_overview_mod.as_deref().unwrap_or(""),
-        ),
-        (
-            "$HYPRSHELL_OVERVIEW_KEY$",
-            config.xkb_key_overview_key.as_deref().unwrap_or(""),
-        ),
-        (
-            "$HYPRSHELL_SWITCH_KEY$",
+            "$SWITCHAROO_SWITCH_KEY$",
             config.xkb_key_switch_key.as_deref().unwrap_or(""),
         ),
         (
-            "$HYPRSHELL_OPEN_OVERVIEW$",
-            &generate_transfer(&TransferType::OpenOverview),
-        ),
-        (
-            "$HYPRSHELL_CLOSE$",
+            "$SWITCHAROO_CLOSE$",
             &generate_transfer(&TransferType::CloseSwitch),
         ),
         (
-            "$HYPRSHELL_OPEN_SWITCH$",
+            "$SWITCHAROO_OPEN_SWITCH$",
             &generate_transfer(&TransferType::OpenSwitch(OpenSwitch { reverse: false })),
         ),
         (
-            "$HYPRSHELL_OPEN_SWITCH_REVERSE$",
+            "$SWITCHAROO_OPEN_SWITCH_REVERSE$",
             &generate_transfer(&TransferType::OpenSwitch(OpenSwitch { reverse: true })),
         ),
     ] {

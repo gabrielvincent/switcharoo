@@ -65,7 +65,7 @@ format:
 
 [group('develop')]
 fix:
-    cargo fix --allow-dirty --workspace --exclude hyprshell-hyprland --exclude hyprshell-wl-clipboard-rs
+    cargo fix --allow-dirty --workspace
 
 [group('develop')]
 build profile="dev":
@@ -74,11 +74,11 @@ build profile="dev":
 [group('checks')]
 lint profile="dev":
     cargo +nightly fmt --all -- --check
-    cargo clippy --profile {{ profile }} --all-targets --workspace --exclude hyprshell-hyprland --exclude hyprshell-wl-clipboard-rs -- --deny warnings
+    cargo clippy --profile {{ profile }} --all-targets --workspace -- --deny warnings
 
 [group('checks')]
 test profile="dev":
-    cargo nextest run --cargo-profile {{ profile }} --all-targets --workspace --exclude hyprshell-hyprland --exclude hyprshell-wl-clipboard-rs
+    cargo nextest run --cargo-profile {{ profile }} --all-targets --workspace
 
 [group('checks')]
 check-feature-combinations:
@@ -86,7 +86,7 @@ check-feature-combinations:
 
 [group('checks')]
 check-default-nix-features:
-    nix build '.#checks.x86_64-linux.hyprshell-check-nix-configs' -L
+    nix build '.#checks.x86_64-linux.switcharoo-check-nix-configs' -L
 
 [group('checks')]
 check profile="dev": (build profile) (lint profile) (test profile)
@@ -101,9 +101,6 @@ run profile="dev" *args="":
 run-run profile="dev" *args="-vv": (run profile "run" args)
 
 [group('run')]
-run-edit-config profile="dev" *args="-vv": (run profile "config edit" args)
-
-[group('run')]
 run-explain-config profile="dev" *args="-vv": (run profile "config explain" args)
 
 [group('run')]
@@ -112,7 +109,7 @@ run-debug profile="dev" *args="": (run profile "debug" args)
 [group('dist')]
 package-usr-lib:
     #!/usr/bin/env bash
-    sudo tar -cvf ar.tar -C /usr/share/hyprshell.debug setup_preview themes
+    sudo tar -cvf ar.tar -C /usr/share/switcharoo.debug setup_preview themes
     ls -lah ar.tar
     sudo mv ar.tar ./packaging/usr-share.tar
     sudo chown user:user ./packaging/usr-share.tar

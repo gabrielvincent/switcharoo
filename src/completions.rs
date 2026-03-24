@@ -14,7 +14,7 @@ pub fn generate(shell: &str, path: Option<PathBuf>, delete: bool) -> anyhow::Res
             let mut path = path.unwrap_or_else(|| "/usr/share/bash-completion/completions".into());
             create_dir_all(&path)
                 .with_context(|| format!("failed to create directory: {}", path.display()))?;
-            path.push("hyprshell.bash");
+            path.push("switcharoo.bash");
             if delete {
                 remove_file(&path)
                     .with_context(|| format!("failed to remove file: {}", &path.display()))?;
@@ -23,7 +23,7 @@ pub fn generate(shell: &str, path: Option<PathBuf>, delete: bool) -> anyhow::Res
                     path.display()
                 );
             } else {
-                aot::generate(aot::Bash, cli, "hyprshell", &mut buffer);
+                aot::generate(aot::Bash, cli, "switcharoo", &mut buffer);
                 write(&path, buffer)
                     .with_context(|| format!("failed to write to file: {}", &path.display()))?;
                 info!("Generated bash completion script at: {}", path.display());
@@ -33,7 +33,7 @@ pub fn generate(shell: &str, path: Option<PathBuf>, delete: bool) -> anyhow::Res
             let mut path = path.unwrap_or_else(|| "/usr/share/zsh/site-functions".into());
             create_dir_all(&path)
                 .with_context(|| format!("failed to create directory: {}", &path.display()))?;
-            path.push("_hyprshell");
+            path.push("_switcharoo");
             if delete {
                 remove_file(&path)
                     .with_context(|| format!("failed to remove file: {}", &path.display()))?;
@@ -42,7 +42,7 @@ pub fn generate(shell: &str, path: Option<PathBuf>, delete: bool) -> anyhow::Res
                     path.display()
                 );
             } else {
-                aot::generate(aot::Zsh, cli, "hyprshell", &mut buffer);
+                aot::generate(aot::Zsh, cli, "switcharoo", &mut buffer);
                 write(&path, buffer)
                     .with_context(|| format!("failed to write to file: {}", &path.display()))?;
                 info!("Generated zsh completion script at: {}", path.display());
@@ -52,7 +52,7 @@ pub fn generate(shell: &str, path: Option<PathBuf>, delete: bool) -> anyhow::Res
             let mut path = path.unwrap_or_else(|| "/usr/share/fish/vendor_completions.d".into());
             create_dir_all(&path)
                 .with_context(|| format!("failed to create directory: {}", &path.display()))?;
-            path.push("hyprshell.fish");
+            path.push("switcharoo.fish");
             if delete {
                 remove_file(&path)
                     .with_context(|| format!("failed to remove file: {}", &path.display()))?;
@@ -61,7 +61,7 @@ pub fn generate(shell: &str, path: Option<PathBuf>, delete: bool) -> anyhow::Res
                     path.display()
                 );
             } else {
-                aot::generate(aot::Fish, cli, "hyprshell", &mut buffer);
+                aot::generate(aot::Fish, cli, "switcharoo", &mut buffer);
                 write(&path, buffer)
                     .with_context(|| format!("failed to write to file: {}", &path.display()))?;
                 info!("Generated fish completion script at: {}", path.display());

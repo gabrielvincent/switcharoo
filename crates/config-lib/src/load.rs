@@ -11,7 +11,7 @@ use tracing::{debug, debug_span, info, trace, warn};
 pub fn load_and_migrate_config(config_file: &Path, allow_migrate: bool) -> anyhow::Result<Config> {
     let _span = debug_span!("load_config", path =? config_file).entered();
     if !config_file.exists() {
-        bail!("Config file does not exist, create it using `hyprshell config generate`");
+        bail!("Config file does not exist, create it using `switcharoo config generate`");
     }
 
     if check_migration_needed(config_file)

@@ -21,11 +21,11 @@ pub fn explain_config(config_file: &Path, add_how_to_explain_again: bool) {
         println!("Daemon \x1b[32mrunning\x1b[0m");
     } else {
         eprintln!(
-            "Daemon \x1b[31mnot running\x1b[0m, start it with `hyprshell run` or `systemctl --user enable --now hyprshell`"
+            "Daemon \x1b[31mnot running\x1b[0m, start it with `switcharoo run` or `systemctl --user enable --now switcharoo`"
         );
     }
 
     if add_how_to_explain_again {
-        println!("\nTo explain the config again, run `hyprshell explain`\n");
+        println!("\nTo explain the config again, run `switcharoo explain`\n");
     }
 }

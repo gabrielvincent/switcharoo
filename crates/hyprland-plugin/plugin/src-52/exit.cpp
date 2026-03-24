@@ -1,7 +1,7 @@
 #include "globals.h"
 
 void exit() {
-    if constexpr (HYPRSHELL_PRINT_DEBUG == 1) {
-        HyprlandAPI::addNotification(PHANDLE, "[Hyprshell Plugin] Plugin deactivated", RED, 3000);
+    if constexpr (SWITCHAROO_PRINT_DEBUG == 1) {
+        HyprlandAPI::addNotification(PHANDLE, "[Switcharoo Plugin] Plugin deactivated", RED, 3000);
     }
 }

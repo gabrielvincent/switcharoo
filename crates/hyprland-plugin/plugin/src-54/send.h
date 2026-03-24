@@ -1,4 +1,4 @@
 #pragma once
 #include <string>
 
-void sendStringToHyprshellSocket(const std::string &message);
+void sendStringToSwitcharooSocket(const std::string &message);

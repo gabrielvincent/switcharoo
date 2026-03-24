@@ -1,4 +1,4 @@
-use hyprshell_hyprland as hyprland;
+use switcharoo_hyprland as hyprland;
 
 /// Demostrates using hyprland-rs to fetch information about clients, workspaces and monitors
 ///

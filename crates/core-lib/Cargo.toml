@@ -1,6 +1,6 @@
 [package]
-name = "hyprshell-core-lib"
-documentation = "https://docs.rs/hyprshell-core-lib"
+name = "switcharoo-core-lib"
+documentation = "https://docs.rs/switcharoo-core-lib"
 version = "4.9.2"
 edition.workspace = true
 description.workspace = true

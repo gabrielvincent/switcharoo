@@ -118,7 +118,7 @@ pub fn check_version() -> anyhow::Result<Version> {
         .version
         .unwrap_or_else(|| version.tag.trim_start_matches('v').to_string());
     info!(
-        "Starting hyprshell {} in {} mode on hyprland {version}",
+        "Starting switcharoo {} in {} mode on hyprland {version}",
         env!("CARGO_PKG_VERSION"),
         if cfg!(debug_assertions) {
             "debug"

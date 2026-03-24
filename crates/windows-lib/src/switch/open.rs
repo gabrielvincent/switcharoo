@@ -26,6 +26,13 @@ pub fn open_switch(data: &mut WindowsSwitchData, config: &OpenSwitch) -> anyhow:
         exclude_workspaces: data.config.exclude_workspaces.clone(),
     })
     .context("Failed to collect data")?;
+
+    let current_active = if switch_already_open(data) {
+        data.active.clone()
+    } else {
+        active_prev
+    };
+
     let dir = if config.reverse {
         Direction::Left
     } else {
@@ -36,7 +43,7 @@ pub fn open_switch(data: &mut WindowsSwitchData, config: &OpenSwitch) -> anyhow:
             &dir,
             true,
             &clients_data,
-            active_prev,
+            current_active,
             data.config.items_per_row,
         )
     } else {
@@ -44,12 +51,14 @@ pub fn open_switch(data: &mut WindowsSwitchData, config: &OpenSwitch) -> anyhow:
             &dir,
             true,
             &clients_data,
-            active_prev,
+            current_active,
             data.config.items_per_row,
         )
     };
     trace!("Showing window {:?}", data.window.id());
     data.window.set_visible(true);
+    data.window.present();
+    data.window.grab_focus();
 
     let remove_html = regex::Regex::new(r"<[^>]*>").context("Invalid regex")?;
     render_switch(data, clients_data, active, &remove_html)

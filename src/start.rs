@@ -7,12 +7,11 @@ use anyhow::Context;
 use async_channel::{Receiver, Sender};
 use config_lib::Config;
 use core_lib::listener::{
-    hyprshell_config_block, hyprshell_config_listener, hyprshell_css_listener,
+    switcharoo_config_block, switcharoo_config_listener, switcharoo_css_listener,
 };
 use core_lib::transfer::TransferType;
 use core_lib::{WarnWithDetails, notify, notify_resident, notify_warn};
 use exec_lib::listener::{hyprland_config_listener, monitor_listener};
-use launcher_lib::{LauncherData, create_windows_overview_launcher_window};
 use relm4::adw::gio;
 use relm4::adw::gtk::gdk::Display;
 use relm4::adw::gtk::prelude::*;
@@ -29,18 +28,17 @@ use std::sync::{Mutex, OnceLock};
 use std::time::Duration;
 use std::{env, process, thread};
 use tracing::{debug, debug_span, error, info, trace};
-use windows_lib::{WindowsOverviewData, WindowsSwitchData};
+use windows_lib::WindowsSwitchData;
 
 pub fn start(
     config_file: PathBuf,
     css_path: PathBuf,
-    data_dir: PathBuf,
+    _data_dir: PathBuf,
     cache_dir: PathBuf,
     hyprland_version: semver::Version,
 ) -> anyhow::Result<()> {
     let config_file = Rc::new(config_file);
     let css_path = Rc::new(css_path);
-    let data_dir = Rc::new(data_dir);
     let cache_dir = Rc::new(cache_dir);
 
     util::preactivate().context("Failed to preactivate GTK and reload icons")?;
@@ -50,7 +48,7 @@ pub fn start(
 
     let (event_sender, event_receiver) = async_channel::unbounded();
 
-    if env::var_os("HYPRSHELL_NO_LISTENERS").is_none() {
+    if env::var_os("SWITCHAROO_NO_LISTENERS").is_none() {
         register_event_restarter(config_file.clone(), css_path.clone(), event_sender.clone());
     }
 
@@ -82,7 +80,6 @@ pub fn start(
 
         let config_file = config_file.clone();
         let css_path = css_path.clone();
-        let data_dir = data_dir.clone();
         let cache_dir = cache_dir.clone();
         let event_sender = event_sender.clone();
         let event_receiver = event_receiver.clone();
@@ -92,7 +89,6 @@ pub fn start(
                 app,
                 &config_file,
                 &css_path,
-                &data_dir,
                 &cache_dir,
                 event_sender.clone(),
                 event_receiver.clone(),
@@ -112,8 +108,6 @@ pub struct Globals {
 
 #[derive(Debug, Default)]
 pub struct WindowsGlobal {
-    // bool ise used to indicate that the launcher is active
-    pub overview: Option<(WindowsOverviewData, LauncherData, bool)>,
     pub switch: Option<WindowsSwitchData>,
 }
 
@@ -122,7 +116,6 @@ fn activate(
     app: &Application,
     config_file: &Path,
     css_path: &Path,
-    data_dir: &Path,
     cache_dir: &Path,
     event_sender: Sender<TransferType>,
     event_receiver: Receiver<TransferType>,
@@ -139,7 +132,7 @@ fn activate(
         Ok((Ordering::Greater, messages)) => {
             notify(
                 &format!(
-                    "Hyprshell was updated to a new version ({})",
+                    "Switcharoo was updated to a new version ({})",
                     env!("CARGO_PKG_VERSION")
                 ),
                 Duration::from_secs(5),
@@ -151,11 +144,11 @@ fn activate(
         }
         Ok((Ordering::Less, _)) => {
             notify_warn(
-                "Hyprshell was downgraded, downgrading config must be done manually if needed",
+                "Switcharoo was downgraded, downgrading config must be done manually if needed",
             );
         }
         Ok((Ordering::Equal, _)) => {
-            debug!("Hyprshell is up to date");
+            debug!("Switcharoo is up to date");
         }
     }
 
@@ -163,7 +156,7 @@ fn activate(
         Ok(config) => config,
         Err(err) => {
             notify_warn(&format!("Failed to load config: {err:?}"));
-            if let Err(err) = hyprshell_config_block(config_file) {
+            if let Err(err) = switcharoo_config_block(config_file) {
                 error!("Failed to block config: {err:?}",);
                 process::exit(1);
             }
@@ -172,12 +165,11 @@ fn activate(
         }
     };
 
-    // TODO remove in future if more is available
     if config.windows.is_none()
-        || matches!(&config.windows, Some(windows) if windows.overview.is_none() && windows.switch.is_none())
+        || matches!(&config.windows, Some(windows) if windows.switch.is_none())
     {
         notify_warn("Nothing is enabled in the config");
-        if let Err(err) = hyprshell_config_block(config_file) {
+        if let Err(err) = switcharoo_config_block(config_file) {
             error!("Failed to block config: {err:?}",);
             process::exit(1);
         }
@@ -187,7 +179,7 @@ fn activate(
 
     if let Err(err) = configure_wm(&config, &hyprland_version) {
         notify_warn(&format!("Failed to configure wm: {err:?}"));
-        if let Err(err) = hyprshell_config_block(config_file) {
+        if let Err(err) = switcharoo_config_block(config_file) {
             error!("Failed to block config: {err:?}");
             process::exit(1);
         }
@@ -195,11 +187,11 @@ fn activate(
         return; // return needed to exit the application
     }
 
-    let globals = match create_windows(app, &config, data_dir, event_sender.clone()) {
+    let globals = match create_windows(app, &config, event_sender.clone()) {
         Ok(data) => data,
         Err(err) => {
             notify_warn(&format!("Failed to create windows: {err:?}"));
-            if let Err(err) = hyprshell_config_block(config_file) {
+            if let Err(err) = switcharoo_config_block(config_file) {
                 error!("Failed to block config: {err:?}");
                 process::exit(1);
             }
@@ -227,7 +219,6 @@ fn activate(
 fn create_windows(
     app: &Application,
     config: &Config,
-    data_dir: &Path,
     event_sender: Sender<TransferType>,
 ) -> anyhow::Result<Globals> {
     let mut global = Globals {
@@ -237,21 +228,6 @@ fn create_windows(
     };
     if let Some(windows) = &config.windows {
         let mut windows_data = WindowsGlobal::default();
-        if let Some(overview) = &windows.overview {
-            let overview_data =
-                windows_lib::overview::create_windows_overview_window(app, overview, windows)
-                    .context("failed to create overview window")?;
-            let launcher_data = create_windows_overview_launcher_window(
-                app,
-                &overview.launcher,
-                data_dir,
-                &event_sender,
-            )
-            .context("failed to create launcher window")?;
-            windows_data.overview = Some((overview_data, launcher_data, false));
-        } else {
-            debug!("Windows overview disabled");
-        }
         if let Some(switch) = &windows.switch {
             let switch_data = windows_lib::switch::create_windows_switch_window(
                 app,
@@ -282,7 +258,6 @@ fn apply_css(custom_css: &Path) -> anyhow::Result<()> {
     );
 
     windows_lib::get_css()?;
-    launcher_lib::get_css()?;
 
     if custom_css.exists() {
         debug!("Loading custom css file {custom_css:?}");
@@ -305,7 +280,7 @@ pub fn register_event_restarter(
     event_sender: Sender<TransferType>,
 ) {
     // delay for 1.5 seconds to allow the config to be reloaded before listening for reload
-    let delay = env::var("HYPRSHELL_RELOAD_TIMEOUT")
+    let delay = env::var("SWITCHAROO_RELOAD_TIMEOUT")
         .ok()
         .and_then(|s| s.parse().ok())
         .unwrap_or(1500);
@@ -357,7 +332,7 @@ static WATCHERS: OnceLock<Mutex<Vec<Box<dyn Any + Send>>>> = OnceLock::new();
 
 fn setup_restart_listener(config_file: &Path, css_path: &Path, restart_tx: &Sender<&'static str>) {
     let tx = restart_tx.clone();
-    if let Ok(watcher) = hyprshell_config_listener(config_file, move |mess| {
+    if let Ok(watcher) = switcharoo_config_listener(config_file, move |mess| {
         let _ = tx.send_blocking(mess);
     }) {
         WATCHERS
@@ -367,7 +342,7 @@ fn setup_restart_listener(config_file: &Path, css_path: &Path, restart_tx: &Send
             .push(Box::new(watcher));
     }
     let tx = restart_tx.clone();
-    if let Ok(watcher) = hyprshell_css_listener(css_path, move |mess| {
+    if let Ok(watcher) = switcharoo_css_listener(css_path, move |mess| {
         let _ = tx.send_blocking(mess);
     }) {
         WATCHERS

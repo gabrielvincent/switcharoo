@@ -9,7 +9,7 @@ use std::io::Write;
 use std::path::Path;
 use tracing::{debug, debug_span, info};
 
-const CONFIG_EXPLANATION: &str = "Edit with `hyprshell config edit`";
+const CONFIG_EXPLANATION: &str = "Switcharoo Configuration";
 
 pub fn write_config(
     config_file: &Path,

@@ -1,6 +1,6 @@
 use anyhow::Context;
 use core_lib::binds::ExecBind;
-use core_lib::{LAUNCHER_NAMESPACE, OVERVIEW_NAMESPACE, SWITCH_NAMESPACE};
+use core_lib::SWITCH_NAMESPACE;
 use hyprland::config::binds;
 use hyprland::config::binds::{Binder, Binding};
 use hyprland::dispatch::DispatchType;
@@ -8,23 +8,30 @@ use hyprland::keyword::Keyword;
 use tracing::{trace, warn};
 
 pub fn apply_layerrules() -> anyhow::Result<()> {
-    // TODO add option to enable blur
+    // Aggressively disable animations for the switcher namespace
+    // We use a regex ^...$ to ensure exact match and avoid any ambiguity
+    let target = format!("^({SWITCH_NAMESPACE})$");
+    
+    Keyword::set("layerrule", format!("noanim, {target}"))?;
+    
+    // Explicitly disable blur and xray which can sometimes cause visual artifacts during mapping
+    Keyword::set("layerrule", format!("blur 0, {target}"))?;
+    Keyword::set("layerrule", format!("xray 0, {target}"))?;
+    
+    // We remove dimaround as it often has its own hardcoded or configurable fade animation 
+    // that might be what the user is perceiving as a "fade".
+    // Keyword::set("layerrule", format!("dimaround, {target}"))?;
+    
+    // ignorealpha and ignorezero help with snappy transparency transitions
+    Keyword::set("layerrule", format!("ignorealpha 0, {target}"))?;
+    Keyword::set("layerrule", format!("ignorezero, {target}"))?;
 
-    Keyword::set("layerrule", format!("noanim, {LAUNCHER_NAMESPACE}"))?;
-    Keyword::set("layerrule", format!("xray 0, {LAUNCHER_NAMESPACE}"))?;
-
-    Keyword::set("layerrule", format!("noanim, {OVERVIEW_NAMESPACE}"))?;
-    Keyword::set("layerrule", format!("xray 0, {OVERVIEW_NAMESPACE}"))?;
-
-    Keyword::set("layerrule", format!("noanim, {SWITCH_NAMESPACE}"))?;
-    Keyword::set("layerrule", format!("dimaround, {SWITCH_NAMESPACE}"))?;
-    Keyword::set("layerrule", format!("xray 0, {SWITCH_NAMESPACE}"))?;
-    trace!("layerrules applied");
+    trace!("layerrules applied for {target}");
     Ok(())
 }
 
 // ctrl+shift+alt, h
-// hyprland::bind!(d e | SUPER, Key, "a" => Exec, "pkill hyprshell");
+// hyprland::bind!(d e | SUPER, Key, "a" => Exec, "pkill switcharoo");
 pub fn apply_exec_bind(bind: &ExecBind) -> anyhow::Result<()> {
     let binding = Binding {
         mods: bind

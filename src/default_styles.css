@@ -39,7 +39,7 @@ label {
     color: var(--text-color, rgba(245, 245, 245, 1));
 }
 
-/* fix size for icons in launcher */
+/* fix size for icons in switcher */
 .large-icons {
     -gtk-icon-size: 32px;
 }

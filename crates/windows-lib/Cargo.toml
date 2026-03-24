@@ -1,6 +1,6 @@
 [package]
-name = "hyprshell-windows-lib"
-documentation = "https://docs.rs/hyprshell-windows-lib"
+name = "switcharoo-windows-lib"
+documentation = "https://docs.rs/switcharoo-windows-lib"
 version = "4.9.2"
 edition.workspace = true
 description.workspace = true

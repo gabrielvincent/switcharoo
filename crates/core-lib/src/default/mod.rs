@@ -135,7 +135,7 @@ pub fn reload_available_icons(
     }
     drop(map);
 
-    if env::var_os("HYPRSHELL_NO_ALL_ICONS").is_none() {
+    if env::var_os("SWITCHAROO_NO_ALL_ICONS").is_none() {
         for path in search_path {
             let span_2 = span.clone();
             if path.exists() {

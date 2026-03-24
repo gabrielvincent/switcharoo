@@ -4,56 +4,26 @@ on:
   push:
     branches-ignore:
       - 'release-please-**'
-      - 'hyprshell-release'
+      - 'switcharoo-release'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
-  check-nix:
-    name: Run Nix Flake Check
-    runs-on: "ubuntu-latest"
-    container:
-      image: ghcr.io/h3rmt/actions-image:latest
-      options: --privileged
-    steps:
-      - run: rustup default stable
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
-      - uses: cachix/cachix-action@0fc020193b5a1fa3ac4575aa3a7d3aa6a35435ad # v16
-        with:
-          name: hyprshell-dev
-          extraPullNames: hyprland
-          pushFilter: "hyprshell-(nextest|clippy|fmt|check-all-feature-combinations|check-nix-configs).*"
-          authToken: ${{ secrets.CACHIX_AUTH_TOKEN_DEV }}
-      - name: Run Nix Flake Build deps
-        run: nix build '.#checks.x86_64-linux.hyprshell-build-deps' -L
-      - name: Run Nix Flake Check build
-        run: nix build '.#checks.x86_64-linux.hyprshell-config-check' -L
-      - name: Run Nix Flake Check clippy
-        run: nix build '.#checks.x86_64-linux.hyprshell-clippy' -L
-      - name: Run Nix Flake Check fmt
-        run: nix build '.#checks.x86_64-linux.hyprshell-fmt' -L
-      - name: Run Nix Flake Check test
-        run: nix build '.#checks.x86_64-linux.hyprshell-test' -L
-      - name: Run Nix Flake Check check-nix-configs
-        run: nix build '.#checks.x86_64-linux.hyprshell-check-nix-configs' -L
-      - name: Run Nix Flake Check check-all-feature-combinations
-        run: nix build '.#checks.x86_64-linux.hyprshell-check-all-feature-combinations' -L
-
   check:
     name: Run build tests
     runs-on: "ubuntu-latest"
     container:
       image: ghcr.io/h3rmt/actions-image:latest
       options: --privileged
-    if: github.ref == 'refs/heads/hyprshell'
+    if: github.ref == 'refs/heads/switcharoo'
     steps:
       - run: rustup default stable
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
       - uses: Swatinem/rust-cache@f13886b937689c021905a6b90929199931d60db1 # v2.8.1
         with:
-          prefix-key: hyprshell
+          prefix-key: switcharoo
           cache-on-failure: true
       - name: Build binary for x86_64-unknown-linux-gnu
         run: |

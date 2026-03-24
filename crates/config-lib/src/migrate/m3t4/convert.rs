@@ -16,19 +16,6 @@ impl From<old_structs::Windows> for crate::Windows {
             items_per_row: value.items_per_row,
             switch: value.switch.map(old_structs::Switch::into),
             switch_2: value.switch_2.map(old_structs::Switch::into),
-            overview: value.overview.map(old_structs::Overview::into),
-        }
-    }
-}
-
-impl From<old_structs::Overview> for crate::Overview {
-    fn from(value: old_structs::Overview) -> Self {
-        Self {
-            key: value.key,
-            modifier: value.modifier,
-            filter_by: value.filter_by,
-            launcher: value.launcher,
-            exclude_workspaces: value.exclude_special_workspaces,
         }
     }
 }
@@ -41,6 +28,7 @@ impl From<old_structs::Switch> for crate::Switch {
             filter_by: value.filter_by,
             switch_workspaces: value.switch_workspaces,
             exclude_workspaces: value.exclude_special_workspaces,
+            show_workspace_number: true,
             kill_key: 'q',
         }
     }

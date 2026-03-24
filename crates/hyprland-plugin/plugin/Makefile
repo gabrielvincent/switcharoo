@@ -7,7 +7,7 @@ SRCS_FILES := key-press.cpp layer-change.cpp init.cpp exit.cpp main.cpp send.cpp
 SRCS := $(addprefix $(SRCS_DIR)/,$(SRCS_FILES))
 
 PREPAREDIR := out
-OUTNAME := hyprshell.so
+OUTNAME := switcharoo.so
 TARGET := $(OUTNAME)
 
 HEADERS := globals.h handlers.h defs.h send.h
